@@ -52,3 +52,17 @@ export function persistFarmProfile(snapshot: FarmProfileSnapshot): void {
 		/* квота / частен режим */
 	}
 }
+
+/** Има ли поне минимални данни, за да смятаме профила „попълнен“ за UX (чат, калкулатор). */
+export function isFarmProfileSubstantial(s: FarmProfileSnapshot | null): boolean {
+	if (!s) return false;
+	const region = s.region?.trim();
+	const farmType = s.farm_type?.trim();
+	const decares = Number(s.total_decares);
+	const hasCropsOrLivestock =
+		(s.crops?.length ?? 0) > 0 || (s.livestock?.length ?? 0) > 0;
+	if (region && farmType) return true;
+	if (decares > 0) return true;
+	if (hasCropsOrLivestock) return true;
+	return false;
+}

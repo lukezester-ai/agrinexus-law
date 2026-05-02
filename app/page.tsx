@@ -12,7 +12,11 @@ import {
   type CharacterId,
   type Character,
 } from "@/lib/characters";
-import { loadFarmProfile, type FarmProfileSnapshot } from "@/lib/farm-profile";
+import {
+  loadFarmProfile,
+  type FarmProfileSnapshot,
+  isFarmProfileSubstantial,
+} from "@/lib/farm-profile";
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -29,6 +33,7 @@ export default function Home() {
 
   const currentCharacter = CHARACTERS[activeCharacter];
   const allCharacters = getAllCharacters();
+  const profileReady = isFarmProfileSubstantial(userProfile);
 
   useEffect(() => {
     const snapshot = loadFarmProfile();
@@ -194,7 +199,7 @@ export default function Home() {
             </Link>
             <Link href="/profile" className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 transition-colors">
               <User size={14} /> 
-              <span className="hidden md:inline">{userProfile ? "Моят профил" : "Профил"}</span>
+              <span className="hidden md:inline">{profileReady ? "Моят профил" : "Профил"}</span>
             </Link>
             <a 
               href="#waitlist"
@@ -242,13 +247,12 @@ export default function Home() {
             <Search size={16} aria-hidden />
             Търси в базата знания (ДФЗ)
           </Link>
-          {!userProfile && (
+          {!profileReady && (
             <Link
               href="/profile"
-              className="inline-flex items-center gap-1.5 text-sm text-stone-700 dark:text-emerald-100/90 hover:text-stone-900 dark:hover:text-white underline decoration-amber-600/70 underline-offset-2 py-1"
+              className="inline-flex items-center text-sm text-stone-700 dark:text-emerald-100/90 hover:text-stone-900 dark:hover:text-white underline decoration-amber-600/70 underline-offset-2 py-1"
             >
-              <User size={14} />
-              Попълни профил за по-точни отговори
+              Попълни профил за по-точни данни
             </Link>
           )}
         </div>
@@ -287,7 +291,7 @@ export default function Home() {
                 онлайн · {currentCharacter.role}
               </div>
             </div>
-            {userProfile && (
+            {profileReady && (
               <div className="text-xs px-2 py-1 rounded-md bg-white/50" style={{ color: currentCharacter.textColor }}>
                 Знам твоя профил
               </div>

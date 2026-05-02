@@ -33,6 +33,8 @@ export default function SearchPage() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [engineHint, setEngineHint] = useState<string | null>(null);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  /** Един разгънат резултат; без нативни <details> — браузърът често запазва „open“ между прерисовки. */
+  const [openDetailId, setOpenDetailId] = useState<string | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
 
   const handleSearch = useCallback(async (searchQuery?: string) => {
@@ -44,6 +46,7 @@ export default function SearchPage() {
     searchAbortRef.current = ac;
 
     setLoading(true);
+    setOpenDetailId(null);
     setHasSearched(true);
     setSearchError(null);
     setEngineHint(null);
@@ -271,17 +274,28 @@ export default function SearchPage() {
                       </p>
                     </div>
                   </div>
-                  <details className="mt-3">
-                    <summary className="text-sm cursor-pointer text-[#0F6E56] dark:text-emerald-400 hover:text-stone-700 dark:hover:text-emerald-300">
-                      Виж пълната информация
-                    </summary>
-                    <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-700">
-                      <pre className="text-sm text-stone-700 dark:text-stone-300 whitespace-pre-wrap font-sans leading-relaxed">{doc.content}</pre>
-                      <p className="text-xs text-stone-500 dark:text-stone-500 mt-3">
-                        Източник: {doc.source}
-                      </p>
-                    </div>
-                  </details>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      aria-expanded={openDetailId === doc.id}
+                      className="text-sm text-left w-full text-[#0F6E56] dark:text-emerald-400 hover:text-stone-700 dark:hover:text-emerald-300 underline decoration-[#0F6E56]/40 dark:decoration-emerald-500/40 underline-offset-2"
+                      onClick={() =>
+                        setOpenDetailId((prev) => (prev === doc.id ? null : doc.id))
+                      }
+                    >
+                      {openDetailId === doc.id ? "Скрий пълната информация" : "Виж пълната информация"}
+                    </button>
+                    {openDetailId === doc.id && (
+                      <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-700">
+                        <pre className="text-sm text-stone-700 dark:text-stone-300 whitespace-pre-wrap font-sans leading-relaxed">
+                          {doc.content}
+                        </pre>
+                        <p className="text-xs text-stone-500 dark:text-stone-500 mt-3">
+                          Източник: {doc.source}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
