@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800 shadow-sm">
+      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white">
             <ArrowLeft size={16} />

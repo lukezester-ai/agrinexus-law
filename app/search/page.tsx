@@ -124,7 +124,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800 shadow-sm">
+      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white">
             <ArrowLeft size={16} />
@@ -150,12 +150,12 @@ export default function SearchPage() {
         )}
 
         {engineHint && !searchError && (
-          <div className="mb-4 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/90 dark:bg-emerald-950/50 px-4 py-3 text-sm text-emerald-950 dark:text-emerald-100">
+          <div className="mb-4 rounded-xl border border-teal-300 dark:border-teal-800 bg-teal-50/90 dark:bg-teal-950/50 px-4 py-3 text-sm text-teal-950 dark:text-teal-100">
             {engineHint}
           </div>
         )}
 
-        <div className="bg-white dark:bg-stone-900/95 rounded-2xl border border-emerald-100/70 dark:border-emerald-900/40 shadow-soft p-6 mb-6">
+        <div className="bg-white dark:bg-stone-900/95 rounded-2xl border border-teal-100/70 dark:border-teal-900/40 shadow-soft p-6 mb-6">
           <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             <div className="flex gap-2 mb-4">
               <div className="flex-1 relative">
@@ -165,13 +165,13 @@ export default function SearchPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Например: 'биологично производство' или 'срокове 2025'"
-                  className="w-full pl-11 pr-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm focus:outline-none focus:border-stone-400 dark:focus:border-emerald-500/50 bg-white dark:bg-stone-950/80 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className="w-full pl-11 pr-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm focus:outline-none focus:border-stone-400 dark:focus:border-teal-500/50 bg-white dark:bg-stone-950/80 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 />
               </div>
               <button
                 type="submit"
                 className="px-6 py-3 text-white rounded-lg text-sm font-medium transition"
-                style={{ background: "#0F6E56" }}
+                style={{ background: "#0d9488" }}
               >
                 Търси
               </button>
@@ -185,7 +185,7 @@ export default function SearchPage() {
                   onClick={() => setCategory(cat.id)}
                   className={`px-3 py-1.5 text-xs rounded-md border transition ${
                     category === cat.id
-                      ? "border-[#0F6E56] bg-[#0F6E56] text-white"
+                      ? "border-[#0d9488] bg-[#0d9488] text-white"
                       : "border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-[#57534e] dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800"
                   }`}
                 >
@@ -216,9 +216,9 @@ export default function SearchPage() {
         {loading && (
           <div className="text-center py-12">
             <div className="inline-flex gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-700 animate-bounce"></span>
-              <span className="w-2 h-2 rounded-full bg-emerald-700 animate-bounce" style={{ animationDelay: "0.1s" }}></span>
-              <span className="w-2 h-2 rounded-full bg-emerald-700 animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+              <span className="w-2 h-2 rounded-full bg-teal-600 animate-bounce"></span>
+              <span className="w-2 h-2 rounded-full bg-teal-600 animate-bounce" style={{ animationDelay: "0.1s" }}></span>
+              <span className="w-2 h-2 rounded-full bg-teal-600 animate-bounce" style={{ animationDelay: "0.2s" }}></span>
             </div>
           </div>
         )}
@@ -234,7 +234,7 @@ export default function SearchPage() {
             <Link 
               href="/"
               className="inline-block mt-4 px-4 py-2 text-white rounded-lg text-sm"
-              style={{ background: "#0F6E56" }}
+              style={{ background: "#0d9488" }}
             >
               Питай Елена →
             </Link>
@@ -278,7 +278,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       aria-expanded={openDetailId === doc.id}
-                      className="text-sm text-left w-full text-[#0F6E56] dark:text-emerald-400 hover:text-stone-700 dark:hover:text-emerald-300 underline decoration-[#0F6E56]/40 dark:decoration-emerald-500/40 underline-offset-2"
+                      className="text-sm text-left w-full text-[#0d9488] dark:text-teal-400 hover:text-stone-700 dark:hover:text-teal-300 underline decoration-[#0d9488]/40 dark:decoration-teal-500/40 underline-offset-2"
                       onClick={() =>
                         setOpenDetailId((prev) => (prev === doc.id ? null : doc.id))
                       }

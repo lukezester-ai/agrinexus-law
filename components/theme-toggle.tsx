@@ -56,7 +56,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="fixed bottom-4 right-4 z-[100] flex h-12 w-12 items-center justify-center rounded-full border border-stone-500/40 bg-stone-200/90 text-stone-800 shadow-lg backdrop-blur-sm transition hover:brightness-110 dark:border-emerald-500/30 dark:bg-stone-900/90 dark:text-amber-200"
+      className="fixed bottom-4 right-4 z-[100] flex h-12 w-12 items-center justify-center rounded-full border border-stone-500/40 bg-stone-200/90 text-stone-800 shadow-lg backdrop-blur-sm transition hover:brightness-110 dark:border-teal-500/35 dark:bg-stone-900/90 dark:text-teal-200"
       title={mode === "dark" ? "Светла тема" : "Тъмна тема"}
       aria-label={mode === "dark" ? "Превключи на светла тема" : "Превключи на тъмна тема"}
     >

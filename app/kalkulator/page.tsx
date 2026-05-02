@@ -89,7 +89,7 @@ export default function KalkulatorPage() {
 
 	return (
 		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800">
+			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800">
 				<div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
 					<Link
 						href="/"
@@ -102,7 +102,7 @@ export default function KalkulatorPage() {
 					</span>
 					<Link
 						href="/kalendar"
-						className="text-xs sm:text-sm text-[#0F6E56] dark:text-emerald-400 font-medium shrink-0">
+						className="text-xs sm:text-sm text-[#0d9488] dark:text-teal-400 font-medium shrink-0">
 						Календар
 					</Link>
 				</div>
@@ -110,7 +110,7 @@ export default function KalkulatorPage() {
 
 			<main className="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 				<div className="text-center mb-8">
-					<div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 mb-4 border border-emerald-200/80 dark:border-emerald-800">
+					<div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 mb-4 border border-teal-200/80 dark:border-teal-800">
 						<Calculator size={28} aria-hidden />
 					</div>
 					<h1 className="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-stone-50 mb-2">
@@ -149,7 +149,7 @@ export default function KalkulatorPage() {
 									onClick={() => setFocus(o.id)}
 									className={`text-left px-4 py-3 rounded-lg border text-sm transition ${
 										focus === o.id
-											? "border-[#0F6E56] bg-emerald-50 dark:bg-emerald-950/40 text-stone-900 dark:text-stone-50"
+											? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50"
 											: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/80"
 									}`}>
 									{o.label}
@@ -206,8 +206,8 @@ export default function KalkulatorPage() {
 					)}
 
 					{result && (
-						<div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/25 p-4 space-y-3">
-							<p className="text-xs uppercase tracking-wide text-emerald-900 dark:text-emerald-300 font-semibold">
+						<div className="rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50/80 dark:bg-teal-950/25 p-4 space-y-3">
+							<p className="text-xs uppercase tracking-wide text-teal-900 dark:text-teal-300 font-semibold">
 								Прогнозен диапазон (годишно)
 							</p>
 							<p className="text-3xl font-semibold text-stone-900 dark:text-stone-50">
@@ -215,7 +215,7 @@ export default function KalkulatorPage() {
 								{result.totalHighBgn.toLocaleString("bg-BG")}{" "}
 								<span className="text-lg font-normal text-stone-600 dark:text-stone-400">лв</span>
 							</p>
-							<ul className="text-xs text-stone-600 dark:text-stone-400 space-y-1.5 border-t border-emerald-200/60 dark:border-emerald-800/60 pt-3">
+							<ul className="text-xs text-stone-600 dark:text-stone-400 space-y-1.5 border-t border-teal-200/60 dark:border-teal-800/60 pt-3">
 								{result.lines.map((L, i) => (
 									<li key={i}>
 										{L.label && <span className="font-medium text-stone-700 dark:text-stone-300">{L.label}: </span>}
@@ -231,7 +231,7 @@ export default function KalkulatorPage() {
 								<button
 									type="button"
 									onClick={() => void onShare()}
-									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0F6E56] text-white text-sm font-medium">
+									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0d9488] text-white text-sm font-medium">
 									{copied ? <Check size={16} /> : <Copy size={16} />}
 									{copied ? "Копирано" : "Сподели текст"}
 								</button>
@@ -243,7 +243,7 @@ export default function KalkulatorPage() {
 								</Link>
 								<Link
 									href="/"
-									className="inline-flex items-center px-4 py-2 rounded-lg text-sm text-[#0F6E56] dark:text-emerald-400 font-medium">
+									className="inline-flex items-center px-4 py-2 rounded-lg text-sm text-[#0d9488] dark:text-teal-400 font-medium">
 									Към чат с Виктория →
 								</Link>
 							</div>

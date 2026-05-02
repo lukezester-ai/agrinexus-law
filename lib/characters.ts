@@ -189,7 +189,7 @@ export function getAllCharacters(): Character[] {
 /** Tailwind класове за акцент при избор на карта в тъмна тема. */
 export const CHARACTER_ACCENT: Record<CharacterId, string> = {
 	elena: "text-[#1565A8] dark:text-sky-400",
-	boris: "text-[#0D6847] dark:text-emerald-400",
+	boris: "text-[#0D6847] dark:text-teal-400",
 	viktoria: "text-[#5B4BB3] dark:text-violet-400",
 };
 

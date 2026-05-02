@@ -79,7 +79,7 @@ export async function POST(req: Request) {
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 580px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <div style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, #1D9E75, #0F6E56); border-radius: 12px; line-height: 50px; color: white; font-size: 24px; font-weight: 600;">A</div>
+                <div style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, #14b8a6, #0d9488); border-radius: 12px; line-height: 50px; color: white; font-size: 24px; font-weight: 600;">A</div>
                 <h1 style="margin: 16px 0 8px; color: #1c1917; font-size: 24px;">Здравей и добре дошъл!</h1>
                 <p style="color: #57534e; margin: 0;">Радваме се, че си с нас.</p>
               </div>
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
                 <p style="line-height: 1.6;">Ако имаш въпроси, просто отговори на този имейл.</p>
               </div>
 
-              <div style="text-align: center; padding: 24px; background: linear-gradient(135deg, #0F6E56, #1D9E75); border-radius: 12px; color: white;">
+              <div style="text-align: center; padding: 24px; background: linear-gradient(135deg, #0f766e, #14b8a6); border-radius: 12px; color: white;">
                 <p style="margin: 0 0 8px; font-size: 18px;">🌾 Добре дошъл в семейството</p>
                 <p style="margin: 0; opacity: 0.9; font-size: 14px;">Екипът на AgriNexus.Law</p>
               </div>

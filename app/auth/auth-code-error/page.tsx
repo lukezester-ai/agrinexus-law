@@ -13,7 +13,7 @@ export default function AuthCodeErrorPage() {
 				<Link
 					href="/vhod"
 					className="inline-flex items-center justify-center w-full py-3 rounded-lg text-sm font-medium text-white"
-					style={{ background: "#0F6E56" }}>
+					style={{ background: "#0d9488" }}>
 					Към вход
 				</Link>
 			</div>

@@ -158,7 +158,7 @@ export default function DocumentsPage() {
 
 	return (
 		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800 shadow-sm">
+			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
 				<div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
 					<Link
 						href="/profile"
@@ -171,7 +171,7 @@ export default function DocumentsPage() {
 					</div>
 					<Link
 						href="/"
-						className="text-sm text-stone-600 dark:text-emerald-300/90 hover:text-stone-900 shrink-0">
+						className="text-sm text-stone-600 dark:text-teal-300/90 hover:text-stone-900 shrink-0">
 						Начало
 					</Link>
 				</div>
@@ -199,7 +199,7 @@ export default function DocumentsPage() {
 									само в този браузер
 								</strong>
 								. За облак и синхрон по акаунт:{" "}
-								<Link href="/vhod" className="text-[#0F6E56] dark:text-emerald-400 font-medium underline">
+								<Link href="/vhod" className="text-[#0d9488] dark:text-teal-400 font-medium underline">
 									вход с имейл
 								</Link>
 								.
@@ -222,7 +222,7 @@ export default function DocumentsPage() {
 						type="button"
 						disabled={busy}
 						onClick={() => inputRef.current?.click()}
-						className="w-full py-4 px-4 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-[#0F6E56] hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition flex items-center justify-center gap-2 disabled:opacity-50">
+						className="w-full py-4 px-4 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-[#0d9488] hover:bg-teal-50/50 dark:hover:bg-teal-950/30 transition flex items-center justify-center gap-2 disabled:opacity-50">
 						<Upload size={18} aria-hidden />
 						{busy ? "Обработка…" : "Избери файлове за добавяне"}
 					</button>
@@ -271,7 +271,7 @@ export default function DocumentsPage() {
 												{formatDocSize(size)} ·{" "}
 												{new Date(createdAt).toLocaleString("bg-BG")}
 												{item.source === "cloud" && (
-													<span className="ml-1 text-emerald-700 dark:text-emerald-400">
+													<span className="ml-1 text-teal-700 dark:text-teal-400">
 														· облак
 													</span>
 												)}

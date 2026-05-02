@@ -132,6 +132,8 @@ export default function Home() {
     setChatInput(example);
   };
 
+  const clearChat = () => setMessages([]);
+
   return (
     <div className="min-h-screen agri-page-bg">
       <nav className="sticky top-0 z-20 premium-nav backdrop-blur-md">
@@ -140,9 +142,9 @@ export default function Home() {
             <div
               className="w-9 h-9 rounded-lg flex items-center justify-center text-base border"
               style={{
-                background: "linear-gradient(135deg, rgba(244,224,174,0.14), rgba(201,146,42,0.2))",
-                borderColor: "rgba(226,188,107,0.45)",
-                color: "#E2BC6B",
+                background: "linear-gradient(135deg, rgba(45,212,191,0.15), rgba(13,148,136,0.22))",
+                borderColor: "rgba(45,212,191,0.45)",
+                color: "#5eead4",
               }}
               aria-hidden="true"
             >
@@ -152,13 +154,13 @@ export default function Home() {
               <div className="font-semibold text-sm sm:text-base leading-none tracking-tight">
                 <span className="text-white">Agri</span><span className="brand-nexus-gold">Nexus</span><span className="brand-law-suffix">.Law</span>
               </div>
-              <div className="text-[11px] sm:text-xs text-emerald-50/75 mt-1">Твоят земеделски екип</div>
+              <div className="text-[11px] sm:text-xs text-teal-50/75 mt-1">Твоят земеделски екип</div>
             </div>
           </Link>
           <div className="flex items-center gap-2 sm:gap-3 md:gap-5 text-sm">
             <Link
               href="/kalkulator"
-              className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 transition-colors font-medium"
+              className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors font-medium"
               title="Ориентировъчни субсидии"
             >
               <Calculator size={14} aria-hidden />
@@ -166,7 +168,7 @@ export default function Home() {
             </Link>
             <Link
               href="/search"
-              className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 sm:gap-1.5 transition-colors"
+              className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 sm:gap-1.5 transition-colors"
               title="Търсачка по субсидии и ДФЗ"
             >
               <Search size={14} aria-hidden />
@@ -175,7 +177,7 @@ export default function Home() {
             {auth.status === "signed_in" && (
               <Link
                 href="/moya-ferma"
-                className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 transition-colors font-medium"
+                className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors font-medium"
                 title="Моя ферма">
                 <Wheat size={14} aria-hidden />
                 <span className="hidden sm:inline">Моя ферма</span>
@@ -184,7 +186,7 @@ export default function Home() {
             {(auth.status === "anonymous" || auth.status === "unconfigured") && (
               <Link
                 href="/vhod"
-                className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 transition-colors"
+                className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors"
                 title="Вход за регистрирани потребители">
                 <LogIn size={14} aria-hidden />
                 <span className="hidden sm:inline">Вход</span>
@@ -192,12 +194,12 @@ export default function Home() {
             )}
             <Link
               href="/documents"
-              className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 transition-colors"
+              className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors"
               title="Мои документи">
               <FolderOpen size={14} aria-hidden />
               <span className="hidden lg:inline">Документи</span>
             </Link>
-            <Link href="/profile" className="text-emerald-50/80 hover:text-amber-200 flex items-center gap-1 transition-colors">
+            <Link href="/profile" className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors">
               <User size={14} /> 
               <span className="hidden md:inline">{profileReady ? "Моят профил" : "Профил"}</span>
             </Link>
@@ -219,7 +221,7 @@ export default function Home() {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight mb-4 tracking-tight">
           <span className="hero-main-title block">Запознай се с екипа на</span>
           <span className="block mt-1">
-            <span className="text-[#0F6E56] dark:text-emerald-300">Agri</span>
+            <span className="text-[#0d9488] dark:text-teal-300">Agri</span>
             <span className="brand-nexus-gold">Nexus</span>
             <span className="brand-law-suffix">.Law</span>
           </span>
@@ -233,16 +235,15 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2 flex-wrap">
           <Link
             href="/kalkulator"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-md transition hover:opacity-95 hover:shadow-lg ring-2 ring-amber-400/60 ring-offset-2 ring-offset-transparent"
-            style={{ background: "#B45309" }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-md transition hover:opacity-95 hover:shadow-lg ring-2 ring-teal-400/55 ring-offset-2 ring-offset-transparent dark:ring-teal-300/40"
+            style={{ background: "#0d9488" }}
           >
             <Calculator size={16} aria-hidden />
             Калкулатор на субсидии
           </Link>
           <Link
             href="/search"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-md transition hover:opacity-95 hover:shadow-lg"
-            style={{ background: "#0F6E56" }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-md transition hover:opacity-95 hover:shadow-lg bg-[#0d9488] ring-2 ring-teal-900/25 dark:bg-teal-600 dark:ring-teal-300/45 dark:shadow-teal-950/35"
           >
             <Search size={16} aria-hidden />
             Търси в базата знания (ДФЗ)
@@ -250,7 +251,7 @@ export default function Home() {
           {!profileReady && (
             <Link
               href="/profile"
-              className="inline-flex items-center text-sm text-stone-700 dark:text-emerald-100/90 hover:text-stone-900 dark:hover:text-white underline decoration-amber-600/70 underline-offset-2 py-1"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-md transition border-2 border-teal-700/30 bg-teal-50 text-teal-950 hover:bg-teal-100 hover:border-teal-600/45 dark:border-teal-400/55 dark:bg-teal-950/35 dark:text-teal-50 dark:backdrop-blur-sm dark:shadow-teal-950/25 dark:hover:bg-teal-900/45 dark:hover:border-teal-300/70"
             >
               Попълни профил за по-точни данни
             </Link>
@@ -275,62 +276,96 @@ export default function Home() {
       </section>
 
       <section id="chat" className="max-w-3xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
-        <div className="bg-white dark:bg-stone-900/95 rounded-2xl shadow-soft border border-emerald-100/70 dark:border-emerald-900/40 overflow-hidden luxury-glow">
-          <div className="p-4 border-b flex items-center gap-3"
-            style={{ background: currentCharacter.bgColor, borderColor: "rgba(0,0,0,0.05)" }}>
+        <div className="bg-white dark:bg-stone-900/95 rounded-2xl shadow-soft border border-teal-100/70 dark:border-teal-900/35 overflow-hidden luxury-glow flex flex-col max-h-[min(82vh,800px)]">
+          <div className="p-4 border-b flex items-center gap-3 shrink-0"
+            style={{ background: currentCharacter.bgColor, borderColor: "rgba(0,0,0,0.06)" }}>
             <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
               style={{ background: `linear-gradient(135deg, ${currentCharacter.primaryColorHex}, ${currentCharacter.textColor})` }}>
               {currentCharacter.avatar}
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="text-sm font-medium" style={{ color: currentCharacter.textColor }}>
                 {currentCharacter.fullName}
               </div>
               <div className="text-xs flex items-center gap-1.5 mt-0.5" style={{ color: currentCharacter.textColor }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
                 онлайн · {currentCharacter.role}
               </div>
             </div>
             {profileReady && (
-              <div className="text-xs px-2 py-1 rounded-md bg-white/50" style={{ color: currentCharacter.textColor }}>
+              <div className="text-xs px-2 py-1 rounded-md bg-white/50 dark:bg-black/10 shrink-0" style={{ color: currentCharacter.textColor }}>
                 Знам твоя профил
               </div>
             )}
           </div>
 
-          <div className="p-4 min-h-[260px] sm:min-h-[300px] max-h-[420px] sm:max-h-[450px] overflow-y-auto">
+          {/* Персони + бързи подкани остават видими — не се „губят“ под отговорите */}
+          <div className="shrink-0 px-4 pt-3 pb-2 border-b border-stone-100 dark:border-stone-700/90 bg-stone-50/90 dark:bg-stone-950/50">
+            <p className="text-[11px] uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-2">
+              С кого чатиш сега
+            </p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {allCharacters.map((char) => (
+                <button
+                  key={char.id}
+                  type="button"
+                  onClick={() => handleCharacterSwitch(char.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                    activeCharacter === char.id
+                      ? "border-teal-500 bg-teal-500/15 text-teal-900 dark:text-teal-100 dark:border-teal-400/70 dark:bg-teal-500/20"
+                      : "border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-teal-400/50 hover:bg-teal-500/5"
+                  }`}
+                >
+                  {char.name}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span className="text-xs font-medium text-stone-600 dark:text-stone-300">Бързи подкани</span>
+              <button
+                type="button"
+                onClick={clearChat}
+                className="text-xs text-teal-700 dark:text-teal-300/90 hover:underline disabled:opacity-40"
+                disabled={messages.length === 0 && !loading}>
+                Изчисти чата
+              </button>
+            </div>
+            <p className="text-[11px] leading-snug text-stone-500 dark:text-stone-400 mb-2">
+              Още подкани — превърти списъка
+            </p>
+            <div
+              className="max-h-[132px] max-[640px]:max-h-[min(42vh,280px)] overflow-y-auto pr-1 space-y-2 [scrollbar-gutter:stable]"
+              role="region"
+              aria-label="Бързи подкани за текущия специалист">
+              {currentCharacter.examples.map((ex, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => applyExamplePrompt(ex)}
+                  className="w-full text-left px-3 py-2 rounded-lg text-xs sm:text-sm text-stone-700 dark:text-stone-200 transition flex items-start gap-2 border border-stone-200/80 dark:border-stone-600/80 bg-white/80 dark:bg-stone-900/60 hover:border-teal-400/45 hover:bg-teal-500/[0.06] dark:hover:bg-teal-500/10">
+                  <MessageCircle size={14} className="text-teal-600/70 dark:text-teal-400/80 flex-shrink-0 mt-0.5" aria-hidden />
+                  <span>{ex}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
             {messages.length === 0 ? (
-              <div>
-                <div className="text-center mb-4">
-                  <p className="text-2xl mb-1 text-stone-900 dark:text-stone-50">{currentCharacter.greeting}</p>
-                  <p className="text-sm text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
-                    {currentCharacter.introduction}
-                  </p>
-                </div>
-                <div className="space-y-2 mt-6">
-                  <p className="text-xs uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-2 text-center">
-                    Опитай нещо такова
-                  </p>
-                  {currentCharacter.examples.map((ex, i) => (
-                    <button 
-                      key={i}
-                      onClick={() => applyExamplePrompt(ex)}
-                      className="w-full text-left px-4 py-3 bg-stone-50 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700/90 rounded-lg text-sm text-stone-700 dark:text-stone-200 transition flex items-center gap-2 border border-transparent dark:border-stone-700/80"
-                    >
-                      <MessageCircle size={14} className="text-stone-400 dark:text-stone-500 flex-shrink-0" />
-                      <span>{ex}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="text-center py-2">
+                <p className="text-xl sm:text-2xl mb-2 text-stone-900 dark:text-stone-50">{currentCharacter.greeting}</p>
+                <p className="text-sm text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
+                  {currentCharacter.introduction}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
                 {messages.map((msg, i) => (
-                  <div 
+                  <div
                     key={i}
                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    <div 
+                    <div
                       className={`max-w-[92%] sm:max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                         msg.role === "user"
                           ? "bg-[#F1EFE8] dark:bg-stone-700 text-[#1C1917] dark:text-stone-50"
@@ -362,11 +397,11 @@ export default function Home() {
                     <div className="px-4 py-3 rounded-2xl"
                       style={{ background: currentCharacter.bgColor }}>
                       <div className="flex gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" 
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce"
                           style={{ background: currentCharacter.primaryColorHex }}></span>
-                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" 
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce"
                           style={{ background: currentCharacter.primaryColorHex, animationDelay: "0.1s" }}></span>
-                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" 
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce"
                           style={{ background: currentCharacter.primaryColorHex, animationDelay: "0.2s" }}></span>
                       </div>
                     </div>
@@ -376,13 +411,13 @@ export default function Home() {
             )}
           </div>
 
-          <form onSubmit={handleChatSubmit} className="p-4 border-t border-stone-100 dark:border-stone-700 flex flex-col sm:flex-row gap-2">
+          <form onSubmit={handleChatSubmit} className="shrink-0 p-4 border-t border-stone-100 dark:border-stone-700 flex flex-col sm:flex-row gap-2 bg-white dark:bg-stone-900/95">
             <input
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder={`Питай ${currentCharacter.name}...`}
-              className="flex-1 px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-lg text-sm focus:outline-none focus:border-stone-400 dark:focus:border-emerald-500/60 transition bg-white dark:bg-stone-950/80 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="flex-1 px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-lg text-sm focus:outline-none focus:border-teal-500/55 dark:focus:border-teal-500/50 transition bg-white dark:bg-stone-950/80 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               disabled={loading}
             />
             <button
@@ -401,17 +436,17 @@ export default function Home() {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
         <Link 
           href="/search"
-          className="block bg-white dark:bg-stone-900/90 rounded-xl border border-stone-200 dark:border-stone-700 p-6 hover:border-stone-300 dark:hover:border-emerald-600/40 transition group"
+          className="block bg-white dark:bg-stone-900/90 rounded-xl border border-stone-200 dark:border-stone-700 p-6 hover:border-stone-300 dark:hover:border-teal-600/40 transition group"
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-[#F1EFE8] dark:bg-emerald-950/80">
-              <Search size={20} className="text-stone-700 dark:text-emerald-300" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-[#ecfdf8] dark:bg-teal-950/75">
+              <Search size={20} className="text-stone-700 dark:text-teal-300" />
             </div>
             <div className="flex-1">
               <h3 className="font-medium text-stone-900 dark:text-stone-100 mb-1">Търсачка за документи и схеми</h3>
               <p className="text-sm text-stone-600 dark:text-stone-400">Намери нужната информация за секунди - ДФЗ субсидии, наредби, срокове.</p>
             </div>
-            <ArrowRight size={18} className="text-stone-400 dark:text-stone-500 group-hover:text-stone-700 dark:group-hover:text-emerald-300 transition" />
+            <ArrowRight size={18} className="text-stone-400 dark:text-stone-500 group-hover:text-stone-700 dark:group-hover:text-teal-300 transition" />
           </div>
         </Link>
       </section>
@@ -448,22 +483,22 @@ export default function Home() {
 
       <section id="waitlist" className="max-w-3xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
         <div className="rounded-2xl p-8 md:p-10 text-center text-white"
-          style={{ background: "linear-gradient(135deg, #0F6E56, #1D9E75)" }}>
+          style={{ background: "linear-gradient(135deg, #0f766e, #14b8a6)" }}>
           <div className="text-3xl mb-3">🤝</div>
           <h2 className="text-2xl md:text-3xl font-medium mb-2">
             Целият екип те чака
           </h2>
-          <p className="text-emerald-50 mb-6 max-w-md mx-auto leading-relaxed">
+          <p className="text-teal-50 mb-6 max-w-md mx-auto leading-relaxed">
             Първите 100 фермери получават достъп до всички специалисти. Безплатно за първата година.
           </p>
 
           {waitlistError && (
-            <div className="mb-4 text-sm text-amber-100 bg-black/10 rounded-lg px-3 py-2">
+            <div className="mb-4 text-sm text-teal-50 bg-black/10 rounded-lg px-3 py-2">
               {waitlistError}
             </div>
           )}
           {submitted ? (
-            <div className="flex items-center justify-center gap-2 text-emerald-50">
+            <div className="flex items-center justify-center gap-2 text-teal-50">
               <Check size={20} />
               <span>Благодарим! Провери имейла си за подробности.</span>
             </div>
@@ -483,14 +518,14 @@ export default function Home() {
               <button
                 type="submit"
                 className="px-6 py-3 bg-white rounded-lg font-medium text-sm transition hover:bg-stone-50"
-                style={{ color: "#0F6E56" }}
+                style={{ color: "#0d9488" }}
               >
                 Запознай се 🌾
               </button>
             </form>
           )}
           
-          <p className="text-xs text-emerald-100 mt-4 opacity-75">
+          <p className="text-xs text-teal-100 mt-4 opacity-75">
             Ще се чуем след 24 часа. Обещаваме.
           </p>
         </div>
@@ -501,8 +536,8 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-stone-500 dark:text-stone-400">© 2026 Agri<span className="brand-nexus-gold">Nexus</span><span className="brand-law-suffix">.Law</span> — Помагаме на българските фермери.</p>
             <div className="flex gap-4 text-sm text-stone-500 dark:text-stone-400">
-              <Link href="/terms" className="hover:text-stone-700 dark:hover:text-emerald-300">Условия</Link>
-              <Link href="/privacy" className="hover:text-stone-700 dark:hover:text-emerald-300">Поверителност</Link>
+              <Link href="/terms" className="hover:text-stone-700 dark:hover:text-teal-300">Условия</Link>
+              <Link href="/privacy" className="hover:text-stone-700 dark:hover:text-teal-300">Поверителност</Link>
             </div>
           </div>
           <p className="text-xs text-stone-400 dark:text-stone-500 mt-4 text-center max-w-2xl mx-auto leading-relaxed">
@@ -545,12 +580,12 @@ function CharacterCard({
       <div className="flex items-center justify-between pt-3 border-t premium-divider">
         <span
           className={`text-xs flex items-center gap-1.5 ${
-            isActive ? "text-amber-800 dark:text-amber-400" : "text-emerald-800 dark:text-emerald-400"
+            isActive ? "text-teal-800 dark:text-teal-300" : "text-teal-800 dark:text-teal-400"
           }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "gold-dot" : "bg-emerald-500 dark:bg-emerald-400"}`}></span>
+          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "gold-dot" : "bg-teal-500 dark:bg-teal-400"}`}></span>
           онлайн сега
         </span>
-        <span className={`text-xs flex items-center gap-1 ${isActive ? "text-amber-800 dark:text-amber-400" : CHARACTER_ACCENT[character.id]}`}>
+        <span className={`text-xs flex items-center gap-1 ${isActive ? "text-teal-800 dark:text-teal-300" : CHARACTER_ACCENT[character.id]}`}>
           {isActive ? "Избран ✓" : "Започни чат"} <ArrowRight size={12} />
         </span>
       </div>

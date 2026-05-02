@@ -16,7 +16,7 @@ export default function Error({
 			<button
 				type="button"
 				onClick={() => reset()}
-				className="rounded-lg bg-[#0F6E56] px-5 py-2.5 text-sm font-medium text-white hover:opacity-90">
+				className="rounded-lg bg-[#0d9488] px-5 py-2.5 text-sm font-medium text-white hover:opacity-90">
 				Опитай отново
 			</button>
 		</div>

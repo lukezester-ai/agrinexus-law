@@ -26,7 +26,7 @@ export default function KalendarPage() {
 
 	return (
 		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800">
+			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800">
 				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
 					<Link
 						href="/"
@@ -39,7 +39,7 @@ export default function KalendarPage() {
 					</span>
 					<Link
 						href="/kalkulator"
-						className="text-xs sm:text-sm text-[#0F6E56] dark:text-emerald-400 font-medium">
+						className="text-xs sm:text-sm text-[#0d9488] dark:text-teal-400 font-medium">
 						Калкулатор
 					</Link>
 				</div>
@@ -47,7 +47,7 @@ export default function KalendarPage() {
 
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 				<div className="flex items-start gap-4 mb-8">
-					<div className="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-950/60 flex items-center justify-center text-sky-800 dark:text-sky-300 shrink-0 border border-sky-200 dark:border-sky-800">
+					<div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950/60 flex items-center justify-center text-teal-800 dark:text-teal-300 shrink-0 border border-teal-200 dark:border-teal-800">
 						<CalendarDays size={24} aria-hidden />
 					</div>
 					<div>
@@ -72,7 +72,7 @@ export default function KalendarPage() {
 								onClick={() => setCrop(k)}
 								className={`px-3 py-2 rounded-lg text-sm border transition ${
 									crop === k
-										? "border-[#0F6E56] bg-emerald-50 dark:bg-emerald-950/40 text-stone-900 dark:text-stone-50"
+										? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50"
 										: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800"
 								}`}>
 								{CROP_LABELS[k]}
@@ -81,8 +81,8 @@ export default function KalendarPage() {
 					</div>
 				</div>
 
-				<div className="rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/90 dark:bg-amber-950/20 p-4 sm:p-5 mb-8">
-					<p className="text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-300 mb-3">
+				<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-teal-50/70 dark:bg-teal-950/25 p-4 sm:p-5 mb-8">
+					<p className="text-xs font-semibold uppercase tracking-wide text-teal-900 dark:text-teal-300 mb-3">
 						ДФЗ — ключови дати (ориентир кампания)
 					</p>
 					<ul className="space-y-2 text-sm text-stone-800 dark:text-stone-200">

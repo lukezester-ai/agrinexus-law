@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800 shadow-sm">
+      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white">
             <ArrowLeft size={16} />
@@ -88,7 +88,7 @@ export default function ProfilePage() {
             {auth.status === "signed_in" && (
               <Link
                 href="/moya-ferma"
-                className="hidden sm:inline-flex items-center gap-1.5 text-sm text-[#0F6E56] dark:text-emerald-400 font-medium hover:underline">
+                className="hidden sm:inline-flex items-center gap-1.5 text-sm text-[#0d9488] dark:text-teal-400 font-medium hover:underline">
                 <Wheat size={14} aria-hidden />
                 Моя ферма
               </Link>
@@ -171,9 +171,9 @@ export default function ProfilePage() {
                     !profile.crops.includes(crop) ? "bg-white dark:bg-stone-800 dark:text-stone-200 dark:border-stone-600 text-[#1c1917]" : ""
                   }`}
                   style={{
-                    background: profile.crops.includes(crop) ? "#0F6E56" : undefined,
+                    background: profile.crops.includes(crop) ? "#0d9488" : undefined,
                     color: profile.crops.includes(crop) ? "white" : undefined,
-                    borderColor: profile.crops.includes(crop) ? "#0F6E56" : "#e7e5e4"
+                    borderColor: profile.crops.includes(crop) ? "#0d9488" : "#e7e5e4"
                   }}
                 >
                   {crop}
@@ -198,7 +198,7 @@ export default function ProfilePage() {
           <button
             onClick={handleSave}
             className="w-full py-3 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
-            style={{ background: "#0F6E56" }}
+            style={{ background: "#0d9488" }}
           >
             {saved ? (
               <>
@@ -227,7 +227,7 @@ export default function ProfilePage() {
 
         <Link 
           href="/"
-          className="block text-center mt-6 text-sm text-stone-600 dark:text-emerald-300/90 hover:text-stone-900 dark:hover:text-white"
+          className="block text-center mt-6 text-sm text-stone-600 dark:text-teal-300/90 hover:text-stone-900 dark:hover:text-white"
         >
           Готов съм - към чата →
         </Link>

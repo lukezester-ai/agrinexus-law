@@ -59,7 +59,7 @@ export function VhodForm() {
 
 	return (
 		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-emerald-100/80 dark:border-stone-800">
+			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800">
 				<div className="max-w-lg mx-auto px-6 py-4 flex items-center justify-between">
 					<Link
 						href="/"
@@ -109,7 +109,7 @@ export function VhodForm() {
 						</p>
 					) : status === "sent" ? (
 						<div className="text-center py-4 space-y-3">
-							<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 mx-auto">
+							<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200 mx-auto">
 								<Mail size={22} aria-hidden />
 							</div>
 							<p className="text-sm text-stone-700 dark:text-stone-200 leading-relaxed">
@@ -121,7 +121,7 @@ export function VhodForm() {
 									setStatus("idle");
 									setMessage(null);
 								}}
-								className="text-sm text-[#0F6E56] dark:text-emerald-400 font-medium hover:underline">
+								className="text-sm text-[#0d9488] dark:text-teal-400 font-medium hover:underline">
 								Използвай друг имейл
 							</button>
 						</div>
@@ -141,7 +141,7 @@ export function VhodForm() {
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
 									placeholder="you@example.com"
-									className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm bg-white dark:bg-stone-950/80 dark:text-stone-100 focus:outline-none focus:border-emerald-500/60"
+									className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm bg-white dark:bg-stone-950/80 dark:text-stone-100 focus:outline-none focus:border-teal-500/60"
 								/>
 							</div>
 
@@ -155,7 +155,7 @@ export function VhodForm() {
 								type="submit"
 								disabled={status === "sending"}
 								className="w-full py-3 rounded-lg text-sm font-medium text-white flex items-center justify-center gap-2 disabled:opacity-60 transition"
-								style={{ background: "#0F6E56" }}>
+								style={{ background: "#0d9488" }}>
 								{status === "sending" ? (
 									<>
 										<Loader2 size={18} className="animate-spin" aria-hidden />
