@@ -1,0 +1,275 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+}
+
+/* Shared page backdrop — fresher greens + warm cream */
+.agri-page-bg {
+  background: linear-gradient(
+    165deg,
+    #ecfdf5 0%,
+    #fffbf5 42%,
+    #eef6f2 72%,
+    #f5f0e8 100%
+  );
+}
+
+.brand-nexus-gold {
+  background: linear-gradient(120deg, #f7e7b7 0%, #e2bc6b 45%, #b8831e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/*
+ * В тъмна тема gradient+clip често прави текста невидим (прозрачен fill).
+ * Ползваме стабилен златист цвят — чете се навсякъде.
+ */
+.dark .brand-nexus-gold {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  color: #fbbf24;
+  -webkit-text-fill-color: #fbbf24;
+}
+
+/* Същата топла златисто-kehlibarena линия като Nexus; на тъмно — като златото на марката */
+.brand-law-suffix {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #b45309;
+}
+.dark .brand-law-suffix {
+  color: #fbbf24;
+}
+
+/* Първи ред на hero — ясен контраст върху светъл/тъмен градиент */
+.hero-main-title {
+  color: #1c1917;
+}
+
+.dark .hero-main-title {
+  color: #fafaf9;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+
+.luxury-glow {
+  box-shadow: 0 16px 40px rgba(15, 110, 86, 0.12), 0 4px 16px rgba(184, 131, 30, 0.15);
+}
+
+.premium-nav {
+  background: linear-gradient(110deg, rgba(10, 24, 20, 0.95) 0%, rgba(17, 45, 38, 0.9) 50%, rgba(33, 23, 7, 0.9) 100%);
+  border-bottom: 1px solid rgba(196, 154, 74, 0.25);
+  box-shadow: 0 8px 30px rgba(8, 20, 17, 0.35);
+}
+
+.premium-pill {
+  border: 1px solid rgba(191, 146, 58, 0.38);
+  background: linear-gradient(135deg, #f6e6b8 0%, #e2bf73 45%, #b9852b 100%);
+  color: #3f2904;
+}
+
+.premium-cta {
+  background: linear-gradient(135deg, #f4e0ae 0%, #d9ac54 45%, #a8721b 100%);
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(168, 114, 27, 0.35);
+}
+
+.premium-cta:hover {
+  filter: brightness(1.06);
+}
+
+.premium-card {
+  border: 1px solid rgba(16, 62, 51, 0.1);
+  background: linear-gradient(150deg, #ffffff 0%, #fdfaf3 45%, #f7f6f2 100%);
+  box-shadow: 0 10px 30px rgba(15, 52, 41, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card:hover {
+  border-color: rgba(180, 132, 39, 0.35);
+  box-shadow: 0 14px 36px rgba(15, 52, 41, 0.12), 0 4px 16px rgba(184, 132, 39, 0.16);
+  transform: translateY(-2px);
+}
+
+.premium-card-active {
+  border: 1px solid rgba(184, 132, 39, 0.6);
+  background: linear-gradient(145deg, #fffefb 0%, #f8f0de 55%, #f3ead5 100%);
+  box-shadow: 0 14px 38px rgba(19, 63, 52, 0.16), 0 5px 18px rgba(184, 132, 39, 0.25);
+}
+
+.premium-card-active::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.85rem;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 20%, rgba(255, 236, 187, 0.5) 48%, rgba(255, 255, 255, 0) 75%);
+  transform: translateX(-140%);
+  pointer-events: none;
+  animation: card-shine-idle 10s ease-in-out infinite;
+}
+
+.premium-card-active:hover::before {
+  animation: card-shine 1.35s ease-in-out;
+}
+
+.premium-divider {
+  border-color: rgba(184, 132, 39, 0.15);
+}
+
+.gold-dot {
+  background: linear-gradient(135deg, #f4ddad 0%, #cf9a3b 100%);
+}
+
+@keyframes card-shine {
+  0% {
+    transform: translateX(-140%);
+  }
+  100% {
+    transform: translateX(140%);
+  }
+}
+
+@keyframes card-shine-idle {
+  0%,
+  82% {
+    transform: translateX(-140%);
+  }
+  100% {
+    transform: translateX(140%);
+  }
+}
+
+@media (max-width: 767px) {
+  .premium-card-active::before,
+  .premium-card-active:hover::before {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-card-active::before,
+  .premium-card-active:hover::before {
+    animation: none;
+  }
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ——— Тъмна тема (клас .dark на <html>) ——— */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .agri-page-bg {
+  background: linear-gradient(
+    165deg,
+    #061210 0%,
+    #0f172a 36%,
+    #0a1814 68%,
+    #111827 100%
+  );
+}
+
+.dark .premium-nav {
+  background: linear-gradient(110deg, rgba(5, 12, 10, 0.97) 0%, rgba(12, 28, 22, 0.95) 50%, rgba(18, 14, 6, 0.92) 100%);
+  border-bottom: 1px solid rgba(52, 211, 153, 0.18);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+}
+
+.dark .premium-pill {
+  border: 1px solid rgba(226, 188, 107, 0.35);
+  background: linear-gradient(135deg, #2d2610 0%, #4a3a14 48%, #6b5420 100%);
+  color: #f5ead0;
+}
+
+.dark .premium-cta {
+  background: linear-gradient(135deg, #5c4818 0%, #8b6914 45%, #b8860b 100%);
+  color: #fffdf8;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.dark .premium-card {
+  border: 1px solid rgba(52, 211, 153, 0.18);
+  background: linear-gradient(150deg, #0f172a 0%, #1e293b 48%, #172554 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  color: rgb(231 229 228);
+}
+
+.dark .premium-card strong {
+  color: rgb(250 250 249);
+}
+
+.dark .premium-card:hover {
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(251, 191, 36, 0.12);
+}
+
+.dark .premium-card-active {
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: linear-gradient(145deg, #1c2538 0%, #292524 55%, #1f2937 100%);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), 0 5px 18px rgba(251, 191, 36, 0.15);
+  color: rgb(231 229 228);
+}
+
+.dark .premium-divider {
+  border-color: rgba(251, 191, 36, 0.22);
+}
+
+.dark .luxury-glow {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 4px 16px rgba(16, 185, 129, 0.12);
+}
+
+.dark .gold-dot {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+}
+
+.dark select,
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea {
+  background-color: rgba(15, 23, 42, 0.85);
+  border-color: rgb(71 85 105);
+  color: rgb(245 245 244);
+}
+
+.dark select:focus,
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark textarea:focus {
+  outline: none;
+  border-color: rgb(52 211 153 / 0.6);
+}
+
+.dark option {
+  background-color: #1c1917;
+  color: #e7e5e4;
+}
+
+/* По-четим вторичен текст в тъмна тема (избягва „изчезнали“ надписи). */
+.dark .agri-page-bg .text-stone-500 {
+  color: rgb(214 211 209);
+}
+
+.dark section strong {
+  color: rgb(250 250 249);
+}
