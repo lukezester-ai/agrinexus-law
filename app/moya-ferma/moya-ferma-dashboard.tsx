@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import {
+	BarChart3,
 	Calculator,
 	CalendarDays,
+	ClipboardList,
 	FileText,
 	LogOut,
 	MessageCircle,
@@ -105,6 +107,22 @@ export function MoyaFermaDashboard() {
 					size={22}
 					className="text-[#0d9488] dark:text-teal-400"
 				/>
+			),
+		},
+		{
+			href: "/statistiki",
+			title: "Статистика по култури",
+			desc: "Демо серии производство, прогноза и напояване по избрана култура.",
+			icon: (
+				<BarChart3 size={22} className="text-[#0d9488] dark:text-teal-400" />
+			),
+		},
+		{
+			href: "/srokove",
+			title: "Твоите срокове и документи",
+			desc: "Ориентировъчни дати ДФЗ, липсващи документи и рискове според профил.",
+			icon: (
+				<ClipboardList size={22} className="text-[#0d9488] dark:text-teal-400" />
 			),
 		},
 		{

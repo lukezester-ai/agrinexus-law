@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Send, Check, Sparkles, MessageCircle, Search, User, FolderOpen, Wheat, LogIn, Calculator, Scale } from "lucide-react";
+import { ArrowRight, Send, Check, Sparkles, MessageCircle, Search, User, FolderOpen, Wheat, LogIn, Calculator, Scale, CalendarDays, BarChart3, ClipboardList } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import {
   CHARACTERS,
@@ -174,6 +174,30 @@ export default function Home() {
               <Search size={14} aria-hidden />
               <span className="max-[380px]:sr-only">Търсачка</span>
             </Link>
+            <Link
+              href="/kalendar"
+              className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors"
+              title="Сезонен календар по култури"
+            >
+              <CalendarDays size={14} aria-hidden />
+              <span className="hidden lg:inline">Календар</span>
+            </Link>
+            <Link
+              href="/statistiki"
+              className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors"
+              title="Статистика по основни култури"
+            >
+              <BarChart3 size={14} aria-hidden />
+              <span className="hidden xl:inline">Статистика</span>
+            </Link>
+            <Link
+              href="/srokove"
+              className="text-teal-50/85 hover:text-teal-100 flex items-center gap-1 transition-colors font-medium"
+              title="Срокове ДФЗ и документи"
+            >
+              <ClipboardList size={14} aria-hidden />
+              <span className="hidden xl:inline">Срокове</span>
+            </Link>
             {auth.status === "signed_in" && (
               <Link
                 href="/moya-ferma"
@@ -256,6 +280,50 @@ export default function Home() {
               Попълни профил за по-точни данни
             </Link>
           )}
+        </div>
+        <p className="text-xs text-stone-500 dark:text-stone-500 mt-6 uppercase tracking-wide text-center">
+          Планиране и данни за сезона
+        </p>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+          <Link
+            href="/kalendar"
+            className="flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/90 dark:bg-stone-900/80 px-4 py-3 text-left hover:border-teal-400/55 dark:hover:border-teal-600/50 transition shadow-sm">
+            <div className="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-950/60 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-900">
+              <CalendarDays size={20} className="text-[#0d9488]" aria-hidden />
+            </div>
+            <div>
+              <span className="font-semibold text-stone-900 dark:text-stone-50 text-sm block">Сезонен календар</span>
+              <span className="text-xs text-stone-600 dark:text-stone-400 leading-snug mt-0.5 block">
+                Месечни задачи по култура и ключови дати към ДФЗ — на български, за бърз ориентир.
+              </span>
+            </div>
+          </Link>
+          <Link
+            href="/statistiki"
+            className="flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/90 dark:bg-stone-900/80 px-4 py-3 text-left hover:border-teal-400/55 dark:hover:border-teal-600/50 transition shadow-sm">
+            <div className="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-950/60 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-900">
+              <BarChart3 size={20} className="text-[#0d9488]" aria-hidden />
+            </div>
+            <div>
+              <span className="font-semibold text-stone-900 dark:text-stone-50 text-sm block">Статистика по култури</span>
+              <span className="text-xs text-stone-600 dark:text-stone-400 leading-snug mt-0.5 block">
+                Демо графики, сравнение със средно и миналогодишно, текстове за вода по регион.
+              </span>
+            </div>
+          </Link>
+          <Link
+            href="/srokove"
+            className="flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/90 dark:bg-stone-900/80 px-4 py-3 text-left hover:border-teal-400/55 dark:hover:border-teal-600/50 transition shadow-sm sm:col-span-1">
+            <div className="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-950/60 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-900">
+              <ClipboardList size={20} className="text-[#0d9488]" aria-hidden />
+            </div>
+            <div>
+              <span className="font-semibold text-stone-900 dark:text-stone-50 text-sm block">Срокове и документи</span>
+              <span className="text-xs text-stone-600 dark:text-stone-400 leading-snug mt-0.5 block">
+                Какво наближава по календар, какво липсва в профила и чернови PDF за консултант.
+              </span>
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -366,10 +434,10 @@ export default function Home() {
                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[92%] sm:max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                      className={`rounded-2xl px-4 py-3 text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] ${
                         msg.role === "user"
-                          ? "bg-[#F1EFE8] dark:bg-stone-700 text-[#1C1917] dark:text-stone-50"
-                          : ""
+                          ? "max-w-[92%] sm:max-w-[85%] bg-[#F1EFE8] dark:bg-stone-700 text-[#1C1917] dark:text-stone-50"
+                          : "w-full max-w-full min-w-0"
                       }`}
                       style={
                         msg.role === "user"
@@ -471,7 +539,10 @@ export default function Home() {
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-3">
                 На едно място са <strong className="font-medium text-stone-800 dark:text-stone-200">Елена</strong> (право и процедури),{" "}
                 <strong className="font-medium text-stone-800 dark:text-stone-200">Борис</strong> (поле и култури) и{" "}
-                <strong className="font-medium text-stone-800 dark:text-stone-200">Виктория</strong> (сметки и ориентири по подпомагане), заедно с търсачка по документи и сезонен календар — по-малко объркване около сроковете и схемите, повече спокойствие при решенията в стопанството.
+                <strong className="font-medium text-stone-800 dark:text-stone-200">Виктория</strong> (сметки и ориентири по подпомагане), заедно с търсачка по документи,{" "}
+                <strong className="font-medium text-stone-800 dark:text-stone-200">сезонен календар</strong> по култури, модул за{" "}
+                <strong className="font-medium text-stone-800 dark:text-stone-200">статистика и прогноза</strong> (демо данни), екран{" "}
+                <strong className="font-medium text-stone-800 dark:text-stone-200">„Твоите срокове и документи“</strong> с чеклист и чернови PDF — по-малко объркване около администрацията и схемите, повече яснота при решенията в стопанството.
               </p>
               <p className="text-xs text-stone-500 dark:text-stone-500 leading-relaxed border-t border-stone-100 dark:border-stone-700 pt-3 mt-1">
                 Това са AI асистенти за обща информация и ориентация — не заместват адвокат, агроном или счетоводител по конкретен казус.
