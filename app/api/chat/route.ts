@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import { CHARACTERS, type CharacterId, buildSystemPrompt } from "@/lib/characters";
 import { tryInternalCharacterReply } from "@/lib/chat-internal";
+import { farmProfileToPromptText } from "@/lib/farm-profile-server";
+import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
 import { getKnowledgeContext } from "@/lib/knowledge/dfz-knowledge";
 import { chatRateLimit, checkRateLimit } from "@/lib/utils/rate-limit";
 import { getSupabaseAdmin } from "@/lib/supabase";
@@ -18,6 +20,9 @@ export async function POST(req: Request) {
 		}
 
 		const { messages, characterId, userProfile } = await req.json();
+
+		const { profile: resolvedFarmProfile, source: farmProfileSource } =
+			await resolveFarmProfileForChat(userProfile);
 
 		const character = CHARACTERS[characterId as CharacterId];
 		if (!character) {
@@ -62,8 +67,8 @@ export async function POST(req: Request) {
 
 			const knowledgeContext = getKnowledgeContext(userQuery);
 
-			const profileText = userProfile
-				? `Тип стопанство: ${userProfile.farm_type}, Размер: ${userProfile.total_decares} декара, Регион: ${userProfile.region}, Култури: ${userProfile.crops?.join(", ") || "не е посочено"}, Биологично: ${userProfile.is_organic ? "да" : "не"}`
+			const profileText = resolvedFarmProfile
+				? farmProfileToPromptText(resolvedFarmProfile)
 				: undefined;
 
 			const systemPrompt = buildSystemPrompt(character, knowledgeContext, profileText);
@@ -93,6 +98,9 @@ export async function POST(req: Request) {
 					user_message: userQuery,
 					assistant_message: responseText,
 					ip_address: ip,
+					user_profile: resolvedFarmProfile
+						? { ...resolvedFarmProfile, _source: farmProfileSource }
+						: null,
 				});
 			} catch (err) {
 				console.error("Failed to log chat:", err);

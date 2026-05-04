@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save, Check, FolderOpen, Wheat } from "lucide-react";
 import { loadFarmProfile, persistFarmProfile } from "@/lib/farm-profile";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 
 const REGIONS = [
@@ -66,12 +67,34 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleSave = () => {
-    persistFarmProfile({
+  const handleSave = async () => {
+    const snapshot = {
       ...profile,
       total_decares: profile.total_decares ? Number(profile.total_decares) : 0,
       livestock: profile.livestock || [],
-    });
+    };
+    persistFarmProfile(snapshot);
+
+    const supabase = createBrowserSupabaseClient();
+    if (supabase) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            farm_profile: {
+              farm_type: snapshot.farm_type,
+              region: snapshot.region,
+              total_decares: snapshot.total_decares,
+              crops: snapshot.crops,
+              livestock: snapshot.livestock,
+              is_organic: snapshot.is_organic,
+            },
+          },
+        });
+        if (error) console.error("Supabase farm_profile metadata:", error);
+      }
+    }
+
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
