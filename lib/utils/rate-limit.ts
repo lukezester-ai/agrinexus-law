@@ -2,8 +2,13 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 function validUpstashConfig(): { url: string; token: string } | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  // Support both native Upstash vars and Vercel KV aliases.
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL?.trim() ||
+    process.env.KV_REST_API_URL?.trim();
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN?.trim() ||
+    process.env.KV_REST_API_TOKEN?.trim();
   if (!url || !token) return null;
   if (!url.startsWith("https://")) return null;
   if (url.includes("...") || token.includes("...")) return null;
@@ -11,6 +16,7 @@ function validUpstashConfig(): { url: string; token: string } | null {
 }
 
 const upstash = validUpstashConfig();
+const isProd = process.env.NODE_ENV === "production";
 const redis = upstash
   ? new Redis({
       url: upstash.url,
@@ -52,8 +58,12 @@ export async function checkRateLimit(
   success: boolean;
   limit?: number;
   remaining?: number;
+  reason?: "not_configured";
 }> {
   if (!rateLimit) {
+    if (isProd) {
+      return { success: false, reason: "not_configured" };
+    }
     return { success: true };
   }
 
