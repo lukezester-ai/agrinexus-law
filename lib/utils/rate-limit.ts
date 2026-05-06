@@ -16,7 +16,6 @@ function validUpstashConfig(): { url: string; token: string } | null {
 }
 
 const upstash = validUpstashConfig();
-const isProd = process.env.NODE_ENV === "production";
 const redis = upstash
   ? new Redis({
       url: upstash.url,
@@ -58,12 +57,8 @@ export async function checkRateLimit(
   success: boolean;
   limit?: number;
   remaining?: number;
-  reason?: "not_configured";
 }> {
   if (!rateLimit) {
-    if (isProd) {
-      return { success: false, reason: "not_configured" };
-    }
     return { success: true };
   }
 

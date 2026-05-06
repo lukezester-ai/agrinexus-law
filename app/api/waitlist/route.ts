@@ -13,12 +13,6 @@ export async function POST(req: Request) {
   try {
     const ip = extractClientIp(req);
     const rateLimitResult = await checkRateLimit(waitlistRateLimit, ip);
-    if (rateLimitResult.reason === "not_configured") {
-      return Response.json(
-        { error: "Rate limit не е конфигуриран на сървъра. Добави Upstash/KV ключовете." },
-        { status: 503 },
-      );
-    }
 
     if (!rateLimitResult.success) {
       return Response.json(
