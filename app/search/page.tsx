@@ -325,8 +325,8 @@ export default function SearchPage() {
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 text-white rounded-lg text-sm font-medium transition"
-                style={{ background: "#0d9488" }}
+                className="px-6 py-3 text-white rounded-lg text-sm font-medium transition shadow-sm hover:brightness-105"
+                style={{ background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 55%, #2563eb 100%)" }}
               >
                 Търси
               </button>
@@ -340,8 +340,8 @@ export default function SearchPage() {
                   onClick={() => setCategory(cat.id)}
                   className={`px-3 py-1.5 text-xs rounded-md border transition ${
                     category === cat.id
-                      ? "border-[#0d9488] bg-[#0d9488] text-white"
-                      : "border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-[#57534e] dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800"
+                      ? "border-indigo-500 bg-indigo-600 text-white"
+                      : "border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-[#57534e] dark:text-stone-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
                   }`}
                 >
                   {cat.label}
@@ -545,7 +545,7 @@ export default function SearchPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs px-2 py-0.5 rounded-md bg-[#E6F1FB] text-[#0C447C] dark:bg-sky-950 dark:text-sky-200">
+                        <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200">
                           {doc.category}
                         </span>
                         <span className="text-xs text-stone-500 dark:text-stone-400">
@@ -565,7 +565,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       aria-expanded={openDetailId === doc.id}
-                      className="text-sm text-left w-full text-[#0d9488] dark:text-teal-400 hover:text-stone-700 dark:hover:text-teal-300 underline decoration-[#0d9488]/40 dark:decoration-teal-500/40 underline-offset-2"
+                      className="text-sm text-left w-full text-indigo-600 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-200 underline decoration-indigo-400/50 dark:decoration-indigo-500/40 underline-offset-2"
                       onClick={() =>
                         setOpenDetailId((prev) => (prev === doc.id ? null : doc.id))
                       }
@@ -581,14 +581,14 @@ export default function SearchPage() {
                           Източник: {doc.source}
                         </p>
                         <div className="mt-1 flex items-center gap-3">
-                          <Link href={`/doc/${doc.id}`} className="inline-flex items-center gap-1 text-xs text-[#0d9488] dark:text-teal-400">
+                          <Link href={`/doc/${doc.id}`} className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-300">
                             Отвори документа
                           </Link>
                           <a
                             href={getKnowledgeSourceUrl(doc)}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[#0d9488] dark:text-teal-400"
+                            className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-300"
                           >
                             Отвори оригинала <ExternalLink size={12} />
                           </a>

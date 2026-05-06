@@ -7,18 +7,18 @@ export default {
     extend: {
       colors: {
         agri: {
-          /** Основен акцент — синхрон с UI (#0d9488 teal-600) */
-          forest: "#0f766e",
-          leaf: "#14b8a6",
-          mint: "#ecfdf8",
-          cream: "#f8fafc",
-          sand: "#eef2f7",
+          /** Canva-like palette (violet/indigo/blue, clean docs vibe) */
+          forest: "#4338ca",
+          leaf: "#6366f1",
+          mint: "#f8f5ff",
+          cream: "#f9fbff",
+          sand: "#eef2ff",
           sky: "#e0f2fe",
           ink: "#1c1917",
         },
       },
       boxShadow: {
-        soft: "0 18px 40px -24px rgba(11, 92, 71, 0.35)",
+        soft: "0 18px 40px -24px rgba(79, 70, 229, 0.35)",
       },
     },
   },

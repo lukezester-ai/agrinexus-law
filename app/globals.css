@@ -15,20 +15,20 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
 }
 
-/* Shared page backdrop — студена slate / teal (една гама с акцента на марката) */
+/* Shared page backdrop — Canva Docs style (soft lilac/blue surface) */
 .agri-page-bg {
   background: linear-gradient(
     165deg,
-    #ecfdf8 0%,
-    #f0f9ff 38%,
-    #e8f7f5 68%,
-    #eef2f7 100%
+    #f8f5ff 0%,
+    #f1f5ff 35%,
+    #eef8ff 70%,
+    #f9fbff 100%
   );
 }
 
-/* „Nexus“ — студен акцент (teal → cyan), без златисто */
+/* „Nexus“ — Canva-like brand blend (violet -> blue -> cyan) */
 .brand-nexus-gold {
-  background: linear-gradient(120deg, #5eead4 0%, #2dd4bf 40%, #22d3ee 100%);
+  background: linear-gradient(120deg, #7c3aed 0%, #4f46e5 45%, #06b6d4 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -39,17 +39,17 @@ body {
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
-  color: #5eead4;
-  -webkit-text-fill-color: #5eead4;
+  color: #a78bfa;
+  -webkit-text-fill-color: #a78bfa;
 }
 
 .brand-law-suffix {
   font-weight: 800;
   letter-spacing: 0.03em;
-  color: #0f766e;
+  color: #4338ca;
 }
 .dark .brand-law-suffix {
-  color: #67e8f9;
+  color: #93c5fd;
 }
 
 /* Първи ред на hero — ясен контраст върху светъл/тъмен градиент */
@@ -63,30 +63,30 @@ body {
 }
 
 .luxury-glow {
-  box-shadow: 0 16px 40px rgba(13, 148, 136, 0.11), 0 4px 16px rgba(45, 212, 191, 0.12);
+  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.12), 0 4px 16px rgba(6, 182, 212, 0.12);
 }
 
 .premium-nav {
   background: linear-gradient(
     110deg,
-    rgba(8, 20, 28, 0.96) 0%,
-    rgba(12, 38, 42, 0.93) 48%,
-    rgba(15, 23, 42, 0.94) 100%
+    rgba(27, 26, 68, 0.96) 0%,
+    rgba(38, 37, 99, 0.93) 48%,
+    rgba(30, 41, 59, 0.95) 100%
   );
-  border-bottom: 1px solid rgba(45, 212, 191, 0.18);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.25);
   box-shadow: 0 8px 30px rgba(8, 18, 28, 0.38);
 }
 
 .premium-pill {
-  border: 1px solid rgba(45, 212, 191, 0.42);
-  background: linear-gradient(135deg, #ecfdf8 0%, #ccfbf1 42%, #e0f2fe 100%);
-  color: #134e4a;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #ecfeff 100%);
+  color: #312e81;
 }
 
 .premium-cta {
-  background: linear-gradient(135deg, #5eead4 0%, #14b8a6 48%, #0d9488 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 48%, #2563eb 100%);
   color: #fff;
-  box-shadow: 0 10px 28px rgba(13, 148, 136, 0.32);
+  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.35);
 }
 
 .premium-cta:hover {
@@ -94,23 +94,23 @@ body {
 }
 
 .premium-card {
-  border: 1px solid rgba(45, 212, 191, 0.22);
-  background: linear-gradient(150deg, #ffffff 0%, #f8fafc 45%, #f1f5f9 100%);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: linear-gradient(150deg, #ffffff 0%, #f8faff 45%, #f1f5ff 100%);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   position: relative;
   overflow: hidden;
 }
 
 .premium-card:hover {
-  border-color: rgba(13, 148, 136, 0.38);
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1), 0 4px 16px rgba(45, 212, 191, 0.12);
+  border-color: rgba(79, 70, 229, 0.34);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1), 0 4px 16px rgba(37, 99, 235, 0.1);
   transform: translateY(-2px);
 }
 
 .premium-card-active {
-  border: 1px solid rgba(13, 148, 136, 0.55);
-  background: linear-gradient(145deg, #ffffff 0%, #ecfdf8 52%, #f0fdfa 100%);
-  box-shadow: 0 14px 38px rgba(13, 148, 136, 0.12), 0 5px 18px rgba(45, 212, 191, 0.18);
+  border: 1px solid rgba(79, 70, 229, 0.5);
+  background: linear-gradient(145deg, #ffffff 0%, #eef2ff 52%, #f0f9ff 100%);
+  box-shadow: 0 14px 38px rgba(79, 70, 229, 0.14), 0 5px 18px rgba(37, 99, 235, 0.16);
 }
 
 .premium-card-active::before {
@@ -118,7 +118,7 @@ body {
   position: absolute;
   inset: -2px;
   border-radius: 0.85rem;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 20%, rgba(94, 234, 212, 0.35) 48%, rgba(255, 255, 255, 0) 75%);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 20%, rgba(129, 140, 248, 0.3) 48%, rgba(255, 255, 255, 0) 75%);
   transform: translateX(-140%);
   pointer-events: none;
   animation: card-shine-idle 10s ease-in-out infinite;
@@ -129,12 +129,12 @@ body {
 }
 
 .premium-divider {
-  border-color: rgba(45, 212, 191, 0.2);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 /* Име „gold-dot“ за съвместимост — визуално teal акцент */
 .gold-dot {
-  background: linear-gradient(135deg, #5eead4 0%, #0d9488 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
 }
 
 @keyframes card-shine {
@@ -185,39 +185,39 @@ body {
 .dark .agri-page-bg {
   background: linear-gradient(
     165deg,
-    #061210 0%,
-    #0f172a 36%,
-    #0a1814 68%,
-    #111827 100%
+    #0b1022 0%,
+    #111a38 36%,
+    #12223f 68%,
+    #0f172a 100%
   );
 }
 
 .dark .premium-nav {
   background: linear-gradient(
     110deg,
-    rgba(6, 14, 22, 0.97) 0%,
-    rgba(10, 28, 35, 0.95) 48%,
+    rgba(13, 15, 38, 0.97) 0%,
+    rgba(18, 24, 58, 0.95) 48%,
     rgba(15, 23, 42, 0.96) 100%
   );
-  border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+  border-bottom: 1px solid rgba(129, 140, 248, 0.28);
   box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
 }
 
 .dark .premium-pill {
-  border: 1px solid rgba(45, 212, 191, 0.28);
-  background: linear-gradient(135deg, #0f172a 0%, #134e4a 42%, #164e63 100%);
-  color: #ccfbf1;
+  border: 1px solid rgba(129, 140, 248, 0.24);
+  background: linear-gradient(135deg, #1e1b4b 0%, #1e3a8a 42%, #0e7490 100%);
+  color: #e0e7ff;
 }
 
 .dark .premium-cta {
-  background: linear-gradient(135deg, #0f766e 0%, #0d9488 45%, #0891b2 100%);
+  background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 45%, #2563eb 100%);
   color: #f8fafc;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(45, 212, 191, 0.12);
 }
 
 .dark .premium-card {
-  border: 1px solid rgba(45, 212, 191, 0.2);
-  background: linear-gradient(150deg, #0f172a 0%, #1e293b 48%, #0f172a 100%);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  background: linear-gradient(150deg, #0f172a 0%, #1f2a44 48%, #0f172a 100%);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   color: rgb(231 229 228);
 }
@@ -227,29 +227,29 @@ body {
 }
 
 .dark .premium-card:hover {
-  border-color: rgba(45, 212, 191, 0.38);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(45, 212, 191, 0.1);
+  border-color: rgba(129, 140, 248, 0.36);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(37, 99, 235, 0.12);
 }
 
 .dark .premium-card-active {
-  border: 1px solid rgba(45, 212, 191, 0.48);
-  background: linear-gradient(145deg, #134e4a 0%, #1e293b 52%, #164e63 100%);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), 0 5px 18px rgba(45, 212, 191, 0.14);
+  border: 1px solid rgba(129, 140, 248, 0.42);
+  background: linear-gradient(145deg, #312e81 0%, #1e293b 52%, #1e3a8a 100%);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), 0 5px 18px rgba(79, 70, 229, 0.2);
   color: rgb(231 229 228);
 }
 
 .dark .premium-divider {
-  border-color: rgba(45, 212, 191, 0.22);
+  border-color: rgba(129, 140, 248, 0.24);
 }
 
 .dark .luxury-glow {
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.45),
-    0 4px 16px rgba(45, 212, 191, 0.1);
+    0 4px 16px rgba(79, 70, 229, 0.16);
 }
 
 .dark .gold-dot {
-  background: linear-gradient(135deg, #5eead4 0%, #14b8a6 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%);
 }
 
 .dark select,
@@ -264,7 +264,7 @@ body {
 .dark input:not([type="checkbox"]):not([type="radio"]):focus,
 .dark textarea:focus {
   outline: none;
-  border-color: rgb(45 212 191 / 0.55);
+  border-color: rgb(129 140 248 / 0.6);
 }
 
 .dark option {

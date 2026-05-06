@@ -105,7 +105,7 @@ export default function Home() {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <nav className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-5 py-3 shadow-sm dark:border-stone-800 dark:bg-stone-900">
           <div className="flex items-center gap-2 text-sm font-semibold">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
               <Leaf size={18} />
             </span>
             <span>AgriNexus-Law</span>
@@ -114,7 +114,7 @@ export default function Home() {
             <Link href="/search" className="hover:text-stone-900 dark:hover:text-white">Документи</Link>
             <Link href="/srokove" className="hover:text-stone-900 dark:hover:text-white">Срокове</Link>
             <Link href="/kalkulator" className="hover:text-stone-900 dark:hover:text-white">Калкулатори</Link>
-            <Link href="/vhod" className="font-medium text-emerald-700 dark:text-emerald-300">Вход</Link>
+            <Link href="/vhod" className="font-medium text-indigo-700 dark:text-indigo-300">Вход</Link>
           </div>
         </nav>
 
@@ -124,7 +124,7 @@ export default function Home() {
             Закони, наредби, сертификати и формуляри — с AI търсене на естествен език.
           </p>
           <form onSubmit={onSearch} className="mx-auto mt-6 max-w-3xl">
-            <div className="flex items-center gap-2 rounded-2xl border border-stone-300 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-950">
+            <div className="flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30">
               <Sparkles className="text-violet-600" size={20} />
               <input
                 value={query}
@@ -132,7 +132,12 @@ export default function Home() {
                 placeholder='Попитай: "Какви документи трябват за био сертификат на пшеница?"'
                 className="w-full bg-transparent text-sm outline-none sm:text-base"
               />
-              <button type="submit" disabled={loading || !query.trim()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              <button
+                type="submit"
+                disabled={loading || !query.trim()}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 55%, #2563eb 100%)" }}
+              >
                 {loading ? "Търся..." : "Търси"}
               </button>
             </div>
@@ -152,7 +157,7 @@ export default function Home() {
             </select>
           </div>
           {aiSummary ? (
-            <div className="mb-4 rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm dark:border-violet-900 dark:bg-violet-950/40">
+            <div className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm dark:border-indigo-900 dark:bg-indigo-950/40">
               <p className="font-medium text-violet-900 dark:text-violet-200">AI обобщение</p>
               <p className="mt-1 text-violet-800 dark:text-violet-300">{aiSummary}</p>
             </div>
@@ -177,7 +182,7 @@ export default function Home() {
                       href={getKnowledgeSourceUrl(doc)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-300"
+                      className="inline-flex items-center gap-1 text-xs text-indigo-700 dark:text-indigo-300"
                     >
                       Оригинал <ExternalLink size={12} />
                     </a>
@@ -194,8 +199,8 @@ export default function Home() {
             {CATEGORY_CARDS.map((card) => {
               const Icon = card.icon;
               return (
-                <button key={card.title} type="button" onClick={() => setQuery(card.title)} className="rounded-xl border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:border-emerald-300 dark:border-stone-800 dark:bg-stone-900">
-                  <Icon size={20} className="mb-2 text-emerald-700 dark:text-emerald-300" />
+                <button key={card.title} type="button" onClick={() => setQuery(card.title)} className="rounded-xl border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:border-indigo-300 dark:border-stone-800 dark:bg-stone-900">
+                  <Icon size={20} className="mb-2 text-indigo-700 dark:text-indigo-300" />
                   <p className="text-sm font-semibold">{card.title}</p>
                   <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">{card.subtitle}</p>
                 </button>
@@ -207,12 +212,12 @@ export default function Home() {
         <section className="mb-8 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold"><Bell size={16} className="text-stone-500" />Последни промени и срокове</h2>
-            <Link href="/srokove" className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Виж всички</Link>
+            <Link href="/srokove" className="text-xs font-medium text-indigo-700 dark:text-indigo-300">Виж всички</Link>
           </div>
           <div className="space-y-3">
             {UPDATES.map((item) => (
               <div key={item.title} className="flex items-start gap-3 border-b border-stone-100 pb-3 last:border-0 last:pb-0 dark:border-stone-800">
-                <span className="mt-0.5 rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">{item.badge}</span>
+                <span className="mt-0.5 rounded bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">{item.badge}</span>
                 <div className="flex-1">
                   <p className="text-sm font-medium">{item.title}</p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">{item.meta}</p>
@@ -222,16 +227,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-10 rounded-2xl bg-emerald-700 px-5 py-7 text-white sm:px-8">
+        <section className="mb-10 rounded-2xl bg-indigo-700 px-5 py-7 text-white sm:px-8">
           <h2 className="text-xl font-semibold">Абонамент за известия</h2>
-          <p className="mt-2 text-sm text-emerald-50">Получавай известия при промени по документи, срокове и регламенти.</p>
+          <p className="mt-2 text-sm text-indigo-100">Получавай известия при промени по документи, срокове и регламенти.</p>
           {waitlistError ? <p className="mt-3 text-sm text-amber-100">{waitlistError}</p> : null}
           {waitlistOk ? (
             <p className="mt-3 inline-flex items-center gap-2 text-sm"><Check size={16} /> Успешно записване!</p>
           ) : (
             <form onSubmit={onWaitlist} className="mt-4 flex max-w-lg flex-col gap-2 sm:flex-row">
               <input type="email" required value={waitlistEmail} onChange={(e) => setWaitlistEmail(e.target.value)} placeholder="Твоят имейл" className="flex-1 rounded-lg px-3 py-2 text-sm text-stone-900 outline-none" />
-              <button type="submit" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-800">Абонирай ме</button>
+              <button type="submit" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-800">Абонирай ме</button>
             </form>
           )}
         </section>
