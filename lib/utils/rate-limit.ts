@@ -11,6 +11,7 @@ function validUpstashConfig(): { url: string; token: string } | null {
 }
 
 const upstash = validUpstashConfig();
+const isProd = process.env.NODE_ENV === "production";
 const redis = upstash
   ? new Redis({
       url: upstash.url,
@@ -48,8 +49,16 @@ export const searchRateLimit = redis
 export async function checkRateLimit(
   rateLimit: Ratelimit | null,
   identifier: string
-): Promise<{ success: boolean; limit?: number; remaining?: number }> {
+): Promise<{
+  success: boolean;
+  limit?: number;
+  remaining?: number;
+  reason?: "not_configured";
+}> {
   if (!rateLimit) {
+    if (isProd) {
+      return { success: false, reason: "not_configured" };
+    }
     return { success: true };
   }
 
@@ -59,4 +68,19 @@ export async function checkRateLimit(
     limit: result.limit,
     remaining: result.remaining,
   };
+}
+
+export function extractClientIp(req: Request): string {
+  const firstFromHeader = (headerValue: string | null): string | null => {
+    if (!headerValue) return null;
+    const first = headerValue.split(",")[0]?.trim();
+    return first || null;
+  };
+
+  const forwarded =
+    firstFromHeader(req.headers.get("x-forwarded-for")) ||
+    firstFromHeader(req.headers.get("x-real-ip")) ||
+    firstFromHeader(req.headers.get("cf-connecting-ip"));
+
+  return forwarded || "unknown";
 }

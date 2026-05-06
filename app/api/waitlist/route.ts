@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { waitlistRateLimit, checkRateLimit } from "@/lib/utils/rate-limit";
+import { waitlistRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -11,8 +11,14 @@ const RESEND_FROM =
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const ip = extractClientIp(req);
     const rateLimitResult = await checkRateLimit(waitlistRateLimit, ip);
+    if (rateLimitResult.reason === "not_configured") {
+      return Response.json(
+        { error: "Rate limit не е конфигуриран на сървъра. Добави Upstash ключовете." },
+        { status: 503 },
+      );
+    }
     
     if (!rateLimitResult.success) {
       return Response.json(

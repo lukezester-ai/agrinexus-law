@@ -4,7 +4,7 @@ import { tryInternalCharacterReply } from "@/lib/chat-internal";
 import { farmProfileToPromptText } from "@/lib/farm-profile-server";
 import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
 import { getKnowledgeContext } from "@/lib/knowledge/dfz-knowledge";
-import { chatRateLimit, checkRateLimit } from "@/lib/utils/rate-limit";
+import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { normalizeChatMessages } from "@/lib/anthropic-messages";
 
@@ -12,8 +12,14 @@ const DEFAULT_MODEL = "gpt-4o-mini";
 
 export async function POST(req: Request) {
 	try {
-		const ip = req.headers.get("x-forwarded-for") || "unknown";
+		const ip = extractClientIp(req);
 		const rateLimitResult = await checkRateLimit(chatRateLimit, ip);
+		if (rateLimitResult.reason === "not_configured") {
+			return Response.json(
+				{ error: "Rate limit не е конфигуриран на сървъра. Добави Upstash ключовете." },
+				{ status: 503 },
+			);
+		}
 
 		if (!rateLimitResult.success) {
 			return Response.json({ error: "Твърде много заявки. Изчакай малко и опитай пак." }, { status: 429 });

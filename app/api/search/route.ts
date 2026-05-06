@@ -4,12 +4,18 @@ import {
 } from "@/lib/knowledge/dfz-knowledge";
 import { mergeKnowledgeSearchResults } from "@/lib/knowledge/merged-search";
 import { isMeiliConfigured, searchWithMeili } from "@/lib/meilisearch";
-import { searchRateLimit, checkRateLimit } from "@/lib/utils/rate-limit";
+import { searchRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const ip = extractClientIp(req);
     const rateLimitResult = await checkRateLimit(searchRateLimit, ip);
+    if (rateLimitResult.reason === "not_configured") {
+      return Response.json(
+        { error: "Rate limit не е конфигуриран на сървъра. Добави Upstash ключовете." },
+        { status: 503 },
+      );
+    }
     if (!rateLimitResult.success) {
       return Response.json(
         { error: "Твърде много търсения. Изчакай малко и опитай пак." },
