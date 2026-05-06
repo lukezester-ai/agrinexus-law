@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, ExternalLink, Search } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/dfz-knowledge";
+import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 
 const CATEGORIES = [
   { id: "all", label: "Всички" },
@@ -124,13 +125,13 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
+      <nav className="sticky top-0 z-20 border-b border-teal-100/80 bg-white/90 backdrop-blur-md shadow-sm dark:border-stone-800 dark:bg-stone-950/90">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white">
+          <Link href="/" className="flex items-center gap-2 text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white">
             <ArrowLeft size={16} />
             <span className="text-sm">Към началото</span>
           </Link>
-          <div className="font-medium text-base dark:text-stone-100">Търсачка</div>
+          <div className="font-medium text-base dark:text-stone-100">AgriNexus-Law · Търсачка</div>
         </div>
       </nav>
 
@@ -290,9 +291,17 @@ export default function SearchPage() {
                         <pre className="text-sm text-stone-700 dark:text-stone-300 whitespace-pre-wrap font-sans leading-relaxed">
                           {doc.content}
                         </pre>
-                        <p className="text-xs text-stone-500 dark:text-stone-500 mt-3">
+                        <p className="mt-3 text-xs text-stone-500 dark:text-stone-500">
                           Източник: {doc.source}
                         </p>
+                        <a
+                          href={getKnowledgeSourceUrl(doc)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 text-xs text-[#0d9488] dark:text-teal-400"
+                        >
+                          Отвори оригинала <ExternalLink size={12} />
+                        </a>
                       </div>
                     )}
                   </div>

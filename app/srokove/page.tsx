@@ -10,17 +10,17 @@ export default function SrokovePage() {
 
 	return (
 		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800">
+			<nav className="sticky top-0 z-20 border-b border-teal-100/80 bg-white/90 backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/90">
 				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
 					<Link
 						href="/"
-						className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 text-sm">
+						className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 dark:text-stone-300">
 						<ArrowLeft size={16} aria-hidden />
 						Начало
 					</Link>
-					<span className="font-medium text-stone-900 dark:text-stone-100 text-sm sm:text-base flex items-center gap-2">
+					<span className="flex items-center gap-2 text-sm font-medium text-stone-900 dark:text-stone-100 sm:text-base">
 						<CalendarClock size={18} className="text-[#0d9488] shrink-0" aria-hidden />
-						{lang === "bg" ? "Срокове и документи" : "Deadlines & paperwork"}
+						AgriNexus-Law · {lang === "bg" ? "Срокове и документи" : "Deadlines & paperwork"}
 					</span>
 					<div className="flex items-center gap-2">
 						<div className="flex rounded-lg border border-stone-200 dark:border-stone-600 overflow-hidden">
