@@ -3,27 +3,27 @@
 @tailwind utilities;
 
 :root {
-  --brand-violet: #7c3aed;
-  --brand-indigo: #4f46e5;
-  --brand-blue: #2563eb;
+  --brand-violet: #8b5cf6;
+  --brand-indigo: #7c3aed;
+  --brand-blue: #3b82f6;
   --brand-cyan: #06b6d4;
-  --bg-violet-soft: #f8f5ff;
-  --bg-indigo-soft: #f1f5ff;
-  --bg-blue-soft: #eef8ff;
-  --bg-paper: #f9fbff;
-  --text-brand-strong: #4338ca;
-  --text-brand-pill: #312e81;
+  --bg-violet-soft: #dff4f5;
+  --bg-indigo-soft: #d9f1f6;
+  --bg-blue-soft: #e8f8fc;
+  --bg-paper: #f7fbfc;
+  --text-brand-strong: #0f172a;
+  --text-brand-pill: #155e75;
 }
 
 .dark {
-  --bg-dark-1: #0b1022;
-  --bg-dark-2: #111a38;
-  --bg-dark-3: #12223f;
+  --bg-dark-1: #0b1420;
+  --bg-dark-2: #122235;
+  --bg-dark-3: #173248;
   --bg-dark-4: #0f172a;
-  --bg-dark-pill-1: #1e1b4b;
-  --bg-dark-pill-2: #1e3a8a;
-  --text-brand-dark: #a78bfa;
-  --text-brand-dark-soft: #93c5fd;
+  --bg-dark-pill-1: #2b1f52;
+  --bg-dark-pill-2: #1d4f91;
+  --text-brand-dark: #c4b5fd;
+  --text-brand-dark-soft: #7dd3fc;
 }
 
 * {
@@ -123,13 +123,13 @@ body {
 }
 
 .brand-soft-surface {
-  border-color: color-mix(in srgb, var(--brand-indigo) 22%, white);
-  background-color: color-mix(in srgb, var(--bg-paper) 92%, white);
+  border-color: color-mix(in srgb, var(--brand-cyan) 22%, white);
+  background-color: color-mix(in srgb, var(--bg-paper) 88%, white);
 }
 
 .brand-soft-input {
-  border-color: color-mix(in srgb, var(--brand-indigo) 30%, white);
-  background-color: color-mix(in srgb, var(--bg-indigo-soft) 75%, white);
+  border-color: color-mix(in srgb, var(--brand-cyan) 28%, white);
+  background-color: color-mix(in srgb, var(--bg-indigo-soft) 78%, white);
 }
 
 .brand-link {
