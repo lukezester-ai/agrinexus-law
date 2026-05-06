@@ -101,9 +101,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
+    <div className="min-h-screen agri-page-bg text-stone-900 dark:text-stone-100">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        <nav className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-5 py-3 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+        <nav className="brand-soft-surface mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-3 shadow-sm dark:border-indigo-900/40 dark:bg-stone-900/90">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
               <Leaf size={18} />
@@ -114,17 +114,17 @@ export default function Home() {
             <Link href="/search" className="hover:text-stone-900 dark:hover:text-white">Документи</Link>
             <Link href="/srokove" className="hover:text-stone-900 dark:hover:text-white">Срокове</Link>
             <Link href="/kalkulator" className="hover:text-stone-900 dark:hover:text-white">Калкулатори</Link>
-            <Link href="/vhod" className="font-medium text-indigo-700 dark:text-indigo-300">Вход</Link>
+            <Link href="/vhod" className="brand-link font-medium">Вход</Link>
           </div>
         </nav>
 
-        <section className="mb-8 rounded-2xl border border-stone-200 bg-white px-4 py-10 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-8">
+        <section className="brand-soft-surface mb-8 rounded-2xl border px-4 py-10 text-center shadow-sm dark:border-indigo-900/40 dark:bg-stone-900/90 sm:px-8">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Цялата документация за земеделието на едно място</h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-stone-600 dark:text-stone-300 sm:text-base">
             Закони, наредби, сертификати и формуляри — с AI търсене на естествен език.
           </p>
           <form onSubmit={onSearch} className="mx-auto mt-6 max-w-3xl">
-            <div className="flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30">
+            <div className="brand-soft-input flex items-center gap-2 rounded-2xl border p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30">
               <Sparkles className="text-violet-600" size={20} />
               <input
                 value={query}
@@ -135,8 +135,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 55%, #2563eb 100%)" }}
+                className="brand-cta-bg rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {loading ? "Търся..." : "Търси"}
               </button>
@@ -145,7 +144,7 @@ export default function Home() {
           {engine ? <p className="mt-3 text-xs text-stone-500 dark:text-stone-400">Search engine: <strong>{engine}</strong></p> : null}
         </section>
 
-        <section ref={resultsSectionRef} className="mb-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+        <section ref={resultsSectionRef} className="brand-soft-surface mb-10 rounded-2xl border p-5 shadow-sm dark:border-indigo-900/40 dark:bg-stone-900/90">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-semibold">Резултати от AI търсене</h2>
             <select value={filterType} onChange={(e) => setFilterType(e.target.value as "all" | KnowledgeDoc["type"])} className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900">
@@ -182,7 +181,7 @@ export default function Home() {
                       href={getKnowledgeSourceUrl(doc)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-indigo-700 dark:text-indigo-300"
+                      className="brand-link inline-flex items-center gap-1 text-xs"
                     >
                       Оригинал <ExternalLink size={12} />
                     </a>
@@ -199,7 +198,7 @@ export default function Home() {
             {CATEGORY_CARDS.map((card) => {
               const Icon = card.icon;
               return (
-                <button key={card.title} type="button" onClick={() => setQuery(card.title)} className="rounded-xl border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:border-indigo-300 dark:border-stone-800 dark:bg-stone-900">
+                <button key={card.title} type="button" onClick={() => setQuery(card.title)} className="brand-soft-surface rounded-xl border p-4 text-left shadow-sm transition hover:border-indigo-400 dark:border-indigo-900/40 dark:bg-stone-900/90">
                   <Icon size={20} className="mb-2 text-indigo-700 dark:text-indigo-300" />
                   <p className="text-sm font-semibold">{card.title}</p>
                   <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">{card.subtitle}</p>
@@ -212,7 +211,7 @@ export default function Home() {
         <section className="mb-8 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold"><Bell size={16} className="text-stone-500" />Последни промени и срокове</h2>
-            <Link href="/srokove" className="text-xs font-medium text-indigo-700 dark:text-indigo-300">Виж всички</Link>
+            <Link href="/srokove" className="brand-link text-xs font-medium">Виж всички</Link>
           </div>
           <div className="space-y-3">
             {UPDATES.map((item) => (

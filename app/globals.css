@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-violet: #7c3aed;
+  --brand-indigo: #4f46e5;
+  --brand-blue: #2563eb;
+  --brand-cyan: #06b6d4;
+  --bg-violet-soft: #f8f5ff;
+  --bg-indigo-soft: #f1f5ff;
+  --bg-blue-soft: #eef8ff;
+  --bg-paper: #f9fbff;
+  --text-brand-strong: #4338ca;
+  --text-brand-pill: #312e81;
+}
+
+.dark {
+  --bg-dark-1: #0b1022;
+  --bg-dark-2: #111a38;
+  --bg-dark-3: #12223f;
+  --bg-dark-4: #0f172a;
+  --bg-dark-pill-1: #1e1b4b;
+  --bg-dark-pill-2: #1e3a8a;
+  --text-brand-dark: #a78bfa;
+  --text-brand-dark-soft: #93c5fd;
+}
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -19,16 +43,16 @@ body {
 .agri-page-bg {
   background: linear-gradient(
     165deg,
-    #f8f5ff 0%,
-    #f1f5ff 35%,
-    #eef8ff 70%,
-    #f9fbff 100%
+    var(--bg-violet-soft) 0%,
+    var(--bg-indigo-soft) 35%,
+    var(--bg-blue-soft) 70%,
+    var(--bg-paper) 100%
   );
 }
 
 /* „Nexus“ — Canva-like brand blend (violet -> blue -> cyan) */
 .brand-nexus-gold {
-  background: linear-gradient(120deg, #7c3aed 0%, #4f46e5 45%, #06b6d4 100%);
+  background: linear-gradient(120deg, var(--brand-violet) 0%, var(--brand-indigo) 45%, var(--brand-cyan) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -39,17 +63,17 @@ body {
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
-  color: #a78bfa;
-  -webkit-text-fill-color: #a78bfa;
+  color: var(--text-brand-dark);
+  -webkit-text-fill-color: var(--text-brand-dark);
 }
 
 .brand-law-suffix {
   font-weight: 800;
   letter-spacing: 0.03em;
-  color: #4338ca;
+  color: var(--text-brand-strong);
 }
 .dark .brand-law-suffix {
-  color: #93c5fd;
+  color: var(--text-brand-dark-soft);
 }
 
 /* Първи ред на hero — ясен контраст върху светъл/тъмен градиент */
@@ -84,13 +108,36 @@ body {
 }
 
 .premium-cta {
-  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 48%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-indigo) 48%, var(--brand-blue) 100%);
   color: #fff;
   box-shadow: 0 10px 28px rgba(79, 70, 229, 0.35);
 }
 
 .premium-cta:hover {
   filter: brightness(1.06);
+}
+
+/* Reusable brand tokens for page-level components */
+.brand-cta-bg {
+  background: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-indigo) 55%, var(--brand-blue) 100%);
+}
+
+.brand-soft-surface {
+  border-color: color-mix(in srgb, var(--brand-indigo) 22%, white);
+  background-color: color-mix(in srgb, var(--bg-paper) 92%, white);
+}
+
+.brand-soft-input {
+  border-color: color-mix(in srgb, var(--brand-indigo) 30%, white);
+  background-color: color-mix(in srgb, var(--bg-indigo-soft) 75%, white);
+}
+
+.brand-link {
+  color: var(--text-brand-strong);
+}
+
+.dark .brand-link {
+  color: var(--text-brand-dark-soft);
 }
 
 .premium-card {
@@ -134,7 +181,7 @@ body {
 
 /* Име „gold-dot“ за съвместимост — визуално teal акцент */
 .gold-dot {
-  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-blue) 100%);
 }
 
 @keyframes card-shine {
@@ -185,10 +232,10 @@ body {
 .dark .agri-page-bg {
   background: linear-gradient(
     165deg,
-    #0b1022 0%,
-    #111a38 36%,
-    #12223f 68%,
-    #0f172a 100%
+    var(--bg-dark-1) 0%,
+    var(--bg-dark-2) 36%,
+    var(--bg-dark-3) 68%,
+    var(--bg-dark-4) 100%
   );
 }
 
@@ -205,12 +252,12 @@ body {
 
 .dark .premium-pill {
   border: 1px solid rgba(129, 140, 248, 0.24);
-  background: linear-gradient(135deg, #1e1b4b 0%, #1e3a8a 42%, #0e7490 100%);
+  background: linear-gradient(135deg, var(--bg-dark-pill-1) 0%, var(--bg-dark-pill-2) 42%, #0e7490 100%);
   color: #e0e7ff;
 }
 
 .dark .premium-cta {
-  background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 45%, #2563eb 100%);
+  background: linear-gradient(135deg, #6d28d9 0%, var(--brand-indigo) 45%, var(--brand-blue) 100%);
   color: #f8fafc;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(45, 212, 191, 0.12);
 }

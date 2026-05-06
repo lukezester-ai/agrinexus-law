@@ -305,12 +305,12 @@ export default function SearchPage() {
         )}
 
         {engineHint && !searchError && (
-          <div className="mb-4 rounded-xl border border-teal-300 dark:border-teal-800 bg-teal-50/90 dark:bg-teal-950/50 px-4 py-3 text-sm text-teal-950 dark:text-teal-100">
+          <div className="mb-4 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-indigo-50/90 dark:bg-indigo-950/50 px-4 py-3 text-sm text-indigo-950 dark:text-indigo-100">
             {engineHint}
           </div>
         )}
 
-        <div className="bg-white dark:bg-stone-900/95 rounded-2xl border border-teal-100/70 dark:border-teal-900/40 shadow-soft p-6 mb-6">
+        <div className="brand-soft-surface rounded-2xl border shadow-soft p-6 mb-6 dark:border-indigo-900/40 dark:bg-stone-900/95">
           <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             <div className="flex gap-2 mb-4">
               <div className="flex-1 relative">
@@ -325,8 +325,7 @@ export default function SearchPage() {
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 text-white rounded-lg text-sm font-medium transition shadow-sm hover:brightness-105"
-                style={{ background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 55%, #2563eb 100%)" }}
+                className="brand-cta-bg px-6 py-3 text-white rounded-lg text-sm font-medium transition shadow-sm hover:brightness-105"
               >
                 Търси
               </button>
@@ -581,14 +580,14 @@ export default function SearchPage() {
                           Източник: {doc.source}
                         </p>
                         <div className="mt-1 flex items-center gap-3">
-                          <Link href={`/doc/${doc.id}`} className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-300">
+                          <Link href={`/doc/${doc.id}`} className="brand-link inline-flex items-center gap-1 text-xs">
                             Отвори документа
                           </Link>
                           <a
                             href={getKnowledgeSourceUrl(doc)}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-300"
+                            className="brand-link inline-flex items-center gap-1 text-xs"
                           >
                             Отвори оригинала <ExternalLink size={12} />
                           </a>
