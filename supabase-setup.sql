@@ -159,3 +159,61 @@ CREATE POLICY "farmer_docs_storage_update"
     bucket_id = 'farmer-docs'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ─── Публичен архив на нормативни документи (ingest pipeline) ───
+
+CREATE TABLE IF NOT EXISTS public_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  institution TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Нормативни актове',
+  doc_type TEXT NOT NULL DEFAULT 'regulation',
+  status TEXT NOT NULL DEFAULT 'active',
+  source_url TEXT NOT NULL UNIQUE,
+  storage_path TEXT NOT NULL,
+  content_hash TEXT NOT NULL,
+  effective_date DATE,
+  last_synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_public_documents_institution ON public_documents(institution);
+CREATE INDEX IF NOT EXISTS idx_public_documents_effective_date ON public_documents(effective_date DESC);
+CREATE INDEX IF NOT EXISTS idx_public_documents_last_synced ON public_documents(last_synced_at DESC);
+CREATE INDEX IF NOT EXISTS idx_public_documents_hash ON public_documents(content_hash);
+
+CREATE TABLE IF NOT EXISTS ingest_runs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  source_name TEXT NOT NULL,
+  status TEXT NOT NULL,
+  fetched_count INTEGER NOT NULL DEFAULT 0,
+  stored_count INTEGER NOT NULL DEFAULT 0,
+  error_message TEXT,
+  started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  finished_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_ingest_runs_started ON ingest_runs(started_at DESC);
+
+ALTER TABLE public_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ingest_runs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access public_documents" ON public_documents;
+CREATE POLICY "Service role full access public_documents"
+  ON public_documents FOR ALL
+  USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Service role full access ingest_runs" ON ingest_runs;
+CREATE POLICY "Service role full access ingest_runs"
+  ON ingest_runs FOR ALL
+  USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Public read public_documents" ON public_documents;
+CREATE POLICY "Public read public_documents"
+  ON public_documents FOR SELECT
+  USING (true);
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('agro-docs', 'agro-docs', false)
+ON CONFLICT (id) DO NOTHING;

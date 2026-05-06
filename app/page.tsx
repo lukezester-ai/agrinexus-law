@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
@@ -31,6 +31,7 @@ const UPDATES = [
 ];
 
 export default function Home() {
+  const resultsSectionRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<KnowledgeDoc[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,6 +51,7 @@ export default function Home() {
   const onSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+    resultsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     setLoading(true);
     setError(null);
     setAiSummary("");
@@ -138,6 +140,54 @@ export default function Home() {
           {engine ? <p className="mt-3 text-xs text-stone-500 dark:text-stone-400">Search engine: <strong>{engine}</strong></p> : null}
         </section>
 
+        <section ref={resultsSectionRef} className="mb-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold">Резултати от AI търсене</h2>
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value as "all" | KnowledgeDoc["type"])} className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900">
+              <option value="all">Всички типове</option>
+              <option value="scheme">Схеми</option>
+              <option value="regulation">Нормативни актове</option>
+              <option value="procedure">Процедури</option>
+              <option value="deadline">Срокове</option>
+            </select>
+          </div>
+          {aiSummary ? (
+            <div className="mb-4 rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm dark:border-violet-900 dark:bg-violet-950/40">
+              <p className="font-medium text-violet-900 dark:text-violet-200">AI обобщение</p>
+              <p className="mt-1 text-violet-800 dark:text-violet-300">{aiSummary}</p>
+            </div>
+          ) : null}
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {!error && filteredResults.length === 0 ? (
+            <p className="text-sm text-stone-500 dark:text-stone-400">Няма резултати. Използвай търсачката по-горе за да получиш документи и резюме.</p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {filteredResults.map((doc) => (
+                <article key={doc.id} className="rounded-xl border border-stone-200 p-4 dark:border-stone-800">
+                  <p className="mb-1 text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">{doc.category} · {doc.type}</p>
+                  <h3 className="text-sm font-semibold">{doc.title}</h3>
+                  <p className="mt-2 line-clamp-3 text-sm text-stone-600 dark:text-stone-300">{doc.content}</p>
+                  <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">Източник: {doc.source} · {doc.effectiveDate}</p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <button type="button" onClick={() => setQuery(`Обясни накратко: ${doc.title}`)} className="rounded-md border border-stone-300 px-2 py-1 text-xs dark:border-stone-700">Попитай AI</button>
+                    <Link href={`/doc/${doc.id}`} className="rounded-md border border-stone-300 px-2 py-1 text-xs dark:border-stone-700">
+                      Отвори
+                    </Link>
+                    <a
+                      href={getKnowledgeSourceUrl(doc)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-300"
+                    >
+                      Оригинал <ExternalLink size={12} />
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
         <section className="mb-8">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Категории</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -170,51 +220,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="mb-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold">Резултати от AI търсене</h2>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value as "all" | KnowledgeDoc["type"])} className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900">
-              <option value="all">Всички типове</option>
-              <option value="scheme">Схеми</option>
-              <option value="regulation">Нормативни актове</option>
-              <option value="procedure">Процедури</option>
-              <option value="deadline">Срокове</option>
-            </select>
-          </div>
-          {aiSummary ? (
-            <div className="mb-4 rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm dark:border-violet-900 dark:bg-violet-950/40">
-              <p className="font-medium text-violet-900 dark:text-violet-200">AI обобщение</p>
-              <p className="mt-1 text-violet-800 dark:text-violet-300">{aiSummary}</p>
-            </div>
-          ) : null}
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-          {!error && filteredResults.length === 0 ? (
-            <p className="text-sm text-stone-500 dark:text-stone-400">Няма резултати. Използвай търсачката по-горе за да получиш документи и резюме.</p>
-          ) : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {filteredResults.map((doc) => (
-                <article key={doc.id} className="rounded-xl border border-stone-200 p-4 dark:border-stone-800">
-                  <p className="mb-1 text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">{doc.category} · {doc.type}</p>
-                  <h3 className="text-sm font-semibold">{doc.title}</h3>
-                  <p className="mt-2 line-clamp-3 text-sm text-stone-600 dark:text-stone-300">{doc.content}</p>
-                  <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">Източник: {doc.source} · {doc.effectiveDate}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <button type="button" onClick={() => setQuery(`Обясни накратко: ${doc.title}`)} className="rounded-md border border-stone-300 px-2 py-1 text-xs dark:border-stone-700">Попитай AI</button>
-                    <a
-                      href={getKnowledgeSourceUrl(doc)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-300"
-                    >
-                      Оригинал <ExternalLink size={12} />
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
         </section>
 
         <section className="mb-10 rounded-2xl bg-emerald-700 px-5 py-7 text-white sm:px-8">

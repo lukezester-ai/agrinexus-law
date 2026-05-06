@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Search } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/dfz-knowledge";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
+import { getDocumentStatus } from "@/lib/knowledge/document-detail";
 
 const CATEGORIES = [
   { id: "all", label: "Всички" },
@@ -25,6 +26,45 @@ const SUGGESTED_QUERIES = [
   "Подаване през ИСАК"
 ];
 
+const CULTURE_FILTERS = [
+  { id: "all", label: "Всички култури" },
+  { id: "zarneno-jitni", label: "Зърнено-житни" },
+  { id: "bobovi", label: "Бобови" },
+  { id: "maslodaini", label: "Маслодайни" },
+  { id: "zelenchuci", label: "Зеленчуци" },
+  { id: "ovoshtni", label: "Овощни" },
+];
+
+const REGION_FILTERS = [
+  { id: "all", label: "Всички региони" },
+  { id: "severoiztok", label: "Североизток" },
+  { id: "severozapad", label: "Северозапад" },
+  { id: "yugoiztok", label: "Югоизток" },
+  { id: "yugozapad", label: "Югозапад" },
+];
+
+const ISSUER_FILTERS = [
+  { id: "all", label: "Всички издатели" },
+  { id: "dfz", label: "ДФЗ" },
+  { id: "mzh", label: "МЗХ" },
+  { id: "eurlex", label: "EUR-Lex" },
+  { id: "babh", label: "БАБХ" },
+];
+
+const DOC_TYPE_FILTERS = [
+  { id: "all", label: "Всички" },
+  { id: "scheme", label: "Схема" },
+  { id: "regulation", label: "Нормативен акт" },
+  { id: "procedure", label: "Процедура" },
+  { id: "deadline", label: "Срок" },
+] as const;
+
+const DOC_STATUS_FILTERS = [
+  { id: "all", label: "Всички" },
+  { id: "active", label: "Актуален" },
+  { id: "cancelled", label: "Отменен" },
+] as const;
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -34,9 +74,123 @@ export default function SearchPage() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [engineHint, setEngineHint] = useState<string | null>(null);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [cultureFilter, setCultureFilter] = useState("all");
+  const [regionFilter, setRegionFilter] = useState("all");
+  const [issuerFilter, setIssuerFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"relevance" | "date_desc" | "date_asc">("relevance");
   /** Един разгънат резултат; без нативни <details> — браузърът често запазва „open“ между прерисовки. */
   const [openDetailId, setOpenDetailId] = useState<string | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
+
+  const inferCulture = (doc: KnowledgeDoc) => {
+    const text = `${doc.title} ${doc.content} ${doc.keywords.join(" ")}`.toLowerCase();
+    if (/пшениц|ечемик|царевиц|ръж|овес/.test(text)) return "zarneno-jitni";
+    if (/грах|нахут|леща|фасул|бобов/.test(text)) return "bobovi";
+    if (/слънчоглед|рапица|маслод/.test(text)) return "maslodaini";
+    if (/зеленчук|домати|пипер|краставиц/.test(text)) return "zelenchuci";
+    if (/овощ|лозя|лозе|трайни насаждения|плод/.test(text)) return "ovoshtni";
+    return "all";
+  };
+
+  const inferRegion = (doc: KnowledgeDoc) => {
+    const text = `${doc.title} ${doc.content}`.toLowerCase();
+    if (/добрич|варна|шумен/.test(text)) return "severoiztok";
+    if (/видин|враца|плевен|монтана/.test(text)) return "severozapad";
+    if (/бургас|сливен|ямбол/.test(text)) return "yugoiztok";
+    if (/софия|благоевград|перник|кюстендил/.test(text)) return "yugozapad";
+    return "all";
+  };
+
+  const inferIssuer = (doc: KnowledgeDoc) => {
+    const src = doc.source.toLowerCase();
+    if (src.includes("дфз")) return "dfz";
+    if (src.includes("мзх")) return "mzh";
+    if (src.includes("eur") || src.includes("lex") || src.includes("регламент (ес)")) return "eurlex";
+    if (src.includes("бабх")) return "babh";
+    return "all";
+  };
+
+  const resultYears = useMemo(
+    () =>
+      Array.from(new Set(results.map((r) => r.effectiveDate.slice(0, 4))))
+        .filter((x) => /^\d{4}$/.test(x))
+        .sort((a, b) => b.localeCompare(a)),
+    [results]
+  );
+
+  const filteredResults = useMemo(() => {
+    const prepared = results.map((doc, index) => ({
+      doc,
+      index,
+      culture: inferCulture(doc),
+      region: inferRegion(doc),
+      issuer: inferIssuer(doc),
+      status: getDocumentStatus(doc),
+    }));
+
+    const filtered = prepared
+      .filter((x) => (cultureFilter === "all" ? true : x.culture === cultureFilter))
+      .filter((x) => (regionFilter === "all" ? true : x.region === regionFilter))
+      .filter((x) => (issuerFilter === "all" ? true : x.issuer === issuerFilter))
+      .filter((x) => (yearFilter === "all" ? true : x.doc.effectiveDate.startsWith(yearFilter)))
+      .filter((x) => (typeFilter === "all" ? true : x.doc.type === typeFilter))
+      .filter((x) => (statusFilter === "all" ? true : x.status === statusFilter));
+
+    filtered.sort((a, b) => {
+      if (sortBy === "date_desc") return b.doc.effectiveDate.localeCompare(a.doc.effectiveDate);
+      if (sortBy === "date_asc") return a.doc.effectiveDate.localeCompare(b.doc.effectiveDate);
+      // Relevance keeps API ranking order stable.
+      return a.index - b.index;
+    });
+
+    return filtered.map((x) => x.doc);
+  }, [results, cultureFilter, regionFilter, issuerFilter, yearFilter, typeFilter, statusFilter, sortBy]);
+
+  const countBy = useMemo(() => {
+    const counts = {
+      culture: new Map<string, number>(),
+      region: new Map<string, number>(),
+      issuer: new Map<string, number>(),
+      year: new Map<string, number>(),
+      type: new Map<string, number>(),
+      status: new Map<string, number>(),
+    };
+
+    const inc = (map: Map<string, number>, key: string) => {
+      map.set(key, (map.get(key) ?? 0) + 1);
+    };
+
+    for (const doc of results) {
+      inc(counts.culture, inferCulture(doc));
+      inc(counts.region, inferRegion(doc));
+      inc(counts.issuer, inferIssuer(doc));
+      inc(counts.year, doc.effectiveDate.slice(0, 4));
+      inc(counts.type, doc.type);
+      inc(counts.status, getDocumentStatus(doc));
+    }
+    return counts;
+  }, [results]);
+
+  const activeFilterCount =
+    (cultureFilter !== "all" ? 1 : 0) +
+    (regionFilter !== "all" ? 1 : 0) +
+    (issuerFilter !== "all" ? 1 : 0) +
+    (yearFilter !== "all" ? 1 : 0) +
+    (typeFilter !== "all" ? 1 : 0) +
+    (statusFilter !== "all" ? 1 : 0);
+
+  const resetFilters = () => {
+    setCultureFilter("all");
+    setRegionFilter("all");
+    setIssuerFilter("all");
+    setYearFilter("all");
+    setTypeFilter("all");
+    setStatusFilter("all");
+    setSortBy("relevance");
+  };
 
   const handleSearch = useCallback(async (searchQuery?: string) => {
     const q = searchQuery || query;
@@ -243,8 +397,130 @@ export default function SearchPage() {
         )}
 
         {!loading && results.length > 0 && (
-          <div>
-            <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Намерени {results.length} резултата</p>
+          <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+            <aside className="h-fit rounded-2xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900/95">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">Филтри</p>
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-[11px] text-stone-500 underline underline-offset-2 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+                >
+                  Нулирай
+                </button>
+              </div>
+              {activeFilterCount > 0 ? (
+                <p className="mb-3 text-[11px] text-emerald-700 dark:text-emerald-300">
+                  Активни филтри: {activeFilterCount}
+                </p>
+              ) : null}
+              <div className="space-y-3">
+                <label className="block text-xs">
+                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Култура</span>
+                  <select value={cultureFilter} onChange={(e) => setCultureFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                    {CULTURE_FILTERS.map((x) => (
+                      (() => {
+                        const count = x.id === "all" ? results.length : (countBy.culture.get(x.id) ?? 0);
+                        return (
+                      <option key={x.id} value={x.id}>
+                        {`${x.label} (${count})`}
+                      </option>
+                        );
+                      })()
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-xs">
+                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Регион</span>
+                  <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                    {REGION_FILTERS.map((x) => (
+                      (() => {
+                        const count = x.id === "all" ? results.length : (countBy.region.get(x.id) ?? 0);
+                        return (
+                          <option key={x.id} value={x.id} disabled={x.id !== "all" && count === 0}>
+                            {`${x.label} (${count})`}
+                          </option>
+                        );
+                      })()
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-xs">
+                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Година</span>
+                  <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                    <option value="all">Всички години ({results.length})</option>
+                    {resultYears.map((year) => (
+                      (() => {
+                        const count = countBy.year.get(year) ?? 0;
+                        return (
+                          <option key={year} value={year} disabled={count === 0}>
+                            {year} ({count})
+                          </option>
+                        );
+                      })()
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-xs">
+                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Издател</span>
+                  <select value={issuerFilter} onChange={(e) => setIssuerFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                    {ISSUER_FILTERS.map((x) => (
+                      (() => {
+                        const count = x.id === "all" ? results.length : (countBy.issuer.get(x.id) ?? 0);
+                        return (
+                          <option key={x.id} value={x.id} disabled={x.id !== "all" && count === 0}>
+                            {`${x.label} (${count})`}
+                          </option>
+                        );
+                      })()
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-xs">
+                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Тип документ</span>
+                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                    {DOC_TYPE_FILTERS.map((x) => (
+                      (() => {
+                        const count = x.id === "all" ? results.length : (countBy.type.get(x.id) ?? 0);
+                        return (
+                          <option key={x.id} value={x.id} disabled={x.id !== "all" && count === 0}>
+                            {`${x.label} (${count})`}
+                          </option>
+                        );
+                      })()
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-xs">
+                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Статус</span>
+                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                    {DOC_STATUS_FILTERS.map((x) => (
+                      (() => {
+                        const count = x.id === "all" ? results.length : (countBy.status.get(x.id) ?? 0);
+                        return (
+                          <option key={x.id} value={x.id} disabled={x.id !== "all" && count === 0}>
+                            {`${x.label} (${count})`}
+                          </option>
+                        );
+                      })()
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </aside>
+
+            <div>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm text-stone-600 dark:text-stone-400">Намерени {filteredResults.length} резултата</p>
+              <label className="text-xs text-stone-500 dark:text-stone-400">
+                Сортиране:{" "}
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as "relevance" | "date_desc" | "date_asc")} className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <option value="relevance">По релевантност</option>
+                  <option value="date_desc">Най-нови първо</option>
+                  <option value="date_asc">Най-стари първо</option>
+                </select>
+              </label>
+            </div>
             {aiSummary && (
               <div className="mb-5 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/90 dark:bg-sky-950/50 px-5 py-4 shadow-sm">
                 <p className="text-xs uppercase tracking-wide text-sky-800 dark:text-sky-300 mb-2 font-semibold">
@@ -253,8 +529,18 @@ export default function SearchPage() {
                 <p className="text-sm text-stone-800 dark:text-stone-200 leading-relaxed whitespace-pre-line">{aiSummary}</p>
               </div>
             )}
+            {!aiSummary && filteredResults.length > 0 ? (
+              <p className="mb-4 text-xs text-stone-500 dark:text-stone-400">
+                Няма AI обобщение за тази заявка — използвай „Отвори документа“ за детайли.
+              </p>
+            ) : null}
+            {filteredResults.length === 0 ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+                Няма съвпадения за избраните филтри. Пробвай с „Нулирай“.
+              </div>
+            ) : null}
             <div className="space-y-3">
-              {results.map((doc) => (
+              {filteredResults.map((doc) => (
                 <div key={doc.id} className="bg-white dark:bg-stone-900/95 rounded-xl border border-stone-200 dark:border-stone-700 p-5">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="flex-1">
@@ -294,19 +580,25 @@ export default function SearchPage() {
                         <p className="mt-3 text-xs text-stone-500 dark:text-stone-500">
                           Източник: {doc.source}
                         </p>
-                        <a
-                          href={getKnowledgeSourceUrl(doc)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-1 inline-flex items-center gap-1 text-xs text-[#0d9488] dark:text-teal-400"
-                        >
-                          Отвори оригинала <ExternalLink size={12} />
-                        </a>
+                        <div className="mt-1 flex items-center gap-3">
+                          <Link href={`/doc/${doc.id}`} className="inline-flex items-center gap-1 text-xs text-[#0d9488] dark:text-teal-400">
+                            Отвори документа
+                          </Link>
+                          <a
+                            href={getKnowledgeSourceUrl(doc)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-[#0d9488] dark:text-teal-400"
+                          >
+                            Отвори оригинала <ExternalLink size={12} />
+                          </a>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         )}
