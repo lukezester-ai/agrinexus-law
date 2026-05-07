@@ -43,7 +43,7 @@ const UPDATES = [
 
 export default function Home() {
   const resultsSectionRef = useRef<HTMLElement | null>(null);
-  const searchFormRef = useRef<HTMLFormElement | null>(null);
+  const searchFormRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<KnowledgeDoc[]>([]);
