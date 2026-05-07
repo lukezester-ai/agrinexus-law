@@ -6,7 +6,7 @@
 
 ### Функционалности
 - ✅ Landing page с тримата персонажа (Елена, Борис, Виктория)
-- ✅ AI чат бот с Claude Opus 4.7
+- ✅ AI чат бот с OpenAI (по подразбиране gpt-4o-mini)
 - ✅ ДФЗ knowledge база с 12+ структурирани документа
 - ✅ RAG-light: всеки въпрос търси релевантни документи и ги дава като контекст
 - ✅ Профил на стопанството с персонализирани отговори
@@ -21,7 +21,7 @@
 
 ### Технологии
 - Next.js 15 + TypeScript + Tailwind
-- Anthropic Claude API
+- OpenAI API
 - Supabase (PostgreSQL)
 - Resend (имейли)
 - Upstash Redis (rate limiting)
@@ -33,15 +33,15 @@
 
 Трябват ви акаунти в следните услуги. Всички имат безплатни планове за стартиране.
 
-### 1. Anthropic - за Claude API
+### 1. OpenAI - за AI chat API
 
-1. Отворете https://console.anthropic.com
+1. Отворете https://platform.openai.com
 2. Sign Up с имейл или Google акаунт
 3. Потвърдете имейла
 4. В лявото меню: API Keys → Create Key
 5. Дайте име "AgriNexus.Law" и натиснете Create
-6. **ВАЖНО:** копирайте ключа (sk-ant-api03-...) НЕЗАБАВНО - после няма да можете да го видите!
-7. Получавате $5 безплатен кредит за тестване (около 1000-2000 разговора)
+6. **ВАЖНО:** копирайте ключа (sk-...) НЕЗАБАВНО - после няма да можете да го видите!
+7. Получавате стартов кредит/лимит за тестване според вашия акаунт
 
 ### 2. Supabase - за базата данни
 
@@ -126,7 +126,7 @@ npm run dev
 Тествайте следното:
 - [ ] Главната страница се зарежда
 - [ ] Можете да превключвате между Елена, Борис и Виктория
-- [ ] Чат бот отговаря (с истински Claude API)
+- [ ] Чат бот отговаря (с реален OpenAI API)
 - [ ] Профил страницата записва данни
 - [ ] Търсачка показва резултати
 - [ ] Waitlist форма работи (проверете в Supabase)
@@ -164,7 +164,8 @@ git push -u origin main
 3. Изберете GitHub repo `agrinexus`
 4. Framework Preset: Next.js (автоматично разпознато)
 5. **ВАЖНО:** В Environment Variables секцията добавете ВСИЧКИ променливи от вашия `.env.local`:
-   - ANTHROPIC_API_KEY
+   - OPENAI_API_KEY
+   - OPENAI_MODEL (напр. gpt-4o-mini)
    - NEXT_PUBLIC_SUPABASE_URL
    - NEXT_PUBLIC_SUPABASE_ANON_KEY
    - SUPABASE_SERVICE_ROLE_KEY
@@ -230,8 +231,8 @@ git push -u origin main
 - Изчистете cache: `npm cache clean --force` и опитайте пак
 
 ### Чат ботът дава 500 грешка
-- Проверете дали ANTHROPIC_API_KEY е правилен
-- Проверете дали имате кредит в Anthropic Console
+- Проверете дали OPENAI_API_KEY е правилен
+- Проверете дали имате активен OpenAI billing/credits
 - Вижте Vercel logs за конкретна грешка
 
 ### Waitlist не записва
@@ -250,7 +251,7 @@ git push -u origin main
 
 - Vercel Hobby: $0
 - Supabase Free: $0
-- Anthropic API: ~$30-100 (зависи от трафика)
+- OpenAI API: ~$30-100 (зависи от трафика и модела)
 - Resend Free: $0 (до 3000 имейла/месец)
 - Upstash Free: $0
 - Домейн: ~$25 (еднократно за година)

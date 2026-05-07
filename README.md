@@ -5,7 +5,7 @@
 ## Бърз старт
 
 1. Прочетете `DEPLOYMENT-GUIDE.md` за подробни инструкции
-2. Регистрирайте се в Anthropic, Supabase, Resend (всички безплатни)
+2. Регистрирайте се в OpenAI, Supabase, Resend (всички с безплатен старт)
 3. Изпълнете `supabase-setup.sql` в Supabase SQL Editor
 4. `npm install` и `npm run dev`
 5. Push в GitHub, deploy на Vercel
@@ -52,7 +52,7 @@ agrinexus-mvp/
 
 - Next.js 15 + React 19 + TypeScript
 - Tailwind CSS
-- Anthropic Claude Opus 4.7
+- OpenAI (по подразбиране: gpt-4o-mini)
 - Supabase PostgreSQL
 - Resend Email
 - Upstash Redis

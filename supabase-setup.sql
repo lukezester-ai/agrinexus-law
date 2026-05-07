@@ -217,3 +217,31 @@ CREATE POLICY "Public read public_documents"
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('agro-docs', 'agro-docs', false)
 ON CONFLICT (id) DO NOTHING;
+
+-- ─── Самообучение от чат обратна връзка ───
+CREATE TABLE IF NOT EXISTS knowledge_learned_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  source_chat_log_id UUID UNIQUE REFERENCES chat_logs(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Практически насоки',
+  type TEXT NOT NULL DEFAULT 'learned_rule',
+  content TEXT NOT NULL,
+  keywords TEXT[] NOT NULL DEFAULT '{}',
+  source TEXT NOT NULL DEFAULT 'User feedback loop',
+  effective_date DATE DEFAULT CURRENT_DATE,
+  quality_score NUMERIC(4,2) NOT NULL DEFAULT 1.0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_knowledge_learned_items_active ON knowledge_learned_items(is_active);
+CREATE INDEX IF NOT EXISTS idx_knowledge_learned_items_category ON knowledge_learned_items(category);
+CREATE INDEX IF NOT EXISTS idx_knowledge_learned_items_created ON knowledge_learned_items(created_at DESC);
+
+ALTER TABLE knowledge_learned_items ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access knowledge_learned_items" ON knowledge_learned_items;
+CREATE POLICY "Service role full access knowledge_learned_items"
+  ON knowledge_learned_items FOR ALL
+  USING (auth.role() = 'service_role');

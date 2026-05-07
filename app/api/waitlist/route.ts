@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { waitlistRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
+import { mkdir, appendFile } from "node:fs/promises";
+import { resolve } from "node:path";
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -8,6 +10,29 @@ const resend = process.env.RESEND_API_KEY
 
 const RESEND_FROM =
   process.env.RESEND_FROM?.trim() || "AgriNexus.Law <onboarding@resend.dev>";
+
+async function storeWaitlistFallback(payload: {
+  email: string;
+  farm_type?: string | null;
+  farm_size?: number | null;
+  region?: string | null;
+  ip_address: string;
+}) {
+  try {
+    const dir = resolve(process.cwd(), ".local");
+    const file = resolve(dir, "waitlist-fallback.jsonl");
+    await mkdir(dir, { recursive: true });
+    await appendFile(
+      file,
+      `${JSON.stringify({ ...payload, stored_at: new Date().toISOString() })}\n`,
+      "utf-8"
+    );
+    return true;
+  } catch (e) {
+    console.error("Fallback waitlist store failed:", e);
+    return false;
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -30,51 +55,64 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-      return Response.json(
-        {
-          error:
-            "Регистрацията не е активна: липсва настройка на Supabase на сървъра.",
-        },
-        { status: 503 },
-      );
-    }
-
-    const { data: existing } = await supabaseAdmin
-      .from("waitlist")
-      .select("email")
-      .eq("email", email.toLowerCase())
-      .maybeSingle();
-
-    if (existing) {
-      return Response.json({
-        success: true,
-        message: "Вече си в списъка! Ще се чуем скоро.",
-      });
-    }
-
-    const { error: dbError } = await supabaseAdmin.from("waitlist").insert({
-      email: email.toLowerCase(),
+    const normalizedEmail = email.toLowerCase().trim();
+    const row = {
+      email: normalizedEmail,
       farm_type: farm_type || null,
       farm_size: farm_size || null,
       region: region || null,
       ip_address: ip,
-    });
+    };
 
-    if (dbError) {
-      console.error("Supabase insert error:", dbError);
-      return Response.json(
-        { error: "Не успяхме да запишем регистрацията. Опитай пак по-късно." },
-        { status: 500 },
-      );
+    const supabaseAdmin = getSupabaseAdmin();
+    let persisted = false;
+
+    if (supabaseAdmin) {
+      const existingRes = await supabaseAdmin
+        .from("waitlist")
+        .select("email")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+
+      if (existingRes.error) {
+        console.error("Supabase existing-check error:", existingRes.error);
+      } else if (existingRes.data) {
+        return Response.json({
+          success: true,
+          message: "Вече си в списъка! Ще се чуем скоро.",
+        });
+      }
+
+      const { error: dbError } = await supabaseAdmin.from("waitlist").insert(row);
+      if (!dbError) {
+        persisted = true;
+      } else {
+        // Unique violation -> treat as already registered success.
+        if ((dbError as { code?: string }).code === "23505") {
+          return Response.json({
+            success: true,
+            message: "Вече си в списъка! Ще се чуем скоро.",
+          });
+        }
+        console.error("Supabase insert error:", dbError);
+      }
+    }
+
+    if (!persisted) {
+      const fallbackStored = await storeWaitlistFallback(row);
+      if (!fallbackStored) {
+        return Response.json(
+          { error: "Не успяхме да запишем регистрацията. Опитай пак по-късно." },
+          { status: 500 },
+        );
+      }
     }
 
     if (resend) {
       try {
         await resend.emails.send({
           from: RESEND_FROM,
-          to: email,
+          to: normalizedEmail,
           subject: "Добре дошъл в AgriNexus.Law! 🌾",
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 580px; margin: 0 auto; padding: 20px;">
@@ -115,9 +153,11 @@ export async function POST(req: Request) {
       }
     }
 
-    return Response.json({ 
+    return Response.json({
       success: true,
-      message: "Регистрацията е успешна!"
+      message: persisted
+        ? "Регистрацията е успешна!"
+        : "Регистрацията е приета. Ще потвърдим при следваща синхронизация.",
     });
   } catch (error) {
     console.error("Waitlist error:", error);

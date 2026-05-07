@@ -7,6 +7,7 @@ import { getKnowledgeContext } from "@/lib/knowledge/dfz-knowledge";
 import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { normalizeChatMessages } from "@/lib/anthropic-messages";
+import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
 		let responseText: string;
 		let replySource: "internal_kb" | "openai" = "openai";
 		let model: string | undefined;
+    let chatLogId: string | null = null;
 
 		if (!internalAttempt.useOpenAI) {
 			responseText = internalAttempt.reply;
@@ -66,12 +68,14 @@ export async function POST(req: Request) {
 			}
 
 			const knowledgeContext = getKnowledgeContext(userQuery);
+      const learnedKnowledgeContext = await getLearnedKnowledgeContext(userQuery);
+      const combinedKnowledgeContext = [knowledgeContext, learnedKnowledgeContext].filter(Boolean).join("\n\n");
 
 			const profileText = resolvedFarmProfile
 				? farmProfileToPromptText(resolvedFarmProfile)
 				: undefined;
 
-			const systemPrompt = buildSystemPrompt(character, knowledgeContext, profileText);
+			const systemPrompt = buildSystemPrompt(character, combinedKnowledgeContext, profileText);
 			model = process.env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
 
 			const openai = new OpenAI({ apiKey });
@@ -93,7 +97,7 @@ export async function POST(req: Request) {
 		const supabaseAdmin = getSupabaseAdmin();
 		if (supabaseAdmin) {
 			try {
-				await supabaseAdmin.from("chat_logs").insert({
+				const inserted = await supabaseAdmin.from("chat_logs").insert({
 					character_id: characterId,
 					user_message: userQuery,
 					assistant_message: responseText,
@@ -101,7 +105,8 @@ export async function POST(req: Request) {
 					user_profile: resolvedFarmProfile
 						? { ...resolvedFarmProfile, _source: farmProfileSource }
 						: null,
-				});
+				}).select("id").single();
+        chatLogId = (inserted.data?.id as string | undefined) ?? null;
 			} catch (err) {
 				console.error("Failed to log chat:", err);
 			}
@@ -113,6 +118,7 @@ export async function POST(req: Request) {
 			remaining: rateLimitResult.remaining,
 			model: model ?? "internal-knowledge-base",
 			replySource,
+      chatLogId,
 		});
 	} catch (error) {
 		console.error("Chat API error:", error);

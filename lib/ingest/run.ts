@@ -4,6 +4,9 @@ import { discoverFilesFromIndex } from "@/lib/ingest/crawler";
 import { INGEST_SOURCES } from "@/lib/ingest/sources";
 import type { IngestResult, IngestSource } from "@/lib/ingest/types";
 
+const DOWNLOAD_TIMEOUT_MS = Math.max(3000, Number.parseInt(process.env.INGEST_DOWNLOAD_TIMEOUT_MS || "15000", 10));
+const MAX_FILE_BYTES = Math.max(64 * 1024, Number.parseInt(process.env.INGEST_MAX_FILE_BYTES || "15728640", 10));
+
 function safeSlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
@@ -11,6 +14,40 @@ function safeSlug(text: string): string {
 function detectEffectiveDateFromTitle(title: string): string | null {
   const year = title.match(/\b(20\d{2})\b/)?.[1];
   return year ? `${year}-01-01` : null;
+}
+
+async function readBodyWithLimit(resp: Response, maxBytes: number): Promise<Uint8Array> {
+  const lenHeader = resp.headers.get("content-length");
+  if (lenHeader) {
+    const declared = Number.parseInt(lenHeader, 10);
+    if (Number.isFinite(declared) && declared > maxBytes) {
+      throw new Error(`file too large (${declared} > ${maxBytes})`);
+    }
+  }
+
+  const body = resp.body;
+  if (!body) return new Uint8Array(await resp.arrayBuffer());
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error(`file too large (${total} > ${maxBytes})`);
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
 }
 
 async function runForSource(source: IngestSource, limit: number): Promise<IngestResult> {
@@ -34,9 +71,15 @@ async function runForSource(source: IngestSource, limit: number): Promise<Ingest
 
     for (const file of files) {
       try {
-        const resp = await fetch(file.fileUrl, { cache: "no-store" });
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort("timeout"), DOWNLOAD_TIMEOUT_MS);
+        const resp = await fetch(file.fileUrl, {
+          cache: "no-store",
+          signal: ctrl.signal,
+          headers: { "User-Agent": "AgriNexusBot/1.0 (+document-sync)" },
+        }).finally(() => clearTimeout(timer));
         if (!resp.ok) throw new Error(`download failed (${resp.status})`);
-        const bytes = new Uint8Array(await resp.arrayBuffer());
+        const bytes = await readBodyWithLimit(resp, MAX_FILE_BYTES);
         const hash = createHash("sha256").update(bytes).digest("hex");
         const ext = file.fileUrl.split(".").pop()?.split("?")[0]?.toLowerCase() || "bin";
         const year = new Date().getFullYear();

@@ -2,6 +2,7 @@ import {
   summarizeKnowledgeQuery,
   type KnowledgeDoc,
 } from "@/lib/knowledge/dfz-knowledge";
+import { searchLearnedKnowledge } from "@/lib/knowledge/learned-knowledge";
 import { mergeKnowledgeSearchResults } from "@/lib/knowledge/merged-search";
 import { isMeiliConfigured, searchWithMeili } from "@/lib/meilisearch";
 import { searchRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
@@ -35,8 +36,14 @@ export async function POST(req: Request) {
         console.error("Meilisearch fallback to internal-ai:", meiliErr);
       }
     }
+    const learnedSlice = await searchLearnedKnowledge(q, category);
 
     let results = mergeKnowledgeSearchResults(q, meiliSlice);
+    if (learnedSlice.length) {
+      const mergedById = new Map<string, KnowledgeDoc>();
+      for (const doc of [...learnedSlice, ...results]) mergedById.set(doc.id, doc);
+      results = Array.from(mergedById.values());
+    }
 
     if (category && category !== "all") {
       results = results.filter((doc) => doc.category === category);

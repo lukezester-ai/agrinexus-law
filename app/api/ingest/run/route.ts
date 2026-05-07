@@ -23,8 +23,9 @@ export async function POST(req: Request) {
     });
     return Response.json({ ok: true, results });
   } catch (error) {
+    console.error("[ingest/run] failed:", error);
     return Response.json(
-      { error: error instanceof Error ? error.message : String(error) },
+      { error: "Ingest run failed. Check server logs for details." },
       { status: 500 }
     );
   }

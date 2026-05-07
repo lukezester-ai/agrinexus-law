@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout } from "lucide-react";
+import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 
@@ -11,6 +11,17 @@ type SearchResponse = {
   engine?: "meili+internal" | "internal-ai";
   aiSummary?: string;
   error?: string;
+};
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  chatLogId?: string | null;
+};
+
+type FeedbackState = {
+  vote: 1 | -1;
+  status: "saving" | "saved" | "error";
 };
 
 const CATEGORY_CARDS = [
@@ -42,6 +53,12 @@ export default function Home() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistOk, setWaitlistOk] = useState(false);
   const [waitlistError, setWaitlistError] = useState<string | null>(null);
+  const [chatCharacter, setChatCharacter] = useState<"elena" | "boris" | "viktoria">("elena");
+  const [chatInput, setChatInput] = useState("");
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [feedbackByLogId, setFeedbackByLogId] = useState<Record<string, FeedbackState>>({});
 
   const filteredResults = useMemo(
     () => results.filter((doc) => (filterType === "all" ? true : doc.type === filterType)),
@@ -97,6 +114,59 @@ export default function Home() {
       setWaitlistEmail("");
     } catch {
       setWaitlistError("Мрежова грешка. Опитай пак.");
+    }
+  };
+
+  const sendChat = async (e: FormEvent) => {
+    e.preventDefault();
+    const text = chatInput.trim();
+    if (!text || chatBusy) return;
+    const nextMessages: ChatMessage[] = [...chatMessages, { role: "user", content: text }];
+    setChatMessages(nextMessages);
+    setChatInput("");
+    setChatBusy(true);
+    setChatError(null);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          characterId: chatCharacter,
+          messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { response?: string; error?: string; chatLogId?: string | null };
+      if (!res.ok || !data.response) {
+        throw new Error(data.error || "Грешка при чат заявка.");
+      }
+      setChatMessages((prev) => [...prev, { role: "assistant", content: data.response || "", chatLogId: data.chatLogId ?? null }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Грешка при чат заявка.";
+      setChatError(msg);
+    } finally {
+      setChatBusy(false);
+    }
+  };
+
+  const sendFeedback = async (chatLogId: string, feedback: 1 | -1) => {
+    if (!chatLogId) return;
+    setFeedbackByLogId((prev) => ({ ...prev, [chatLogId]: { vote: feedback, status: "saving" } }));
+    try {
+      const res = await fetch("/api/chat-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatLogId, feedback }),
+      });
+      if (!res.ok) throw new Error("feedback failed");
+      setFeedbackByLogId((prev) => ({ ...prev, [chatLogId]: { vote: feedback, status: "saved" } }));
+    } catch {
+      setFeedbackByLogId((prev) => {
+        const current = prev[chatLogId];
+        return {
+          ...prev,
+          [chatLogId]: { vote: current?.vote ?? feedback, status: "error" },
+        };
+      });
     }
   };
 
@@ -238,6 +308,88 @@ export default function Home() {
               <button type="submit" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-800">Абонирай ме</button>
             </form>
           )}
+        </section>
+
+        <section id="chat" className="mb-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold">Чат с екипа</h2>
+            <select
+              value={chatCharacter}
+              onChange={(e) => setChatCharacter(e.target.value as "elena" | "boris" | "viktoria")}
+              className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900"
+            >
+              <option value="elena">Елена (право/ДФЗ)</option>
+              <option value="boris">Борис (поле)</option>
+              <option value="viktoria">Виктория (финанси)</option>
+            </select>
+          </div>
+
+          <div className="mb-3 max-h-80 overflow-auto rounded-xl border border-stone-200 p-3 dark:border-stone-700">
+            {chatMessages.length === 0 ? (
+              <p className="text-xs text-stone-500 dark:text-stone-400">Задай въпрос и използвай 👍/👎 под отговора, за да се самообучава системата.</p>
+            ) : (
+              <div className="space-y-3">
+                {chatMessages.map((msg, idx) => (
+                  <div key={idx} className={`rounded-lg p-2 text-sm ${msg.role === "user" ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-stone-50 dark:bg-stone-800/60"}`}>
+                    <p className="mb-1 text-[11px] uppercase tracking-wide text-stone-500 dark:text-stone-400">{msg.role === "user" ? "Ти" : "Асистент"}</p>
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    {msg.role === "assistant" && msg.chatLogId ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        {(() => {
+                          const state = feedbackByLogId[msg.chatLogId];
+                          if (!state) return null;
+                          if (state.status === "saving") {
+                            return <span className="text-[11px] text-stone-500 dark:text-stone-400">Запазва се...</span>;
+                          }
+                          if (state.status === "saved") {
+                            return <span className="text-[11px] text-emerald-700 dark:text-emerald-300">✅ Feedback е записан</span>;
+                          }
+                          return <span className="text-[11px] text-red-600 dark:text-red-300">⚠️ Неуспешен запис</span>;
+                        })()}
+                        <button
+                          type="button"
+                          onClick={() => void sendFeedback(msg.chatLogId as string, 1)}
+                          disabled={feedbackByLogId[msg.chatLogId]?.status === "saving"}
+                          className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs disabled:opacity-60 ${
+                            feedbackByLogId[msg.chatLogId]?.vote === 1 ? "border-emerald-500 text-emerald-700 dark:text-emerald-300" : "border-stone-300 dark:border-stone-600"
+                          }`}
+                        >
+                          <ThumbsUp size={12} /> Полезно
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void sendFeedback(msg.chatLogId as string, -1)}
+                          disabled={feedbackByLogId[msg.chatLogId]?.status === "saving"}
+                          className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs disabled:opacity-60 ${
+                            feedbackByLogId[msg.chatLogId]?.vote === -1 ? "border-rose-500 text-rose-700 dark:text-rose-300" : "border-stone-300 dark:border-stone-600"
+                          }`}
+                        >
+                          <ThumbsDown size={12} /> Неточно
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {chatError ? <p className="mb-2 text-xs text-red-600">{chatError}</p> : null}
+          <form onSubmit={sendChat} className="flex gap-2">
+            <input
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Задай въпрос към избрания специалист..."
+              className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-stone-700 dark:bg-stone-900"
+            />
+            <button
+              type="submit"
+              disabled={chatBusy || !chatInput.trim()}
+              className="brand-cta-bg rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {chatBusy ? "..." : "Изпрати"}
+            </button>
+          </form>
         </section>
       </div>
     </div>

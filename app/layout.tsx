@@ -8,9 +8,16 @@ const themeInitScript = `(function(){try{var k='agrinexus-theme';var s=localStor
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://agrinexus.bg";
+const metadataBase = (() => {
+  try {
+    return new URL(siteUrl);
+  } catch {
+    return new URL("https://agrinexus.bg");
+  }
+})();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase,
   title: {
     default: "AgriNexus.Law — AI за фермери, ДФЗ и ОСП (България)",
     template: "%s · AgriNexus.Law",
