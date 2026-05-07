@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
 	Bar,
 	CartesianGrid,
@@ -56,6 +56,13 @@ const STRINGS: Record<
 		bullet1: string;
 		bullet2: string;
 		bullet3: string;
+		weather7dTitle: string;
+		weatherLoading: string;
+		weatherError: string;
+		dayLabel: string;
+		tempLabel: string;
+		rainLabel: string;
+		windLabel: string;
 	}
 > = {
 	bg: {
@@ -99,6 +106,13 @@ const STRINGS: Record<
 			"Сравненията спрямо средно и миналогодишно ти дават контекст вътре в демо серията — не заместват пазарен или климатичен анализ.",
 		bullet3:
 			"При смяна на културата виж как се променят текстовете за вода и регионални акценти под графиката.",
+		weather7dTitle: "7-дневна метео прогноза (безплатен Open-Meteo)",
+		weatherLoading: "Зареждам прогноза...",
+		weatherError: "Неуспешно зареждане на прогноза.",
+		dayLabel: "Ден",
+		tempLabel: "Темп. (°C)",
+		rainLabel: "Валеж (мм)",
+		windLabel: "Вятър (м/с)",
 	},
 	en: {
 		title: "Bulgaria crop production — 5-year view & outlook",
@@ -138,7 +152,31 @@ const STRINGS: Record<
 		bullet1: "Bars are illustrative volumes; the line is a mathematical trend, not an expert forecast.",
 		bullet2: "Benchmarks vs average / prior year are in-demo context only — not market or climate analysis.",
 		bullet3: "Switch crops to see irrigation hints change below the chart.",
+		weather7dTitle: "7-day weather outlook (free Open-Meteo)",
+		weatherLoading: "Loading forecast...",
+		weatherError: "Could not load forecast.",
+		dayLabel: "Day",
+		tempLabel: "Temp (°C)",
+		rainLabel: "Rain (mm)",
+		windLabel: "Wind (m/s)",
 	},
+};
+
+type ForecastDay = {
+	date: string;
+	tempMaxC: number;
+	tempMinC: number;
+	precipMm: number;
+	windMaxMs: number;
+};
+
+const CROP_COORDS: Record<CropKey, { lat: number; lon: number }> = {
+	wheat: { lat: 43.6, lon: 27.8 }, // Dobrudzha
+	sunflower: { lat: 43.2, lon: 26.9 },
+	corn: { lat: 42.4, lon: 25.6 }, // Upper Thrace
+	tomatoes: { lat: 42.15, lon: 24.75 }, // Plovdiv
+	grapes: { lat: 42.03, lon: 24.87 }, // Asenovgrad/Plovdiv
+	lavender: { lat: 43.28, lon: 26.94 }, // Shumen/Targovishte
 };
 
 function buildChartRows(profile: (typeof CROP_PROFILES)[number]) {
@@ -161,6 +199,9 @@ export function CropStatisticsView() {
 	const [lang, setLang] = useState<CropStatsLang>("bg");
 	const [cropKey, setCropKey] = useState<CropKey>("tomatoes");
 	const tr = STRINGS[lang];
+	const [weatherDays, setWeatherDays] = useState<ForecastDay[]>([]);
+	const [weatherLoading, setWeatherLoading] = useState(false);
+	const [weatherError, setWeatherError] = useState<string | null>(null);
 
 	const profile = useMemo(
 		() => CROP_PROFILES.find(c => c.key === cropKey) ?? CROP_PROFILES[0],
@@ -191,6 +232,39 @@ export function CropStatisticsView() {
 			: outlook.tone === "tailwind"
 				? tr.outlookTailwind.replace("{reasons}", outlookReasons)
 				: tr.outlookMixed.replace("{reasons}", outlookReasons);
+
+	useEffect(() => {
+		const coords = CROP_COORDS[cropKey];
+		if (!coords) return;
+		let cancelled = false;
+		setWeatherLoading(true);
+		setWeatherError(null);
+		void (async () => {
+			try {
+				const res = await fetch(`/api/weather/forecast?lat=${coords.lat}&lon=${coords.lon}`, {
+					cache: "no-store",
+				});
+				const data = (await res.json().catch(() => ({}))) as {
+					ok?: boolean;
+					days?: ForecastDay[];
+				};
+				if (!res.ok || !data.ok || !Array.isArray(data.days)) {
+					throw new Error("weather fetch failed");
+				}
+				if (!cancelled) setWeatherDays(data.days);
+			} catch {
+				if (!cancelled) {
+					setWeatherDays([]);
+					setWeatherError(tr.weatherError);
+				}
+			} finally {
+				if (!cancelled) setWeatherLoading(false);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [cropKey, tr.weatherError]);
 
 	return (
 		<div className="space-y-6">
@@ -423,6 +497,39 @@ export function CropStatisticsView() {
 						</strong>{" "}
 						{dry ? pickL(profile.irrigationIfDry, lang) : tr.normalIrrigationExtra}
 					</p>
+					<div className="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white/70 dark:bg-stone-900/70 p-3">
+						<p className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-400 mb-2">
+							{tr.weather7dTitle}
+						</p>
+						{weatherLoading ? (
+							<p className="text-sm text-stone-500 dark:text-stone-400">{tr.weatherLoading}</p>
+						) : weatherError ? (
+							<p className="text-sm text-red-600 dark:text-red-300">{weatherError}</p>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="min-w-full text-xs">
+									<thead>
+										<tr className="text-stone-500 dark:text-stone-400">
+											<th className="text-left pr-3 py-1">{tr.dayLabel}</th>
+											<th className="text-left pr-3 py-1">{tr.tempLabel}</th>
+											<th className="text-left pr-3 py-1">{tr.rainLabel}</th>
+											<th className="text-left py-1">{tr.windLabel}</th>
+										</tr>
+									</thead>
+									<tbody>
+										{weatherDays.map((d) => (
+											<tr key={d.date} className="border-t border-stone-100 dark:border-stone-800">
+												<td className="py-1.5 pr-3">{new Date(d.date).toLocaleDateString(lang === "bg" ? "bg-BG" : "en-GB", { weekday: "short", day: "2-digit", month: "2-digit" })}</td>
+												<td className="py-1.5 pr-3">{Math.round(d.tempMinC)}° / {Math.round(d.tempMaxC)}°</td>
+												<td className="py-1.5 pr-3">{d.precipMm.toFixed(1)}</td>
+												<td className="py-1.5">{d.windMaxMs.toFixed(1)}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 
