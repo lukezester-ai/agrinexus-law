@@ -43,6 +43,8 @@ const UPDATES = [
 
 export default function Home() {
   const resultsSectionRef = useRef<HTMLElement | null>(null);
+  const searchFormRef = useRef<HTMLFormElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<KnowledgeDoc[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,15 +61,11 @@ export default function Home() {
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [feedbackByLogId, setFeedbackByLogId] = useState<Record<string, FeedbackState>>({});
+  const [searchFocusPulse, setSearchFocusPulse] = useState(false);
 
-  const filteredResults = useMemo(
-    () => results.filter((doc) => (filterType === "all" ? true : doc.type === filterType)),
-    [results, filterType],
-  );
-
-  const onSearch = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const executeSearch = async (rawQuery: string) => {
+    const trimmed = rawQuery.trim();
+    if (!trimmed) return;
     resultsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     setLoading(true);
     setError(null);
@@ -76,7 +74,7 @@ export default function Home() {
       const res = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim(), category: "all" }),
+        body: JSON.stringify({ query: trimmed, category: "all" }),
       });
       const data = (await res.json().catch(() => ({}))) as SearchResponse;
       if (!res.ok) {
@@ -92,6 +90,16 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filteredResults = useMemo(
+    () => results.filter((doc) => (filterType === "all" ? true : doc.type === filterType)),
+    [results, filterType],
+  );
+
+  const onSearch = async (e: FormEvent) => {
+    e.preventDefault();
+    await executeSearch(query);
   };
 
   const onWaitlist = async (e: FormEvent) => {
@@ -115,6 +123,24 @@ export default function Home() {
     } catch {
       setWaitlistError("Мрежова грешка. Опитай пак.");
     }
+  };
+
+  const jumpToSearch = (prefill?: string, autoRun = false) => {
+    const next = (prefill ?? query).trim();
+    if (prefill) setQuery(prefill);
+    searchFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.setSelectionRange(
+        searchInputRef.current.value.length,
+        searchInputRef.current.value.length,
+      );
+      setSearchFocusPulse(true);
+      window.setTimeout(() => setSearchFocusPulse(false), 900);
+      if (autoRun && next) {
+        void executeSearch(next);
+      }
+    }, 260);
   };
 
   const sendChat = async (e: FormEvent) => {
@@ -194,9 +220,17 @@ export default function Home() {
             Закони, наредби, сертификати и формуляри — с AI търсене на естествен език.
           </p>
           <form onSubmit={onSearch} className="mx-auto mt-6 max-w-3xl">
-            <div className="brand-soft-input flex items-center gap-2 rounded-2xl border p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30">
+            <div
+              ref={searchFormRef}
+              className={`brand-soft-input flex items-center gap-2 rounded-2xl border p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30 transition-all ${
+                searchFocusPulse
+                  ? "ring-2 ring-indigo-400 shadow-[0_0_0_6px_rgba(129,140,248,0.20)]"
+                  : ""
+              }`}
+            >
               <Sparkles className="text-violet-600" size={20} />
               <input
+                ref={searchInputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder='Попитай: "Какви документи трябват за био сертификат на пшеница?"'
@@ -243,7 +277,13 @@ export default function Home() {
                   <p className="mt-2 line-clamp-3 text-sm text-stone-600 dark:text-stone-300">{doc.content}</p>
                   <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">Източник: {doc.source} · {doc.effectiveDate}</p>
                   <div className="mt-3 flex items-center gap-2">
-                    <button type="button" onClick={() => setQuery(`Обясни накратко: ${doc.title}`)} className="rounded-md border border-stone-300 px-2 py-1 text-xs dark:border-stone-700">Попитай AI</button>
+                    <button
+                      type="button"
+                      onClick={() => jumpToSearch(`Обясни накратко: ${doc.title}`, true)}
+                      className="rounded-md border border-stone-300 px-2 py-1 text-xs dark:border-stone-700"
+                    >
+                      Попитай AI
+                    </button>
                     <Link href={`/doc/${doc.id}`} className="rounded-md border border-stone-300 px-2 py-1 text-xs dark:border-stone-700">
                       Отвори
                     </Link>
@@ -268,7 +308,12 @@ export default function Home() {
             {CATEGORY_CARDS.map((card) => {
               const Icon = card.icon;
               return (
-                <button key={card.title} type="button" onClick={() => setQuery(card.title)} className="brand-soft-surface rounded-xl border p-4 text-left shadow-sm transition hover:border-indigo-400 dark:border-indigo-900/40 dark:bg-stone-900/90">
+                <button
+                  key={card.title}
+                  type="button"
+                  onClick={() => jumpToSearch(card.title, true)}
+                  className="brand-soft-surface rounded-xl border p-4 text-left shadow-sm transition hover:border-indigo-400 dark:border-indigo-900/40 dark:bg-stone-900/90"
+                >
                   <Icon size={20} className="mb-2 text-indigo-700 dark:text-indigo-300" />
                   <p className="text-sm font-semibold">{card.title}</p>
                   <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">{card.subtitle}</p>
