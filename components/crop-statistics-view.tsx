@@ -171,12 +171,12 @@ type ForecastDay = {
 };
 
 const CROP_COORDS: Record<CropKey, { lat: number; lon: number }> = {
-	wheat: { lat: 43.6, lon: 27.8 }, // Dobrudzha
+	wheat_barley: { lat: 43.6, lon: 27.8 }, // Dobrudzha
 	sunflower: { lat: 43.2, lon: 26.9 },
-	corn: { lat: 42.4, lon: 25.6 }, // Upper Thrace
+	maize: { lat: 42.4, lon: 25.6 }, // Upper Thrace
 	tomatoes: { lat: 42.15, lon: 24.75 }, // Plovdiv
 	grapes: { lat: 42.03, lon: 24.87 }, // Asenovgrad/Plovdiv
-	lavender: { lat: 43.28, lon: 26.94 }, // Shumen/Targovishte
+	apples: { lat: 42.73, lon: 25.48 }, // Central BG
 };
 
 function buildChartRows(profile: (typeof CROP_PROFILES)[number]) {
