@@ -19,6 +19,12 @@ import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { chunkText, sha256 } from "@/lib/rag/chunker";
 import { embedBatch } from "@/lib/rag/embeddings";
 import type { ChunkSourceType } from "@/lib/rag/vector-search";
+import {
+  indexPublicDocumentsContent,
+  type IndexPublicDocsOptions,
+  type IndexPublicDocsSummary,
+} from "@/lib/rag/content/pipeline";
+import { shutdownOcr } from "@/lib/rag/content/ocr";
 
 export interface ReindexStats {
   source: ChunkSourceType;
@@ -281,4 +287,34 @@ export async function reindexAll(opts?: {
     out.push(await reindexPublicDocuments());
   }
   return out;
+}
+
+/**
+ * Реално индексиране на съдържанието на `public_documents` —
+ * изтегля PDF/HTML/DOCX, чънква и записва в `knowledge_chunks` със
+ * `source_type='public_document'` (заменя старите metadata-only записи
+ * за същия source_id).
+ *
+ * Резултатът се връща в стандартния `ReindexStats` формат, така че
+ * /api/rag/reindex да го емитира еднообразно с другите цели.
+ */
+export async function reindexPublicDocumentContent(
+  opts: IndexPublicDocsOptions = {},
+): Promise<ReindexStats & { summary: IndexPublicDocsSummary }> {
+  const summary = await indexPublicDocumentsContent(opts);
+  try {
+    await shutdownOcr();
+  } catch {
+    /* ignore OCR teardown errors */
+  }
+  const stats: ReindexStats & { summary: IndexPublicDocsSummary } = {
+    source: "public_document",
+    documentsScanned: summary.scanned,
+    chunksCreated: summary.totalChunks,
+    chunksSkipped: summary.empty,
+    chunksFailed: summary.failed,
+    errors: summary.errors,
+    summary,
+  };
+  return stats;
 }

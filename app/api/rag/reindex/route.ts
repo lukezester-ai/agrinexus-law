@@ -1,6 +1,7 @@
 import {
   reindexAll,
   reindexLearned,
+  reindexPublicDocumentContent,
   reindexPublicDocuments,
   reindexStatic,
   type ReindexStats,
@@ -19,14 +20,20 @@ function isAuthorized(req: Request): boolean {
   return Boolean(headerToken && headerToken === required);
 }
 
-type Target = "all" | "static" | "learned" | "public_documents";
+type Target =
+  | "all"
+  | "static"
+  | "learned"
+  | "public_documents"
+  | "public_doc_content";
 
 function isValidTarget(value: unknown): value is Target {
   return (
     value === "all" ||
     value === "static" ||
     value === "learned" ||
-    value === "public_documents"
+    value === "public_documents" ||
+    value === "public_doc_content"
   );
 }
 
@@ -45,9 +52,9 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { target?: Target } = {};
+  let body: { target?: Target; limit?: number; onlySourceIds?: string[] } = {};
   try {
-    body = (await req.json().catch(() => ({}))) as { target?: Target };
+    body = (await req.json().catch(() => ({}))) as typeof body;
   } catch {
     body = {};
   }
@@ -64,6 +71,16 @@ export async function POST(req: Request) {
         break;
       case "public_documents":
         results = [await reindexPublicDocuments()];
+        break;
+      case "public_doc_content":
+        results = [
+          await reindexPublicDocumentContent({
+            limit: typeof body.limit === "number" ? body.limit : undefined,
+            onlySourceIds: Array.isArray(body.onlySourceIds)
+              ? body.onlySourceIds
+              : undefined,
+          }),
+        ];
         break;
       case "all":
       default:
@@ -93,7 +110,13 @@ export async function GET(req: Request) {
     usage: {
       method: "POST",
       headers: { "x-ingest-token": "<INGEST_ADMIN_TOKEN>" },
-      body: { target: "all | static | learned | public_documents" },
+      body: {
+        target:
+          "all | static | learned | public_documents | public_doc_content",
+        // optional за target='public_doc_content'
+        limit: "number (по подразбиране 50)",
+        onlySourceIds: "string[] (id-та от public_documents)",
+      },
     },
   });
 }
