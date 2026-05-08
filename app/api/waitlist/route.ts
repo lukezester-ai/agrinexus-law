@@ -84,6 +84,18 @@ export async function POST(req: Request) {
 
     const supabaseAdmin = getSupabaseAdmin();
     let persisted = false;
+    const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
+
+    if (!supabaseAdmin && process.env.NODE_ENV === "production") {
+      return Response.json(
+        {
+          error:
+            "Регистрацията е недостъпна: липсва сървърна конфигурация за база данни. Моля, свържи се с поддръжката.",
+          code: hasServiceRole ? "WAITLIST_DB_UNAVAILABLE" : "WAITLIST_MISSING_SERVICE_ROLE_KEY",
+        },
+        { status: 503 },
+      );
+    }
 
     if (supabaseAdmin) {
       const existingRes = await supabaseAdmin
@@ -119,7 +131,10 @@ export async function POST(req: Request) {
     if (!persisted) {
       if (process.env.NODE_ENV === "production") {
         return Response.json(
-          { error: "Регистрацията е временно недостъпна. Опитай пак след малко." },
+          {
+            error: "Регистрацията е временно недостъпна. Опитай пак след малко.",
+            code: "WAITLIST_DB_WRITE_FAILED",
+          },
           { status: 503 },
         );
       }

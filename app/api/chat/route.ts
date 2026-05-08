@@ -10,26 +10,11 @@ import { normalizeChatMessages } from "@/lib/anthropic-messages";
 import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
 import { getRagContext } from "@/lib/rag/hybrid-search";
 import { isRagEnabled } from "@/lib/rag/config";
-import { isSupabaseAuthConfigured } from "@/lib/supabase/env";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
 export async function POST(req: Request) {
 	try {
-		if (isSupabaseAuthConfigured()) {
-			const supabase = await createSupabaseServerClient();
-			const {
-				data: { user },
-			} = await supabase.auth.getUser();
-			if (!user) {
-				return Response.json(
-					{ error: "Нужен е вход с имейл, за да ползваш чата." },
-					{ status: 401 },
-				);
-			}
-		}
-
 		const ip = extractClientIp(req);
 		const rateLimitResult = await checkRateLimit(chatRateLimit, ip);
 
