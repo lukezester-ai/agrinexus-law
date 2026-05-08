@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Script from "next/script";
-import { useSearchParams } from "next/navigation";
 import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
@@ -56,7 +55,6 @@ const UPDATES = [
 ];
 
 export default function Home() {
-  const searchParams = useSearchParams();
   const auth = useAuthUser();
   const resultsSectionRef = useRef<HTMLElement | null>(null);
   const searchFormRef = useRef<HTMLDivElement | null>(null);
@@ -95,10 +93,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const chatQ = searchParams.get("chatQ");
+    if (typeof window === "undefined") return;
+    const chatQ = new URLSearchParams(window.location.search).get("chatQ");
     if (!chatQ) return;
     setChatInput((prev) => (prev.trim() ? prev : chatQ));
-  }, [searchParams]);
+  }, []);
 
   const executeSearch = async (rawQuery: string) => {
     const trimmed = rawQuery.trim();
