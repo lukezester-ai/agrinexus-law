@@ -12,10 +12,54 @@ import {
 	type CropCalendarKey,
 } from "@/lib/season-calendar-data";
 
+type SeasonFilter = "all" | "winter" | "spring" | "summer" | "autumn";
+
+const SEASON_MONTHS: Record<Exclude<SeasonFilter, "all">, number[]> = {
+	winter: [12, 1, 2],
+	spring: [3, 4, 5],
+	summer: [6, 7, 8],
+	autumn: [9, 10, 11],
+};
+
+const MONTH_PHOTO_BG: Record<number, string> = {
+	1: "https://images.unsplash.com/photo-1549737221-bef65e2604bc?auto=format&fit=crop&w=1200&q=80",
+	2: "https://images.unsplash.com/photo-1515471209610-2c5b8b35f7b8?auto=format&fit=crop&w=1200&q=80",
+	3: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80",
+	4: "https://images.unsplash.com/photo-1492496913980-501348b61469?auto=format&fit=crop&w=1200&q=80",
+	5: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80",
+	6: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
+	7: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?auto=format&fit=crop&w=1200&q=80",
+	8: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=80",
+	9: "https://images.unsplash.com/photo-1472145246862-b24cf25c4a36?auto=format&fit=crop&w=1200&q=80",
+	10: "https://images.unsplash.com/photo-1501877008226-4fca48ee50c1?auto=format&fit=crop&w=1200&q=80",
+	11: "https://images.unsplash.com/photo-1472141521881-95d0e87e2e39?auto=format&fit=crop&w=1200&q=80",
+	12: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80",
+};
+
+function seasonLabelBg(key: SeasonFilter): string {
+	switch (key) {
+		case "all":
+			return "Всички";
+		case "winter":
+			return "Зима";
+		case "spring":
+			return "Пролет";
+		case "summer":
+			return "Лято";
+		case "autumn":
+			return "Есен";
+	}
+}
+
 export default function KalendarPage() {
 	const [crop, setCrop] = useState<CropCalendarKey>("wheat_barley");
+	const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>("all");
 
 	const tasksByMonth = useMemo(() => SEASON_TASKS_BY_CROP[crop], [crop]);
+	const monthsToRender = useMemo(() => {
+		if (seasonFilter === "all") return Array.from({ length: 12 }, (_, i) => i + 1);
+		return SEASON_MONTHS[seasonFilter];
+	}, [seasonFilter]);
 
 	return (
 		<div className="min-h-screen agri-page-bg">
@@ -80,6 +124,27 @@ export default function KalendarPage() {
 					</div>
 				</div>
 
+				<div className="mb-8">
+					<label className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-2">
+						Избери сезон
+					</label>
+					<div className="flex flex-wrap gap-2">
+						{(["all", "winter", "spring", "summer", "autumn"] as const).map((key) => (
+							<button
+								key={key}
+								type="button"
+								onClick={() => setSeasonFilter(key)}
+								className={`px-3 py-2 rounded-lg text-sm border transition ${
+									seasonFilter === key
+										? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50"
+										: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800"
+								}`}>
+								{seasonLabelBg(key)}
+							</button>
+						))}
+					</div>
+				</div>
+
 				<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-teal-50/70 dark:bg-teal-950/25 p-4 sm:p-5 mb-8">
 					<p className="text-xs font-semibold uppercase tracking-wide text-teal-900 dark:text-teal-300 mb-3">
 						ДФЗ — ключови дати (ориентир кампания)
@@ -98,14 +163,20 @@ export default function KalendarPage() {
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2">
-					{MONTH_NAMES_BG.map((monthName, idx) => {
-						const m = idx + 1;
+					{monthsToRender.map((m) => {
+						const monthName = MONTH_NAMES_BG[m - 1];
 						const tasks = tasksByMonth[m];
 						if (!tasks?.length) return null;
 						return (
 							<div
 								key={m}
 								className="bg-white dark:bg-stone-900/95 rounded-xl border border-stone-200 dark:border-stone-700 p-4 shadow-sm">
+								<img
+									src={MONTH_PHOTO_BG[m]}
+									alt={`${monthName} сезонна снимка`}
+									loading="lazy"
+									className="w-full h-32 object-cover rounded-lg mb-3 border border-stone-200/80 dark:border-stone-700"
+								/>
 								<h2 className="font-semibold text-stone-900 dark:text-stone-50 mb-2 flex items-center gap-2">
 									<span className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-sm">
 										{m}
