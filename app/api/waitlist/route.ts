@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { waitlistRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
+import { isValidEmail, normalizeEmail } from "@/lib/validation/email";
+import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/security/turnstile";
 import { mkdir, appendFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -16,7 +18,6 @@ async function storeWaitlistFallback(payload: {
   farm_type?: string | null;
   farm_size?: number | null;
   region?: string | null;
-  ip_address: string;
 }) {
   try {
     const dir = resolve(process.cwd(), ".local");
@@ -46,16 +47,33 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, farm_type, farm_size, region } = await req.json();
-
-    if (!email || !email.includes("@") || !email.includes(".")) {
+    const { email, farm_type, farm_size, region, captchaToken } = await req.json();
+    if (!isValidEmail(email)) {
       return Response.json(
         { error: "Невалиден имейл адрес" },
         { status: 400 }
       );
     }
+    if (isTurnstileConfigured()) {
+      if (typeof captchaToken !== "string" || !captchaToken.trim()) {
+        return Response.json(
+          { error: "Потвърди, че не си робот." },
+          { status: 400 },
+        );
+      }
+      const captchaOk = await verifyTurnstileToken({
+        token: captchaToken.trim(),
+        remoteIp: ip,
+      });
+      if (!captchaOk) {
+        return Response.json(
+          { error: "CAPTCHA проверката не беше успешна. Опитай отново." },
+          { status: 400 },
+        );
+      }
+    }
 
-    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedEmail = normalizeEmail(email);
     const row = {
       email: normalizedEmail,
       farm_type: farm_type || null,
@@ -99,6 +117,12 @@ export async function POST(req: Request) {
     }
 
     if (!persisted) {
+      if (process.env.NODE_ENV === "production") {
+        return Response.json(
+          { error: "Регистрацията е временно недостъпна. Опитай пак след малко." },
+          { status: 503 },
+        );
+      }
       const fallbackStored = await storeWaitlistFallback(row);
       if (!fallbackStored) {
         return Response.json(

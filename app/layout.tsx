@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyticsLoader } from "@/components/analytics-loader";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
 import "./globals.css";
@@ -84,6 +85,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100">
         {children}
         <ThemeToggle />
+        <CookieConsentBanner />
         <AnalyticsLoader />
       </body>
     </html>

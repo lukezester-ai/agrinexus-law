@@ -1,10 +1,13 @@
 ﻿"use client";
 
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
+import { useSearchParams } from "next/navigation";
 import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
+import { useAuthUser } from "@/hooks/use-auth-user";
 
 type SearchResponse = {
   results?: KnowledgeDoc[];
@@ -24,6 +27,17 @@ type FeedbackState = {
   status: "saving" | "saved" | "error";
 };
 
+declare global {
+  interface Window {
+    onWaitlistTurnstileSuccess?: (token: string) => void;
+    onWaitlistTurnstileExpired?: () => void;
+    onWaitlistTurnstileError?: () => void;
+    turnstile?: {
+      reset: () => void;
+    };
+  }
+}
+
 const CATEGORY_CARDS = [
   { title: "Субсидии", subtitle: "директни плащания и интервенции", icon: Sprout },
   { title: "Закони", subtitle: "нормативни актове и изисквания", icon: Scale },
@@ -42,6 +56,8 @@ const UPDATES = [
 ];
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const auth = useAuthUser();
   const resultsSectionRef = useRef<HTMLElement | null>(null);
   const searchFormRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -55,6 +71,7 @@ export default function Home() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistOk, setWaitlistOk] = useState(false);
   const [waitlistError, setWaitlistError] = useState<string | null>(null);
+  const [waitlistCaptchaToken, setWaitlistCaptchaToken] = useState<string | null>(null);
   const [chatCharacter, setChatCharacter] = useState<"elena" | "boris" | "viktoria">("elena");
   const [chatInput, setChatInput] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
@@ -62,6 +79,26 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [feedbackByLogId, setFeedbackByLogId] = useState<Record<string, FeedbackState>>({});
   const [searchFocusPulse, setSearchFocusPulse] = useState(false);
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || "";
+  const isTurnstileEnabled = Boolean(turnstileSiteKey);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.onWaitlistTurnstileSuccess = (token: string) => setWaitlistCaptchaToken(token);
+    window.onWaitlistTurnstileExpired = () => setWaitlistCaptchaToken(null);
+    window.onWaitlistTurnstileError = () => setWaitlistCaptchaToken(null);
+    return () => {
+      window.onWaitlistTurnstileSuccess = undefined;
+      window.onWaitlistTurnstileExpired = undefined;
+      window.onWaitlistTurnstileError = undefined;
+    };
+  }, []);
+
+  useEffect(() => {
+    const chatQ = searchParams.get("chatQ");
+    if (!chatQ) return;
+    setChatInput((prev) => (prev.trim() ? prev : chatQ));
+  }, [searchParams]);
 
   const executeSearch = async (rawQuery: string) => {
     const trimmed = rawQuery.trim();
@@ -105,21 +142,36 @@ export default function Home() {
   const onWaitlist = async (e: FormEvent) => {
     e.preventDefault();
     if (!waitlistEmail.trim()) return;
+    if (isTurnstileEnabled && !waitlistCaptchaToken) {
+      setWaitlistError("Потвърди, че не си робот.");
+      return;
+    }
     setWaitlistError(null);
     setWaitlistOk(false);
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: waitlistEmail.trim() }),
+        body: JSON.stringify({
+          email: waitlistEmail.trim(),
+          captchaToken: waitlistCaptchaToken,
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string };
       if (!res.ok || !data.success) {
         setWaitlistError(data.error || "Неуспешна регистрация.");
+        setWaitlistCaptchaToken(null);
+        if (typeof window !== "undefined") {
+          window.turnstile?.reset();
+        }
         return;
       }
       setWaitlistOk(true);
       setWaitlistEmail("");
+      setWaitlistCaptchaToken(null);
+      if (typeof window !== "undefined") {
+        window.turnstile?.reset();
+      }
     } catch {
       setWaitlistError("Мрежова грешка. Опитай пак.");
     }
@@ -145,6 +197,10 @@ export default function Home() {
 
   const sendChat = async (e: FormEvent) => {
     e.preventDefault();
+    if (auth.status !== "signed_in") {
+      setChatError("Нужен е вход с имейл, за да използваш чата.");
+      return;
+    }
     const text = chatInput.trim();
     if (!text || chatBusy) return;
     const nextMessages: ChatMessage[] = [...chatMessages, { role: "user", content: text }];
@@ -349,8 +405,29 @@ export default function Home() {
             <p className="mt-3 inline-flex items-center gap-2 text-sm"><Check size={16} /> Успешно записване!</p>
           ) : (
             <form onSubmit={onWaitlist} className="mt-4 flex max-w-lg flex-col gap-2 sm:flex-row">
+              {isTurnstileEnabled ? (
+                <>
+                  <Script
+                    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                    strategy="afterInteractive"
+                  />
+                  <div
+                    className="cf-turnstile"
+                    data-sitekey={turnstileSiteKey}
+                    data-callback="onWaitlistTurnstileSuccess"
+                    data-expired-callback="onWaitlistTurnstileExpired"
+                    data-error-callback="onWaitlistTurnstileError"
+                  />
+                </>
+              ) : null}
               <input type="email" required value={waitlistEmail} onChange={(e) => setWaitlistEmail(e.target.value)} placeholder="Твоят имейл" className="flex-1 rounded-lg px-3 py-2 text-sm text-stone-900 outline-none" />
-              <button type="submit" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-800">Абонирай ме</button>
+              <button
+                type="submit"
+                disabled={isTurnstileEnabled && !waitlistCaptchaToken}
+                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-800 disabled:opacity-60"
+              >
+                Абонирай ме
+              </button>
             </form>
           )}
         </section>
@@ -358,19 +435,32 @@ export default function Home() {
         <section id="chat" className="mb-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-sm font-semibold">Чат с екипа</h2>
-            <select
-              value={chatCharacter}
-              onChange={(e) => setChatCharacter(e.target.value as "elena" | "boris" | "viktoria")}
-              className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900"
-            >
-              <option value="elena">Елена (право/ДФЗ)</option>
-              <option value="boris">Борис (поле)</option>
-              <option value="viktoria">Виктория (финанси)</option>
-            </select>
+            {auth.status === "signed_in" ? (
+              <select
+                value={chatCharacter}
+                onChange={(e) => setChatCharacter(e.target.value as "elena" | "boris" | "viktoria")}
+                className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900"
+              >
+                <option value="elena">Елена (право/ДФЗ)</option>
+                <option value="boris">Борис (поле)</option>
+                <option value="viktoria">Виктория (финанси)</option>
+              </select>
+            ) : (
+              <Link
+                href="/vhod?redirect=/#chat"
+                className="rounded-md bg-[#0d9488] px-3 py-1.5 text-xs font-medium text-white"
+              >
+                Вход за чат
+              </Link>
+            )}
           </div>
 
           <div className="mb-3 max-h-80 overflow-auto rounded-xl border border-stone-200 p-3 dark:border-stone-700">
-            {chatMessages.length === 0 ? (
+            {auth.status !== "signed_in" ? (
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                Чатът е достъпен за регистрирани потребители. Влез с имейл и получаваш достъп веднага.
+              </p>
+            ) : chatMessages.length === 0 ? (
               <p className="text-xs text-stone-500 dark:text-stone-400">Задай въпрос и използвай 👍/👎 под отговора, за да се самообучава системата.</p>
             ) : (
               <div className="space-y-3">
@@ -425,11 +515,12 @@ export default function Home() {
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Задай въпрос към избрания специалист..."
-              className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-stone-700 dark:bg-stone-900"
+              disabled={auth.status !== "signed_in"}
+              className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-900"
             />
             <button
               type="submit"
-              disabled={chatBusy || !chatInput.trim()}
+              disabled={auth.status !== "signed_in" || chatBusy || !chatInput.trim()}
               className="brand-cta-bg rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {chatBusy ? "..." : "Изпрати"}

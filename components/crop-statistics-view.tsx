@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
 	Bar,
 	CartesianGrid,
@@ -170,6 +171,12 @@ type ForecastDay = {
 	windMaxMs: number;
 };
 
+type RagInsight = {
+	title: string;
+	source: string;
+	snippet: string;
+};
+
 const CROP_COORDS: Record<CropKey, { lat: number; lon: number }> = {
 	wheat_barley: { lat: 43.6, lon: 27.8 }, // Dobrudzha
 	sunflower: { lat: 43.2, lon: 26.9 },
@@ -202,6 +209,10 @@ export function CropStatisticsView() {
 	const [weatherDays, setWeatherDays] = useState<ForecastDay[]>([]);
 	const [weatherLoading, setWeatherLoading] = useState(false);
 	const [weatherError, setWeatherError] = useState<string | null>(null);
+	const [ragInsights, setRagInsights] = useState<RagInsight[]>([]);
+	const [ragMode, setRagMode] = useState<"rag_hybrid" | "bm25" | null>(null);
+	const [ragLoading, setRagLoading] = useState(false);
+	const [ragError, setRagError] = useState<string | null>(null);
 
 	const profile = useMemo(
 		() => CROP_PROFILES.find(c => c.key === cropKey) ?? CROP_PROFILES[0],
@@ -225,6 +236,12 @@ export function CropStatisticsView() {
 		outlook.factors.length === 0
 			? pickL(OUTLOOK_FACTORS_NONE, lang)
 			: outlook.factors.map(f => pickL(OUTLOOK_FACTOR_LABELS[f], lang)).join("; ");
+	const primaryInsightTitle = ragInsights[0]?.title;
+	const askAiPrompt =
+		lang === "bg"
+			? `Направи кратък анализ за ${pickL(profile.label, "bg")} в България. Включи риск, субсидии и срокове.${primaryInsightTitle ? ` Ползвай и контекста: ${primaryInsightTitle}.` : ""}`
+			: `Make a short analysis for ${pickL(profile.label, "en")} in Bulgaria. Include risks, subsidies, and deadlines.${primaryInsightTitle ? ` Also use this context: ${primaryInsightTitle}.` : ""}`;
+	const askAiHref = `/?chatQ=${encodeURIComponent(askAiPrompt)}#chat`;
 
 	const outlookNarrative =
 		outlook.tone === "headwind"
@@ -265,6 +282,52 @@ export function CropStatisticsView() {
 			cancelled = true;
 		};
 	}, [cropKey, tr.weatherError]);
+
+	useEffect(() => {
+		let cancelled = false;
+		setRagLoading(true);
+		setRagError(null);
+		const cropLabelBg = pickL(profile.label, "bg");
+		const query = `Статистика и прогноза за ${cropLabelBg} в България: субсидии, срокове, рискове, изисквания`;
+
+		void (async () => {
+			try {
+				const res = await fetch("/api/statistiki/insights", {
+					method: "POST",
+					headers: { "content-type": "application/json" },
+					body: JSON.stringify({ query }),
+				});
+				const data = (await res.json().catch(() => ({}))) as {
+					ok?: boolean;
+					mode?: "rag_hybrid" | "bm25";
+					insights?: RagInsight[];
+					error?: string;
+				};
+				if (!res.ok || !data.ok) {
+					throw new Error(data.error || "insights failed");
+				}
+				if (cancelled) return;
+				setRagInsights(Array.isArray(data.insights) ? data.insights : []);
+				setRagMode(data.mode || null);
+			} catch {
+				if (!cancelled) {
+					setRagInsights([]);
+					setRagMode(null);
+					setRagError(
+						lang === "bg"
+							? "RAG контекстът не можа да се зареди в момента."
+							: "Could not load RAG context right now.",
+					);
+				}
+			} finally {
+				if (!cancelled) setRagLoading(false);
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [cropKey, lang, profile.label]);
 
 	return (
 		<div className="space-y-6">
@@ -531,6 +594,57 @@ export function CropStatisticsView() {
 						)}
 					</div>
 				</div>
+			</div>
+
+			<div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 p-4 sm:p-5">
+				<div className="flex items-center justify-between gap-3 mb-2">
+					<h2 className="font-semibold text-stone-900 dark:text-stone-50 text-base">
+						{lang === "bg" ? "RAG контекст за културата" : "RAG context for this crop"}
+					</h2>
+					<div className="flex items-center gap-2">
+						{ragMode ? (
+							<span className="text-[11px] uppercase tracking-wider text-stone-500 dark:text-stone-400">
+								{ragMode === "rag_hybrid" ? "RAG hybrid" : "BM25 fallback"}
+							</span>
+						) : null}
+						<Link
+							href={askAiHref}
+							className="rounded-md bg-[#0d9488] px-2.5 py-1.5 text-xs font-medium text-white">
+							{lang === "bg" ? "Попитай AI" : "Ask AI"}
+						</Link>
+					</div>
+				</div>
+				{ragLoading ? (
+					<p className="text-sm text-stone-600 dark:text-stone-400">
+						{lang === "bg" ? "Зареждам релевантен контекст..." : "Loading relevant context..."}
+					</p>
+				) : ragError ? (
+					<p className="text-sm text-red-600 dark:text-red-300">{ragError}</p>
+				) : ragInsights.length === 0 ? (
+					<p className="text-sm text-stone-600 dark:text-stone-400">
+						{lang === "bg"
+							? "Няма релевантни RAG резултати за тази култура."
+							: "No relevant RAG results for this crop."}
+					</p>
+				) : (
+					<ul className="space-y-2">
+						{ragInsights.map((insight, idx) => (
+							<li
+								key={`${insight.title}-${idx}`}
+								className="rounded-lg border border-indigo-100 dark:border-indigo-900/40 bg-white/80 dark:bg-stone-900/60 px-3 py-2">
+								<p className="text-sm font-medium text-stone-900 dark:text-stone-100">
+									{insight.title}
+								</p>
+								<p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+									{insight.source}
+								</p>
+								<p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">
+									{insight.snippet}
+								</p>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			<p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed rounded-xl border border-teal-100 dark:border-teal-900/40 bg-teal-50/40 dark:bg-teal-950/15 p-4">

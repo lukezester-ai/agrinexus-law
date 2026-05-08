@@ -41,6 +41,15 @@ export const waitlistRateLimit = redis
     })
   : null;
 
+export const authMagicLinkRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "15 m"),
+      analytics: true,
+      prefix: "ratelimit:auth-magic-link",
+    })
+  : null;
+
 export const searchRateLimit = redis
   ? new Ratelimit({
       redis,

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 
 export default function PrivacyPage() {
   return (
@@ -79,6 +80,9 @@ export default function PrivacyPage() {
             Използваме минимум технически бисквитки за работата на сайта и анонимна аналитика чрез Vercel Analytics. 
             Не използваме рекламни или проследяващи бисквитки на трети страни.
           </p>
+          <div className="mt-4">
+            <CookiePreferencesButton />
+          </div>
         </section>
 
         <section className="mb-6">

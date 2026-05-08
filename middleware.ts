@@ -3,7 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseAuthConfigured } from "@/lib/supabase/env";
 
 export async function middleware(request: NextRequest) {
+	const path = request.nextUrl.pathname;
 	if (!isSupabaseAuthConfigured()) {
+		if (path.startsWith("/moya-ferma")) {
+			const url = request.nextUrl.clone();
+			url.pathname = "/vhod";
+			url.searchParams.set("error", "config");
+			return NextResponse.redirect(url);
+		}
 		return NextResponse.next();
 	}
 
@@ -44,7 +51,6 @@ export async function middleware(request: NextRequest) {
 		data: { user },
 	} = await supabase.auth.getUser();
 
-	const path = request.nextUrl.pathname;
 	if (path.startsWith("/moya-ferma") && !user) {
 		const url = request.nextUrl.clone();
 		url.pathname = "/vhod";

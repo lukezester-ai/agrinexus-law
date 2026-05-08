@@ -1,11 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { isSupabaseAuthConfigured } from "@/lib/supabase/env";
+
+declare global {
+	interface Window {
+		onTurnstileSuccess?: (token: string) => void;
+		onTurnstileExpired?: () => void;
+		onTurnstileError?: () => void;
+		turnstile?: {
+			reset: () => void;
+		};
+	}
+}
 
 export function VhodForm() {
 	const searchParams = useSearchParams();
@@ -17,37 +28,56 @@ export function VhodForm() {
 		"idle",
 	);
 	const [message, setMessage] = useState<string | null>(null);
+	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
 	const configured = isSupabaseAuthConfigured();
+	const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || "";
+	const isTurnstileEnabled = Boolean(turnstileSiteKey);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		window.onTurnstileSuccess = (token: string) => setCaptchaToken(token);
+		window.onTurnstileExpired = () => setCaptchaToken(null);
+		window.onTurnstileError = () => setCaptchaToken(null);
+		return () => {
+			window.onTurnstileSuccess = undefined;
+			window.onTurnstileExpired = undefined;
+			window.onTurnstileError = undefined;
+		};
+	}, []);
 
 	const onSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!email.trim() || !configured) return;
-
-		const supabase = createBrowserSupabaseClient();
-		if (!supabase) return;
+		if (isTurnstileEnabled && !captchaToken) {
+			setStatus("error");
+			setMessage("Потвърди, че не си робот.");
+			return;
+		}
 
 		setStatus("sending");
 		setMessage(null);
 
-		const origin = window.location.origin;
-		const next =
-			redirectTo.startsWith("/") && !redirectTo.startsWith("//")
-				? redirectTo
-				: "/moya-ferma";
-		const emailRedirectTo = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
-
-		const { error } = await supabase.auth.signInWithOtp({
-			email: email.trim(),
-			options: {
-				emailRedirectTo,
-				shouldCreateUser: true,
-			},
+		const res = await fetch("/api/auth/magic-link", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({
+				email: email.trim(),
+				redirectTo,
+				captchaToken,
+			}),
 		});
+		const payload = (await res.json().catch(() => ({}))) as {
+			error?: string;
+		};
 
-		if (error) {
+		if (!res.ok) {
 			setStatus("error");
-			setMessage(error.message || "Неуспешно изпращане. Опитай пак.");
+			setMessage(payload.error || "Неуспешно изпращане. Опитай пак.");
+			setCaptchaToken(null);
+			if (typeof window !== "undefined") {
+				window.turnstile?.reset();
+			}
 			return;
 		}
 
@@ -127,6 +157,21 @@ export function VhodForm() {
 						</div>
 					) : (
 						<form onSubmit={onSubmit} className="space-y-4">
+							{isTurnstileEnabled && (
+								<>
+									<Script
+										src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+										strategy="afterInteractive"
+									/>
+									<div
+										className="cf-turnstile"
+										data-sitekey={turnstileSiteKey}
+										data-callback="onTurnstileSuccess"
+										data-expired-callback="onTurnstileExpired"
+										data-error-callback="onTurnstileError"
+									/>
+								</>
+							)}
 							<div>
 								<label
 									htmlFor="vhod-email"
@@ -153,7 +198,9 @@ export function VhodForm() {
 
 							<button
 								type="submit"
-								disabled={status === "sending"}
+								disabled={
+									status === "sending" || (isTurnstileEnabled && !captchaToken)
+								}
 								className="w-full py-3 rounded-lg text-sm font-medium text-white flex items-center justify-center gap-2 disabled:opacity-60 transition"
 								style={{ background: "#0d9488" }}>
 								{status === "sending" ? (
