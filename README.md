@@ -39,7 +39,7 @@ agrinexus-mvp/
 
 - **3 AI персонажа** с различни личности и експертизи
 - **ДФЗ Knowledge базата** с 12+ структурирани документа за основните схеми
-- **RAG-light система** - всеки въпрос намира релевантни документи и ги дава като контекст
+- **RAG (pgvector + BM25 hybrid)** — semantic search в Supabase + lexical fallback, обединени с RRF
 - **Профил на стопанството** - персонализирани отговори
 - **Базова търсачка** с филтри по категории
 - **Supabase интеграция** за waitlist и chat logs
@@ -47,6 +47,41 @@ agrinexus-mvp/
 - **Rate limiting** срещу abuse
 - **Mobile responsive** дизайн
 - **GDPR compliance** - Privacy Policy на български
+
+## RAG (Retrieval-Augmented Generation)
+
+Чатът използва hybrid retrieval — за всеки въпрос:
+
+1. **Lexical (BM25)** — `lib/knowledge/internal-ai-search.ts` ранкира статичните `KNOWLEDGE_BASE` документи.
+2. **Vector (pgvector)** — `lib/rag/vector-search.ts` извиква `match_knowledge_chunks` RPC в Supabase със `text-embedding-3-small` embeddings.
+3. **Reciprocal Rank Fusion** — `lib/rag/hybrid-search.ts` комбинира двата списъка и връща топ-N най-релевантни парчета.
+4. Резултатът се добавя към `system prompt` преди заявката към OpenAI.
+
+Ако RAG не е активиран (липсва `OPENAI_API_KEY` или `SUPABASE_SERVICE_ROLE_KEY`), системата автоматично използва само BM25 — без чупене на чата.
+
+### Setup
+
+```bash
+# 1. Изпълни supabase-rag-setup.sql в Supabase SQL Editor (активира pgvector + създава knowledge_chunks)
+# 2. Сложи OPENAI_API_KEY, SUPABASE_*  и INGEST_ADMIN_TOKEN в .env.local
+# 3. Стартирай dev сървъра
+npm run dev
+
+# 4. Първоначално индексиране (генерира embeddings за всички KNOWLEDGE_BASE + learned + public_documents):
+curl -X POST http://localhost:3002/api/rag/reindex \
+  -H "x-ingest-token: <INGEST_ADMIN_TOKEN>" \
+  -H "content-type: application/json" \
+  -d '{"target":"all"}'
+```
+
+### Reindex таргети
+
+- `all` — всички източници (по подразбиране)
+- `static` — само `lib/knowledge/dfz-knowledge*.ts`
+- `learned` — `knowledge_learned_items` (от feedback loop)
+- `public_documents` — заглавия на нормативни документи (от ingest pipeline)
+
+Reindex е **idempotent** — chunks с непроменено съдържание (`content_hash`) се пропускат.
 
 ## Технологичен stack
 

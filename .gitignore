@@ -13,3 +13,5 @@ build/
 .idea/
 next-env.d.ts
 .vercel
+tsconfig.tsbuildinfo
+*.lnk

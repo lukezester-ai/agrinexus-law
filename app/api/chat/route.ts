@@ -8,6 +8,8 @@ import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { normalizeChatMessages } from "@/lib/anthropic-messages";
 import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
+import { getRagContext } from "@/lib/rag/hybrid-search";
+import { isRagEnabled } from "@/lib/rag/config";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
@@ -47,6 +49,8 @@ export async function POST(req: Request) {
 		let replySource: "internal_kb" | "openai" = "openai";
 		let model: string | undefined;
     let chatLogId: string | null = null;
+    let retrievalMode: "rag_hybrid" | "bm25" | "none" = "none";
+    let retrievedCount = 0;
 
 		if (!internalAttempt.useOpenAI) {
 			responseText = internalAttempt.reply;
@@ -67,7 +71,21 @@ export async function POST(req: Request) {
 				);
 			}
 
-			const knowledgeContext = getKnowledgeContext(userQuery);
+			let knowledgeContext = "";
+			if (isRagEnabled()) {
+				try {
+					const rag = await getRagContext(userQuery);
+					knowledgeContext = rag.context;
+					retrievedCount = rag.items.length;
+					retrievalMode = rag.usedVector ? "rag_hybrid" : "bm25";
+				} catch (ragErr) {
+					console.error("RAG retrieval failed, falling back to BM25:", ragErr);
+				}
+			}
+			if (!knowledgeContext) {
+				knowledgeContext = getKnowledgeContext(userQuery);
+				retrievalMode = knowledgeContext ? "bm25" : "none";
+			}
       const learnedKnowledgeContext = await getLearnedKnowledgeContext(userQuery);
       const combinedKnowledgeContext = [knowledgeContext, learnedKnowledgeContext].filter(Boolean).join("\n\n");
 
@@ -119,6 +137,10 @@ export async function POST(req: Request) {
 			model: model ?? "internal-knowledge-base",
 			replySource,
       chatLogId,
+      retrieval: {
+        mode: retrievalMode,
+        items: retrievedCount,
+      },
 		});
 	} catch (error) {
 		console.error("Chat API error:", error);
