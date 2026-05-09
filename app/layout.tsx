@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
 import "./globals.css";
 
-const themeInitScript = `(function(){try{var k='agrinexus-theme';var s=localStorage.getItem(k);if(s==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){document.documentElement.classList.add('dark');}})();`;
+const themeInitScript = `(function(){try{var k='agrinexus-theme';var f='agrinexus-theme-user-set';var s=localStorage.getItem(k);var u=localStorage.getItem(f)==='1';if(u&&s==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`;
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://agrinexus.bg";

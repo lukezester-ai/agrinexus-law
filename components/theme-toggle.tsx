@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
 const KEY = "agrinexus-theme";
+const USER_SET_KEY = "agrinexus-theme-user-set";
 
 function applyTheme(mode: "dark" | "light") {
   const root = document.documentElement;
@@ -11,29 +12,31 @@ function applyTheme(mode: "dark" | "light") {
   else root.classList.remove("dark");
   try {
     localStorage.setItem(KEY, mode);
+    localStorage.setItem(USER_SET_KEY, "1");
   } catch {
     /* ignore */
   }
 }
 
 export function ThemeToggle() {
-  const [mode, setMode] = useState<"dark" | "light">("dark");
+  const [mode, setMode] = useState<"dark" | "light">("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     try {
       const s = localStorage.getItem(KEY) as "dark" | "light" | null;
-      if (s === "light" || s === "dark") {
+      const userSet = localStorage.getItem(USER_SET_KEY) === "1";
+      if (userSet && (s === "light" || s === "dark")) {
         setMode(s);
         applyTheme(s);
       } else {
-        setMode("dark");
-        applyTheme("dark");
+        setMode("light");
+        document.documentElement.classList.remove("dark");
       }
     } catch {
-      setMode("dark");
-      applyTheme("dark");
+      setMode("light");
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 

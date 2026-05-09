@@ -65,6 +65,7 @@ export default function Home() {
   const [engine, setEngine] = useState<string>("");
   const [filterType, setFilterType] = useState<"all" | KnowledgeDoc["type"]>("all");
   const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistEmailConfirmed, setWaitlistEmailConfirmed] = useState("");
   const [waitlistOk, setWaitlistOk] = useState(false);
   const [waitlistError, setWaitlistError] = useState<string | null>(null);
   const [waitlistCaptchaToken, setWaitlistCaptchaToken] = useState<string | null>(null);
@@ -145,6 +146,7 @@ export default function Home() {
     }
     setWaitlistError(null);
     setWaitlistOk(false);
+    setWaitlistEmailConfirmed("");
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
@@ -164,6 +166,7 @@ export default function Home() {
         return;
       }
       setWaitlistOk(true);
+      setWaitlistEmailConfirmed(waitlistEmail.trim());
       setWaitlistEmail("");
       setWaitlistCaptchaToken(null);
       if (typeof window !== "undefined") {
@@ -259,7 +262,7 @@ export default function Home() {
             <Link href="/search" className="hover:text-stone-900 dark:hover:text-white">Документи</Link>
             <Link href="/srokove" className="hover:text-stone-900 dark:hover:text-white">Срокове</Link>
             <Link href="/kalkulator" className="hover:text-stone-900 dark:hover:text-white">Калкулатори</Link>
-            <Link href="/vhod" className="brand-link font-medium">Вход</Link>
+            <Link href="/vhod" className="brand-link font-medium">Регистрация / Вход</Link>
           </div>
         </nav>
 
@@ -395,7 +398,14 @@ export default function Home() {
           <p className="mt-2 text-sm text-indigo-100">Получавай известия при промени по документи, срокове и регламенти.</p>
           {waitlistError ? <p className="mt-3 text-sm text-amber-100">{waitlistError}</p> : null}
           {waitlistOk ? (
-            <p className="mt-3 inline-flex items-center gap-2 text-sm"><Check size={16} /> Успешно записване!</p>
+            <div className="mt-3 rounded-lg bg-white/15 px-3 py-2 text-sm">
+              <p className="inline-flex items-center gap-2 font-medium">
+                <Check size={16} /> Успешно записване за {waitlistEmailConfirmed || "имейла ти"}.
+              </p>
+              <p className="mt-1 text-xs text-indigo-100">
+                Ще получаваш известия при важни промени по документи, срокове и регламенти.
+              </p>
+            </div>
           ) : (
             <form onSubmit={onWaitlist} className="mt-4 flex max-w-lg flex-col gap-2 sm:flex-row">
               {isTurnstileEnabled ? (

@@ -49,6 +49,12 @@ export function VhodForm() {
 	const onSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!email.trim() || !configured) return;
+		const normalized = email.trim().toLowerCase();
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+			setStatus("error");
+			setMessage("Моля, въведи валиден имейл адрес.");
+			return;
+		}
 		if (isTurnstileEnabled && !captchaToken) {
 			setStatus("error");
 			setMessage("Потвърди, че не си робот.");
@@ -58,33 +64,42 @@ export function VhodForm() {
 		setStatus("sending");
 		setMessage(null);
 
-		const res = await fetch("/api/auth/magic-link", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({
-				email: email.trim(),
-				redirectTo,
-				captchaToken,
-			}),
-		});
-		const payload = (await res.json().catch(() => ({}))) as {
-			error?: string;
-		};
+		try {
+			const res = await fetch("/api/auth/magic-link", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({
+					email: normalized,
+					redirectTo,
+					captchaToken,
+				}),
+			});
+			const payload = (await res.json().catch(() => ({}))) as {
+				error?: string;
+			};
 
-		if (!res.ok) {
+			if (!res.ok) {
+				setStatus("error");
+				setMessage(payload.error || "Неуспешно изпращане. Опитай пак.");
+				setCaptchaToken(null);
+				if (typeof window !== "undefined") {
+					window.turnstile?.reset();
+				}
+				return;
+			}
+
+			setStatus("sent");
+			setMessage(
+				"Изпратихме връзка на имейла ти. При първи вход профилът се създава автоматично.",
+			);
+		} catch {
 			setStatus("error");
-			setMessage(payload.error || "Неуспешно изпращане. Опитай пак.");
+			setMessage("Мрежова грешка. Провери връзката и опитай отново.");
 			setCaptchaToken(null);
 			if (typeof window !== "undefined") {
 				window.turnstile?.reset();
 			}
-			return;
 		}
-
-		setStatus("sent");
-		setMessage(
-			"Изпратихме връзка на имейла ти. Отвори я на същото устройство или браузър, ако е възможно.",
-		);
 	};
 
 	return (
@@ -98,7 +113,7 @@ export function VhodForm() {
 						Начало
 					</Link>
 					<span className="text-sm font-medium text-stone-800 dark:text-stone-100">
-						Вход
+						Регистрация / Вход
 					</span>
 				</div>
 			</nav>
@@ -109,11 +124,11 @@ export function VhodForm() {
 						🌾
 					</div>
 					<h1 className="text-2xl font-semibold text-stone-900 dark:text-stone-50 mb-2">
-						Достъп до „Моя ферма“
+						Регистрация и достъп до „Моя ферма“
 					</h1>
 					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-						Въведи имейла си — ще получиш връзка за вход без парола. Така
-						имаш личен професионален панел за стопанството си.
+						Въведи имейла си — ще получиш връзка за вход без парола. При първи
+						вход профилът се създава автоматично, без отделна форма.
 					</p>
 				</div>
 
@@ -176,7 +191,7 @@ export function VhodForm() {
 								<label
 									htmlFor="vhod-email"
 									className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-1.5">
-									Имейл
+									Служебен имейл
 								</label>
 								<input
 									id="vhod-email"
@@ -185,7 +200,7 @@ export function VhodForm() {
 									autoComplete="email"
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
-									placeholder="you@example.com"
+									placeholder="name@company.bg"
 									className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm bg-white dark:bg-stone-950/80 dark:text-stone-100 focus:outline-none focus:border-teal-500/60"
 								/>
 							</div>

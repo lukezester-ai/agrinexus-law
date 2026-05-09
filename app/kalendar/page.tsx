@@ -21,21 +21,6 @@ const SEASON_MONTHS: Record<Exclude<SeasonFilter, "all">, number[]> = {
 	autumn: [9, 10, 11],
 };
 
-const MONTH_PHOTO_BG: Record<number, string> = {
-	1: "https://images.unsplash.com/photo-1549737221-bef65e2604bc?auto=format&fit=crop&w=1200&q=80",
-	2: "https://images.unsplash.com/photo-1515471209610-2c5b8b35f7b8?auto=format&fit=crop&w=1200&q=80",
-	3: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80",
-	4: "https://images.unsplash.com/photo-1492496913980-501348b61469?auto=format&fit=crop&w=1200&q=80",
-	5: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80",
-	6: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
-	7: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?auto=format&fit=crop&w=1200&q=80",
-	8: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=80",
-	9: "https://images.unsplash.com/photo-1472145246862-b24cf25c4a36?auto=format&fit=crop&w=1200&q=80",
-	10: "https://images.unsplash.com/photo-1501877008226-4fca48ee50c1?auto=format&fit=crop&w=1200&q=80",
-	11: "https://images.unsplash.com/photo-1472141521881-95d0e87e2e39?auto=format&fit=crop&w=1200&q=80",
-	12: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80",
-};
-
 function seasonLabelBg(key: SeasonFilter): string {
 	switch (key) {
 		case "all":
@@ -171,12 +156,6 @@ export default function KalendarPage() {
 							<div
 								key={m}
 								className="bg-white dark:bg-stone-900/95 rounded-xl border border-stone-200 dark:border-stone-700 p-4 shadow-sm">
-								<img
-									src={MONTH_PHOTO_BG[m]}
-									alt={`${monthName} сезонна снимка`}
-									loading="lazy"
-									className="w-full h-32 object-cover rounded-lg mb-3 border border-stone-200/80 dark:border-stone-700"
-								/>
 								<h2 className="font-semibold text-stone-900 dark:text-stone-50 mb-2 flex items-center gap-2">
 									<span className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-sm">
 										{m}
