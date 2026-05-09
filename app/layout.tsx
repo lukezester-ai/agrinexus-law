@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AnalyticsLoader } from "@/components/analytics-loader";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
+import { PwaRegister } from "@/components/pwa-register";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
 import "./globals.css";
@@ -19,6 +20,7 @@ const metadataBase = (() => {
 
 export const metadata: Metadata = {
   metadataBase,
+  manifest: "/manifest.webmanifest",
   title: {
     default: "AgriNexus.Law — AI за фермери, ДФЗ и ОСП (България)",
     template: "%s · AgriNexus.Law",
@@ -64,6 +66,15 @@ export const metadata: Metadata = {
     description:
       "Субсидии, наредби, срокове и практики — на български, за български стопани.",
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: ["/icon.svg"],
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 const jsonLdGraph = buildAgriNexusLawJsonLd(siteUrl);
@@ -84,6 +95,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100">
         {children}
+        <PwaRegister />
         <ThemeToggle />
         <CookieConsentBanner />
         <AnalyticsLoader />
