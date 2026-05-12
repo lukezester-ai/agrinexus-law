@@ -2,12 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 import { authMagicLinkRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { isSupabaseAuthConfigured } from "@/lib/supabase/env";
 import { isValidEmail, normalizeEmail } from "@/lib/validation/email";
-import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/security/turnstile";
 
 type MagicLinkRequest = {
 	email?: string;
 	redirectTo?: string;
-	captchaToken?: string;
 };
 
 export async function POST(req: Request) {
@@ -31,24 +29,6 @@ export async function POST(req: Request) {
 		const body = (await req.json()) as MagicLinkRequest;
 		if (!isValidEmail(body.email)) {
 			return Response.json({ error: "Невалиден имейл адрес." }, { status: 400 });
-		}
-		if (isTurnstileConfigured()) {
-			if (!body.captchaToken?.trim()) {
-				return Response.json(
-					{ error: "Потвърди, че не си робот." },
-					{ status: 400 },
-				);
-			}
-			const captchaOk = await verifyTurnstileToken({
-				token: body.captchaToken.trim(),
-				remoteIp: ip,
-			});
-			if (!captchaOk) {
-				return Response.json(
-					{ error: "CAPTCHA проверката не беше успешна. Опитай отново." },
-					{ status: 400 },
-				);
-			}
 		}
 
 		const next =

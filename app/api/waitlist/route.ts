@@ -2,7 +2,6 @@ import { Resend } from "resend";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { waitlistRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { isValidEmail, normalizeEmail } from "@/lib/validation/email";
-import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/security/turnstile";
 import { mkdir, appendFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -47,32 +46,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, farm_type, farm_size, region, captchaToken } = await req.json();
+    const { email, farm_type, farm_size, region } = await req.json();
     if (!isValidEmail(email)) {
       return Response.json(
         { error: "Невалиден имейл адрес" },
         { status: 400 }
       );
     }
-    if (isTurnstileConfigured()) {
-      if (typeof captchaToken !== "string" || !captchaToken.trim()) {
-        return Response.json(
-          { error: "Потвърди, че не си робот." },
-          { status: 400 },
-        );
-      }
-      const captchaOk = await verifyTurnstileToken({
-        token: captchaToken.trim(),
-        remoteIp: ip,
-      });
-      if (!captchaOk) {
-        return Response.json(
-          { error: "CAPTCHA проверката не беше успешна. Опитай отново." },
-          { status: 400 },
-        );
-      }
-    }
-
     const normalizedEmail = normalizeEmail(email);
     const row = {
       email: normalizedEmail,

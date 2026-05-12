@@ -15,3 +15,7 @@ next-env.d.ts
 .vercel
 tsconfig.tsbuildinfo
 *.lnk
+.gradle/
+local.properties
+
+# Локални Android / IDE (Capacitor `android/` се комитира; това е машинен кеш)

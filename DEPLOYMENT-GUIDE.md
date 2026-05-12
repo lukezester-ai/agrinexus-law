@@ -172,8 +172,6 @@ git push -u origin main
    - RESEND_API_KEY (ако имате)
    - UPSTASH_REDIS_REST_URL (ако имате)
    - UPSTASH_REDIS_REST_TOKEN (ако имате)
-   - NEXT_PUBLIC_TURNSTILE_SITE_KEY (препоръчително за production)
-   - TURNSTILE_SECRET_KEY (препоръчително за production)
 
 6. Натиснете "Deploy"
 7. Изчакайте 2-3 минути

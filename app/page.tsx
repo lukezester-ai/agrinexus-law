@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Script from "next/script";
 import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
@@ -24,17 +23,6 @@ type FeedbackState = {
   vote: 1 | -1;
   status: "saving" | "saved" | "error";
 };
-
-declare global {
-  interface Window {
-    onWaitlistTurnstileSuccess?: (token: string) => void;
-    onWaitlistTurnstileExpired?: () => void;
-    onWaitlistTurnstileError?: () => void;
-    turnstile?: {
-      reset: () => void;
-    };
-  }
-}
 
 const CATEGORY_CARDS = [
   { title: "Субсидии", subtitle: "директни плащания и интервенции", icon: Sprout },
@@ -68,7 +56,6 @@ export default function Home() {
   const [waitlistEmailConfirmed, setWaitlistEmailConfirmed] = useState("");
   const [waitlistOk, setWaitlistOk] = useState(false);
   const [waitlistError, setWaitlistError] = useState<string | null>(null);
-  const [waitlistCaptchaToken, setWaitlistCaptchaToken] = useState<string | null>(null);
   const [chatCharacter, setChatCharacter] = useState<"elena" | "boris" | "viktoria">("elena");
   const [chatInput, setChatInput] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
@@ -76,20 +63,6 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [feedbackByLogId, setFeedbackByLogId] = useState<Record<string, FeedbackState>>({});
   const [searchFocusPulse, setSearchFocusPulse] = useState(false);
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || "";
-  const isTurnstileEnabled = Boolean(turnstileSiteKey);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.onWaitlistTurnstileSuccess = (token: string) => setWaitlistCaptchaToken(token);
-    window.onWaitlistTurnstileExpired = () => setWaitlistCaptchaToken(null);
-    window.onWaitlistTurnstileError = () => setWaitlistCaptchaToken(null);
-    return () => {
-      window.onWaitlistTurnstileSuccess = undefined;
-      window.onWaitlistTurnstileExpired = undefined;
-      window.onWaitlistTurnstileError = undefined;
-    };
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -140,10 +113,6 @@ export default function Home() {
   const onWaitlist = async (e: FormEvent) => {
     e.preventDefault();
     if (!waitlistEmail.trim()) return;
-    if (isTurnstileEnabled && !waitlistCaptchaToken) {
-      setWaitlistError("Потвърди, че не си робот.");
-      return;
-    }
     setWaitlistError(null);
     setWaitlistOk(false);
     setWaitlistEmailConfirmed("");
@@ -153,25 +122,16 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: waitlistEmail.trim(),
-          captchaToken: waitlistCaptchaToken,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string };
       if (!res.ok || !data.success) {
         setWaitlistError(data.error || "Неуспешна регистрация.");
-        setWaitlistCaptchaToken(null);
-        if (typeof window !== "undefined") {
-          window.turnstile?.reset();
-        }
         return;
       }
       setWaitlistOk(true);
       setWaitlistEmailConfirmed(waitlistEmail.trim());
       setWaitlistEmail("");
-      setWaitlistCaptchaToken(null);
-      if (typeof window !== "undefined") {
-        window.turnstile?.reset();
-      }
     } catch {
       setWaitlistError("Мрежова грешка. Опитай пак.");
     }
@@ -408,25 +368,9 @@ export default function Home() {
             </div>
           ) : (
             <form onSubmit={onWaitlist} className="mt-4 flex max-w-lg flex-col gap-2 sm:flex-row">
-              {isTurnstileEnabled ? (
-                <>
-                  <Script
-                    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-                    strategy="afterInteractive"
-                  />
-                  <div
-                    className="cf-turnstile"
-                    data-sitekey={turnstileSiteKey}
-                    data-callback="onWaitlistTurnstileSuccess"
-                    data-expired-callback="onWaitlistTurnstileExpired"
-                    data-error-callback="onWaitlistTurnstileError"
-                  />
-                </>
-              ) : null}
               <input type="email" required value={waitlistEmail} onChange={(e) => setWaitlistEmail(e.target.value)} placeholder="Твоят имейл" className="flex-1 rounded-lg px-3 py-2 text-sm text-stone-900 outline-none" />
               <button
                 type="submit"
-                disabled={isTurnstileEnabled && !waitlistCaptchaToken}
                 className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-800 disabled:opacity-60"
               >
                 Абонирай ме
