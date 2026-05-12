@@ -42,6 +42,53 @@ function lexicalKey(doc: KnowledgeDoc): string {
 }
 
 /**
+ * Статичните chunks в DB ползват същото `source_id` като lexical `doc:${id}`.
+ * След RRF+bonus може да присъстват и целият документ, и chunks — еднакъв източник,
+ * двойно в prompt-а. Запазваме страната с по-висок score; при равенство — chunks
+ * (обикновено по-компактни от целия doc).
+ */
+function dedupeStaticDocVersusChunks(fused: Map<string, RetrievedItem>): void {
+  const docKeyBySourceId = new Map<string, string>();
+  const staticChunkKeysBySourceId = new Map<string, string[]>();
+
+  for (const [key, item] of fused.entries()) {
+    if (key.startsWith("doc:")) {
+      docKeyBySourceId.set(key.slice(4), key);
+    }
+    if (
+      item.source_type === "static" &&
+      item.source_id &&
+      key.startsWith("chunk:")
+    ) {
+      const list = staticChunkKeysBySourceId.get(item.source_id) ?? [];
+      list.push(key);
+      staticChunkKeysBySourceId.set(item.source_id, list);
+    }
+  }
+
+  for (const [sourceId, docKey] of docKeyBySourceId) {
+    const chunkKeys = staticChunkKeysBySourceId.get(sourceId);
+    if (!chunkKeys?.length) continue;
+
+    const docItem = fused.get(docKey);
+    if (!docItem) continue;
+
+    let bestChunkScore = Number.NEGATIVE_INFINITY;
+    for (const ck of chunkKeys) {
+      const ch = fused.get(ck);
+      if (ch) bestChunkScore = Math.max(bestChunkScore, ch.score);
+    }
+    if (bestChunkScore === Number.NEGATIVE_INFINITY) continue;
+
+    if (docItem.score > bestChunkScore) {
+      for (const ck of chunkKeys) fused.delete(ck);
+    } else {
+      fused.delete(docKey);
+    }
+  }
+}
+
+/**
  * Намира релевантните парчета (chunks) и/или цели документи за дадена заявка.
  * Ако RAG е изключен / Supabase не е достъпен → връща само BM25 резултати.
  */
@@ -133,6 +180,8 @@ export async function hybridRetrieve(
       }
     }
   }
+
+  dedupeStaticDocVersusChunks(fused);
 
   return Array.from(fused.values())
     .sort((a, b) => b.score - a.score)

@@ -23,6 +23,11 @@ const redis = upstash
     })
   : null;
 
+/** Споделен Redis клиент за брояч на посещения и др. (null без env). */
+export function getUpstashRedis(): Redis | null {
+  return redis;
+}
+
 export const chatRateLimit = redis
   ? new Ratelimit({
       redis,
@@ -56,6 +61,26 @@ export const searchRateLimit = redis
       limiter: Ratelimit.slidingWindow(40, "1 m"),
       analytics: true,
       prefix: "ratelimit:search",
+    })
+  : null;
+
+/** RAG insights за статистики — вдига embeddings; по-строг лимит от общото търсене. */
+export const statistikiInsightsRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(20, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:statistiki-insights",
+    })
+  : null;
+
+/** POST към брояч на посещения — ограничение срещу надуване на брояча. */
+export const visitCounterPostRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(120, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:visit-counter-post",
     })
   : null;
 

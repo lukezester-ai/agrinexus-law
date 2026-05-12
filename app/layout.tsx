@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyticsLoader } from "@/components/analytics-loader";
+import { SiteVisitTracker } from "@/components/site-visit-tracker";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { PwaHelpButton } from "@/components/pwa-help-button";
 import { PwaOnboarding } from "@/components/pwa-onboarding";
@@ -108,6 +109,7 @@ export default function RootLayout({
         <ThemeToggle />
         <CookieConsentBanner />
         <AnalyticsLoader />
+        <SiteVisitTracker />
       </body>
     </html>
   );

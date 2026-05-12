@@ -1,5 +1,10 @@
 import { getRagContext } from "@/lib/rag/hybrid-search";
 import { getKnowledgeContext } from "@/lib/knowledge/dfz-knowledge";
+import {
+  checkRateLimit,
+  extractClientIp,
+  statistikiInsightsRateLimit,
+} from "@/lib/utils/rate-limit";
 
 function toShortSnippet(text: string): string {
 	const cleaned = text.replace(/\s+/g, " ").trim();
@@ -20,6 +25,15 @@ function fallbackBullets(context: string): string[] {
 
 export async function POST(req: Request) {
 	try {
+		const ip = extractClientIp(req);
+		const rateLimitResult = await checkRateLimit(statistikiInsightsRateLimit, ip);
+		if (!rateLimitResult.success) {
+			return Response.json(
+				{ error: "Твърде много заявки. Изчакай малко и опитай пак." },
+				{ status: 429 },
+			);
+		}
+
 		const body = (await req.json()) as { query?: string };
 		const query = (body.query || "").trim();
 		if (!query) {

@@ -3,8 +3,10 @@ import { runDocumentIngest } from "@/lib/ingest/run";
 function isAuthorized(req: Request): boolean {
   const required = process.env.INGEST_ADMIN_TOKEN?.trim();
   if (!required) return false;
-  const got = req.headers.get("x-ingest-token")?.trim();
-  return Boolean(got && got === required);
+  const headerToken =
+    req.headers.get("x-ingest-token")?.trim() ||
+    req.headers.get("authorization")?.trim().replace(/^Bearer\s+/i, "");
+  return Boolean(headerToken && headerToken === required);
 }
 
 export async function POST(req: Request) {
