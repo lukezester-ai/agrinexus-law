@@ -1,4 +1,4 @@
-const CACHE_NAME = "agrinexus-pwa-v2";
+const CACHE_NAME = "agrinexus-pwa-v3";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/icon-192", "/icon-512"];
 
 self.addEventListener("install", (event) => {
@@ -21,6 +21,17 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  // Шрифтове за PDF: без SW кеш/логика — избягва грешни отговори и опростява зареждането.
+  try {
+    const u = new URL(event.request.url);
+    if (u.pathname.startsWith("/fonts/")) {
+      event.respondWith(fetch(event.request));
+      return;
+    }
+  } catch {
+    /* ignore */
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

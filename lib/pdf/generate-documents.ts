@@ -12,7 +12,12 @@ function fontUrlsInOrder(): string[] {
 		typeof process !== "undefined" && process.env.NEXT_PUBLIC_BASE_PATH
 			? process.env.NEXT_PUBLIC_BASE_PATH.replace(/\/?$/, "/")
 			: "/";
-	return [`${base}fonts/NotoSans-Regular.ttf`, NOTO_TTF_CDN];
+	const relative = `${base}fonts/NotoSans-Regular.ttf`.replace(/([^:])\/{2,}/g, "$1/");
+	if (typeof window !== "undefined" && window.location?.origin) {
+		const path = relative.startsWith("/") ? relative : `/${relative}`;
+		return [`${window.location.origin}${path}`, relative, NOTO_TTF_CDN];
+	}
+	return [relative, NOTO_TTF_CDN];
 }
 
 function assertBinaryLooksLikeTtf(buf: ArrayBuffer): void {
@@ -76,6 +81,14 @@ function wrapLines(text: string, maxChars: number): string[] {
 	return lines.length ? lines : [""];
 }
 
+async function embedCyrillicFont(pdfDoc: PDFDocument, fontBytes: ArrayBuffer | Uint8Array) {
+	try {
+		return await pdfDoc.embedFont(fontBytes, { subset: true });
+	} catch {
+		return await pdfDoc.embedFont(fontBytes, { subset: false });
+	}
+}
+
 async function pageWithHeader(
 	pdfDoc: PDFDocument,
 	title: string,
@@ -83,7 +96,7 @@ async function pageWithHeader(
 	footerNote: string,
 ): Promise<void> {
 	const fontBytes = await loadCyrillicFontBytes();
-	const font = await pdfDoc.embedFont(fontBytes, { subset: true });
+	const font = await embedCyrillicFont(pdfDoc, fontBytes);
 	const page = pdfDoc.addPage([595, 842]);
 	const { height } = page.getSize();
 	let y = height - 56;
