@@ -21,12 +21,6 @@ export type CommandMissingDoc = {
 	hint: LocalizedLine;
 };
 
-export type CommandRisk = {
-	id: string;
-	severity: "high" | "medium";
-	label: LocalizedLine;
-};
-
 /** Кампания 2026 — датите са ориентир (не правно обвързващи). */
 export const COMMAND_DEADLINES: CommandDeadline[] = [
 	{
@@ -129,8 +123,8 @@ export function getMissingDocuments(profile: FarmerLocalProfile): CommandMissing
 				en: "You are missing land use / tenure proof (lease, rental contract, or ownership document).",
 			},
 			hint: {
-				bg: "Без него рискуваш отказ или санкция при кръстосъответствие.",
-				en: "Without it you risk refusal or penalties in cross-compliance checks.",
+				bg: "Без него е възможен отказ или корекция при проверка за съответствие.",
+				en: "Without it you may face refusal or corrections in compliance checks.",
 			},
 		});
 	}
@@ -143,8 +137,8 @@ export function getMissingDocuments(profile: FarmerLocalProfile): CommandMissing
 				en: "Missing confirmation of the bank account for DAFS payments.",
 			},
 			hint: {
-				bg: "Провери ИСУН и банката за актуален IBAN.",
-				en: "Check ISUN and your bank for the correct IBAN.",
+				bg: "Провери ИСУН и потвърди сметката за плащания от ДФЗ с банката си.",
+				en: "Check ISUN and confirm your payment account with your bank.",
 			},
 		});
 	}
@@ -157,90 +151,13 @@ export function getMissingDocuments(profile: FarmerLocalProfile): CommandMissing
 				en: "Valid organic certificate is missing while organic / eco-scheme is declared.",
 			},
 			hint: {
-				bg: "Това е висок риск от санкция и отказано плащане.",
-				en: "High risk of sanctions and denied payments.",
-			},
-		});
-	}
-
-	if (!profile.uin.trim()) {
-		out.push({
-			id: "uin",
-			label: {
-				bg: "Липсва ЕГН / ЕИК в профила — полезно за автоматично попълване на документи.",
-				en: "Personal or company ID missing in profile — useful for document autofill.",
-			},
-			hint: {
-				bg: "Попълни полето по-долу.",
-				en: "Fill in the field below.",
+				bg: "Възможен е отказ на плащане или допълнителна проверка — уточни с консултант.",
+				en: "Payment refusal or extra verification is possible — confirm with an adviser.",
 			},
 		});
 	}
 
 	return out;
-}
-
-export function getRiskFlags(profile: FarmerLocalProfile): CommandRisk[] {
-	const risks: CommandRisk[] = [];
-	const dec = Number(String(profile.decares).replace(",", "."));
-	const hasArea = Number.isFinite(dec) && dec > 0;
-
-	if (profile.declaresOrganic && !profile.hasOrganicCertificate) {
-		risks.push({
-			id: "organic-sanction",
-			severity: "high",
-			label: {
-				bg: "Имаш риск от санкция при проверка: декларирано био без валиден сертификат.",
-				en: "Sanction risk on inspection: organic declared without a valid certificate.",
-			},
-		});
-	}
-
-	if (hasArea && !profile.hasLandRightsDoc) {
-		risks.push({
-			id: "land-gap",
-			severity: "high",
-			label: {
-				bg: "Имаш риск от несъответствие на площите без документ за ползване.",
-				en: "Risk of area mismatch without land use documentation.",
-			},
-		});
-	}
-
-	if (hasArea && dec > 5000) {
-		risks.push({
-			id: "area-sanity",
-			severity: "medium",
-			label: {
-				bg: "Провери декларираните декари — необичайно голяма стойност за тестов профил.",
-				en: "Verify declared decares — unusually large value for a test profile.",
-			},
-		});
-	}
-
-	if (risks.length === 0 && hasArea && profile.hasLandRightsDoc && profile.hasBankAccountVerified) {
-		risks.push({
-			id: "ok-continue",
-			severity: "medium",
-			label: {
-				bg: "Няма автоматично открити критични рискове по тези полета — потвърди със специалист преди подаване.",
-				en: "No critical risks auto-detected from these fields — confirm with an adviser before filing.",
-			},
-		});
-	}
-
-	if (risks.length === 0) {
-		risks.push({
-			id: "profile-incomplete",
-			severity: "medium",
-			label: {
-				bg: "Попълни профила и площите — без това не можем да оценим реални рискове и липсващи документи.",
-				en: "Complete your profile and area — without it we cannot assess real risks or missing documents.",
-			},
-		});
-	}
-
-	return risks;
 }
 
 export function line(lang: "bg" | "en", L: LocalizedLine): string {

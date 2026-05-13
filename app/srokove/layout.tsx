@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Твоите срокове и документи — ДФЗ",
+	title: "Твоите срокове и чернови PDF — ДФЗ",
 	description:
-		"Ориентировъчни срокове за кампания, чеклист документи и рискове според профил — AgriNexus.Law.",
+		"Ориентировъчни срокове за кампания и работни PDF чернови — AgriNexus.Law.",
 	openGraph: {
 		title: "Твоите срокове · AgriNexus.Law",
-		description: "До кога, какво липсва и къде има риск — потвърди в ИСУН и dfz.bg.",
+		description: "Ключови дати и чернови PDF — потвърди в ИСУН и dfz.bg.",
 	},
 };
 

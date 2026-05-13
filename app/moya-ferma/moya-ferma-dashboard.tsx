@@ -119,8 +119,8 @@ export function MoyaFermaDashboard() {
 		},
 		{
 			href: "/srokove",
-			title: "Твоите срокове и документи",
-			desc: "Ориентировъчни дати ДФЗ, липсващи документи и рискове според профил.",
+			title: "Твоите срокове",
+			desc: "Ориентировъчни дати ДФЗ и чернови PDF.",
 			icon: (
 				<ClipboardList size={22} className="text-[#0d9488] dark:text-teal-400" />
 			),

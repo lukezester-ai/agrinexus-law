@@ -20,7 +20,7 @@ export default function SrokovePage() {
 					</Link>
 					<span className="flex items-center gap-2 text-sm font-medium text-stone-900 dark:text-stone-100 sm:text-base">
 						<CalendarClock size={18} className="text-[#0d9488] shrink-0" aria-hidden />
-						AgriNexus-Law · {lang === "bg" ? "Срокове и документи" : "Deadlines & paperwork"}
+						AgriNexus-Law · {lang === "bg" ? "Срокове и PDF" : "Deadlines & PDF"}
 					</span>
 					<div className="flex items-center gap-2">
 						<div className="flex rounded-lg border border-stone-200 dark:border-stone-600 overflow-hidden">
