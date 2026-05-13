@@ -123,7 +123,9 @@ export function VhodForm() {
 
 					{!configured && (
 						<p className="text-sm text-amber-900 dark:text-amber-100/95 leading-relaxed bg-amber-50 dark:bg-amber-950/35 border border-amber-200/90 dark:border-amber-800/50 rounded-lg px-3 py-2.5">
-							Тук изпращането на връзката е изключено, защото липсват{" "}
+							Изпращането на връзката е изключено, защото magic link-ът се вика към{" "}
+							<strong className="font-medium">Supabase Auth</strong> — нужни са адресът
+							на проекта и публичният anon ключ. Без{" "}
 							<code className="text-[11px] bg-white/80 dark:bg-stone-900 px-1 rounded">
 								NEXT_PUBLIC_SUPABASE_URL
 							</code>{" "}
@@ -131,8 +133,9 @@ export function VhodForm() {
 							<code className="text-[11px] bg-white/80 dark:bg-stone-900 px-1 rounded">
 								NEXT_PUBLIC_SUPABASE_ANON_KEY
 							</code>{" "}
-							в средата. Ползвай чата и профила локално; след настройка на
-							Supabase полето по-долу изпраща връзка за регистрация и вход.
+							в средата (.env) заявката няма къде да отиде и имейл няма да се изпрати.
+							Ползвай чата и профила локално; след като добавиш ключовете и рестартираш
+							dev сървъра, полето по-долу изпраща връзка за регистрация и вход.
 						</p>
 					)}
 
