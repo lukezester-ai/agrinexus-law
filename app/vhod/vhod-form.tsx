@@ -53,7 +53,7 @@ export function VhodForm() {
 
 			setStatus("sent");
 			setMessage(
-				"Изпратихме връзка на имейла ти. Няма парола — отвори писмото и потвърди входа. При първи достъп акаунтът се създава автоматично.",
+				"Изпратихме връзка на имейла ти. Няма парола — отвори писмото и потвърди. При първо потвърждение се създава акаунт; при следващи — вход.",
 			);
 		} catch {
 			setStatus("error");
@@ -83,11 +83,12 @@ export function VhodForm() {
 						🌾
 					</div>
 					<h1 className="text-2xl font-semibold text-stone-900 dark:text-stone-50 mb-2">
-						Достъп до „Моя ферма“ само с имейл
+						Регистрация и вход в „Моя ферма“ с имейл
 					</h1>
 					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-						Няма парола и отделна регистрационна форма: въведи имейла си, потвърди
-						връзката от пощата си и при първи вход акаунтът се създава автоматично.
+						Няма парола и отделна регистрационна страница: един и същи имейл и връзка
+						от пощата ти служат и за първа регистрация, и за следващи входове. При
+						първо потвърждение акаунтът се създава автоматично.
 					</p>
 				</div>
 
@@ -99,19 +100,43 @@ export function VhodForm() {
 						</p>
 					)}
 
-					{!configured ? (
-						<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-							В тази среда акаунтите не са активни (липсват{" "}
-							<code className="text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded">
+					<div className="grid gap-3 sm:grid-cols-2">
+						<div className="rounded-xl border border-stone-200/90 bg-stone-50/80 px-3 py-3 dark:border-stone-700 dark:bg-stone-800/40">
+							<p className="text-xs font-semibold uppercase tracking-wide text-[#0d9488] dark:text-teal-400">
+								Регистрация
+							</p>
+							<p className="mt-1 text-xs text-stone-600 dark:text-stone-400 leading-snug">
+								Нов потребител: въведи имейл и потвърди връзката — така се създава
+								акаунтът.
+							</p>
+						</div>
+						<div className="rounded-xl border border-stone-200/90 bg-stone-50/80 px-3 py-3 dark:border-stone-700 dark:bg-stone-800/40">
+							<p className="text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+								Вход
+							</p>
+							<p className="mt-1 text-xs text-stone-600 dark:text-stone-400 leading-snug">
+								Вече имаш акаунт: същият имейл и същата връзка от пощата — без
+								парола.
+							</p>
+						</div>
+					</div>
+
+					{!configured && (
+						<p className="text-sm text-amber-900 dark:text-amber-100/95 leading-relaxed bg-amber-50 dark:bg-amber-950/35 border border-amber-200/90 dark:border-amber-800/50 rounded-lg px-3 py-2.5">
+							Тук изпращането на връзката е изключено, защото липсват{" "}
+							<code className="text-[11px] bg-white/80 dark:bg-stone-900 px-1 rounded">
 								NEXT_PUBLIC_SUPABASE_URL
 							</code>{" "}
 							и{" "}
-							<code className="text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded">
+							<code className="text-[11px] bg-white/80 dark:bg-stone-900 px-1 rounded">
 								NEXT_PUBLIC_SUPABASE_ANON_KEY
-							</code>
-							). Ползвай чата и профила локално; входът ще работи след настройка.
+							</code>{" "}
+							в средата. Ползвай чата и профила локално; след настройка на
+							Supabase полето по-долу изпраща връзка за регистрация и вход.
 						</p>
-					) : status === "sent" ? (
+					)}
+
+					{configured && status === "sent" ? (
 						<div className="text-center py-4 space-y-3">
 							<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200 mx-auto">
 								<Mail size={22} aria-hidden />
@@ -135,17 +160,18 @@ export function VhodForm() {
 								<label
 									htmlFor="vhod-email"
 									className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-1.5">
-									Служебен имейл
+									Имейл за регистрация или вход
 								</label>
 								<input
 									id="vhod-email"
 									type="email"
-									required
+									required={configured}
 									autoComplete="email"
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
 									placeholder="name@company.bg"
-									className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm bg-white dark:bg-stone-950/80 dark:text-stone-100 focus:outline-none focus:border-teal-500/60"
+									disabled={!configured}
+									className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm bg-white dark:bg-stone-950/80 dark:text-stone-100 focus:outline-none focus:border-teal-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
 								/>
 							</div>
 
@@ -157,8 +183,8 @@ export function VhodForm() {
 
 							<button
 								type="submit"
-								disabled={status === "sending"}
-								className="w-full py-3 rounded-lg text-sm font-medium text-white flex items-center justify-center gap-2 disabled:opacity-60 transition"
+								disabled={!configured || status === "sending"}
+								className="w-full py-3 rounded-lg text-sm font-medium text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
 								style={{ background: "#0d9488" }}>
 								{status === "sending" ? (
 									<>
@@ -168,7 +194,7 @@ export function VhodForm() {
 								) : (
 									<>
 										<Mail size={18} aria-hidden />
-										Изпрати връзка за вход
+										Изпрати връзка за регистрация или вход
 									</>
 								)}
 							</button>
@@ -176,7 +202,7 @@ export function VhodForm() {
 					)}
 
 					<p className="text-xs text-stone-500 dark:text-stone-400 text-center leading-relaxed">
-						С вход потвърждаваш, че си запознат с{" "}
+						С регистрация или вход потвърждаваш, че си запознат с{" "}
 						<Link href="/terms" className="underline hover:text-stone-700 dark:hover:text-stone-200">
 							условията
 						</Link>{" "}

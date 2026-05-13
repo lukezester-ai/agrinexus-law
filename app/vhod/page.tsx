@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { VhodForm } from "./vhod-form";
 
 export const metadata: Metadata = {
-	title: "„Моя ферма“ — вход само с имейл | AgriNexus.Law",
+	title: "„Моя ферма“ — регистрация и вход с имейл | AgriNexus.Law",
 	description:
-		"Magic link по имейл за панела „Моя ферма“: без парола, при първи вход акаунтът се създава автоматично.",
+		"Регистрация и вход с един magic link по имейл за „Моя ферма“: без парола; при първо потвърждение акаунтът се създава автоматично.",
 	robots: { index: false },
 };
 
