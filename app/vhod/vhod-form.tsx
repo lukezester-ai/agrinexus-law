@@ -135,7 +135,7 @@ export function VhodForm() {
 								<label
 									htmlFor="vhod-email"
 									className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-1.5">
-									Имейл за връзка за вход
+									Служебен имейл
 								</label>
 								<input
 									id="vhod-email"

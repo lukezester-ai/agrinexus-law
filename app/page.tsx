@@ -222,7 +222,7 @@ export default function Home() {
             <Link href="/search" className="hover:text-stone-900 dark:hover:text-white">Документи</Link>
             <Link href="/srokove" className="hover:text-stone-900 dark:hover:text-white">Срокове</Link>
             <Link href="/kalkulator" className="hover:text-stone-900 dark:hover:text-white">Калкулатори</Link>
-            <Link href="/vhod" className="brand-link font-medium">„Моя ферма“ — имейл</Link>
+            <Link href="/vhod" className="brand-link font-medium">„Моя ферма“ — само с имейл</Link>
           </div>
         </nav>
 
