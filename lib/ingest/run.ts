@@ -1,8 +1,16 @@
 import { discoverFilesFromIndex } from "@/lib/ingest/crawler";
+import { discoverFromRss, discoverFromSitemap } from "@/lib/ingest/feed-discovery";
 import { downloadAndPersistPublicDoc } from "@/lib/ingest/download-and-persist-public-doc";
-import { INGEST_SOURCES } from "@/lib/ingest/sources";
+import { getIngestSources } from "@/lib/ingest/sources";
 import type { IngestResult, IngestSource } from "@/lib/ingest/types";
 import { getSupabaseAdmin } from "@/lib/supabase";
+
+async function discoverFilesForSource(source: IngestSource, limit: number) {
+  const mode = source.discoverMode ?? "html";
+  if (mode === "sitemap") return discoverFromSitemap(source.indexUrl, limit);
+  if (mode === "rss") return discoverFromRss(source.indexUrl, limit);
+  return discoverFilesFromIndex(source, limit);
+}
 
 async function runForSource(source: IngestSource, limit: number): Promise<IngestResult> {
   const supabase = getSupabaseAdmin();
@@ -20,7 +28,7 @@ async function runForSource(source: IngestSource, limit: number): Promise<Ingest
   const errors: string[] = [];
 
   try {
-    const files = await discoverFilesFromIndex(source, limit);
+    const files = await discoverFilesForSource(source, limit);
     fetched = files.length;
 
     for (const file of files) {
@@ -69,8 +77,8 @@ export async function runDocumentIngest(options?: {
 }): Promise<IngestResult[]> {
   const limit = Math.min(Math.max(options?.limitPerSource ?? 10, 1), 50);
   const targets = options?.sourceName
-    ? INGEST_SOURCES.filter((s) => s.name === options.sourceName)
-    : INGEST_SOURCES;
+    ? getIngestSources().filter((s) => s.name === options.sourceName)
+    : getIngestSources();
   if (targets.length === 0) {
     throw new Error(`Unknown source: ${options?.sourceName}`);
   }

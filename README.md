@@ -63,7 +63,7 @@ agrinexus-mvp/
 
 ```bash
 # 1. Изпълни supabase-rag-setup.sql в Supabase SQL Editor (активира pgvector + създава knowledge_chunks)
-# 2. Сложи OPENAI_API_KEY, SUPABASE_*  и INGEST_ADMIN_TOKEN в .env.local
+# 2. Сложи OPENAI_API_KEY, SUPABASE_*  и INGEST_ADMIN_TOKEN в .env.local. За EUR-Lex ingest добави EUR_LEX_SITEMAP_URL и/или EUR_LEX_RSS_URL (копирай от https://eur-lex.europa.eu/robots.txt или RSS в браузър).
 # 3. Стартирай dev сървъра
 npm run dev
 
