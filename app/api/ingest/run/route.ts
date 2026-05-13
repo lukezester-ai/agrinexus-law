@@ -1,4 +1,5 @@
 import { runDocumentIngest } from "@/lib/ingest/run";
+import { runWebAgricultureDocumentIngest } from "@/lib/ingest/web-agri-discover";
 
 function isAuthorized(req: Request): boolean {
   const required = process.env.INGEST_ADMIN_TOKEN?.trim();
@@ -16,9 +17,27 @@ export async function POST(req: Request) {
 
   try {
     const body = (await req.json().catch(() => ({}))) as {
+      mode?: string;
+      topic?: string;
       sourceName?: string;
       limitPerSource?: number;
+      searchNum?: number;
+      maxDownloads?: number;
     };
+
+    if (body.mode === "web") {
+      const topic =
+        typeof body.topic === "string" && body.topic.trim()
+          ? body.topic.trim()
+          : "земеделие субсидии ОСП CAP ПСРР България";
+      const one = await runWebAgricultureDocumentIngest({
+        topic,
+        searchNum: typeof body.searchNum === "number" ? body.searchNum : undefined,
+        maxDownloads: typeof body.maxDownloads === "number" ? body.maxDownloads : undefined,
+      });
+      return Response.json({ ok: true, results: [one], mode: "web" as const });
+    }
+
     const results = await runDocumentIngest({
       sourceName: body.sourceName,
       limitPerSource: body.limitPerSource,
