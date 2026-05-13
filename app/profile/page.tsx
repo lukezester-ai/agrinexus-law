@@ -126,7 +126,7 @@ export default function ProfilePage() {
           <div className="mb-6 rounded-xl border border-amber-200/90 dark:border-amber-800/50 bg-amber-50/90 dark:bg-amber-950/25 px-4 py-3 text-sm text-amber-950 dark:text-amber-100/95 leading-relaxed">
             За личен панел „Моя ферма“ с профил, документи и инструменти —{" "}
             <Link href="/vhod" className="font-semibold underline hover:no-underline">
-              влез с имейл
+              влез само с имейл (magic link, без парола)
             </Link>
             .
           </div>
