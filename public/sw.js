@@ -1,13 +1,12 @@
-const CACHE_NAME = "agrinexus-pwa-v3";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/icon-192", "/icon-512"];
+const CACHE_NAME = "agrinexus-pwa-v4";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(APP_SHELL);
-    }),
+    Promise.all([
+      caches.open(CACHE_NAME).then((cache) => cache.add("/")),
+      self.skipWaiting(),
+    ]),
   );
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -19,41 +18,56 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+function cacheableAssetPath(pathname) {
+  return (
+    pathname === "/manifest.webmanifest" ||
+    pathname.startsWith("/icon") ||
+    pathname === "/icon.svg"
+  );
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  // Шрифтове за PDF: без SW кеш/логика — избягва грешни отговори и опростява зареждането.
+  let url;
   try {
-    const u = new URL(event.request.url);
-    if (u.pathname.startsWith("/fonts/")) {
-      event.respondWith(fetch(event.request));
-      return;
-    }
+    url = new URL(event.request.url);
   } catch {
-    /* ignore */
+    return;
+  }
+
+  // Шрифт: директно от мрежата, без SW кеш.
+  if (url.pathname.startsWith("/fonts/")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // HTML навигация: винаги мрежа първо — иначе след деплой остава стар bundle („няма промяна“).
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => res)
+        .catch(() => caches.match("/")),
+    );
+    return;
+  }
+
+  // Само икони/manifest: кеш по желание; всичко друго (вкл. /_next/) — без кеш от този SW.
+  if (!cacheableAssetPath(url.pathname)) {
+    event.respondWith(fetch(event.request));
+    return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
-            return networkResponse;
-          }
-
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-          return networkResponse;
-        })
-        .catch(() => {
-          // Не подменяй шрифтове/API с HTML от „/“ — това чупи pdf-lib (изглежда като мрежа/шрифт).
-          if (event.request.mode === "navigate") {
-            return caches.match("/");
-          }
-          return Response.error();
-        });
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.ok && networkResponse.type === "basic") {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return networkResponse;
+      });
     }),
   );
 });

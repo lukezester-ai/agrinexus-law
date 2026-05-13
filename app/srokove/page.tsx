@@ -56,6 +56,10 @@ export default function SrokovePage() {
 			</nav>
 
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+				<p className="text-[11px] text-stone-400 dark:text-stone-500 mb-4 font-mono">
+					{lang === "bg" ? "Версия на приложението:" : "App build:"}{" "}
+					{process.env.NEXT_PUBLIC_APP_REV ?? "—"}
+				</p>
 				<FarmerCommandPanel lang={lang} />
 			</main>
 		</div>
