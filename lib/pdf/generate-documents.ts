@@ -1,6 +1,11 @@
 import { PDFDocument, rgb } from "pdf-lib";
 import type { FarmerLocalProfile } from "@/lib/farmer-profile-storage";
 
+export type FarmerPdfOptions = {
+	/** Ако е зададено (напр. от API route), не се ползва fetch в браузъра за шрифт. */
+	loadFont?: () => Promise<ArrayBuffer>;
+};
+
 /** Резерв, ако локалният файл в `public/fonts/` липсва (стари билдове). */
 const NOTO_TTF_CDN =
 	"https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf";
@@ -64,6 +69,11 @@ function loadCyrillicFontBytes(): Promise<ArrayBuffer> {
 	return fontBytesPromise;
 }
 
+async function resolveFontBytes(opts?: FarmerPdfOptions): Promise<ArrayBuffer> {
+	if (opts?.loadFont) return opts.loadFont();
+	return loadCyrillicFontBytes();
+}
+
 function wrapLines(text: string, maxChars: number): string[] {
 	const words = text.split(/\s+/);
 	const lines: string[] = [];
@@ -94,8 +104,9 @@ async function pageWithHeader(
 	title: string,
 	bodyLines: string[],
 	footerNote: string,
+	opts?: FarmerPdfOptions,
 ): Promise<void> {
-	const fontBytes = await loadCyrillicFontBytes();
+	const fontBytes = await resolveFontBytes(opts);
 	const font = await embedCyrillicFont(pdfDoc, fontBytes);
 	const page = pdfDoc.addPage([595, 842]);
 	const { height } = page.getSize();
@@ -117,7 +128,10 @@ async function pageWithHeader(
 }
 
 /** Декларация — образец за попълване (не е официален бланк на ДФЗ). */
-export async function buildDeclarationPdf(profile: FarmerLocalProfile): Promise<Uint8Array> {
+export async function buildDeclarationPdf(
+	profile: FarmerLocalProfile,
+	opts?: FarmerPdfOptions,
+): Promise<Uint8Array> {
 	const pdfDoc = await PDFDocument.create();
 	const body = [
 		`Декларирам, че данните по-долу са верни към датата на подписване:`,
@@ -136,11 +150,15 @@ export async function buildDeclarationPdf(profile: FarmerLocalProfile): Promise<
 		"ДЕКЛАРАЦИЯ (образец за чернова)",
 		body,
 		"Този файл е с ориентировъчен характер. Провери текста със специалист и използвай актуални бланци от ДФЗ / ИСУН.",
+		opts,
 	);
 	return pdfDoc.save();
 }
 
-export async function buildApplicationSummaryPdf(profile: FarmerLocalProfile): Promise<Uint8Array> {
+export async function buildApplicationSummaryPdf(
+	profile: FarmerLocalProfile,
+	opts?: FarmerPdfOptions,
+): Promise<Uint8Array> {
 	const pdfDoc = await PDFDocument.create();
 	const body = [
 		`ОБОБЩЕНИЕ ЗА ЗАЯВЛЕНИЕ (чернова)`,
@@ -161,11 +179,15 @@ export async function buildApplicationSummaryPdf(profile: FarmerLocalProfile): P
 		"ЗАЯВЛЕНИЕ — обобщение",
 		body,
 		"Генерирано от AgriNexus. Не е подписан документ за държавни органи.",
+		opts,
 	);
 	return pdfDoc.save();
 }
 
-export async function buildLeaseContractDraftPdf(profile: FarmerLocalProfile): Promise<Uint8Array> {
+export async function buildLeaseContractDraftPdf(
+	profile: FarmerLocalProfile,
+	opts?: FarmerPdfOptions,
+): Promise<Uint8Array> {
 	const pdfDoc = await PDFDocument.create();
 	const body = [
 		`ДОГОВОР ЗА АРЕНДА НА ЗЕМЕДЕЛСКА ЗЕМЯ (ЧЕРНОВА)`,
@@ -186,11 +208,15 @@ export async function buildLeaseContractDraftPdf(profile: FarmerLocalProfile): P
 		"ДОГОВОР — чернова",
 		body,
 		"Образец за преговори. Задължителен преглед от юрист. AgriNexus не носи отговорност за съдържанието.",
+		opts,
 	);
 	return pdfDoc.save();
 }
 
-export async function buildStatementPdf(profile: FarmerLocalProfile): Promise<Uint8Array> {
+export async function buildStatementPdf(
+	profile: FarmerLocalProfile,
+	opts?: FarmerPdfOptions,
+): Promise<Uint8Array> {
 	const pdfDoc = await PDFDocument.create();
 	const body = [
 		`СПРАВКА ЗА СТОПАНСКИ ДАННИ (чернова)`,
@@ -202,16 +228,19 @@ export async function buildStatementPdf(profile: FarmerLocalProfile): Promise<Ui
 		``,
 		`Справката е предназначена за вътрешна употреба и приложение към банка / доставчик / партньор.`,
 	];
-	await pageWithHeader(pdfDoc, "СПРАВКА", body, "Не е официален документ на държавна институция.");
+	await pageWithHeader(pdfDoc, "СПРАВКА", body, "Не е официален документ на държавна институция.", opts);
 	return pdfDoc.save();
 }
 
 /** Обединен PDF — четири страници. */
-export async function buildDocumentPackPdf(profile: FarmerLocalProfile): Promise<Uint8Array> {
-	const dec = await buildDeclarationPdf(profile);
-	const app = await buildApplicationSummaryPdf(profile);
-	const lease = await buildLeaseContractDraftPdf(profile);
-	const stmt = await buildStatementPdf(profile);
+export async function buildDocumentPackPdf(
+	profile: FarmerLocalProfile,
+	opts?: FarmerPdfOptions,
+): Promise<Uint8Array> {
+	const dec = await buildDeclarationPdf(profile, opts);
+	const app = await buildApplicationSummaryPdf(profile, opts);
+	const lease = await buildLeaseContractDraftPdf(profile, opts);
+	const stmt = await buildStatementPdf(profile, opts);
 
 	const merged = await PDFDocument.create();
 	for (const bytes of [dec, app, lease, stmt]) {

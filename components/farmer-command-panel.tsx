@@ -8,15 +8,8 @@ import {
 	line,
 	type CommandDeadline,
 } from "@/lib/command-center-data";
-import { profileForPdf } from "@/lib/farmer-profile-storage";
-import {
-	buildApplicationSummaryPdf,
-	buildDeclarationPdf,
-	buildDocumentPackPdf,
-	buildLeaseContractDraftPdf,
-	buildStatementPdf,
-	downloadPdfBytes,
-} from "@/lib/pdf/generate-documents";
+import { profileForPdf, type FarmerLocalProfile } from "@/lib/farmer-profile-storage";
+import { downloadPdfBytes } from "@/lib/pdf/generate-documents";
 
 type Lang = "bg" | "en";
 
@@ -80,6 +73,40 @@ const UI: Record<
 
 type Props = { lang?: Lang };
 
+type PdfKind = "declaration" | "application" | "lease" | "statement" | "pack";
+
+const PDF_DOWNLOAD_NAMES: Record<PdfKind, string> = {
+	declaration: "agrinexus-deklaratsiya-chernova.pdf",
+	application: "agrinexus-zayavlenie-obobshtenie.pdf",
+	lease: "agrinexus-dogovor-arenda-chernova.pdf",
+	statement: "agrinexus-spravka.pdf",
+	pack: "agrinexus-paket-dokumenti.pdf",
+};
+
+async function fetchFarmerPdf(kind: PdfKind, profile: FarmerLocalProfile): Promise<Uint8Array> {
+	const res = await fetch("/api/farmer-pdf", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ kind, profile }),
+	});
+	if (!res.ok) {
+		let detail = res.statusText;
+		try {
+			const j = (await res.json()) as { error?: string };
+			if (typeof j.error === "string" && j.error.length) detail = j.error;
+		} catch {
+			try {
+				const t = await res.text();
+				if (t.length && t.length < 500) detail = t;
+			} catch {
+				/* ignore */
+			}
+		}
+		throw new Error(detail);
+	}
+	return new Uint8Array(await res.arrayBuffer());
+}
+
 export function FarmerCommandPanel({ lang = "bg" }: Props) {
 	const tr = UI[lang];
 	const L = lang;
@@ -90,37 +117,16 @@ export function FarmerCommandPanel({ lang = "bg" }: Props) {
 	const deadlines = useMemo(() => getActiveDeadlines(), []);
 
 	const runPdf = useCallback(
-		async (kind: "declaration" | "application" | "lease" | "statement" | "pack") => {
+		async (kind: PdfKind) => {
 			setPdfErr(null);
 			setPdfBusy(kind);
 			const p = profileForPdf();
-			const buildOnce = async (): Promise<{ bytes: Uint8Array; name: string }> => {
-				if (kind === "declaration") {
-					return { bytes: await buildDeclarationPdf(p), name: "agrinexus-deklaratsiya-chernova.pdf" };
-				}
-				if (kind === "application") {
-					return {
-						bytes: await buildApplicationSummaryPdf(p),
-						name: "agrinexus-zayavlenie-obobshtenie.pdf",
-					};
-				}
-				if (kind === "lease") {
-					return {
-						bytes: await buildLeaseContractDraftPdf(p),
-						name: "agrinexus-dogovor-arenda-chernova.pdf",
-					};
-				}
-				if (kind === "statement") {
-					return { bytes: await buildStatementPdf(p), name: "agrinexus-spravka.pdf" };
-				}
-				return { bytes: await buildDocumentPackPdf(p), name: "agrinexus-paket-dokumenti.pdf" };
-			};
 			try {
 				let lastErr: unknown;
 				for (let attempt = 0; attempt < 2; attempt += 1) {
 					try {
-						const { bytes, name } = await buildOnce();
-						downloadPdfBytes(bytes, name);
+						const bytes = await fetchFarmerPdf(kind, p);
+						downloadPdfBytes(bytes, PDF_DOWNLOAD_NAMES[kind]);
 						return;
 					} catch (e) {
 						lastErr = e;
