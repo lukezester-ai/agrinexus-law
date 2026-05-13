@@ -1,16 +1,45 @@
 import { PDFDocument, rgb } from "pdf-lib";
 import type { FarmerLocalProfile } from "@/lib/farmer-profile-storage";
 
-const NOTO_TTF =
+/** Резерв, ако локалният файл в `public/fonts/` липсва (стари билдове). */
+const NOTO_TTF_CDN =
 	"https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf";
 
 let fontBytesPromise: Promise<ArrayBuffer> | null = null;
 
+function fontUrlsInOrder(): string[] {
+	const base =
+		typeof process !== "undefined" && process.env.NEXT_PUBLIC_BASE_PATH
+			? process.env.NEXT_PUBLIC_BASE_PATH.replace(/\/?$/, "/")
+			: "/";
+	return [`${base}fonts/NotoSans-Regular.ttf`, NOTO_TTF_CDN];
+}
+
+async function fetchFontFromUrl(url: string): Promise<ArrayBuffer> {
+	const r = await fetch(url);
+	if (!r.ok) throw new Error(`Font HTTP ${r.status}`);
+	return r.arrayBuffer();
+}
+
+/** Noto за кирилица: първо от същия хост, после CDN; при грешка кешът се нулира. */
 function loadCyrillicFontBytes(): Promise<ArrayBuffer> {
 	if (!fontBytesPromise) {
-		fontBytesPromise = fetch(NOTO_TTF).then(r => {
-			if (!r.ok) throw new Error("Failed to load Cyrillic font");
-			return r.arrayBuffer();
+		fontBytesPromise = (async () => {
+			let lastErr: unknown;
+			for (const url of fontUrlsInOrder()) {
+				for (let attempt = 0; attempt < 2; attempt += 1) {
+					try {
+						return await fetchFontFromUrl(url);
+					} catch (e) {
+						lastErr = e;
+						if (attempt === 0) await new Promise<void>(res => setTimeout(res, 400));
+					}
+				}
+			}
+			throw lastErr instanceof Error ? lastErr : new Error("Failed to load Cyrillic font");
+		})().catch(err => {
+			fontBytesPromise = null;
+			throw err;
 		});
 	}
 	return fontBytesPromise;

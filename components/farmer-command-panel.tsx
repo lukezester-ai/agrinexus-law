@@ -94,26 +94,40 @@ export function FarmerCommandPanel({ lang = "bg" }: Props) {
 			setPdfErr(null);
 			setPdfBusy(kind);
 			const p = profileForPdf();
-			try {
-				let bytes: Uint8Array;
-				let name: string;
+			const buildOnce = async (): Promise<{ bytes: Uint8Array; name: string }> => {
 				if (kind === "declaration") {
-					bytes = await buildDeclarationPdf(p);
-					name = "agrinexus-deklaratsiya-chernova.pdf";
-				} else if (kind === "application") {
-					bytes = await buildApplicationSummaryPdf(p);
-					name = "agrinexus-zayavlenie-obobshtenie.pdf";
-				} else if (kind === "lease") {
-					bytes = await buildLeaseContractDraftPdf(p);
-					name = "agrinexus-dogovor-arenda-chernova.pdf";
-				} else if (kind === "statement") {
-					bytes = await buildStatementPdf(p);
-					name = "agrinexus-spravka.pdf";
-				} else {
-					bytes = await buildDocumentPackPdf(p);
-					name = "agrinexus-paket-dokumenti.pdf";
+					return { bytes: await buildDeclarationPdf(p), name: "agrinexus-deklaratsiya-chernova.pdf" };
 				}
-				downloadPdfBytes(bytes, name);
+				if (kind === "application") {
+					return {
+						bytes: await buildApplicationSummaryPdf(p),
+						name: "agrinexus-zayavlenie-obobshtenie.pdf",
+					};
+				}
+				if (kind === "lease") {
+					return {
+						bytes: await buildLeaseContractDraftPdf(p),
+						name: "agrinexus-dogovor-arenda-chernova.pdf",
+					};
+				}
+				if (kind === "statement") {
+					return { bytes: await buildStatementPdf(p), name: "agrinexus-spravka.pdf" };
+				}
+				return { bytes: await buildDocumentPackPdf(p), name: "agrinexus-paket-dokumenti.pdf" };
+			};
+			try {
+				let lastErr: unknown;
+				for (let attempt = 0; attempt < 2; attempt += 1) {
+					try {
+						const { bytes, name } = await buildOnce();
+						downloadPdfBytes(bytes, name);
+						return;
+					} catch (e) {
+						lastErr = e;
+						if (attempt === 0) await new Promise<void>(r => setTimeout(r, 600));
+					}
+				}
+				throw lastErr;
 			} catch {
 				setPdfErr(tr.generateError);
 			} finally {
