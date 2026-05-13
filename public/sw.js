@@ -1,4 +1,4 @@
-const CACHE_NAME = "agrinexus-pwa-v1";
+const CACHE_NAME = "agrinexus-pwa-v2";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/icon-192", "/icon-512"];
 
 self.addEventListener("install", (event) => {
@@ -36,7 +36,13 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
           return networkResponse;
         })
-        .catch(() => caches.match("/"));
+        .catch(() => {
+          // Не подменяй шрифтове/API с HTML от „/“ — това чупи pdf-lib (изглежда като мрежа/шрифт).
+          if (event.request.mode === "navigate") {
+            return caches.match("/");
+          }
+          return Response.error();
+        });
     }),
   );
 });

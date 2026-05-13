@@ -15,10 +15,24 @@ function fontUrlsInOrder(): string[] {
 	return [`${base}fonts/NotoSans-Regular.ttf`, NOTO_TTF_CDN];
 }
 
+function assertBinaryLooksLikeTtf(buf: ArrayBuffer): void {
+	if (buf.byteLength < 6) throw new Error("Font response too small");
+	const u = new Uint8Array(buf, 0, 4);
+	// Подменен отговор (напр. SW fallback към HTML) — не е TTF/OTF.
+	if (u[0] === 0x3c) throw new Error("Font URL returned HTML or text, not a font file");
+	const tag = String.fromCharCode(u[0], u[1], u[2], u[3]);
+	if (tag === "true" || tag === "typ1" || tag === "OTTO" || tag === "ttcf") return;
+	const scaler = new DataView(buf).getUint32(0, false);
+	if (scaler === 0x00010000) return;
+	throw new Error("Font response is not a recognized TrueType/OpenType font");
+}
+
 async function fetchFontFromUrl(url: string): Promise<ArrayBuffer> {
 	const r = await fetch(url);
 	if (!r.ok) throw new Error(`Font HTTP ${r.status}`);
-	return r.arrayBuffer();
+	const buf = await r.arrayBuffer();
+	assertBinaryLooksLikeTtf(buf);
+	return buf;
 }
 
 /** Noto за кирилица: първо от същия хост, после CDN; при грешка кешът се нулира. */
