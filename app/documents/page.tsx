@@ -13,88 +13,47 @@ import {
 	getFarmerDocumentBlob,
 	isAllowedFarmerDoc,
 } from "@/lib/farmer-docs-storage";
-import {
-	deleteCloudFarmerDocument,
-	getCloudDocumentSignedUrl,
-	listCloudFarmerDocuments,
-	uploadCloudFarmerDocument,
-	type CloudFarmerDocRow,
-} from "@/lib/farmer-docs-supabase";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { useAuthUser } from "@/hooks/use-auth-user";
-
-type DocItem =
-	| { source: "local"; meta: StoredFarmerDocMeta }
-	| { source: "cloud"; row: CloudFarmerDocRow };
 
 export default function DocumentsPage() {
-	const auth = useAuthUser();
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [items, setItems] = useState<DocItem[]>([]);
+	const [items, setItems] = useState<StoredFarmerDocMeta[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
-
-	const userId = auth.status === "signed_in" ? auth.user.id : null;
 
 	const refresh = useCallback(async () => {
 		setLoading(true);
 		setError(null);
 		try {
-			const supabase = createBrowserSupabaseClient();
-			if (auth.status === "signed_in" && supabase && userId) {
-				const rows = await listCloudFarmerDocuments(supabase);
-				setItems(rows.map((row) => ({ source: "cloud", row })));
-			} else {
-				const list = await listFarmerDocuments();
-				setItems(list.map((meta) => ({ source: "local", meta })));
-			}
+			const list = await listFarmerDocuments();
+			setItems(list);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Неуспешно зареждане.");
 			setItems([]);
 		} finally {
 			setLoading(false);
 		}
-	}, [auth.status, userId]);
+	}, []);
 
 	useEffect(() => {
 		void refresh();
 	}, [refresh]);
-
-	const supabaseLive =
-		auth.status === "signed_in" ? createBrowserSupabaseClient() : null;
-	const cloudActive = auth.status === "signed_in" && Boolean(supabaseLive);
 
 	const onPickFiles = async (files: FileList | null) => {
 		if (!files?.length) return;
 		setBusy(true);
 		setError(null);
 
-		const supabase = createBrowserSupabaseClient();
-
 		try {
-			if (auth.status === "signed_in" && supabase && userId) {
-				for (let i = 0; i < files.length; i++) {
-					const file = files[i];
-					if (!isAllowedFarmerDoc(file)) {
-						setError(
-							`Файлът „${file.name}“ е твърде голям или неподдържан. Макс. ${MAX_FARMER_DOC_BYTES / (1024 * 1024)} MB.`,
-						);
-						continue;
-					}
-					await uploadCloudFarmerDocument(supabase, userId, file);
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				if (!isAllowedFarmerDoc(file)) {
+					setError(
+						`Файлът „${file.name}“ е твърде голям или неподдържан. Макс. ${MAX_FARMER_DOC_BYTES / (1024 * 1024)} MB.`,
+					);
+					continue;
 				}
-			} else {
-				for (let i = 0; i < files.length; i++) {
-					const file = files[i];
-					if (!isAllowedFarmerDoc(file)) {
-						setError(
-							`Файлът „${file.name}“ е твърде голям или неподдържан. Макс. ${MAX_FARMER_DOC_BYTES / (1024 * 1024)} MB.`,
-						);
-						continue;
-					}
-					await addFarmerDocument(file);
-				}
+				await addFarmerDocument(file);
 			}
 			await refresh();
 		} catch (e) {
@@ -105,49 +64,25 @@ export default function DocumentsPage() {
 		}
 	};
 
-	const onDownload = async (item: DocItem) => {
-		if (item.source === "local") {
-			const blob = await getFarmerDocumentBlob(item.meta.id);
-			if (!blob) {
-				setError("Файлът не е намерен.");
-				return;
-			}
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = item.meta.name;
-			a.click();
-			URL.revokeObjectURL(url);
+	const onDownload = async (meta: StoredFarmerDocMeta) => {
+		const blob = await getFarmerDocumentBlob(meta.id);
+		if (!blob) {
+			setError("Файлът не е намерен.");
 			return;
 		}
-
-		const supabase = createBrowserSupabaseClient();
-		if (!supabase) return;
-		try {
-			const url = await getCloudDocumentSignedUrl(supabase, item.row.storage_path);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = item.row.filename;
-			a.rel = "noopener noreferrer";
-			a.target = "_blank";
-			a.click();
-		} catch (e) {
-			setError(e instanceof Error ? e.message : "Неуспешно изтегляне.");
-		}
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = meta.name;
+		a.click();
+		URL.revokeObjectURL(url);
 	};
 
-	const onDelete = async (item: DocItem) => {
-		const label = item.source === "local" ? item.meta.name : item.row.filename;
-		if (!confirm(`Да се изтрие ли „${label}“?`)) return;
+	const onDelete = async (meta: StoredFarmerDocMeta) => {
+		if (!confirm(`Да се изтрие ли „${meta.name}“?`)) return;
 		setBusy(true);
 		try {
-			if (item.source === "local") {
-				await deleteFarmerDocument(item.meta.id);
-			} else {
-				const supabase = createBrowserSupabaseClient();
-				if (!supabase) throw new Error("Няма връзка със Supabase.");
-				await deleteCloudFarmerDocument(supabase, item.row);
-			}
+			await deleteFarmerDocument(meta.id);
 			await refresh();
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Изтриването не успя.");
@@ -184,27 +119,11 @@ export default function DocumentsPage() {
 						Твоите файлове от ДФЗ и др.
 					</h1>
 					<p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed max-w-lg mx-auto">
-						{cloudActive ? (
-							<>
-								Влязъл си с акаунт — файловете се записват в{" "}
-								<strong className="text-stone-800 dark:text-stone-200">
-									твоя личен контейнер в Supabase
-								</strong>{" "}
-								и са достъпни от всеки браузър, където ползваш същия имейл.
-							</>
-						) : (
-							<>
-								Файловете остават{" "}
-								<strong className="text-stone-800 dark:text-stone-200">
-									само в този браузер
-								</strong>
-								. За облак и синхрон по акаунт:{" "}
-								<Link href="/vhod" className="text-[#0d9488] dark:text-teal-400 font-medium underline">
-									вход с имейл
-								</Link>
-								.
-							</>
-						)}
+						Файловете се пазят{" "}
+						<strong className="text-stone-800 dark:text-stone-200">
+							само в този браузер
+						</strong>{" "}
+						(IndexedDB). Не се изисква вход — достъпни са веднага на това устройство.
 					</p>
 				</div>
 
@@ -246,69 +165,44 @@ export default function DocumentsPage() {
 						</div>
 					) : (
 						<ul className="divide-y divide-stone-200 dark:divide-stone-700">
-							{items.map((item) => {
-								const id = item.source === "local" ? item.meta.id : item.row.id;
-								const name =
-									item.source === "local" ? item.meta.name : item.row.filename;
-								const size =
-									item.source === "local" ? item.meta.size : item.row.byte_size;
-								const createdAt =
-									item.source === "local"
-										? item.meta.createdAt
-										: new Date(item.row.created_at).getTime();
-
-								return (
-									<li
-										key={id}
-										className="py-3 flex flex-wrap items-center gap-3 justify-between">
-										<div className="min-w-0 flex-1">
-											<p
-												className="font-medium text-sm text-stone-900 dark:text-stone-100 truncate"
-												title={name}>
-												{name}
-											</p>
-											<p className="text-xs text-stone-500 dark:text-stone-400">
-												{formatDocSize(size)} ·{" "}
-												{new Date(createdAt).toLocaleString("bg-BG")}
-												{item.source === "cloud" && (
-													<span className="ml-1 text-teal-700 dark:text-teal-400">
-														· облак
-													</span>
-												)}
-											</p>
-										</div>
-										<div className="flex items-center gap-2 shrink-0">
-											<button
-												type="button"
-												disabled={busy}
-												onClick={() => void onDownload(item)}
-												className="p-2 rounded-lg border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200"
-												title="Изтегли">
-												<Download size={16} aria-hidden />
-											</button>
-											<button
-												type="button"
-												disabled={busy}
-												onClick={() => void onDelete(item)}
-												className="p-2 rounded-lg border border-stone-200 dark:border-stone-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-700 dark:text-red-300"
-												title="Изтрий">
-												<Trash2 size={16} aria-hidden />
-											</button>
-										</div>
-									</li>
-								);
-							})}
+							{items.map((meta) => (
+								<li
+									key={meta.id}
+									className="py-3 flex flex-wrap items-center gap-3 justify-between">
+									<div className="min-w-0 flex-1">
+										<p
+											className="font-medium text-sm text-stone-900 dark:text-stone-100 truncate"
+											title={meta.name}>
+											{meta.name}
+										</p>
+										<p className="text-xs text-stone-500 dark:text-stone-400">
+											{formatDocSize(meta.size)} ·{" "}
+											{new Date(meta.createdAt).toLocaleString("bg-BG")}
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										<button
+											type="button"
+											disabled={busy}
+											onClick={() => void onDownload(meta)}
+											className="p-2 rounded-lg border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200"
+											title="Изтегли">
+											<Download size={16} aria-hidden />
+										</button>
+										<button
+											type="button"
+											disabled={busy}
+											onClick={() => void onDelete(meta)}
+											className="p-2 rounded-lg border border-stone-200 dark:border-stone-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-700 dark:text-red-300"
+											title="Изтрий">
+											<Trash2 size={16} aria-hidden />
+										</button>
+									</div>
+								</li>
+							))}
 						</ul>
 					)}
 				</div>
-
-				<p className="text-xs text-stone-500 dark:text-stone-500 text-center mt-6 max-w-md mx-auto leading-relaxed">
-					За облачни документи трябват таблица и bucket „farmer-docs“ в Supabase — виж{" "}
-					<code className="text-[11px] bg-stone-100 dark:bg-stone-800 px-1 rounded">
-						supabase-setup.sql
-					</code>
-					.
-				</p>
 			</div>
 		</div>
 	);

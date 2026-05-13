@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, Calculator, Check, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Bell, Calculator, ExternalLink, FileDown, FileText, Leaf, Scale, ShieldCheck, Sparkles, Sprout, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 
@@ -52,10 +52,6 @@ export default function Home() {
   const [aiSummary, setAiSummary] = useState("");
   const [engine, setEngine] = useState<string>("");
   const [filterType, setFilterType] = useState<"all" | KnowledgeDoc["type"]>("all");
-  const [waitlistEmail, setWaitlistEmail] = useState("");
-  const [waitlistEmailConfirmed, setWaitlistEmailConfirmed] = useState("");
-  const [waitlistOk, setWaitlistOk] = useState(false);
-  const [waitlistError, setWaitlistError] = useState<string | null>(null);
   const [chatCharacter, setChatCharacter] = useState<"elena" | "boris" | "viktoria">("elena");
   const [chatInput, setChatInput] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
@@ -108,33 +104,6 @@ export default function Home() {
   const onSearch = async (e: FormEvent) => {
     e.preventDefault();
     await executeSearch(query);
-  };
-
-  const onWaitlist = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!waitlistEmail.trim()) return;
-    setWaitlistError(null);
-    setWaitlistOk(false);
-    setWaitlistEmailConfirmed("");
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: waitlistEmail.trim(),
-        }),
-      });
-      const data = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string };
-      if (!res.ok || !data.success) {
-        setWaitlistError(data.error || "Неуспешна регистрация.");
-        return;
-      }
-      setWaitlistOk(true);
-      setWaitlistEmailConfirmed(waitlistEmail.trim());
-      setWaitlistEmail("");
-    } catch {
-      setWaitlistError("Мрежова грешка. Опитай пак.");
-    }
   };
 
   const jumpToSearch = (prefill?: string, autoRun = false) => {
@@ -222,7 +191,6 @@ export default function Home() {
             <Link href="/search" className="hover:text-stone-900 dark:hover:text-white">Документи</Link>
             <Link href="/srokove" className="hover:text-stone-900 dark:hover:text-white">Срокове</Link>
             <Link href="/kalkulator" className="hover:text-stone-900 dark:hover:text-white">Калкулатори</Link>
-            <Link href="/vhod" className="brand-link font-medium">„Моя ферма“ — само с имейл</Link>
           </div>
         </nav>
 
@@ -351,32 +319,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="mb-10 rounded-2xl bg-indigo-700 px-5 py-7 text-white sm:px-8">
-          <h2 className="text-xl font-semibold">Абонамент за известия</h2>
-          <p className="mt-2 text-sm text-indigo-100">Получавай известия при промени по документи, срокове и регламенти.</p>
-          {waitlistError ? <p className="mt-3 text-sm text-amber-100">{waitlistError}</p> : null}
-          {waitlistOk ? (
-            <div className="mt-3 rounded-lg bg-white/15 px-3 py-2 text-sm">
-              <p className="inline-flex items-center gap-2 font-medium">
-                <Check size={16} /> Успешно записване за {waitlistEmailConfirmed || "имейла ти"}.
-              </p>
-              <p className="mt-1 text-xs text-indigo-100">
-                Ще получаваш известия при важни промени по документи, срокове и регламенти.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={onWaitlist} className="mt-4 flex max-w-lg flex-col gap-2 sm:flex-row">
-              <input type="email" required value={waitlistEmail} onChange={(e) => setWaitlistEmail(e.target.value)} placeholder="Твоят имейл" className="flex-1 rounded-lg px-3 py-2 text-sm text-stone-900 outline-none" />
-              <button
-                type="submit"
-                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-800 disabled:opacity-60"
-              >
-                Абонирай ме
-              </button>
-            </form>
-          )}
         </section>
 
         <section id="chat" className="mb-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">

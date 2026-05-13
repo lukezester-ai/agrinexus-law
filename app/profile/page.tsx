@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Check, FolderOpen, Wheat } from "lucide-react";
+import { ArrowLeft, Save, Check, FolderOpen } from "lucide-react";
 import { loadFarmProfile, persistFarmProfile } from "@/lib/farm-profile";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { useAuthUser } from "@/hooks/use-auth-user";
 
 const REGIONS = [
   "Благоевград", "Бургас", "Варна", "Велико Търново", "Видин", "Враца",
@@ -33,7 +31,6 @@ const COMMON_CROPS = [
 ];
 
 export default function ProfilePage() {
-  const auth = useAuthUser();
   const [profile, setProfile] = useState({
     farm_type: "",
     region: "",
@@ -75,26 +72,6 @@ export default function ProfilePage() {
     };
     persistFarmProfile(snapshot);
 
-    const supabase = createBrowserSupabaseClient();
-    if (supabase) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error } = await supabase.auth.updateUser({
-          data: {
-            farm_profile: {
-              farm_type: snapshot.farm_type,
-              region: snapshot.region,
-              total_decares: snapshot.total_decares,
-              crops: snapshot.crops,
-              livestock: snapshot.livestock,
-              is_organic: snapshot.is_organic,
-            },
-          },
-        });
-        if (error) console.error("Supabase farm_profile metadata:", error);
-      }
-    }
-
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -107,31 +84,11 @@ export default function ProfilePage() {
             <ArrowLeft size={16} />
             <span className="text-sm">Към началото</span>
           </Link>
-          <div className="flex items-center gap-3">
-            {auth.status === "signed_in" && (
-              <Link
-                href="/moya-ferma"
-                className="hidden sm:inline-flex items-center gap-1.5 text-sm text-[#0d9488] dark:text-teal-400 font-medium hover:underline">
-                <Wheat size={14} aria-hidden />
-                Моя ферма
-              </Link>
-            )}
-            <div className="font-medium text-base dark:text-stone-100">Профил на стопанството</div>
-          </div>
+          <div className="font-medium text-base dark:text-stone-100">Профил на стопанството</div>
         </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 py-10">
-        {auth.status === "anonymous" && (
-          <div className="mb-6 rounded-xl border border-amber-200/90 dark:border-amber-800/50 bg-amber-50/90 dark:bg-amber-950/25 px-4 py-3 text-sm text-amber-950 dark:text-amber-100/95 leading-relaxed">
-            За личен панел „Моя ферма“ с профил, документи и инструменти —{" "}
-            <Link href="/vhod" className="font-semibold underline hover:no-underline">
-              влез само с имейл (magic link, без парола)
-            </Link>
-            .
-          </div>
-        )}
-
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🌾</div>
           <h1 className="text-2xl font-medium mb-2 dark:text-stone-50">Разкажи ни за стопанството си</h1>

@@ -32,8 +32,7 @@ export default function PrivacyPage() {
         <section className="mb-6">
           <h2 className="text-xl font-medium mb-3 dark:text-stone-100">Какви данни събираме</h2>
           <ul className="list-disc pl-6 space-y-2 text-stone-700 dark:text-stone-300">
-            <li><strong>Имейл адрес</strong> - когато се регистрирате в waitlist</li>
-            <li><strong>Информация за стопанството</strong> - тип, размер, регион (само ако вие я въведете)</li>
+            <li><strong>Информация за стопанството</strong> — тип, размер, регион (само ако я въведете в профила; пази се локално в браузъра)</li>
             <li><strong>Чат история</strong> - запазваме разговорите за подобрение на услугата (анонимизирано)</li>
             <li><strong>Технически данни</strong> - IP адрес, браузър, време на посещение (за сигурност)</li>
           </ul>
@@ -43,7 +42,6 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-medium mb-3 dark:text-stone-100">Как използваме данните</h2>
           <ul className="list-disc pl-6 space-y-2 text-stone-700 dark:text-stone-300">
             <li>За да предоставим услугата (отговорим на въпроси)</li>
-            <li>За да изпратим welcome имейл и обновления (можете да се отпишете)</li>
             <li>За подобряване на отговорите на AI асистентите</li>
             <li>За защита от злоупотреби и spam</li>
           </ul>
@@ -66,7 +64,6 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-6 space-y-2 text-stone-700 dark:text-stone-300">
             <li>Поискате достъп до данните, които пазим за вас</li>
             <li>Поискате корекция или изтриване на данните</li>
-            <li>Се отпишете от имейл известия по всяко време</li>
             <li>Подадете жалба до КЗЛД</li>
           </ul>
           <p className="leading-relaxed text-stone-700 dark:text-stone-300 mt-3">

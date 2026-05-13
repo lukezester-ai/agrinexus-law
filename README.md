@@ -7,7 +7,7 @@
 1. Прочетете `DEPLOYMENT-GUIDE.md` за подробни инструкции
 2. Регистрирайте се в OpenAI, Supabase, Resend (всички с безплатен старт)
 3. Изпълнете `supabase-setup.sql` в Supabase SQL Editor
-4. Копирайте `.env.example` → `.env.local`, попълнете `NEXT_PUBLIC_SUPABASE_*` от Supabase → Settings → API; обърнете Redirect URL-ите с `npm run check:auth`
+4. Копирайте `.env.example` → `.env.local` и попълнете ключовете (виж `DEPLOYMENT-GUIDE.md`)
 5. `npm install` и `npm run dev` (по подразбиране http://localhost:3002)
 6. Push в GitHub, deploy на Vercel
 
@@ -18,7 +18,6 @@ agrinexus-mvp/
 ├── app/
 │   ├── api/
 │   │   ├── chat/         # Chat с RAG
-│   │   ├── waitlist/     # Регистрация + имейл
 │   │   └── search/       # Търсачка
 │   ├── profile/          # Профил на стопанството
 │   ├── search/           # Търсачка UI
@@ -43,7 +42,7 @@ agrinexus-mvp/
 - **RAG (pgvector + BM25 hybrid)** — semantic search в Supabase + lexical fallback, обединени с RRF
 - **Профил на стопанството** - персонализирани отговори
 - **Базова търсачка** с филтри по категории
-- **Supabase интеграция** за waitlist и chat logs
+- **Supabase интеграция** за chat logs и RAG
 - **Resend имейли** с професионални welcome съобщения
 - **Rate limiting** срещу abuse
 - **Mobile responsive** дизайн

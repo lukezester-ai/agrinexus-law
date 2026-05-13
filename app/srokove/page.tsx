@@ -51,12 +51,6 @@ export default function SrokovePage() {
 						<Link href="/statistiki" className="text-xs sm:text-sm text-[#0d9488] dark:text-teal-400 font-medium">
 							Статистика
 						</Link>
-						<Link
-							href="/moya-ferma"
-							title="„Моя ферма“ — само с имейл (magic link)"
-							className="text-xs sm:text-sm text-[#0d9488] dark:text-teal-400 font-medium">
-							„Моя ферма“ — само с имейл
-						</Link>
 					</div>
 				</div>
 			</nav>

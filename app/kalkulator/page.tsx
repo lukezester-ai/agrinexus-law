@@ -236,10 +236,10 @@ export default function KalkulatorPage() {
 									{copied ? "Копирано" : "Сподели текст"}
 								</button>
 								<Link
-									href="/#waitlist"
+									href="/"
 									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-stone-300 dark:border-stone-600 text-sm font-medium text-stone-800 dark:text-stone-100">
 									<Sparkles size={16} />
-									Запис в waitlist
+									Към началото
 								</Link>
 								<Link
 									href="/"
