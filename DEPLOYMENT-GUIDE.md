@@ -54,7 +54,12 @@
    - `anon public` ключа → NEXT_PUBLIC_SUPABASE_ANON_KEY
    - `service_role` ключа (Reveal) → SUPABASE_SERVICE_ROLE_KEY
 
-6. Отворете SQL Editor и изпълнете съдържанието на `supabase-setup.sql`
+6. **За magic link (вход с имейл):** Authentication → URL Configuration:
+   - **Site URL** (локално): `http://localhost:3002` (портът по подразбиране на `npm run dev` в този проект)
+   - **Redirect URLs:** добавете `http://localhost:3002/auth/callback` (и после production URL към същия път `/auth/callback`)
+   - Без тези URL-и Supabase често отказва връщане след клик върху линка от имейла.
+
+7. Отворете SQL Editor и изпълнете съдържанието на `supabase-setup.sql`
 
 ### 3. Resend - за имейли (опционално, но препоръчително)
 
@@ -117,7 +122,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-7. Отворете http://localhost:3000
+7. Отворете http://localhost:3002 (портът от `npm run dev`; проверка на env за вход: `npm run check:auth`)
 
 Ако всичко работи - ще видите AgriNexus.Law с тримата персонажа!
 

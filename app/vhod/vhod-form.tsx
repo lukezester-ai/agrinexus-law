@@ -4,7 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
-import { isSupabaseAuthConfigured } from "@/lib/supabase/env";
+import {
+	DEV_SERVER_DEFAULT_PORT,
+	getLocalAuthCallbackUrl,
+	isSupabaseAuthConfigured,
+} from "@/lib/supabase/env";
 
 export function VhodForm() {
 	const searchParams = useSearchParams();
@@ -135,7 +139,28 @@ export function VhodForm() {
 							</code>{" "}
 							в средата (.env) заявката няма къде да отиде и имейл няма да се изпрати.
 							Ползвай чата и профила локално; след като добавиш ключовете и рестартираш
-							dev сървъра, полето по-долу изпраща връзка за регистрация и вход.
+							dev сървъра, полето по-долу изпраща връзка за регистрация и вход. Проверка:{" "}
+							<code className="text-[11px] bg-white/80 dark:bg-stone-900 px-1 rounded">
+								npm run check:auth
+							</code>
+							.
+						</p>
+					)}
+
+					{configured && (
+						<p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed border border-teal-200/70 dark:border-teal-800/50 bg-teal-50/60 dark:bg-teal-950/25 rounded-lg px-3 py-2.5">
+							<strong className="text-stone-800 dark:text-stone-200">
+								За да работи линкът от имейла локално:
+							</strong>{" "}
+							Supabase → Authentication → URL Configuration — Site URL{" "}
+							<code className="text-[11px] bg-white/90 dark:bg-stone-900 px-1 rounded break-all">
+								http://localhost:{DEV_SERVER_DEFAULT_PORT}
+							</code>
+							, в Redirect URLs добави{" "}
+							<code className="text-[11px] bg-white/90 dark:bg-stone-900 px-1 rounded break-all">
+								{getLocalAuthCallbackUrl()}
+							</code>
+							. Без това често виждаш грешка след клик върху връзката.
 						</p>
 					)}
 
