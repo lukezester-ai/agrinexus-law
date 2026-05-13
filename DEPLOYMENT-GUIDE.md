@@ -54,7 +54,7 @@
    - `anon public` ключа → NEXT_PUBLIC_SUPABASE_ANON_KEY
    - `service_role` ключа (Reveal) → SUPABASE_SERVICE_ROLE_KEY
 
-6. **За magic link (вход с имейл):** Authentication → URL Configuration (вход само за вече създадени потребители в Supabase; приложението не прави саморегистрация и не изпраща welcome имейли):
+6. **За magic link (регистрация и вход с имейл):** Authentication → URL Configuration:
    - **Site URL** (локално): `http://localhost:3002` (портът по подразбиране на `npm run dev` в този проект)
    - **Redirect URLs:** добавете `http://localhost:3002/auth/callback` (и после production URL към същия път `/auth/callback`)
    - Без тези URL-и Supabase често отказва връщане след клик върху линка от имейла.

@@ -50,8 +50,8 @@ export async function POST(req: Request) {
 			email: normalizeEmail(body.email),
 			options: {
 				emailRedirectTo,
-				// Само вход: без саморегистрация; акаунтите се управляват в Supabase.
-				shouldCreateUser: false,
+				// Първи път: създава акаунт; след това същият поток е вход.
+				shouldCreateUser: true,
 			},
 		});
 
@@ -61,11 +61,10 @@ export async function POST(req: Request) {
 			let userMessage = raw;
 			if (
 				lower.includes("signups not allowed") ||
-				lower.includes("user not found") ||
 				lower.includes("email address is not authorized")
 			) {
 				userMessage =
-					"Няма активен достъп с този имейл или акаунтът не е активиран. Свържи се с администратор.";
+					"Регистрацията с този имейл не е разрешена в проекта Supabase. Провери Authentication → Providers / настройките за signup.";
 			}
 			return Response.json({ error: userMessage }, { status: 400 });
 		}

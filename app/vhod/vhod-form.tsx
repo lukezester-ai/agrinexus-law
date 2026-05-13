@@ -57,7 +57,7 @@ export function VhodForm() {
 
 			setStatus("sent");
 			setMessage(
-				"Ако имейлът е одобрен за достъп, в пощата ти има само системното писмо с връзка за вход (от Supabase) — без други съобщения от нас. Отвори го и потвърди.",
+				"Изпратихме връзка на имейла ти. Отвори писмото и потвърди — след това влизаш в „Моя ферма“. При първи път акаунтът се създава автоматично; при следващи пъти същият имейл е само вход. AgriNexus не изпраща welcome или маркетинг отделно.",
 			);
 		} catch {
 			setStatus("error");
@@ -87,13 +87,13 @@ export function VhodForm() {
 						🌾
 					</div>
 					<h1 className="text-2xl font-semibold text-stone-900 dark:text-stone-50 mb-2">
-						Вход в „Моя ферма“ с имейл
+						Регистрация и вход в „Моя ферма“ с имейл
 					</h1>
 					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-						Няма парола: въведи служебния си имейл и потвърди връзката от пощата.
-						Достъпът е само за вече активирани акаунти. AgriNexus не изпраща welcome,
-						напомняния или маркетинг — използва се само стандартният имейл с връзка от
-						системата за вход (Supabase), когато имейлът е одобрен.
+						Един и същи процес, без парола: при първи път потвърждаването на връзката от
+						пощата ти създава акаунт и веднага те въвежда в панела; след това същият
+						имейл служи само за вход. AgriNexus не изпраща welcome или маркетингови
+						имейли — само системното писмо с връзка от Supabase.
 					</p>
 				</div>
 
@@ -119,7 +119,7 @@ export function VhodForm() {
 							</code>{" "}
 							в средата (.env) заявката няма къде да отиде и имейл няма да се изпрати.
 							Ползвай чата и профила локално; след като добавиш ключовете и рестартираш
-							dev сървъра, полето по-долу заявява вход по имейл. Проверка:{" "}
+							dev сървъра, полето по-долу изпраща връзка за регистрация или вход. Проверка:{" "}
 							<code className="text-[11px] bg-white/80 dark:bg-stone-900 px-1 rounded">
 								npm run check:auth
 							</code>
@@ -168,7 +168,7 @@ export function VhodForm() {
 								<label
 									htmlFor="vhod-email"
 									className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-1.5">
-									Служебен имейл за вход
+									Имейл за регистрация или вход
 								</label>
 								<input
 									id="vhod-email"
@@ -202,7 +202,7 @@ export function VhodForm() {
 								) : (
 									<>
 										<Mail size={18} aria-hidden />
-										Изпрати връзка за вход
+										Изпрати връзка за регистрация или вход
 									</>
 								)}
 							</button>
@@ -210,7 +210,7 @@ export function VhodForm() {
 					)}
 
 					<p className="text-xs text-stone-500 dark:text-stone-400 text-center leading-relaxed">
-						С вход потвърждаваш, че си запознат с{" "}
+						С регистрация или вход потвърждаваш, че си запознат с{" "}
 						<Link href="/terms" className="underline hover:text-stone-700 dark:hover:text-stone-200">
 							условията
 						</Link>{" "}
