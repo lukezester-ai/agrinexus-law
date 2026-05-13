@@ -50,15 +50,24 @@ export async function POST(req: Request) {
 			email: normalizeEmail(body.email),
 			options: {
 				emailRedirectTo,
-				shouldCreateUser: true,
+				// Само вход: без саморегистрация; акаунтите се управляват в Supabase.
+				shouldCreateUser: false,
 			},
 		});
 
 		if (error) {
-			return Response.json(
-				{ error: error.message || "Неуспешно изпращане. Опитай пак." },
-				{ status: 400 },
-			);
+			const raw = error.message || "Неуспешно изпращане. Опитай пак.";
+			const lower = raw.toLowerCase();
+			let userMessage = raw;
+			if (
+				lower.includes("signups not allowed") ||
+				lower.includes("user not found") ||
+				lower.includes("email address is not authorized")
+			) {
+				userMessage =
+					"Няма активен достъп с този имейл или акаунтът не е активиран. Свържи се с администратор.";
+			}
+			return Response.json({ error: userMessage }, { status: 400 });
 		}
 
 		return Response.json({ success: true });
