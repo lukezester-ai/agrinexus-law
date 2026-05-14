@@ -20,7 +20,7 @@ export default function SrokovePage() {
 					</Link>
 					<span className="flex items-center gap-2 text-sm font-medium text-stone-900 dark:text-stone-100 sm:text-base">
 						<CalendarClock size={18} className="text-[#0d9488] shrink-0" aria-hidden />
-						AgriNexus-Law · {lang === "bg" ? "Срокове и PDF" : "Deadlines & PDF"}
+						AgriNexus-Law · {lang === "bg" ? "Срокове" : "Deadlines"}
 					</span>
 					<div className="flex items-center gap-2">
 						<div className="flex rounded-lg border border-stone-200 dark:border-stone-600 overflow-hidden">
@@ -56,10 +56,6 @@ export default function SrokovePage() {
 			</nav>
 
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-				<p className="text-[11px] text-stone-400 dark:text-stone-500 mb-4 font-mono">
-					{lang === "bg" ? "Версия на приложението:" : "App build:"}{" "}
-					{process.env.NEXT_PUBLIC_APP_REV ?? "—"}
-				</p>
 				<FarmerCommandPanel lang={lang} />
 			</main>
 		</div>

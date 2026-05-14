@@ -63,8 +63,8 @@ export function saveFarmerProfile(p: FarmerLocalProfile): void {
 }
 
 /**
- * Данни за чернови PDF: локалният command-профил + полета от „Профил на стопанството“ (/profile),
- * когато command-профилът е празен.
+ * Обединен изглед на командния профил и „Профил на стопанството“ (/profile),
+ * когато командният профил е празен (за бъдещи функции / проверки).
  */
 export function profileForPdf(): FarmerLocalProfile {
 	if (typeof window === "undefined") return defaultFarmerProfile();
