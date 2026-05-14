@@ -8,8 +8,8 @@ const showPublicCounter =
   process.env.NEXT_PUBLIC_SHOW_VISIT_COUNTER === "1";
 
 /**
- * Веднъж на браузър сесия: POST /api/stats/visits (ако има Redis).
- * Винаги: GET за актуална стойност (за опционално показване).
+ * На заден план: веднъж на браузър сесия POST /api/stats/visits (ако има Redis).
+ * GET към същия endpoint само ако NEXT_PUBLIC_SHOW_VISIT_COUNTER=1 — за показване на число.
  */
 export function SiteVisitTracker() {
   const [total, setTotal] = useState<number | null>(null);
@@ -30,6 +30,8 @@ export function SiteVisitTracker() {
       } catch {
         /* private mode */
       }
+
+      if (!showPublicCounter) return;
 
       try {
         const g = await fetch("/api/stats/visits", { cache: "no-store" });
