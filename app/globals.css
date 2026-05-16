@@ -3,16 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --brand-violet: #8b5cf6;
-  --brand-indigo: #7c3aed;
-  --brand-blue: #3b82f6;
-  --brand-cyan: #06b6d4;
-  --bg-violet-soft: #dff4f5;
-  --bg-indigo-soft: #d9f1f6;
-  --bg-blue-soft: #e8f8fc;
-  --bg-paper: #f7fbfc;
+  --brand-violet: #6d28d9;
+  --brand-indigo: #4338ca;
+  --brand-blue: #2563eb;
+  --brand-cyan: #0891b2;
+  --brand-emerald: #047857;
+  --brand-ink: #0f172a;
+  --bg-violet-soft: #eef6ef;
+  --bg-indigo-soft: #f6f8f4;
+  --bg-blue-soft: #eef3ee;
+  --bg-paper: #fbfaf7;
   --text-brand-strong: #0f172a;
-  --text-brand-pill: #155e75;
+  --text-brand-pill: #065f46;
 }
 
 .dark {
@@ -41,13 +43,13 @@ body {
 
 /* Shared page backdrop — Canva Docs style (soft lilac/blue surface) */
 .agri-page-bg {
-  background: linear-gradient(
-    165deg,
-    var(--bg-violet-soft) 0%,
-    var(--bg-indigo-soft) 35%,
-    var(--bg-blue-soft) 70%,
-    var(--bg-paper) 100%
-  );
+  background:
+    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 14% 0%, rgba(4, 120, 87, 0.12), transparent 30%),
+    radial-gradient(circle at 86% 14%, rgba(148, 163, 184, 0.2), transparent 34%),
+    linear-gradient(180deg, #fbfaf7 0%, #f4f6f1 48%, #ffffff 100%);
+  background-size: 42px 42px, 42px 42px, auto, auto, auto;
 }
 
 /* „Nexus“ — Canva-like brand blend (violet -> blue -> cyan) */
@@ -224,19 +226,40 @@ body {
   overflow: hidden;
 }
 
+.hero-field-visual {
+  background:
+    linear-gradient(90deg, rgba(251, 250, 247, 0), rgba(251, 250, 247, 0.72) 11%, rgba(251, 250, 247, 0) 32%),
+    linear-gradient(150deg, rgba(4, 120, 87, 0.82), rgba(20, 83, 45, 0.56) 34%, rgba(15, 23, 42, 0.1) 34.3%, transparent 35%),
+    repeating-linear-gradient(112deg, rgba(22, 101, 52, 0.28) 0 10px, rgba(255, 255, 255, 0.18) 10px 14px, rgba(101, 163, 13, 0.18) 14px 26px),
+    linear-gradient(135deg, rgba(4, 120, 87, 0.2), rgba(217, 119, 6, 0.12));
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.dashboard-preview {
+  border-radius: 10px;
+}
+
 /* ——— Тъмна тема (клас .dark на <html>) ——— */
 .dark {
   color-scheme: dark;
 }
 
 .dark .agri-page-bg {
-  background: linear-gradient(
-    165deg,
-    var(--bg-dark-1) 0%,
-    var(--bg-dark-2) 36%,
-    var(--bg-dark-3) 68%,
-    var(--bg-dark-4) 100%
-  );
+  background:
+    linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.12), transparent 30%),
+    radial-gradient(circle at 86% 14%, rgba(51, 65, 85, 0.36), transparent 34%),
+    linear-gradient(180deg, #020617 0%, #0f172a 46%, #020617 100%);
+  background-size: 42px 42px, 42px 42px, auto, auto, auto;
+}
+
+.dark .hero-field-visual {
+  background:
+    linear-gradient(90deg, rgba(2, 6, 23, 0), rgba(2, 6, 23, 0.72) 11%, rgba(2, 6, 23, 0) 32%),
+    linear-gradient(150deg, rgba(16, 185, 129, 0.42), rgba(6, 78, 59, 0.62) 34%, rgba(15, 23, 42, 0.12) 34.3%, transparent 35%),
+    repeating-linear-gradient(112deg, rgba(16, 185, 129, 0.14) 0 10px, rgba(255, 255, 255, 0.06) 10px 14px, rgba(132, 204, 22, 0.09) 14px 26px),
+    linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(217, 119, 6, 0.08));
 }
 
 .dark .premium-nav {

@@ -3,7 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "com.agrinexus.law",
   appName: "AgriNexus.Law",
-  webDir: ".next",
+  webDir: "public/capacitor",
   server: {
     // Store builds load the live secure deployment.
     url: "https://agrinexuslaw.com",
