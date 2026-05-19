@@ -1,6 +1,9 @@
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 
-export function getKnowledgeSourceUrl(doc: Pick<KnowledgeDoc, "title" | "source">): string {
+export function getKnowledgeSourceUrl(
+  doc: Pick<KnowledgeDoc, "title" | "source" | "sourceUrl">,
+): string {
+  if (doc.sourceUrl?.startsWith("http")) return doc.sourceUrl;
   const source = doc.source.toLowerCase();
   if (source.includes("eur-lex")) return "https://eur-lex.europa.eu/";
   if (source.includes("дфз") || source.includes("dfz")) return "https://www.dfz.bg/";

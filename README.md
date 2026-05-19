@@ -67,11 +67,15 @@ agrinexus-mvp/
 # 3. Стартирай dev сървъра
 npm run dev
 
-# 4. Първоначално индексиране (генерира embeddings за всички KNOWLEDGE_BASE + learned + public_documents):
-curl -X POST http://localhost:3002/api/rag/reindex \
-  -H "x-ingest-token: <INGEST_ADMIN_TOKEN>" \
-  -H "content-type: application/json" \
-  -d '{"target":"all"}'
+# 4. Първоначално индексиране (чете INGEST_ADMIN_TOKEN от .env.local):
+npm run reindex
+
+# Проверка на индекса:
+npm run check:rag:local
+
+# Production (след deploy, същият токен във Vercel):
+npm run reindex:prod
+npm run check:rag:prod
 ```
 
 ### Reindex таргети

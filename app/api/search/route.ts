@@ -2,8 +2,10 @@ import {
   summarizeKnowledgeQuery,
   type KnowledgeDoc,
 } from "@/lib/knowledge/dfz-knowledge";
+import { categoryMatchesFilter, sortDocuments } from "@/lib/knowledge/document-taxonomy";
 import { searchLearnedKnowledge } from "@/lib/knowledge/learned-knowledge";
 import { mergeKnowledgeSearchResults } from "@/lib/knowledge/merged-search";
+import { searchPublicDocuments } from "@/lib/knowledge/public-documents-search";
 import { isMeiliConfigured, searchWithMeili } from "@/lib/meilisearch";
 import { searchRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 
@@ -36,26 +38,40 @@ export async function POST(req: Request) {
         console.error("Meilisearch fallback to internal-ai:", meiliErr);
       }
     }
-    const learnedSlice = await searchLearnedKnowledge(q, category);
+    const [learnedSlice, publicSlice] = await Promise.all([
+      searchLearnedKnowledge(q, category),
+      searchPublicDocuments(q, 8),
+    ]);
 
     let results = mergeKnowledgeSearchResults(q, meiliSlice);
-    if (learnedSlice.length) {
+    if (learnedSlice.length || publicSlice.length) {
       const mergedById = new Map<string, KnowledgeDoc>();
-      for (const doc of [...learnedSlice, ...results]) mergedById.set(doc.id, doc);
+      for (const doc of [...publicSlice, ...learnedSlice, ...results]) {
+        mergedById.set(doc.id, doc);
+      }
       results = Array.from(mergedById.values());
     }
 
     if (category && category !== "all") {
-      results = results.filter((doc) => doc.category === category);
+      results = results.filter((doc) => categoryMatchesFilter(doc, category));
     }
 
     if (results.length === 0) {
       results = mergeKnowledgeSearchResults(q, []);
+      const pubFallback = await searchPublicDocuments(q, 6);
+      for (const doc of pubFallback) {
+        if (!results.some((r) => r.id === doc.id)) results.push(doc);
+      }
       if (category && category !== "all") {
-        results = results.filter((doc) => doc.category === category);
+        results = results.filter((doc) => categoryMatchesFilter(doc, category));
       }
       engine = "internal-ai";
     }
+
+    results = sortDocuments(
+      results.map((d, i) => ({ ...d, score: results.length - i })),
+      "relevance",
+    ) as KnowledgeDoc[];
 
     const aiSummary = summarizeKnowledgeQuery(q, results);
 

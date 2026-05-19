@@ -25,7 +25,9 @@ import {
 	ThumbsUp,
 } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
+import { HOME_CATEGORY_SEARCH } from "@/lib/knowledge/document-taxonomy";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
+import { isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
 
 type SearchResponse = {
 	results?: KnowledgeDoc[];
@@ -55,16 +57,12 @@ type LiveStatsResponse = {
 	rag?: { healthy?: boolean; hints?: string[] };
 };
 
-const CATEGORY_CARDS = [
-	{ title: "Субсидии", subtitle: "директни плащания, интервенции, ставки", icon: Sprout },
-	{ title: "Закони", subtitle: "наредби, регламенти и изисквания", icon: Scale },
-	{ title: "Сертификати", subtitle: "био, GlobalG.A.P. и документи", icon: ShieldCheck },
-	{ title: "Био производство", subtitle: "контрол, дневници и преход", icon: Leaf },
-	{ title: "Растителна защита", subtitle: "препарати, ограничения, срокове", icon: BookOpenCheck },
-	{ title: "ЕС регламенти", subtitle: "EUR-Lex и ОСП рамка", icon: FileText },
-	{ title: "Образци", subtitle: "форми, заявления, приложения", icon: FileDown },
-	{ title: "Калкулатори", subtitle: "площи, добиви, субсидии", icon: Calculator },
-];
+const CATEGORY_ICONS = [Sprout, Scale, ShieldCheck, Leaf, BookOpenCheck, FileText, FileDown, Calculator] as const;
+
+const CATEGORY_CARDS = HOME_CATEGORY_SEARCH.map((card, i) => ({
+	...card,
+	icon: CATEGORY_ICONS[i] ?? FileText,
+}));
 
 const UPDATES = [
 	{ badge: "СРОК", title: "Директни плащания и корекции по заявления", meta: "ДФЗ · проследяване на активните прозорци" },
@@ -491,11 +489,13 @@ export default function Home() {
 											>
 												Попитай AI
 											</button>
-											<Link href={`/doc/${doc.id}`} className="rounded-md bg-slate-950 px-3 py-1.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
-												Отвори
-											</Link>
+											{!isPublicDocumentId(doc.id) ? (
+												<Link href={`/doc/${doc.id}`} className="rounded-md bg-slate-950 px-3 py-1.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
+													Отвори
+												</Link>
+											) : null}
 											<a href={getKnowledgeSourceUrl(doc)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-												Оригинал <ExternalLink size={12} />
+												{isPublicDocumentId(doc.id) ? "PDF / оригинал" : "Оригинал"} <ExternalLink size={12} />
 											</a>
 										</div>
 									</article>
@@ -520,7 +520,7 @@ export default function Home() {
 								<button
 									key={card.title}
 									type="button"
-									onClick={() => jumpToSearch(card.title, true)}
+									onClick={() => jumpToSearch(card.searchQuery, true)}
 									className="group border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 dark:border-slate-800 dark:bg-slate-950"
 								>
 									<Icon size={20} className="mb-3 text-emerald-700 dark:text-emerald-300" />

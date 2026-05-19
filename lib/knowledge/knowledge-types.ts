@@ -9,4 +9,6 @@ export interface KnowledgeDoc {
 	keywords: string[];
 	source: string;
 	effectiveDate: string;
+	/** Ingest PDF/HTML от public_documents — външен линк. */
+	sourceUrl?: string;
 }

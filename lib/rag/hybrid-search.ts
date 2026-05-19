@@ -11,6 +11,7 @@ import { KNOWLEDGE_BASE } from "@/lib/knowledge/dfz-knowledge";
 import { internalKnowledgeSearch } from "@/lib/knowledge/internal-ai-search";
 import { vectorSearchChunks, type MatchedChunk } from "@/lib/rag/vector-search";
 import { RAG_CONFIG, isRagEnabled } from "@/lib/rag/config";
+import { sortDocuments } from "@/lib/knowledge/document-taxonomy";
 
 export interface RetrievedItem {
   /** Уникален ключ за дедупликация (chunk id или doc id). */
@@ -183,9 +184,31 @@ export async function hybridRetrieve(
 
   dedupeStaticDocVersusChunks(fused);
 
-  return Array.from(fused.values())
-    .sort((a, b) => b.score - a.score)
-    .slice(0, finalTopK);
+  const ranked = Array.from(fused.values()).sort((a, b) => b.score - a.score);
+
+  const asSortable = ranked.map((item) => ({
+    id: item.key,
+    title: item.title,
+    category: item.category ?? "",
+    type: inferDocTypeFromRetrieved(item),
+    effectiveDate: item.effective_date ?? "1970-01-01",
+    score: item.score,
+  }));
+  const sorted = sortDocuments(asSortable, "relevance");
+  const order = new Map(sorted.map((s, i) => [s.id, i]));
+  ranked.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999));
+
+  return ranked.slice(0, finalTopK);
+}
+
+function inferDocTypeFromRetrieved(
+  item: RetrievedItem,
+): "scheme" | "regulation" | "procedure" | "deadline" {
+  const hay = `${item.title} ${item.content}`.toLowerCase();
+  if (/срок|краен/i.test(hay)) return "deadline";
+  if (/процедур|заявлен|исак/i.test(hay)) return "procedure";
+  if (/схем|субсид|плащан|бисс/i.test(hay)) return "scheme";
+  return "regulation";
 }
 
 /**
@@ -195,9 +218,19 @@ export async function hybridRetrieve(
  */
 export function formatRetrievedContext(items: RetrievedItem[]): string {
   if (!items.length) return "";
+  const typeLabel: Record<string, string> = {
+    scheme: "схема/субсидия",
+    regulation: "наредба/закон",
+    procedure: "процедура",
+    deadline: "срок",
+  };
   return items
     .map((item, i) => {
-      const meta: string[] = [];
+      const docType = inferDocTypeFromRetrieved(item);
+      const meta: string[] = [
+        `Тип: ${typeLabel[docType] ?? docType}`,
+        `Произход: ${item.source_type ?? "kb"}`,
+      ];
       if (item.category) meta.push(`Категория: ${item.category}`);
       if (item.source_name) meta.push(`Източник: ${item.source_name}`);
       if (item.effective_date) meta.push(`В сила от: ${item.effective_date}`);

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, Search } from "lucide-react";
 import type { KnowledgeDoc } from "@/lib/knowledge/dfz-knowledge";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
+import { isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
 import { getDocumentStatus } from "@/lib/knowledge/document-detail";
 
 const CATEGORIES = [
@@ -580,16 +581,19 @@ export default function SearchPage() {
                           Източник: {doc.source}
                         </p>
                         <div className="mt-1 flex items-center gap-3">
-                          <Link href={`/doc/${doc.id}`} className="brand-link inline-flex items-center gap-1 text-xs">
-                            Отвори документа
-                          </Link>
+                          {!isPublicDocumentId(doc.id) ? (
+                            <Link href={`/doc/${doc.id}`} className="brand-link inline-flex items-center gap-1 text-xs">
+                              Отвори документа
+                            </Link>
+                          ) : null}
                           <a
                             href={getKnowledgeSourceUrl(doc)}
                             target="_blank"
                             rel="noreferrer"
                             className="brand-link inline-flex items-center gap-1 text-xs"
                           >
-                            Отвори оригинала <ExternalLink size={12} />
+                            {isPublicDocumentId(doc.id) ? "PDF / оригинал" : "Отвори оригинала"}{" "}
+                            <ExternalLink size={12} />
                           </a>
                         </div>
                       </div>

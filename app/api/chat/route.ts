@@ -8,6 +8,7 @@ import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { normalizeChatMessages } from "@/lib/anthropic-messages";
 import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
+import { formatTaxonomyForRag } from "@/lib/knowledge/document-taxonomy";
 import { getRagContext } from "@/lib/rag/hybrid-search";
 import { isRagEnabled } from "@/lib/rag/config";
 
@@ -93,7 +94,12 @@ export async function POST(req: Request) {
 				? farmProfileToPromptText(resolvedFarmProfile)
 				: undefined;
 
-			const systemPrompt = buildSystemPrompt(character, combinedKnowledgeContext, profileText);
+			const systemPrompt = buildSystemPrompt(
+				character,
+				combinedKnowledgeContext,
+				profileText,
+				formatTaxonomyForRag(),
+			);
 			model = process.env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
 
 			const openai = new OpenAI({ apiKey });

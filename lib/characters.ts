@@ -193,15 +193,31 @@ export const CHARACTER_ACCENT: Record<CharacterId, string> = {
 	viktoria: "text-[#5B4BB3] dark:text-violet-400",
 };
 
-export function buildSystemPrompt(character: Character, knowledgeContext: string, userProfile?: string): string {
+export const RAG_DOCUMENT_RULES = `ПРАВИЛА ЗА ДОКУМЕНТИ (RAG):
+- Чети подадените фрагменти като източници — не измисляй норми, срокове или суми извън тях.
+- Групирай отговора: 1) спешни срокове 2) процедури/образци 3) схеми и плащания 4) наредби/закони.
+- За всеки твърд факт посочи [#номер] от контекста или „официален източник (ДФЗ/МЗХ)“.
+- Ако документите противоречат — кажи кое е по-ново по дата „В сила от“.
+- Не смесвай кампании/години без да го отбележиш.`;
+
+export function buildSystemPrompt(
+	character: Character,
+	knowledgeContext: string,
+	userProfile?: string,
+	taxonomyBlock?: string,
+): string {
 	let prompt = character.systemPromptBase;
+	prompt += `\n\n${RAG_DOCUMENT_RULES}`;
+	if (taxonomyBlock?.trim()) {
+		prompt += `\n\n${taxonomyBlock.trim()}`;
+	}
 
 	if (userProfile) {
 		prompt += `\n\nИНФОРМАЦИЯ ЗА ПОТРЕБИТЕЛЯ:\n${userProfile}\n\nИзползвай я за персонализирани, но предпазливи съвети.`;
 	}
 
 	if (knowledgeContext) {
-		prompt += `\n\nРЕЛЕВАНТЕН ФРАГМЕНТ ОТ БАЗА ЗНАНИЯ (ДФЗ / вътрешни резюмета):\n${knowledgeContext}\n\nСъобрази се с него; при противоречие с официален източник посочи, че важи официалният документ.`;
+		prompt += `\n\nРЕЛЕВАНТЕН ФРАГМЕНТ ОТ БАЗА ЗНАНИЯ (ДФЗ / ingest / резюмета):\n${knowledgeContext}\n\nСъобрази се с него; при противоречие с официален източник посочи, че важи официалният документ.`;
 	}
 
 	return prompt;

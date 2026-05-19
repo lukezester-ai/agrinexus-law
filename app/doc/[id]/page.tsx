@@ -9,6 +9,7 @@ import {
   getRelatedDocuments,
   summarizeDocumentInFiveSentences,
 } from "@/lib/knowledge/document-detail";
+import { getPublicDocumentById, isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -18,7 +19,9 @@ function statusLabel(status: "active" | "cancelled") {
 
 export default async function DocumentPage({ params }: Params) {
   const { id } = await params;
-  const doc = getKnowledgeDocumentById(id);
+  const doc = isPublicDocumentId(id)
+    ? await getPublicDocumentById(id)
+    : getKnowledgeDocumentById(id);
 
   if (!doc) {
     notFound();
@@ -26,8 +29,9 @@ export default async function DocumentPage({ params }: Params) {
 
   const status = getDocumentStatus(doc);
   const summary = summarizeDocumentInFiveSentences(doc);
-  const versions = getDocumentVersionHistory(doc);
-  const related = getRelatedDocuments(doc);
+  const versions = isPublicDocumentId(id) ? [] : getDocumentVersionHistory(doc);
+  const related = isPublicDocumentId(id) ? [] : getRelatedDocuments(doc);
+  const sourceUrl = getKnowledgeSourceUrl(doc);
 
   return (
     <div className="min-h-screen agri-page-bg">
@@ -54,76 +58,71 @@ export default async function DocumentPage({ params }: Params) {
               {statusLabel(status)}
             </span>
             <span className="text-xs text-stone-500 dark:text-stone-400">
-              {doc.category} · {doc.effectiveDate}
+              {doc.category} · {doc.type} · {doc.effectiveDate}
             </span>
           </div>
           <h1 className="text-2xl font-semibold dark:text-stone-50">{doc.title}</h1>
-
-          <div className="mt-5 flex flex-wrap gap-2">
+          <p className="mt-4 text-sm leading-7 text-stone-700 dark:text-stone-300">{summary}</p>
+          {isPublicDocumentId(id) ? (
+            <p className="mt-4 text-sm text-stone-600 dark:text-stone-400">
+              Това е индексиран държавен документ от ingest pipeline. Пълният текст е в RAG чата; отвори оригинала за PDF/HTML.
+            </p>
+          ) : null}
+          <div className="mt-6 flex flex-wrap gap-3">
             <a
-              href={`/api/documents/${doc.id}/download`}
-              className="inline-flex items-center gap-2 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-stone-700"
-            >
-              <Download size={15} />
-              Свали документа
-            </a>
-            <a
-              href={getKnowledgeSourceUrl(doc)}
+              href={sourceUrl}
               target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
             >
-              Оригинал
-              <ExternalLink size={14} />
+              <ExternalLink size={16} />
+              Официален източник
             </a>
+            {!isPublicDocumentId(id) ? (
+              <a
+                href={`/api/documents/${doc.id}/download`}
+                className="inline-flex items-center gap-2 rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium dark:border-stone-600"
+              >
+                <Download size={16} />
+                Изтегли резюме (.txt)
+              </a>
+            ) : null}
           </div>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-violet-200 bg-violet-50 p-6 dark:border-violet-900 dark:bg-violet-950/40">
-          <h2 className="text-sm font-semibold text-violet-900 dark:text-violet-200">AI обобщение (5 изречения)</h2>
-          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-violet-900/95 dark:text-violet-200">
-            {summary.map((sentence, idx) => (
-              <li key={`${doc.id}-${idx}`}>{sentence}</li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-          <h2 className="text-sm font-semibold">Пълен текст</h2>
-          <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-relaxed text-stone-700 dark:text-stone-300">
-            {doc.content}
-          </pre>
-        </section>
-
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-            <h3 className="text-sm font-semibold">История на версиите</h3>
-            <ul className="mt-3 space-y-2 text-sm">
-              {versions.map((item) => (
-                <li key={item.id} className="rounded-lg border border-stone-200 px-3 py-2 dark:border-stone-700">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    {item.effectiveDate} · {statusLabel(item.status)}
-                  </p>
+        {versions.length > 0 ? (
+          <section className="mt-8">
+            <h2 className="text-lg font-semibold dark:text-stone-50">Версии</h2>
+            <ul className="mt-3 space-y-2">
+              {versions.map((v) => (
+                <li key={v.id} className="rounded-lg border border-stone-200 p-3 text-sm dark:border-stone-700">
+                  <Link href={`/doc/${v.id}`} className="font-medium text-teal-700 dark:text-teal-400">
+                    {v.title}
+                  </Link>
+                  <span className="ml-2 text-stone-500">{v.effectiveDate}</span>
                 </li>
               ))}
             </ul>
           </section>
+        ) : null}
 
-          <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-            <h3 className="text-sm font-semibold">Свързани документи</h3>
-            <ul className="mt-3 space-y-2 text-sm">
-              {related.map((item) => (
-                <li key={item.id}>
-                  <Link href={`/doc/${item.id}`} className="block rounded-lg border border-stone-200 px-3 py-2 hover:bg-stone-50 dark:border-stone-700 dark:hover:bg-stone-800">
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">{item.category}</p>
+        {related.length > 0 ? (
+          <section className="mt-8">
+            <h2 className="text-lg font-semibold dark:text-stone-50">Свързани документи</h2>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {related.map((r) => (
+                <li key={r.id}>
+                  <Link
+                    href={`/doc/${r.id}`}
+                    className="block rounded-lg border border-stone-200 p-3 text-sm hover:border-teal-400 dark:border-stone-700"
+                  >
+                    {r.title}
                   </Link>
                 </li>
               ))}
             </ul>
           </section>
-        </div>
+        ) : null}
       </main>
     </div>
   );
