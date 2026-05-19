@@ -40,7 +40,7 @@ export function CookieConsentBanner() {
 	if (!visible) return null;
 
 	return (
-		<div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-3xl rounded-xl border border-stone-200 bg-white/95 p-4 shadow-lg backdrop-blur dark:border-stone-700 dark:bg-stone-900/95">
+		<div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 rounded-xl border border-stone-200 bg-white/95 p-4 shadow-lg backdrop-blur dark:border-stone-700 dark:bg-stone-900/95">
 			<p className="text-sm text-stone-700 dark:text-stone-200">
 				Използваме технически бисквитки и аналитика за подобрение на услугата.
 				Прочети{" "}

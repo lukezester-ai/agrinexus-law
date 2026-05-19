@@ -15,7 +15,7 @@ export function PwaHelpButton() {
 			type="button"
 			onClick={openHelp}
 			aria-label="Помощ за инсталиране"
-			className="fixed bottom-4 left-4 z-[60] inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/95 text-emerald-800 shadow-lg backdrop-blur transition hover:border-emerald-400 hover:bg-white dark:border-emerald-800 dark:bg-slate-900/95 dark:text-emerald-200"
+			className="fixed bottom-20 left-3 z-[60] inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/95 text-emerald-800 shadow-lg backdrop-blur transition hover:border-emerald-400 hover:bg-white sm:bottom-4 sm:left-4 dark:border-emerald-800 dark:bg-slate-900/95 dark:text-emerald-200"
 		>
 			<HelpCircle size={20} />
 		</button>
