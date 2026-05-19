@@ -45,6 +45,16 @@ type FeedbackState = {
 	status: "saving" | "saved" | "error";
 };
 
+type LiveStatTile = { value: string; label: string };
+type DeadlineRiskRow = { label: string; percent: number };
+
+type LiveStatsResponse = {
+	ok?: boolean;
+	tiles?: LiveStatTile[];
+	deadlineRisks?: DeadlineRiskRow[];
+	rag?: { healthy?: boolean; hints?: string[] };
+};
+
 const CATEGORY_CARDS = [
 	{ title: "Субсидии", subtitle: "директни плащания, интервенции, ставки", icon: Sprout },
 	{ title: "Закони", subtitle: "наредби, регламенти и изисквания", icon: Scale },
@@ -92,12 +102,41 @@ export default function Home() {
 	const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 	const [feedbackByLogId, setFeedbackByLogId] = useState<Record<string, FeedbackState>>({});
 	const [searchFocusPulse, setSearchFocusPulse] = useState(false);
+	const [liveTiles, setLiveTiles] = useState<LiveStatTile[]>([
+		{ value: "…", label: "чат записа" },
+		{ value: "…", label: "страници" },
+		{ value: "…", label: "RAG" },
+	]);
+	const [deadlineRisks, setDeadlineRisks] = useState<DeadlineRiskRow[]>([]);
+	const [liveStatsLoading, setLiveStatsLoading] = useState(true);
+	const [ragHealthy, setRagHealthy] = useState<boolean | null>(null);
 
 	useEffect(() => {
 		if (typeof window === "undefined") return;
 		const chatQ = new URLSearchParams(window.location.search).get("chatQ");
 		if (!chatQ) return;
 		setChatInput((prev) => (prev.trim() ? prev : chatQ));
+	}, []);
+
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await fetch("/api/stats/live", { cache: "no-store" });
+				const data = (await res.json().catch(() => ({}))) as LiveStatsResponse;
+				if (cancelled || !data.ok) return;
+				if (data.tiles?.length) setLiveTiles(data.tiles);
+				if (data.deadlineRisks?.length) setDeadlineRisks(data.deadlineRisks);
+				setRagHealthy(Boolean(data.rag?.healthy));
+			} catch {
+				/* keep placeholders */
+			} finally {
+				if (!cancelled) setLiveStatsLoading(false);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
 	}, []);
 
 	const executeSearch = async (rawQuery: string) => {
@@ -218,16 +257,20 @@ export default function Home() {
 	};
 
 	return (
-		<div className="min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
+		<div className="agri-mobile-safe min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
 			<header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/88">
-				<div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-					<Link href="/" className="flex items-center gap-3" aria-label="AgriNexus.Law">
-						<span className="grid h-10 w-10 place-items-center rounded-md bg-emerald-950 text-white shadow-sm dark:bg-emerald-500 dark:text-emerald-950">
+				<div className="mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6">
+					<Link href="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3" aria-label="AgriNexus.Law">
+						<span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-emerald-950 text-white shadow-sm sm:h-10 sm:w-10 dark:bg-emerald-500 dark:text-emerald-950">
 							<Leaf size={21} />
 						</span>
-						<span className="leading-tight">
-							<span className="block text-sm font-black tracking-[0.18em] text-slate-950 dark:text-white">AGRINEXUS</span>
-							<span className="block text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-700 dark:text-emerald-300">Law Intelligence</span>
+						<span className="min-w-0 leading-tight">
+							<span className="block text-xs font-black tracking-[0.1em] text-slate-950 sm:text-sm sm:tracking-[0.18em] dark:text-white">
+								AGRINEXUS
+							</span>
+							<span className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 sm:block sm:text-[11px] sm:tracking-[0.28em] dark:text-emerald-300">
+								Law Intelligence
+							</span>
 						</span>
 					</Link>
 					<nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300 md:flex">
@@ -239,9 +282,11 @@ export default function Home() {
 					<button
 						type="button"
 						onClick={() => jumpToSearch()}
-						className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-100"
+						className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 sm:gap-2 sm:px-4 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-100"
+						aria-label="Търсене"
 					>
-						<Search size={16} /> Търси
+						<Search size={16} aria-hidden />
+						<span className="sr-only sm:not-sr-only">Търси</span>
 					</button>
 				</div>
 			</header>
@@ -249,13 +294,15 @@ export default function Home() {
 			<main>
 				<section className="relative overflow-hidden border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,250,252,0.62))] dark:border-slate-800 dark:bg-[linear-gradient(180deg,rgba(2,6,23,0.82),rgba(15,23,42,0.72))]">
 					<div className="hero-field-visual absolute inset-y-0 right-0 hidden w-[48%] opacity-90 lg:block" aria-hidden="true" />
-					<div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
-						<div className="relative z-10 max-w-3xl">
-							<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-slate-900/80 dark:text-emerald-300">
-								<LockKeyhole size={14} /> Проверими източници, не свободни догадки
+					<div className="mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
+						<div className="relative z-10 min-w-0 max-w-3xl">
+							<div className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase leading-snug tracking-normal text-emerald-800 shadow-sm sm:text-xs sm:tracking-[0.12em] dark:border-emerald-800 dark:bg-slate-900/80 dark:text-emerald-300">
+								<LockKeyhole size={14} className="shrink-0" />
+								<span className="sm:hidden">Проверими източници</span>
+								<span className="hidden sm:inline">Проверими източници, не свободни догадки</span>
 							</div>
-							<h1 className="max-w-4xl text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
-								Правна и агро информация, подредена за решения на терен.
+							<h1 className="w-full max-w-full text-balance break-words text-[1.65rem] font-black leading-[1.2] tracking-normal text-slate-950 dark:text-white sm:text-4xl sm:leading-tight md:text-5xl lg:text-6xl">
+								Правна и аграрна документация
 							</h1>
 							<p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
 								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
@@ -268,19 +315,21 @@ export default function Home() {
 										searchFocusPulse ? "ring-4 ring-emerald-500/20" : ""
 									}`}
 								>
-									<div className="flex items-center gap-3">
-										<Search className="shrink-0 text-emerald-700 dark:text-emerald-300" size={22} />
-										<input
-											ref={searchInputRef}
-											value={query}
-											onChange={(e) => setQuery(e.target.value)}
-											placeholder="Попитай за срок, субсидия, наредба или документ..."
-											className="min-w-0 flex-1 bg-transparent text-base font-medium text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
-										/>
+									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+										<div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+											<Search className="shrink-0 text-emerald-700 dark:text-emerald-300" size={22} />
+											<input
+												ref={searchInputRef}
+												value={query}
+												onChange={(e) => setQuery(e.target.value)}
+												placeholder="Попитай за срок, субсидия, наредба или документ..."
+												className="min-w-0 w-full flex-1 bg-transparent text-base font-medium text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
+											/>
+										</div>
 										<button
 											type="submit"
 											disabled={loading || !query.trim()}
-											className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+											className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
 										>
 											{loading ? "Търся..." : "Търси"} <ArrowRight size={16} />
 										</button>
@@ -314,46 +363,62 @@ export default function Home() {
 							</div>
 						</div>
 
-						<div className="relative z-10 lg:pl-4">
-							<div className="dashboard-preview border border-slate-200 bg-white shadow-2xl shadow-slate-950/12 dark:border-slate-800 dark:bg-slate-950">
-								<div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-									<div>
-										<p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Live Intelligence</p>
-										<p className="mt-1 text-lg font-black text-slate-950 dark:text-white">Кампания и документи</p>
+						<div className="relative z-10 min-w-0 lg:pl-4">
+							<div className="dashboard-preview min-w-0 border border-slate-200 bg-white shadow-2xl shadow-slate-950/12 dark:border-slate-800 dark:bg-slate-950">
+								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-5 dark:border-slate-800">
+									<div className="min-w-0">
+										<p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-700 sm:tracking-[0.18em] dark:text-emerald-300">Live Intelligence</p>
+										<p className="mt-1 text-base font-black text-slate-950 sm:text-lg dark:text-white">Кампания и документи</p>
 									</div>
-									<span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">онлайн</span>
+									<span
+										className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
+											ragHealthy === false
+												? "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+												: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+										}`}
+										title={
+											ragHealthy === false
+												? "RAG индексът изисква внимание — виж /api/health"
+												: "Услугата е онлайн"
+										}
+									>
+										{liveStatsLoading ? "…" : ragHealthy === false ? "RAG проверка" : "онлайн"}
+									</span>
 								</div>
-								<div className="grid gap-4 p-5">
-									<div className="grid grid-cols-3 gap-3">
-										{[
-											["43", "чат записа"],
-											["25", "страници"],
-											["0", "грешки build"],
-										].map(([value, label]) => (
-											<div key={label} className="border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-												<p className="text-2xl font-black text-slate-950 dark:text-white">{value}</p>
-												<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</p>
+								<div className="grid gap-4 p-4 sm:p-5">
+									<div className="grid grid-cols-3 gap-2 sm:gap-3">
+										{liveTiles.map((tile) => (
+											<div
+												key={tile.label}
+												className="border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
+											>
+												<p className="text-2xl font-black text-slate-950 dark:text-white">
+													{liveStatsLoading ? "…" : tile.value}
+												</p>
+												<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{tile.label}</p>
 											</div>
 										))}
 									</div>
 									<div className="border border-slate-100 p-4 dark:border-slate-800">
 										<div className="mb-4 flex items-center justify-between">
-											<p className="text-sm font-bold text-slate-950 dark:text-white">Риск по срокове</p>
+											<p className="text-sm font-bold text-slate-950 dark:text-white">Спешност по срокове</p>
 											<LineChart size={18} className="text-emerald-700 dark:text-emerald-300" />
 										</div>
 										<div className="space-y-3">
-											{[
-												["Директни плащания", "78%"],
-												["Био контрол", "51%"],
-												["Документи за износ", "34%"],
-											].map(([label, width]) => (
-												<div key={label}>
+											{(deadlineRisks.length
+												? deadlineRisks
+												: [{ label: "Зареждане…", percent: 0 }]
+											).map((row) => (
+												<div key={row.label}>
 													<div className="mb-1 flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-														<span>{label}</span>
-														<span>{width}</span>
+														<span>{row.label}</span>
+														<span>{row.percent}%</span>
 													</div>
 													<div className="h-2 bg-slate-100 dark:bg-slate-800">
-														<div className="h-full bg-emerald-600" style={{ width }} />
+														<div
+															className="h-full bg-emerald-600 transition-[width] duration-500"
+															style={{ width: `${row.percent}%` }}
+														/>
 													</div>
 												</div>
 											))}

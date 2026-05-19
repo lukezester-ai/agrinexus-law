@@ -19,3 +19,10 @@ tsconfig.tsbuildinfo
 local.properties
 
 # Локални Android / IDE (Capacitor `android/` се комитира; това е машинен кеш)
+app/build/
+app/.gradle/
+app/src/
+app/build.gradle.kts
+app/proguard-rules.pro
+
+.vercel

@@ -1,7 +1,7 @@
 /** JSON-LD за Schema.org (Organization + WebSite + SearchAction). */
 
 export function buildAgriNexusLawJsonLd(siteUrlRaw: string): string {
-	const siteUrl = siteUrlRaw.replace(/\/$/, "") || "https://agrinexus.bg";
+	const siteUrl = siteUrlRaw.replace(/\/$/, "") || "https://www.agrinexuslaw.com";
 
 	const graph = [
 		{

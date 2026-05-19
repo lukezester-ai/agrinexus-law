@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { AnalyticsLoader } from "@/components/analytics-loader";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { PwaHelpButton } from "@/components/pwa-help-button";
@@ -12,12 +12,12 @@ import "./globals.css";
 const themeInitScript = `(function(){try{var k='agrinexus-theme';var f='agrinexus-theme-user-set';var s=localStorage.getItem(k);var u=localStorage.getItem(f)==='1';if(u&&s==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`;
 
 const siteUrl =
-	process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://agrinexus.bg";
+	process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.agrinexuslaw.com";
 const metadataBase = (() => {
 	try {
 		return new URL(siteUrl);
 	} catch {
-		return new URL("https://agrinexus.bg");
+		return new URL("https://www.agrinexuslaw.com");
 	}
 })();
 
@@ -101,7 +101,7 @@ export default function RootLayout({
 					dangerouslySetInnerHTML={{ __html: jsonLdGraph }}
 				/>
 			</head>
-			<body className="min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+			<body className="agri-mobile-safe min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
 				{children}
 				<PwaRegister />
 				<PwaHelpButton />
