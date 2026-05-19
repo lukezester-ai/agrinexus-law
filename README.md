@@ -1,6 +1,6 @@
 # AgriNexus.Law MVP 1.0 🌾
 
-**GitHub / deploy:** [roxsonltd-droid](https://github.com/roxsonltd-droid) — виж `ROXSON-GIT.md`.
+**GitHub:** [lukezester-ai/agrinexus-law](https://github.com/lukezester-ai/agrinexus-law) · **Vercel:** roxsonltd-droid — виж `ROXSON-GIT.md`.
 
 **Production-ready** AI платформа за български фермери. Три специалиста — Елена (право/ДФЗ), Борис (култури и почва), Виктория (финанси и сметки).
 

@@ -1,28 +1,28 @@
-# GitHub — Roxson (`roxsonltd-droid`)
+# GitHub и Vercel
 
-Официалният remote е **Roxson**, не `lukezester-ai`.
+| | |
+|---|---|
+| **Git repo** | [lukezester-ai/agrinexus-law](https://github.com/lukezester-ai/agrinexus-law) |
+| **Vercel team** | `roxsonltd-droid` → проект `agrinexus-mvp` |
+| **Production** | https://www.agrinexuslaw.com |
 
-## Remote
+## Remote (Git)
 
 ```bash
-git remote set-url origin https://github.com/roxsonltd-droid/agrinexus-mvp.git
+git remote set-url origin https://github.com/lukezester-ai/agrinexus-law.git
 git remote -v
 ```
 
-Ако репото в GitHub се казва друго (напр. `agrinexus-law`), смени URL-а съответно.
+Под `roxsonltd-droid` в GitHub **няма** `agrinexus-mvp` — deploy-ът в Vercel е свързан с repo-то по-горе.
 
 ## Първо качване (ако repo още няма)
 
-1. GitHub → org **roxsonltd-droid** → **New repository**
-2. Име: `agrinexus-mvp` (или както е вързано в Vercel)
-3. Private, без README
-4. В папката на проекта:
+В папката на проекта:
 
 ```powershell
 cd "C:\Users\expre\OneDrive\Desktop\agrinexus-mvp"
-git remote set-url origin https://github.com/roxsonltd-droid/agrinexus-mvp.git
+git remote set-url origin https://github.com/lukezester-ai/agrinexus-law.git
 git push -u origin fix/live-stats-cleanup-app
-git push -u origin main
 ```
 
 ## Production (след merge)
