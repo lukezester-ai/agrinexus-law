@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Upload, FileText, CircleCheck, AlertCircle, ArrowLeft } from "lucide-react";
 
@@ -15,6 +15,16 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [ingestToken, setIngestToken] = useState("");
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("agrinexus_ingest_admin_token");
+      if (saved) setIngestToken(saved);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -27,6 +37,12 @@ export default function AdminPage() {
     if (!file) {
       setStatus("error");
       setMessage("Моля, изберете PDF файл.");
+      return;
+    }
+
+    if (!ingestToken.trim()) {
+      setStatus("error");
+      setMessage("Въведете админ токена (INGEST_ADMIN_TOKEN от .env.local), за да може сървърът да приеме качването.");
       return;
     }
 
@@ -45,6 +61,7 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/ingest/upload", {
         method: "POST",
+        headers: { "x-ingest-token": ingestToken.trim() },
         body: formData,
       });
 
@@ -56,6 +73,11 @@ export default function AdminPage() {
 
       setStatus("success");
       setMessage(`Документът е качен и индексиран успешно! Създадени са ${data.chunksCreated} парчета.`);
+      try {
+        sessionStorage.setItem("agrinexus_ingest_admin_token", ingestToken.trim());
+      } catch {
+        /* ignore */
+      }
       
       // Clear form
       setFile(null);
@@ -84,10 +106,26 @@ export default function AdminPage() {
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm leading-relaxed">
               Файлът ще бъде автоматично сканиран, разделен на логически части и качен в RAG базата.
+              Нужен е същият админ токен като за <code className="text-xs bg-slate-200/80 dark:bg-slate-800 px-1 rounded">/api/rag/reindex</code> (<code className="text-xs">INGEST_ADMIN_TOKEN</code>).
             </p>
           </div>
 
           <form onSubmit={handleUpload} className="p-8 grid gap-8">
+            <div className="space-y-2 sm:col-span-2">
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Админ токен за индексиране *</label>
+              <input
+                type="password"
+                autoComplete="off"
+                value={ingestToken}
+                onChange={(e) => setIngestToken(e.target.value)}
+                placeholder="Стойността на INGEST_ADMIN_TOKEN от .env.local"
+                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition font-mono text-sm"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Запазва се само в този браузър (sessionStorage) след успешно качване — не се изпраща към трети страни.
+              </p>
+            </div>
+
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Заглавие на документа *</label>
@@ -172,7 +210,7 @@ export default function AdminPage() {
 
             <button 
               type="submit" 
-              disabled={uploading || !file || !title}
+              disabled={uploading || !file || !title.trim() || !ingestToken.trim()}
               className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover-elevate"
             >
               {uploading ? (

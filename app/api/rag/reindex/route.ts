@@ -1,44 +1,17 @@
+import { isIngestAdminAuthorized } from "@/lib/ai-leader/admin-ingest-auth";
 import {
-  reindexAll,
-  reindexLearned,
-  reindexPublicDocumentContent,
-  reindexPublicDocuments,
-  reindexStatic,
-  type ReindexStats,
-} from "@/lib/rag/reindex";
+  getReindexOrchestrationUsageDocs,
+  parseReindexTarget,
+  runReindexOrchestration,
+  type ReindexTarget,
+} from "@/lib/ai-leader/ingest-reindex-pipeline";
 import { isRagEnabled } from "@/lib/rag/config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function isAuthorized(req: Request): boolean {
-  const required = process.env.INGEST_ADMIN_TOKEN?.trim();
-  if (!required) return false;
-  const headerToken =
-    req.headers.get("x-ingest-token")?.trim() ||
-    req.headers.get("authorization")?.trim().replace(/^Bearer\s+/i, "");
-  return Boolean(headerToken && headerToken === required);
-}
-
-type Target =
-  | "all"
-  | "static"
-  | "learned"
-  | "public_documents"
-  | "public_doc_content";
-
-function isValidTarget(value: unknown): value is Target {
-  return (
-    value === "all" ||
-    value === "static" ||
-    value === "learned" ||
-    value === "public_documents" ||
-    value === "public_doc_content"
-  );
-}
-
 export async function POST(req: Request) {
-  if (!isAuthorized(req)) {
+  if (!isIngestAdminAuthorized(req)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -52,41 +25,19 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { target?: Target; limit?: number; onlySourceIds?: string[] } = {};
+  let body: { target?: ReindexTarget; limit?: number; onlySourceIds?: string[] } = {};
   try {
     body = (await req.json().catch(() => ({}))) as typeof body;
   } catch {
     body = {};
   }
-  const target: Target = isValidTarget(body.target) ? body.target : "all";
+  const target = parseReindexTarget(body.target);
 
   try {
-    let results: ReindexStats[] = [];
-    switch (target) {
-      case "static":
-        results = [await reindexStatic()];
-        break;
-      case "learned":
-        results = [await reindexLearned()];
-        break;
-      case "public_documents":
-        results = [await reindexPublicDocuments()];
-        break;
-      case "public_doc_content":
-        results = [
-          await reindexPublicDocumentContent({
-            limit: typeof body.limit === "number" ? body.limit : undefined,
-            onlySourceIds: Array.isArray(body.onlySourceIds)
-              ? body.onlySourceIds
-              : undefined,
-          }),
-        ];
-        break;
-      case "all":
-      default:
-        results = await reindexAll();
-        break;
-    }
+    const { results } = await runReindexOrchestration(target, {
+      limit: typeof body.limit === "number" ? body.limit : undefined,
+      onlySourceIds: Array.isArray(body.onlySourceIds) ? body.onlySourceIds : undefined,
+    });
     return Response.json({ ok: true, target, results });
   } catch (error) {
     console.error("[rag/reindex] failed:", error);
@@ -101,22 +52,12 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  if (!isAuthorized(req)) {
+  if (!isIngestAdminAuthorized(req)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   return Response.json({
     ok: true,
     enabled: isRagEnabled(),
-    usage: {
-      method: "POST",
-      headers: { "x-ingest-token": "<INGEST_ADMIN_TOKEN>" },
-      body: {
-        target:
-          "all | static | learned | public_documents | public_doc_content",
-        // optional за target='public_doc_content'
-        limit: "number (по подразбиране 50)",
-        onlySourceIds: "string[] (id-та от public_documents)",
-      },
-    },
+    usage: getReindexOrchestrationUsageDocs(),
   });
 }

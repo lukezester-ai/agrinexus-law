@@ -1,9 +1,14 @@
+import { isIngestAdminAuthorized } from "@/lib/ai-leader/admin-ingest-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { extractPdfText } from "@/lib/rag/content/pdf-parser";
 import { chunkText, sha256 } from "@/lib/rag/chunker";
 import { embedBatch } from "@/lib/rag/embeddings";
 
 export async function POST(req: Request) {
+  if (!isIngestAdminAuthorized(req)) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;

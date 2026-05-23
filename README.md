@@ -13,7 +13,10 @@
 5. `npm install` и `npm run dev` (по подразбиране http://localhost:3002)
 6. Push в GitHub, deploy на Vercel
 
-## Структура
+## AI документация и оркестрация
+
+- **`docs/AI-DOCUMENTATION.md`** — LLM, RAG, API, env, troubleshooting
+- **`docs/AI-LEADER-ARCHITECTURE.md`** — „AI лидер“: автоматизация между RAG, ДФЗ база, learned knowledge и Furrow (`lib/ai-leader/`)
 
 ```
 agrinexus-mvp/
@@ -30,6 +33,7 @@ agrinexus-mvp/
 │   ├── characters.ts     # Тримата персонажа
 │   ├── knowledge/
 │   │   └── dfz-knowledge.ts  # ДФЗ knowledge база
+│   ├── ai-leader/            # Чат retrieval pipeline + ingest/reindex оркестрация + админ auth
 │   ├── supabase.ts       # Database client
 │   └── utils/
 │       └── rate-limit.ts # Защита от abuse

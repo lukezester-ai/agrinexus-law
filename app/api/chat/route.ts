@@ -4,15 +4,11 @@ import { CHARACTERS, type CharacterId, buildSystemPrompt } from "@/lib/character
 import { tryInternalCharacterReply } from "@/lib/chat-internal";
 import { farmProfileToPromptText } from "@/lib/farm-profile-server";
 import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
-import { getKnowledgeContext } from "@/lib/knowledge/dfz-knowledge";
 import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { normalizeChatMessages } from "@/lib/anthropic-messages";
-import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
 import { formatTaxonomyForRag } from "@/lib/knowledge/document-taxonomy";
-import { getRagContext } from "@/lib/rag/hybrid-search";
-import { isRagEnabled } from "@/lib/rag/config";
-import { getFurrowMarketsData } from "@/lib/knowledge/furrow-markets";
+import { runChatKnowledgePipeline } from "@/lib/ai-leader/chat-knowledge-pipeline";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
@@ -102,24 +98,8 @@ export async function POST(req: Request) {
 				);
 			}
 
-			let knowledgeContext = "";
-			if (isRagEnabled()) {
-				try {
-					const rag = await getRagContext(userQuery);
-					knowledgeContext = rag.context;
-					retrievedCount = rag.items.length;
-					retrievalMode = rag.usedVector ? "rag_hybrid" : "bm25";
-				} catch (ragErr) {
-					console.error("RAG retrieval failed, falling back to BM25:", ragErr);
-				}
-			}
-			if (!knowledgeContext) {
-				knowledgeContext = getKnowledgeContext(userQuery);
-				retrievalMode = knowledgeContext ? "bm25" : "none";
-			}
-      const learnedKnowledgeContext = await getLearnedKnowledgeContext(userQuery);
-      const furrowContext = getFurrowMarketsData();
-      const combinedKnowledgeContext = [knowledgeContext, learnedKnowledgeContext, furrowContext].filter(Boolean).join("\n\n");
+			const pipeline = await runChatKnowledgePipeline(userQuery);
+			const { combinedKnowledgeContext, retrievalMode, retrievedCount } = pipeline;
 
 			const profileText = resolvedFarmProfile
 				? farmProfileToPromptText(resolvedFarmProfile)
