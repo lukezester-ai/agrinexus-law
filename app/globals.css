@@ -3,29 +3,30 @@
 @tailwind utilities;
 
 :root {
-  --brand-violet: #6d28d9;
+  /* Vibrant Modern Colors */
+  --brand-teal: #0d9488;
+  --brand-teal-light: #14b8a6;
   --brand-indigo: #4338ca;
   --brand-blue: #2563eb;
   --brand-cyan: #0891b2;
-  --brand-emerald: #047857;
-  --brand-ink: #0f172a;
-  --bg-violet-soft: #eef6ef;
-  --bg-indigo-soft: #f6f8f4;
-  --bg-blue-soft: #eef3ee;
-  --bg-paper: #fbfaf7;
-  --text-brand-strong: #0f172a;
-  --text-brand-pill: #065f46;
+  --brand-ink: #020617;
+  
+  --bg-paper: #ffffff;
+  --bg-subtle: #f8fafc;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
 }
 
 .dark {
-  --bg-dark-1: #0b1420;
-  --bg-dark-2: #122235;
-  --bg-dark-3: #173248;
-  --bg-dark-4: #0f172a;
-  --bg-dark-pill-1: #2b1f52;
-  --bg-dark-pill-2: #1d4f91;
-  --text-brand-dark: #c4b5fd;
-  --text-brand-dark-soft: #7dd3fc;
+  --bg-paper: #020617; /* Deep OLED black */
+  --bg-subtle: #0f172a;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  
+  --brand-teal: #2dd4bf;
+  --brand-teal-light: #5eead4;
 }
 
 * {
@@ -38,28 +39,83 @@ html {
   overflow-x: hidden;
   width: 100%;
   max-width: 100%;
-  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
   overflow-x: hidden;
   width: 100%;
   max-width: 100%;
   overscroll-behavior-x: none;
 }
 
-/* Hero заглавие — равномерни редове, без „изтегляне“ наляво */
-.agri-hero-title {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  text-wrap: balance;
+/* Typography Overrides */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-outfit), sans-serif;
   letter-spacing: -0.02em;
 }
 
-/* Предотвратява хоризонтален скрол и „изместване в ляво“ в WebView (Capacitor) */
+/* Glassmorphism & UI Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Modern Gradient Text */
+.text-gradient {
+  background: linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-blue) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Interactive Card Elevate */
+.hover-elevate {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hover-elevate:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(13, 148, 136, 0.25);
+  border-color: var(--brand-teal-light);
+}
+
+.dark .hover-elevate:hover {
+  box-shadow: 0 12px 24px -10px rgba(45, 212, 191, 0.15);
+}
+
+/* Global Background */
+.agri-page-bg {
+  background-color: var(--bg-paper);
+  background-image: radial-gradient(circle at 15% 50%, rgba(13, 148, 136, 0.05), transparent 25%),
+                    radial-gradient(circle at 85% 30%, rgba(67, 56, 202, 0.04), transparent 25%);
+}
+
+.dark .agri-page-bg {
+  background-image: radial-gradient(circle at 15% 50%, rgba(45, 212, 191, 0.07), transparent 25%),
+                    radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.05), transparent 25%);
+}
+
+.hero-field-visual {
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(67, 56, 202, 0.05));
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+.dark .hero-field-visual {
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(99, 102, 241, 0.08));
+}
+
 .agri-mobile-safe {
   width: 100%;
   max-width: 100%;
@@ -72,326 +128,4 @@ body {
 .agri-mobile-safe *::before,
 .agri-mobile-safe *::after {
   box-sizing: border-box;
-}
-
-@media (max-width: 639px) {
-  .agri-mobile-safe h1,
-  .agri-mobile-safe h2,
-  .agri-mobile-safe h3,
-  .agri-mobile-safe p,
-  .agri-mobile-safe button,
-  .agri-mobile-safe input {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-}
-
-/* Shared page backdrop — Canva Docs style (soft lilac/blue surface) */
-.agri-page-bg {
-  background:
-    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
-    radial-gradient(circle at 14% 0%, rgba(4, 120, 87, 0.12), transparent 30%),
-    radial-gradient(circle at 86% 14%, rgba(148, 163, 184, 0.2), transparent 34%),
-    linear-gradient(180deg, #fbfaf7 0%, #f4f6f1 48%, #ffffff 100%);
-  background-size: 42px 42px, 42px 42px, auto, auto, auto;
-}
-
-/* „Nexus“ — Canva-like brand blend (violet -> blue -> cyan) */
-.brand-nexus-gold {
-  background: linear-gradient(120deg, var(--brand-violet) 0%, var(--brand-indigo) 45%, var(--brand-cyan) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-.dark .brand-nexus-gold {
-  background: none;
-  -webkit-background-clip: unset;
-  background-clip: unset;
-  color: var(--text-brand-dark);
-  -webkit-text-fill-color: var(--text-brand-dark);
-}
-
-.brand-law-suffix {
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  color: var(--text-brand-strong);
-}
-.dark .brand-law-suffix {
-  color: var(--text-brand-dark-soft);
-}
-
-/* Първи ред на hero — ясен контраст върху светъл/тъмен градиент */
-.hero-main-title {
-  color: #1c1917;
-}
-
-.dark .hero-main-title {
-  color: #fafaf9;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
-}
-
-.luxury-glow {
-  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.12), 0 4px 16px rgba(6, 182, 212, 0.12);
-}
-
-.premium-nav {
-  background: linear-gradient(
-    110deg,
-    rgba(27, 26, 68, 0.96) 0%,
-    rgba(38, 37, 99, 0.93) 48%,
-    rgba(30, 41, 59, 0.95) 100%
-  );
-  border-bottom: 1px solid rgba(99, 102, 241, 0.25);
-  box-shadow: 0 8px 30px rgba(8, 18, 28, 0.38);
-}
-
-.premium-pill {
-  border: 1px solid rgba(99, 102, 241, 0.35);
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #ecfeff 100%);
-  color: #312e81;
-}
-
-.premium-cta {
-  background: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-indigo) 48%, var(--brand-blue) 100%);
-  color: #fff;
-  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.35);
-}
-
-.premium-cta:hover {
-  filter: brightness(1.06);
-}
-
-/* Reusable brand tokens for page-level components */
-.brand-cta-bg {
-  background: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-indigo) 55%, var(--brand-blue) 100%);
-}
-
-.brand-soft-surface {
-  border-color: color-mix(in srgb, var(--brand-cyan) 22%, white);
-  background-color: color-mix(in srgb, var(--bg-paper) 88%, white);
-}
-
-.brand-soft-input {
-  border-color: color-mix(in srgb, var(--brand-cyan) 28%, white);
-  background-color: color-mix(in srgb, var(--bg-indigo-soft) 78%, white);
-}
-
-.brand-link {
-  color: var(--text-brand-strong);
-}
-
-.dark .brand-link {
-  color: var(--text-brand-dark-soft);
-}
-
-.premium-card {
-  border: 1px solid rgba(99, 102, 241, 0.18);
-  background: linear-gradient(150deg, #ffffff 0%, #f8faff 45%, #f1f5ff 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  position: relative;
-  overflow: hidden;
-}
-
-.premium-card:hover {
-  border-color: rgba(79, 70, 229, 0.34);
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1), 0 4px 16px rgba(37, 99, 235, 0.1);
-  transform: translateY(-2px);
-}
-
-.premium-card-active {
-  border: 1px solid rgba(79, 70, 229, 0.5);
-  background: linear-gradient(145deg, #ffffff 0%, #eef2ff 52%, #f0f9ff 100%);
-  box-shadow: 0 14px 38px rgba(79, 70, 229, 0.14), 0 5px 18px rgba(37, 99, 235, 0.16);
-}
-
-.premium-card-active::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 0.85rem;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 20%, rgba(129, 140, 248, 0.3) 48%, rgba(255, 255, 255, 0) 75%);
-  transform: translateX(-140%);
-  pointer-events: none;
-  animation: card-shine-idle 10s ease-in-out infinite;
-}
-
-.premium-card-active:hover::before {
-  animation: card-shine 1.35s ease-in-out;
-}
-
-.premium-divider {
-  border-color: rgba(99, 102, 241, 0.2);
-}
-
-/* Име „gold-dot“ за съвместимост — визуално teal акцент */
-.gold-dot {
-  background: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-blue) 100%);
-}
-
-@keyframes card-shine {
-  0% {
-    transform: translateX(-140%);
-  }
-  100% {
-    transform: translateX(140%);
-  }
-}
-
-@keyframes card-shine-idle {
-  0%,
-  82% {
-    transform: translateX(-140%);
-  }
-  100% {
-    transform: translateX(140%);
-  }
-}
-
-@media (max-width: 767px) {
-  .premium-card-active::before,
-  .premium-card-active:hover::before {
-    animation: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .premium-card-active::before,
-  .premium-card-active:hover::before {
-    animation: none;
-  }
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.hero-field-visual {
-  background:
-    linear-gradient(90deg, rgba(251, 250, 247, 0), rgba(251, 250, 247, 0.72) 11%, rgba(251, 250, 247, 0) 32%),
-    linear-gradient(150deg, rgba(4, 120, 87, 0.82), rgba(20, 83, 45, 0.56) 34%, rgba(15, 23, 42, 0.1) 34.3%, transparent 35%),
-    repeating-linear-gradient(112deg, rgba(22, 101, 52, 0.28) 0 10px, rgba(255, 255, 255, 0.18) 10px 14px, rgba(101, 163, 13, 0.18) 14px 26px),
-    linear-gradient(135deg, rgba(4, 120, 87, 0.2), rgba(217, 119, 6, 0.12));
-  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%);
-}
-
-.dashboard-preview {
-  border-radius: 10px;
-}
-
-/* ——— Тъмна тема (клас .dark на <html>) ——— */
-.dark {
-  color-scheme: dark;
-}
-
-.dark .agri-page-bg {
-  background:
-    linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.12), transparent 30%),
-    radial-gradient(circle at 86% 14%, rgba(51, 65, 85, 0.36), transparent 34%),
-    linear-gradient(180deg, #020617 0%, #0f172a 46%, #020617 100%);
-  background-size: 42px 42px, 42px 42px, auto, auto, auto;
-}
-
-.dark .hero-field-visual {
-  background:
-    linear-gradient(90deg, rgba(2, 6, 23, 0), rgba(2, 6, 23, 0.72) 11%, rgba(2, 6, 23, 0) 32%),
-    linear-gradient(150deg, rgba(16, 185, 129, 0.42), rgba(6, 78, 59, 0.62) 34%, rgba(15, 23, 42, 0.12) 34.3%, transparent 35%),
-    repeating-linear-gradient(112deg, rgba(16, 185, 129, 0.14) 0 10px, rgba(255, 255, 255, 0.06) 10px 14px, rgba(132, 204, 22, 0.09) 14px 26px),
-    linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(217, 119, 6, 0.08));
-}
-
-.dark .premium-nav {
-  background: linear-gradient(
-    110deg,
-    rgba(13, 15, 38, 0.97) 0%,
-    rgba(18, 24, 58, 0.95) 48%,
-    rgba(15, 23, 42, 0.96) 100%
-  );
-  border-bottom: 1px solid rgba(129, 140, 248, 0.28);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
-}
-
-.dark .premium-pill {
-  border: 1px solid rgba(129, 140, 248, 0.24);
-  background: linear-gradient(135deg, var(--bg-dark-pill-1) 0%, var(--bg-dark-pill-2) 42%, #0e7490 100%);
-  color: #e0e7ff;
-}
-
-.dark .premium-cta {
-  background: linear-gradient(135deg, #6d28d9 0%, var(--brand-indigo) 45%, var(--brand-blue) 100%);
-  color: #f8fafc;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(45, 212, 191, 0.12);
-}
-
-.dark .premium-card {
-  border: 1px solid rgba(129, 140, 248, 0.2);
-  background: linear-gradient(150deg, #0f172a 0%, #1f2a44 48%, #0f172a 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  color: rgb(231 229 228);
-}
-
-.dark .premium-card strong {
-  color: rgb(250 250 249);
-}
-
-.dark .premium-card:hover {
-  border-color: rgba(129, 140, 248, 0.36);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(37, 99, 235, 0.12);
-}
-
-.dark .premium-card-active {
-  border: 1px solid rgba(129, 140, 248, 0.42);
-  background: linear-gradient(145deg, #312e81 0%, #1e293b 52%, #1e3a8a 100%);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), 0 5px 18px rgba(79, 70, 229, 0.2);
-  color: rgb(231 229 228);
-}
-
-.dark .premium-divider {
-  border-color: rgba(129, 140, 248, 0.24);
-}
-
-.dark .luxury-glow {
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.45),
-    0 4px 16px rgba(79, 70, 229, 0.16);
-}
-
-.dark .gold-dot {
-  background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%);
-}
-
-.dark select,
-.dark input:not([type="checkbox"]):not([type="radio"]),
-.dark textarea {
-  background-color: rgba(15, 23, 42, 0.85);
-  border-color: rgb(71 85 105);
-  color: rgb(245 245 244);
-}
-
-.dark select:focus,
-.dark input:not([type="checkbox"]):not([type="radio"]):focus,
-.dark textarea:focus {
-  outline: none;
-  border-color: rgb(129 140 248 / 0.6);
-}
-
-.dark option {
-  background-color: #1c1917;
-  color: #e7e5e4;
-}
-
-/* По-четим вторичен текст в тъмна тема (избягва „изчезнали“ надписи). */
-.dark .agri-page-bg .text-stone-500 {
-  color: rgb(214 211 209);
-}
-
-.dark section strong {
-  color: rgb(250 250 249);
 }

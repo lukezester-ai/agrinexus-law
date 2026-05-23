@@ -1,4 +1,5 @@
-import OpenAI from "openai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { streamText } from "ai";
 import { CHARACTERS, type CharacterId, buildSystemPrompt } from "@/lib/characters";
 import { tryInternalCharacterReply } from "@/lib/chat-internal";
 import { farmProfileToPromptText } from "@/lib/farm-profile-server";
@@ -11,6 +12,7 @@ import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
 import { formatTaxonomyForRag } from "@/lib/knowledge/document-taxonomy";
 import { getRagContext } from "@/lib/rag/hybrid-search";
 import { isRagEnabled } from "@/lib/rag/config";
+import { getFurrowMarketsData } from "@/lib/knowledge/furrow-markets";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
@@ -46,16 +48,44 @@ export async function POST(req: Request) {
 			normalized,
 		);
 
-		let responseText: string;
 		let replySource: "internal_kb" | "openai" = "openai";
 		let model: string | undefined;
-    let chatLogId: string | null = null;
     let retrievalMode: "rag_hybrid" | "bm25" | "none" = "none";
     let retrievedCount = 0;
 
+		const supabaseAdmin = getSupabaseAdmin();
+
 		if (!internalAttempt.useOpenAI) {
-			responseText = internalAttempt.reply;
 			replySource = "internal_kb";
+			
+			// Логваме вътрешния отговор веднага
+			let chatLogId: string | null = null;
+			if (supabaseAdmin) {
+				try {
+					const inserted = await supabaseAdmin.from("chat_logs").insert({
+						character_id: characterId,
+						user_message: userQuery,
+						assistant_message: internalAttempt.reply,
+						ip_address: ip,
+						user_profile: resolvedFarmProfile
+							? { ...resolvedFarmProfile, _source: farmProfileSource }
+							: null,
+					}).select("id").single();
+					chatLogId = (inserted.data?.id as string | undefined) ?? null;
+				} catch (err) {
+					console.error("Failed to log chat:", err);
+				}
+			}
+
+			return Response.json({
+				response: internalAttempt.reply,
+				character: characterId,
+				remaining: rateLimitResult.remaining,
+				model: "internal-knowledge-base",
+				replySource,
+				chatLogId,
+				retrieval: { mode: retrievalMode, items: retrievedCount },
+			});
 		} else {
 			const apiKey = process.env.OPENAI_API_KEY?.trim();
 			const isPlaceholderKey =
@@ -88,7 +118,8 @@ export async function POST(req: Request) {
 				retrievalMode = knowledgeContext ? "bm25" : "none";
 			}
       const learnedKnowledgeContext = await getLearnedKnowledgeContext(userQuery);
-      const combinedKnowledgeContext = [knowledgeContext, learnedKnowledgeContext].filter(Boolean).join("\n\n");
+      const furrowContext = getFurrowMarketsData();
+      const combinedKnowledgeContext = [knowledgeContext, learnedKnowledgeContext, furrowContext].filter(Boolean).join("\n\n");
 
 			const profileText = resolvedFarmProfile
 				? farmProfileToPromptText(resolvedFarmProfile)
@@ -102,52 +133,50 @@ export async function POST(req: Request) {
 			);
 			model = process.env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
 
-			const openai = new OpenAI({ apiKey });
+			// Предварително създаваме запис за лог в базата (за да имаме chatLogId)
+			let chatLogId: string | null = null;
+			if (supabaseAdmin) {
+				try {
+					const inserted = await supabaseAdmin.from("chat_logs").insert({
+						character_id: characterId,
+						user_message: userQuery,
+						assistant_message: "...", // ще се обнови след края
+						ip_address: ip,
+						user_profile: resolvedFarmProfile
+							? { ...resolvedFarmProfile, _source: farmProfileSource }
+							: null,
+					}).select("id").single();
+					chatLogId = (inserted.data?.id as string | undefined) ?? null;
+				} catch (err) {
+					console.error("Failed to pre-log chat:", err);
+				}
+			}
 
-			const response = await openai.chat.completions.create({
-				model,
-				max_tokens: 1024,
+			const openai = createOpenAI({ apiKey });
+			
+			const result = streamText({
+				model: openai(model),
 				messages: [
 					{ role: "system", content: systemPrompt },
 					...normalized,
 				],
+				async onFinish({ text }) {
+					// Ъпдейтваме лога в базата с финалния отговор
+					if (supabaseAdmin && chatLogId) {
+						await supabaseAdmin.from("chat_logs").update({ assistant_message: text }).eq("id", chatLogId);
+					}
+				}
 			});
 
-			responseText =
-				response.choices[0]?.message?.content?.trim() ||
-				"Извинявай, не успях да отговоря. Опитай пак.";
+			return result.toTextStreamResponse({
+				headers: {
+					"X-Chat-Log-Id": chatLogId || "",
+					"X-Model-Used": model,
+					"X-Retrieval-Mode": retrievalMode,
+					"X-Retrieval-Items": retrievedCount.toString()
+				}
+			});
 		}
-
-		const supabaseAdmin = getSupabaseAdmin();
-		if (supabaseAdmin) {
-			try {
-				const inserted = await supabaseAdmin.from("chat_logs").insert({
-					character_id: characterId,
-					user_message: userQuery,
-					assistant_message: responseText,
-					ip_address: ip,
-					user_profile: resolvedFarmProfile
-						? { ...resolvedFarmProfile, _source: farmProfileSource }
-						: null,
-				}).select("id").single();
-        chatLogId = (inserted.data?.id as string | undefined) ?? null;
-			} catch (err) {
-				console.error("Failed to log chat:", err);
-			}
-		}
-
-		return Response.json({
-			response: responseText,
-			character: characterId,
-			remaining: rateLimitResult.remaining,
-			model: model ?? "internal-knowledge-base",
-			replySource,
-      chatLogId,
-      retrieval: {
-        mode: retrievalMode,
-        items: retrievedCount,
-      },
-		});
 	} catch (error) {
 		console.error("Chat API error:", error);
 		const msg = error instanceof Error ? error.message : String(error);

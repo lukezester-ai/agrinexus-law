@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 
 const SESSION_KEY = "agrinexus_site_visit_recorded_v1";
 
-const showPublicCounter =
-  process.env.NEXT_PUBLIC_SHOW_VISIT_COUNTER === "1";
+/** По подразбиране показваме брояча, ако Redis е настроен (Vercel + UPSTASH_*). Скриване: NEXT_PUBLIC_SHOW_VISIT_COUNTER=0 */
+const hidePublicCounter =
+  process.env.NEXT_PUBLIC_SHOW_VISIT_COUNTER === "0";
 
 /**
  * На заден план: веднъж на браузър сесия POST /api/stats/visits (ако има Redis).
- * GET към същия endpoint само ако NEXT_PUBLIC_SHOW_VISIT_COUNTER=1 — за показване на число.
+ * GET за общия брой — показва се като „utility“ лентичка (подобно на live сайтове с публичен трафик).
  */
 export function SiteVisitTracker() {
   const [total, setTotal] = useState<number | null>(null);
@@ -31,7 +32,7 @@ export function SiteVisitTracker() {
         /* private mode */
       }
 
-      if (!showPublicCounter) return;
+      if (hidePublicCounter) return;
 
       try {
         const g = await fetch("/api/stats/visits", { cache: "no-store" });
@@ -59,17 +60,23 @@ export function SiteVisitTracker() {
     };
   }, []);
 
-  if (!showPublicCounter || total === null) {
+  if (hidePublicCounter || total === null) {
     return null;
   }
 
   return (
     <p
-      className="pointer-events-none fixed bottom-14 left-3 z-[19] select-none rounded bg-stone-100/90 px-2 py-1 text-[11px] text-stone-500 shadow-sm dark:bg-stone-900/90 dark:text-stone-400"
-      title="Приблизителен брой записани посещения (сесии с Redis)"
+      className="pointer-events-none fixed right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[35] select-none rounded-md border border-amber-200/60 bg-amber-50/95 px-2.5 py-1 font-[system-ui] text-[11px] font-medium uppercase tracking-[0.12em] text-amber-950/85 shadow-sm tabular-nums dark:border-teal-700/40 dark:bg-slate-950/90 dark:text-teal-100/90 sm:text-xs sm:tracking-[0.14em]"
+      title="Приблизителен брой записани посещения (сесии; Upstash Redis)"
       aria-live="polite"
     >
-      Посещения: {total.toLocaleString("bg-BG")}
+      <span className="text-amber-800/70 dark:text-teal-300/80">Посещения</span>
+      <span className="mx-1.5 text-amber-950/40 dark:text-teal-200/35" aria-hidden>
+        ·
+      </span>
+      <span className="normal-case tracking-normal">
+        {total.toLocaleString("bg-BG")}
+      </span>
     </p>
   );
 }

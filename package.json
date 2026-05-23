@@ -30,6 +30,7 @@
     "cap:ios": "npx cap open ios"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.64",
     "@capacitor/android": "^8.3.3",
     "@capacitor/cli": "^8.3.3",
     "@capacitor/core": "^8.3.3",
@@ -41,6 +42,7 @@
     "@upstash/ratelimit": "^2.0.3",
     "@upstash/redis": "^1.34.3",
     "@vercel/analytics": "^1.4.1",
+    "ai": "^6.0.189",
     "lucide-react": "^0.460.0",
     "mammoth": "^1.9.1",
     "meilisearch": "^0.58.0",

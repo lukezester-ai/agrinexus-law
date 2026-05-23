@@ -204,26 +204,70 @@ export default function Home() {
 		setChatBusy(true);
 		setChatError(null);
 		try {
+			// Вземаме профила от localStorage, ако има такъв
+			let userProfile = undefined;
+			try {
+				const stored = localStorage.getItem("agrinexus_farm_profile");
+				if (stored) userProfile = JSON.parse(stored);
+			} catch (e) {
+				console.error("Failed to parse farm profile", e);
+			}
+
 			const res = await fetch("/api/chat", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					characterId: chatCharacter,
+					userProfile,
 					messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
 				}),
 			});
-			const data = (await res.json().catch(() => ({}))) as {
-				response?: string;
-				error?: string;
-				chatLogId?: string | null;
-			};
-			if (!res.ok || !data.response) {
-				throw new Error(data.error || "Грешка при чат заявка.");
+			
+			if (!res.ok) {
+				const errData = await res.json().catch(() => ({}));
+				throw new Error(errData.error || "Грешка при чат заявка.");
 			}
-			setChatMessages((prev) => [
-				...prev,
-				{ role: "assistant", content: data.response || "", chatLogId: data.chatLogId ?? null },
-			]);
+
+			const contentType = res.headers.get("content-type") || "";
+			
+			if (contentType.includes("application/json")) {
+				const data = (await res.json()) as {
+					response?: string;
+					chatLogId?: string | null;
+				};
+				setChatMessages((prev) => [
+					...prev,
+					{ role: "assistant", content: data.response || "", chatLogId: data.chatLogId ?? null },
+				]);
+			} else {
+				// Streaming text response
+				const chatLogId = res.headers.get("X-Chat-Log-Id") || null;
+				const reader = res.body?.getReader();
+				const decoder = new TextDecoder("utf-8");
+				let done = false;
+				let text = "";
+				
+				// Добавяме празно съобщение, което ще обновяваме
+				setChatMessages((prev) => [
+					...prev,
+					{ role: "assistant", content: "", chatLogId },
+				]);
+				
+				if (reader) {
+					while (!done) {
+						const { value, done: readerDone } = await reader.read();
+						done = readerDone;
+						if (value) {
+							text += decoder.decode(value, { stream: true });
+							setChatMessages((prev) => {
+								const newMessages = [...prev];
+								newMessages[newMessages.length - 1].content = text;
+								return newMessages;
+							});
+						}
+					}
+				}
+			}
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : "Грешка при чат заявка.";
 			setChatError(msg);
@@ -256,7 +300,7 @@ export default function Home() {
 
 	return (
 		<div className="agri-mobile-safe min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
-			<header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/88">
+			<header className="sticky top-0 z-30 border-b border-white/10 bg-white/70 backdrop-blur-2xl dark:border-slate-800/50 dark:bg-slate-950/70">
 				<div className="mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6">
 					<Link href="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3" aria-label="AgriNexus.Law">
 						<span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-emerald-950 text-white shadow-sm sm:h-10 sm:w-10 dark:bg-emerald-500 dark:text-emerald-950">
@@ -276,6 +320,8 @@ export default function Home() {
 						<Link href="/srokove" className="hover:text-slate-950 dark:hover:text-white">Срокове</Link>
 						<Link href="/kalkulator" className="hover:text-slate-950 dark:hover:text-white">Калкулатори</Link>
 						<Link href="/statistiki" className="hover:text-slate-950 dark:hover:text-white">Статистики</Link>
+						<Link href="/moya-ferma" className="font-bold text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100">Моята ферма</Link>
+						<Link href="/admin" className="hover:text-slate-950 dark:hover:text-white">Качи PDF</Link>
 					</nav>
 					<button
 						type="button"
@@ -294,28 +340,28 @@ export default function Home() {
 					<div className="hero-field-visual absolute inset-y-0 right-0 hidden w-[48%] opacity-90 lg:block" aria-hidden="true" />
 					<div className="mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
 						<div className="relative z-10 min-w-0 max-w-3xl">
-							<div className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase leading-snug tracking-normal text-emerald-800 shadow-sm sm:text-xs sm:tracking-[0.12em] dark:border-emerald-800 dark:bg-slate-900/80 dark:text-emerald-300">
-								<LockKeyhole size={14} className="shrink-0" />
+							<div className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs font-bold uppercase leading-snug tracking-[0.12em] text-teal-800 shadow-sm dark:border-teal-800/50 dark:bg-teal-950/30 dark:text-teal-300">
+								<LockKeyhole size={16} className="shrink-0" />
 								<span className="sm:hidden">Проверими източници</span>
 								<span className="hidden sm:inline">Проверими източници, не свободни догадки</span>
 							</div>
-							<h1 className="w-full max-w-full text-balance break-words text-[1.65rem] font-black leading-[1.2] tracking-normal text-slate-950 dark:text-white sm:text-4xl sm:leading-tight md:text-5xl lg:text-6xl">
-								Правна и аграрна документация
+							<h1 className="w-full max-w-full text-balance break-words font-display text-[2rem] font-black leading-[1.1] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl">
+								Правна и аграрна <span className="text-gradient">документация</span>
 							</h1>
-							<p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
+							<p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl">
 								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
 							</p>
 
 							<form onSubmit={onSearch} className="mt-8 max-w-3xl">
 								<div
 									ref={searchFormRef}
-									className={`grid gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/8 transition-all dark:border-slate-800 dark:bg-slate-900 ${
-										searchFocusPulse ? "ring-4 ring-emerald-500/20" : ""
+									className={`grid gap-4 rounded-3xl glass-panel p-4 transition-all ${
+										searchFocusPulse ? "ring-4 ring-teal-500/30" : ""
 									}`}
 								>
 									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-										<div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-											<Search className="shrink-0 text-emerald-700 dark:text-emerald-300" size={22} />
+										<div className="flex min-w-0 flex-1 items-center gap-3 px-2">
+											<Search className="shrink-0 text-teal-600 dark:text-teal-400" size={24} />
 											<input
 												ref={searchInputRef}
 												value={query}
@@ -361,18 +407,18 @@ export default function Home() {
 							</div>
 						</div>
 
-						<div className="relative z-10 min-w-0 lg:pl-4">
-							<div className="dashboard-preview min-w-0 border border-slate-200 bg-white shadow-2xl shadow-slate-950/12 dark:border-slate-800 dark:bg-slate-950">
-								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-5 dark:border-slate-800">
+						<div className="relative z-10 min-w-0 lg:pl-6">
+							<div className="dashboard-preview min-w-0 rounded-3xl glass-panel shadow-2xl shadow-teal-900/10">
+								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200/50 px-6 py-5 dark:border-slate-800/50">
 									<div className="min-w-0">
-										<p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-700 sm:tracking-[0.18em] dark:text-emerald-300">Live Intelligence</p>
-										<p className="mt-1 text-base font-black text-slate-950 sm:text-lg dark:text-white">Кампания и документи</p>
+										<p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700 dark:text-teal-300">Live Intelligence</p>
+										<p className="mt-1 font-display text-xl font-black text-slate-950 dark:text-white">Кампания и документи</p>
 									</div>
 									<span
-										className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
+										className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold ${
 											ragHealthy === false
-												? "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-												: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+												? "bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300"
+												: "bg-teal-50 text-teal-700 dark:bg-teal-950/30 dark:text-teal-300"
 										}`}
 										title={
 											ragHealthy === false
@@ -397,10 +443,10 @@ export default function Home() {
 											</div>
 										))}
 									</div>
-									<div className="border border-slate-100 p-4 dark:border-slate-800">
+									<div className="rounded-2xl bg-white/50 p-5 dark:bg-slate-900/50">
 										<div className="mb-4 flex items-center justify-between">
-											<p className="text-sm font-bold text-slate-950 dark:text-white">Спешност по срокове</p>
-											<LineChart size={18} className="text-emerald-700 dark:text-emerald-300" />
+											<p className="font-display text-base font-bold text-slate-950 dark:text-white">Спешност по срокове</p>
+											<LineChart size={20} className="text-teal-600 dark:text-teal-400" />
 										</div>
 										<div className="space-y-3">
 											{(deadlineRisks.length
@@ -459,7 +505,7 @@ export default function Home() {
 						</select>
 					</div>
 
-					<div className="border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+					<div className="rounded-3xl glass-panel p-6 sm:p-8">
 						{engine ? <p className="mb-4 text-xs font-semibold text-slate-500 dark:text-slate-400">Search engine: {engine}</p> : null}
 						{aiSummary ? (
 							<div className="mb-5 border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm dark:bg-emerald-950/30">
@@ -476,10 +522,10 @@ export default function Home() {
 						) : (
 							<div className="grid gap-4 md:grid-cols-2">
 								{filteredResults.map((doc) => (
-									<article key={doc.id} className="border border-slate-200 p-4 transition hover:border-emerald-300 dark:border-slate-800">
+									<article key={doc.id} className="rounded-2xl glass-panel p-6 hover-elevate transition-all">
 										<p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{doc.category} · {doc.type}</p>
-										<h3 className="text-base font-black text-slate-950 dark:text-white">{doc.title}</h3>
-										<p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{doc.content}</p>
+										<h3 className="font-display text-lg font-black text-slate-950 dark:text-white">{doc.title}</h3>
+										<p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{doc.content}</p>
 										<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Източник: {doc.source} · {doc.effectiveDate}</p>
 										<div className="mt-4 flex flex-wrap items-center gap-2">
 											<button
@@ -521,11 +567,11 @@ export default function Home() {
 									key={card.title}
 									type="button"
 									onClick={() => jumpToSearch(card.searchQuery, true)}
-									className="group border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 dark:border-slate-800 dark:bg-slate-950"
+									className="group rounded-2xl glass-panel p-6 text-left hover-elevate transition-all"
 								>
-									<Icon size={20} className="mb-3 text-emerald-700 dark:text-emerald-300" />
-									<p className="text-sm font-black text-slate-950 dark:text-white">{card.title}</p>
-									<p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{card.subtitle}</p>
+									<Icon size={24} className="mb-4 text-teal-600 dark:text-teal-400" />
+									<p className="font-display text-base font-black text-slate-950 dark:text-white">{card.title}</p>
+									<p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{card.subtitle}</p>
 								</button>
 							);
 						})}

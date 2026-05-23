@@ -7,7 +7,11 @@ import { PwaRegister } from "@/components/pwa-register";
 import { SiteVisitTracker } from "@/components/site-visit-tracker";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 const themeInitScript = `(function(){try{var k='agrinexus-theme';var f='agrinexus-theme-user-set';var s=localStorage.getItem(k);var u=localStorage.getItem(f)==='1';if(u&&s==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`;
 
@@ -101,7 +105,7 @@ export default function RootLayout({
 					dangerouslySetInnerHTML={{ __html: jsonLdGraph }}
 				/>
 			</head>
-			<body className="agri-mobile-safe min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+			<body className={`${inter.variable} ${outfit.variable} agri-mobile-safe min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100 font-sans`}>
 				{children}
 				<PwaRegister />
 				<PwaHelpButton />

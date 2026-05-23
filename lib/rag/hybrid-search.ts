@@ -12,6 +12,7 @@ import { internalKnowledgeSearch } from "@/lib/knowledge/internal-ai-search";
 import { vectorSearchChunks, type MatchedChunk } from "@/lib/rag/vector-search";
 import { RAG_CONFIG, isRagEnabled } from "@/lib/rag/config";
 import { sortDocuments } from "@/lib/knowledge/document-taxonomy";
+import { getUpstashRedis } from "@/lib/utils/rate-limit";
 
 export interface RetrievedItem {
   /** Уникален ключ за дедупликация (chunk id или doc id). */
@@ -108,6 +109,20 @@ export async function hybridRetrieve(
   const finalTopK = opts?.finalTopK ?? RAG_CONFIG.finalTopK;
   const vectorTopK = opts?.vectorTopK ?? RAG_CONFIG.vectorTopK;
   const lexicalTopK = opts?.lexicalTopK ?? RAG_CONFIG.lexicalTopK;
+  
+  const redis = getUpstashRedis();
+  const cacheKey = `rag:hybrid:${finalTopK}:${vectorTopK}:${lexicalTopK}:${q}`;
+  
+  if (redis) {
+    try {
+      const cached = await redis.get<RetrievedItem[]>(cacheKey);
+      if (cached && Array.isArray(cached) && cached.length > 0) {
+        return cached;
+      }
+    } catch (err) {
+      console.error("hybridRetrieve: cache read failed", err);
+    }
+  }
 
   const lexicalResult = internalKnowledgeSearch(q, KNOWLEDGE_BASE, {
     limit: lexicalTopK,
@@ -198,7 +213,18 @@ export async function hybridRetrieve(
   const order = new Map(sorted.map((s, i) => [s.id, i]));
   ranked.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999));
 
-  return ranked.slice(0, finalTopK);
+  const resultList = ranked.slice(0, finalTopK);
+
+  if (redis && resultList.length > 0) {
+    try {
+      // Кешираме за 24 часа, тъй като нормативните документи не се променят на всяка минута
+      await redis.setex(cacheKey, 60 * 60 * 24, resultList);
+    } catch (err) {
+      console.error("hybridRetrieve: cache write failed", err);
+    }
+  }
+
+  return resultList;
 }
 
 function inferDocTypeFromRetrieved(
