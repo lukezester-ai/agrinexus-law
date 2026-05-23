@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, FileText, Trash2, Upload } from "lucide-react";
+import { Download, FileText, Trash2, Upload } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 import {
 	addFarmerDocument,
 	deleteFarmerDocument,
@@ -92,42 +93,32 @@ export default function DocumentsPage() {
 	};
 
 	return (
-		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
-				<div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-					<Link
-						href="/profile"
-						className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white shrink-0">
-						<ArrowLeft size={16} />
-						<span className="text-sm">Профил</span>
+		<SitePageShell
+			maxWidth="2xl"
+			subheader={
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<Link href="/profile" className="text-sm font-semibold text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white">
+						← Профил
 					</Link>
-					<div className="font-medium text-base dark:text-stone-100 text-center truncate">
-						Мои документи
-					</div>
-					<Link
-						href="/"
-						className="text-sm text-stone-600 dark:text-teal-300/90 hover:text-stone-900 shrink-0">
+					<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Мои документи</p>
+					<Link href="/" className="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
 						Начало
 					</Link>
 				</div>
-			</nav>
-
-			<div className="max-w-2xl mx-auto px-6 py-10">
-				<div className="text-center mb-8">
-					<div className="text-4xl mb-3">📂</div>
-					<h1 className="text-2xl font-medium mb-2 dark:text-stone-50">
-						Твоите файлове от ДФЗ и др.
-					</h1>
-					<p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed max-w-lg mx-auto">
-						Файловете се пазят{" "}
-						<strong className="text-stone-800 dark:text-stone-200">
-							само в този браузер
-						</strong>{" "}
-						(IndexedDB). Не се изисква вход — достъпни са веднага на това устройство.
-					</p>
+			}
+		>
+			<div className="mb-8 text-center">
+				<div className="mb-3 text-4xl" aria-hidden>
+					📂
 				</div>
+				<h1 className="font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white">Твоите файлове от ДФЗ и др.</h1>
+				<p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+					Файловете се пазят <strong className="text-slate-900 dark:text-white">само в този браузър</strong> (IndexedDB). Не се изисква вход —
+					достъпни са веднага на това устройство.
+				</p>
+			</div>
 
-				<div className="bg-white dark:bg-stone-900/95 rounded-2xl border border-stone-200 dark:border-stone-700 p-6 space-y-4">
+			<div className="surface-card space-y-4 p-6">
 					<input
 						ref={inputRef}
 						type="file"
@@ -141,12 +132,12 @@ export default function DocumentsPage() {
 						type="button"
 						disabled={busy}
 						onClick={() => inputRef.current?.click()}
-						className="w-full py-4 px-4 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-[#0d9488] hover:bg-teal-50/50 dark:hover:bg-teal-950/30 transition flex items-center justify-center gap-2 disabled:opacity-50">
+						className="w-full py-4 px-4 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-600 hover:bg-teal-50/50 dark:hover:bg-teal-950/30 transition flex items-center justify-center gap-2 disabled:opacity-50">
 						<Upload size={18} aria-hidden />
 						{busy ? "Обработка…" : "Избери файлове за добавяне"}
 					</button>
 
-					<p className="text-xs text-stone-500 dark:text-stone-400 text-center">
+					<p className="text-xs text-slate-500 dark:text-slate-400 text-center">
 						До {MAX_FARMER_DOC_BYTES / (1024 * 1024)} MB на файл · PDF, изображения, Word/Excel, TXT
 					</p>
 
@@ -157,25 +148,25 @@ export default function DocumentsPage() {
 					)}
 
 					{loading ? (
-						<p className="text-center text-sm text-stone-500 py-6">Зареждане…</p>
+						<p className="text-center text-sm text-slate-500 py-6">Зареждане…</p>
 					) : items.length === 0 ? (
-						<div className="text-center py-10 text-stone-500 dark:text-stone-400 text-sm">
+						<div className="text-center py-10 text-slate-500 dark:text-slate-400 text-sm">
 							<FileText className="mx-auto mb-2 opacity-50" size={32} aria-hidden />
 							<p>Все още няма записани документи.</p>
 						</div>
 					) : (
-						<ul className="divide-y divide-stone-200 dark:divide-stone-700">
+						<ul className="divide-y divide-slate-200 dark:divide-slate-700">
 							{items.map((meta) => (
 								<li
 									key={meta.id}
 									className="py-3 flex flex-wrap items-center gap-3 justify-between">
 									<div className="min-w-0 flex-1">
 										<p
-											className="font-medium text-sm text-stone-900 dark:text-stone-100 truncate"
+											className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate"
 											title={meta.name}>
 											{meta.name}
 										</p>
-										<p className="text-xs text-stone-500 dark:text-stone-400">
+										<p className="text-xs text-slate-500 dark:text-slate-400">
 											{formatDocSize(meta.size)} ·{" "}
 											{new Date(meta.createdAt).toLocaleString("bg-BG")}
 										</p>
@@ -185,7 +176,7 @@ export default function DocumentsPage() {
 											type="button"
 											disabled={busy}
 											onClick={() => void onDownload(meta)}
-											className="p-2 rounded-lg border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200"
+											className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
 											title="Изтегли">
 											<Download size={16} aria-hidden />
 										</button>
@@ -193,7 +184,7 @@ export default function DocumentsPage() {
 											type="button"
 											disabled={busy}
 											onClick={() => void onDelete(meta)}
-											className="p-2 rounded-lg border border-stone-200 dark:border-stone-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-700 dark:text-red-300"
+											className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-700 dark:text-red-300"
 											title="Изтрий">
 											<Trash2 size={16} aria-hidden />
 										</button>
@@ -202,8 +193,7 @@ export default function DocumentsPage() {
 							))}
 						</ul>
 					)}
-				</div>
 			</div>
-		</div>
+		</SitePageShell>
 	);
 }

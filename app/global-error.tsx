@@ -1,5 +1,7 @@
 "use client";
 
+import "./globals.css";
+
 export default function GlobalError({
 	error,
 	reset,
@@ -9,24 +11,16 @@ export default function GlobalError({
 }) {
 	return (
 		<html lang="bg">
-			<body style={{ margin: 0, fontFamily: "system-ui, sans-serif", background: "#0c0a09", color: "#fafaf9" }}>
-				<div style={{ padding: "2rem", maxWidth: "36rem", margin: "0 auto" }}>
-					<h1 style={{ fontSize: "1.25rem", marginBottom: "0.75rem" }}>Критична грешка</h1>
-					<p style={{ opacity: 0.85, marginBottom: "1.25rem", fontSize: "0.9rem" }}>
+			<body className="m-0 min-h-screen bg-slate-950 font-sans text-slate-50 antialiased">
+				<div className="mx-auto max-w-xl p-8">
+					<h1 className="mb-3 text-xl font-semibold">Критична грешка</h1>
+					<p className="mb-5 text-sm text-slate-300">
 						{error.message || "Приложението спря. Презареди страницата или рестартирай npm run dev."}
 					</p>
 					<button
 						type="button"
 						onClick={() => reset()}
-						style={{
-							padding: "0.6rem 1rem",
-							borderRadius: "0.5rem",
-							border: "none",
-							background: "#0f766e",
-							color: "#fff",
-							cursor: "pointer",
-							fontWeight: 600,
-						}}>
+						className="brand-cta-bg rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-105 transition">
 						Презареди
 					</button>
 				</div>

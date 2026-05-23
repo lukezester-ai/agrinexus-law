@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft, Save, MapPin, Wheat, Sprout, CircleCheck } from "lucide-react";
+import { Save, MapPin, Wheat, Sprout, CircleCheck } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 
 type FarmProfile = {
   region: string;
@@ -43,13 +43,8 @@ export default function MoyaFermaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white mb-6">
-          <ArrowLeft size={16} /> Назад към началото
-        </Link>
-        
-        <div className="glass-panel rounded-3xl overflow-hidden">
+    <SitePageShell maxWidth="2xl" subheader={<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Моята ферма</p>}>
+        <div className="glass-panel overflow-hidden rounded-3xl">
           <div className="p-8 border-b border-white/10 bg-teal-50/50 dark:bg-teal-950/20">
             <h1 className="font-display text-3xl font-black text-slate-950 dark:text-white flex items-center gap-3">
               <Sprout className="text-teal-600 dark:text-teal-400" /> Моята ферма
@@ -115,7 +110,6 @@ export default function MoyaFermaPage() {
             </button>
           </form>
         </div>
-      </div>
-    </div>
+    </SitePageShell>
   );
 }

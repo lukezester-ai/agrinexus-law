@@ -46,11 +46,11 @@ export function FarmerCommandPanel({ lang = "bg" }: Props) {
 	const deadlines = useMemo(() => getActiveDeadlines(), []);
 
 	return (
-		<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-white dark:bg-stone-900/95 p-5 sm:p-6 shadow-sm space-y-6">
+		<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-white dark:bg-slate-900/95 p-5 sm:p-6 shadow-sm space-y-6">
 			<div>
-				<h1 className="text-xl font-semibold text-stone-900 dark:text-stone-50">{tr.pageTitle}</h1>
-				<p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">{tr.pageSub}</p>
-				<p className="text-xs text-stone-500 dark:text-stone-500 mt-2">{tr.govNote}</p>
+				<h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">{tr.pageTitle}</h1>
+				<p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{tr.pageSub}</p>
+				<p className="text-xs text-slate-500 dark:text-slate-500 mt-2">{tr.govNote}</p>
 			</div>
 
 			<section>
@@ -58,14 +58,14 @@ export function FarmerCommandPanel({ lang = "bg" }: Props) {
 					<CalendarClock size={16} aria-hidden />
 					{tr.sectionDeadlines}
 				</h2>
-				<ul className="space-y-3 text-sm text-stone-800 dark:text-stone-200 list-disc pl-5">
+				<ul className="space-y-3 text-sm text-slate-800 dark:text-slate-200 list-disc pl-5">
 					{deadlines.map((d: CommandDeadline) => (
 						<li key={d.id}>
 							<strong>{formatDeadlineHeadline(d, L)}</strong>
-							<div className="text-stone-600 dark:text-stone-400 mt-1 text-[13px] leading-relaxed">
+							<div className="text-slate-600 dark:text-slate-400 mt-1 text-[13px] leading-relaxed">
 								{line(L, d.action)}
 							</div>
-							<div className="text-stone-500 dark:text-stone-500 mt-1 text-xs leading-relaxed">
+							<div className="text-slate-500 dark:text-slate-500 mt-1 text-xs leading-relaxed">
 								{line(L, d.sourceNote)}
 							</div>
 						</li>

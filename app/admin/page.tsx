@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Upload, FileText, CircleCheck, AlertCircle, ArrowLeft } from "lucide-react";
+import { Upload, FileText, CircleCheck, AlertCircle } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 
 export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -93,12 +93,12 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
-      <div className="max-w-3xl mx-auto">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white mb-6">
-          <ArrowLeft size={16} /> Назад към началото
-        </Link>
-        
+    <SitePageShell
+      maxWidth="3xl"
+      subheader={
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Админ · Качване и индексиране (RAG)</p>
+      }
+    >
         <div className="glass-panel rounded-3xl overflow-hidden">
           <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
             <h1 className="font-display text-3xl font-black text-slate-950 dark:text-white flex items-center gap-3">
@@ -221,7 +221,6 @@ export default function AdminPage() {
             </button>
           </form>
         </div>
-      </div>
-    </div>
+    </SitePageShell>
   );
 }

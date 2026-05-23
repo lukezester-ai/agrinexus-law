@@ -34,6 +34,25 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  background-color: rgba(13, 148, 136, 0.22);
+  color: var(--text-primary);
+}
+
+.dark ::selection {
+  background-color: rgba(45, 212, 191, 0.28);
+  color: var(--text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-teal);
+  outline-offset: 2px;
+}
+
+.dark :focus-visible {
+  outline-color: var(--brand-teal-light);
+}
+
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -48,9 +67,9 @@ body {
   overscroll-behavior-x: none;
 }
 
-/* Typography Overrides */
+/* Typography: Outfit за латиница; кирилица автоматично от Inter (fallback). */
 h1, h2, h3, h4, h5, h6, .font-display {
-  font-family: var(--font-outfit), sans-serif;
+  font-family: var(--font-outfit), var(--font-inter), system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -99,12 +118,28 @@ h1, h2, h3, h4, h5, h6, .font-display {
 .agri-page-bg {
   background-color: var(--bg-paper);
   background-image: radial-gradient(circle at 15% 50%, rgba(13, 148, 136, 0.05), transparent 25%),
-                    radial-gradient(circle at 85% 30%, rgba(67, 56, 202, 0.04), transparent 25%);
+                    radial-gradient(circle at 85% 30%, rgba(67, 56, 202, 0.04), transparent 25%),
+                    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(13, 148, 136, 0.06), transparent 55%);
 }
 
 .dark .agri-page-bg {
   background-image: radial-gradient(circle at 15% 50%, rgba(45, 212, 191, 0.07), transparent 25%),
-                    radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.05), transparent 25%);
+                    radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.05), transparent 25%),
+                    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(45, 212, 191, 0.08), transparent 55%);
+}
+
+/* Карти / панели — единен „въздух“ и дълбочина */
+.surface-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 12px 40px -24px rgba(15, 23, 42, 0.12);
+}
+
+.dark .surface-card {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 40px -20px rgba(0, 0, 0, 0.45);
 }
 
 .hero-field-visual {
@@ -128,4 +163,19 @@ h1, h2, h3, h4, h5, h6, .font-display {
 .agri-mobile-safe *::before,
 .agri-mobile-safe *::after {
   box-sizing: border-box;
+}
+
+@layer components {
+  /* Търсене / CTA — използват се в app/search и др. */
+  .brand-soft-surface {
+    @apply border border-slate-200/90 bg-slate-50/95 dark:border-slate-700/80 dark:bg-slate-900/60;
+  }
+
+  .brand-cta-bg {
+    background: linear-gradient(135deg, var(--brand-teal) 0%, #0f766e 100%);
+  }
+
+  .brand-link {
+    @apply font-semibold text-teal-700 underline underline-offset-2 hover:text-teal-900 dark:text-teal-300 dark:hover:text-teal-200;
+  }
 }

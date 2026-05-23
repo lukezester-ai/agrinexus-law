@@ -21,7 +21,21 @@ export async function POST(req: Request) {
 			return Response.json({ error: "Твърде много заявки. Изчакай малко и опитай пак." }, { status: 429 });
 		}
 
-		const { messages, characterId, userProfile } = await req.json();
+		let body: unknown;
+		try {
+			body = await req.json();
+		} catch {
+			return Response.json(
+				{ error: "Невалидно JSON тяло на заявката. Опресни страницата и опитай пак." },
+				{ status: 400 },
+			);
+		}
+
+		const { messages, characterId, userProfile } = (body ?? {}) as {
+			messages?: unknown;
+			characterId?: unknown;
+			userProfile?: unknown;
+		};
 
 		const { profile: resolvedFarmProfile, source: farmProfileSource } =
 			await resolveFarmProfileForChat(userProfile);
@@ -31,7 +45,16 @@ export async function POST(req: Request) {
 			return Response.json({ error: "Невалиден персонаж" }, { status: 400 });
 		}
 
-		const normalized = normalizeChatMessages(messages ?? []);
+		const rawMessages = Array.isArray(messages) ? messages : [];
+		const normalized = normalizeChatMessages(
+			rawMessages.filter(
+				(m): m is { role: string; content: string } =>
+					m != null &&
+					typeof m === "object" &&
+					typeof (m as { role?: unknown }).role === "string" &&
+					typeof (m as { content?: unknown }).content === "string",
+			),
+		);
 		if (normalized.length === 0) {
 			return Response.json({ error: "Няма съобщение за обработка." }, { status: 400 });
 		}

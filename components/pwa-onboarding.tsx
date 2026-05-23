@@ -67,19 +67,19 @@ export function PwaOnboarding() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-stone-950/45 p-4 sm:items-center">
-      <div className="w-full max-w-md rounded-2xl border border-indigo-200 bg-white p-5 shadow-2xl dark:border-indigo-900/50 dark:bg-stone-900">
-        <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
+      <div className="w-full max-w-md rounded-2xl border border-indigo-200 bg-white p-5 shadow-2xl dark:border-indigo-900/50 dark:bg-slate-900">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
           {content.title}
         </h2>
-        <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           {content.text}
         </p>
         <div className="mt-4 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={closeForSession}
-            className="rounded-lg border border-stone-300 px-3 py-2 text-sm font-medium text-stone-700 dark:border-stone-700 dark:text-stone-200"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:text-slate-200"
           >
             Затвори
           </button>

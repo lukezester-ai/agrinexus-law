@@ -337,24 +337,24 @@ export function CropStatisticsView() {
 						<BarChart3 size={22} aria-hidden />
 					</div>
 					<div>
-						<h1 className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">
+						<h1 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-50">
 							{tr.title}
 						</h1>
-						<p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed max-w-3xl">
+						<p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed max-w-3xl">
 							{tr.subtitle}
 						</p>
 					</div>
 				</div>
 				<div className="flex items-center gap-2 shrink-0">
-					<span className="text-xs text-stone-500 dark:text-stone-400">{tr.langLabel}</span>
-					<div className="flex rounded-lg border border-stone-200 dark:border-stone-600 overflow-hidden">
+					<span className="text-xs text-slate-500 dark:text-slate-400">{tr.langLabel}</span>
+					<div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
 						<button
 							type="button"
 							onClick={() => setLang("bg")}
 							className={`px-3 py-1.5 text-xs font-medium transition ${
 								lang === "bg"
-									? "bg-[#0d9488] text-white"
-									: "bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800"
+									? "bg-emerald-600 text-white"
+									: "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
 							}`}>
 							BG
 						</button>
@@ -363,8 +363,8 @@ export function CropStatisticsView() {
 							onClick={() => setLang("en")}
 							className={`px-3 py-1.5 text-xs font-medium transition ${
 								lang === "en"
-									? "bg-[#0d9488] text-white"
-									: "bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800"
+									? "bg-emerald-600 text-white"
+									: "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
 							}`}>
 							EN
 						</button>
@@ -372,11 +372,11 @@ export function CropStatisticsView() {
 				</div>
 			</div>
 
-			<div className="rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-900/50 px-4 py-3">
-				<p className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-400 mb-2">
+			<div className="rounded-xl border border-slate-200/90 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/50 px-4 py-3">
+				<p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-2">
 					{tr.bulletsTitle}
 				</p>
-				<ul className="text-sm text-stone-600 dark:text-stone-400 space-y-1.5 list-disc pl-5 leading-relaxed">
+				<ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1.5 list-disc pl-5 leading-relaxed">
 					<li>{tr.bullet1}</li>
 					<li>{tr.bullet2}</li>
 					<li>{tr.bullet3}</li>
@@ -384,7 +384,7 @@ export function CropStatisticsView() {
 			</div>
 
 			<div>
-				<label className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-2">
+				<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
 					{tr.pickCrop}
 				</label>
 				<div className="flex flex-wrap gap-2">
@@ -395,8 +395,8 @@ export function CropStatisticsView() {
 							onClick={() => setCropKey(c.key)}
 							className={`px-3 py-2 rounded-lg text-sm border transition ${
 								cropKey === c.key
-									? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50 shadow-sm"
-									: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800"
+									? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50 shadow-sm"
+									: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
 							}`}
 							style={
 								cropKey === c.key
@@ -409,7 +409,7 @@ export function CropStatisticsView() {
 				</div>
 			</div>
 
-			<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-gradient-to-br from-teal-50/90 to-white dark:from-teal-950/30 dark:to-stone-900/90 p-4 sm:p-5">
+			<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-gradient-to-br from-teal-50/90 to-white dark:from-teal-950/30 dark:to-slate-900/90 p-4 sm:p-5">
 				<div className="w-full h-[300px] sm:h-[340px]">
 					<ResponsiveContainer width="100%" height="100%">
 						<ComposedChart data={rows} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
@@ -484,17 +484,17 @@ export function CropStatisticsView() {
 
 			<div className="grid gap-4 sm:grid-cols-2">
 				<div className="rounded-xl border border-sky-200/80 dark:border-sky-900/50 bg-sky-50/50 dark:bg-sky-950/20 p-4 sm:p-5">
-					<h2 className="font-semibold text-stone-900 dark:text-stone-50 mb-2 flex items-center gap-2 text-base">
+					<h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-2 flex items-center gap-2 text-base">
 						<TrendingUp size={18} className="text-sky-600 dark:text-sky-400 shrink-0" aria-hidden />
 						{tr.forecastTitle}
 					</h2>
-					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+					<p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
 						{tr.forecastIntro.replace(/\{year\}/g, String(nextYear)).replace(/\{kt\}/g, String(Math.round(forecastKt)))}
 					</p>
-					<p className="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+					<p className="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						{tr.compareHeading}
 					</p>
-					<ul className="text-sm text-stone-600 dark:text-stone-400 space-y-2 list-disc pl-5 mb-4">
+					<ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-disc pl-5 mb-4">
 						<li>
 							{tr.vsLastDetail
 								.replace(/\{year\}/g, String(outlook.lastYear))
@@ -516,18 +516,16 @@ export function CropStatisticsView() {
 						</li>
 					</ul>
 					<p
-						className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed pl-3 border-l-[3px] mb-3"
-						style={{
-							borderLeftColor:
-								outlook.tone === "headwind"
-									? "rgba(251, 146, 60, 0.85)"
-									: outlook.tone === "tailwind"
-										? "rgba(13, 148, 136, 0.9)"
-										: "rgba(148, 163, 184, 0.65)",
-						}}>
+						className={`text-sm text-slate-600 dark:text-slate-400 leading-relaxed pl-3 border-l-[3px] mb-3 ${
+							outlook.tone === "headwind"
+								? "border-l-orange-400"
+								: outlook.tone === "tailwind"
+									? "border-l-emerald-600"
+									: "border-l-slate-400"
+						}`}>
 						{outlookNarrative}
 					</p>
-					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+					<p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
 						{pickL(profile.genNotes, lang)}
 					</p>
 				</div>
@@ -538,7 +536,7 @@ export function CropStatisticsView() {
 							? "border-orange-300/80 dark:border-orange-900/50 bg-orange-50/60 dark:bg-orange-950/25"
 							: "border-teal-200/80 dark:border-teal-900/50 bg-teal-50/40 dark:bg-teal-950/20"
 					}`}>
-					<h2 className="font-semibold text-stone-900 dark:text-stone-50 mb-2 flex flex-wrap items-center gap-2 text-base">
+					<h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-2 flex flex-wrap items-center gap-2 text-base">
 						<Droplets
 							size={18}
 							className={dry ? "text-orange-600 dark:text-orange-400" : "text-teal-600 dark:text-teal-400"}
@@ -551,28 +549,28 @@ export function CropStatisticsView() {
 							</span>
 						) : null}
 					</h2>
-					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-3">
+					<p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
 						{pickL(profile.irrigationGeneral, lang)}
 					</p>
-					<p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+					<p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
 						<strong className={dry ? "text-orange-700 dark:text-orange-300" : "text-teal-700 dark:text-teal-400"}>
 							{dry ? tr.dryLead : tr.normalLead}
 						</strong>{" "}
 						{dry ? pickL(profile.irrigationIfDry, lang) : tr.normalIrrigationExtra}
 					</p>
-					<div className="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white/70 dark:bg-stone-900/70 p-3">
-						<p className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-400 mb-2">
+					<div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 p-3">
+						<p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-2">
 							{tr.weather7dTitle}
 						</p>
 						{weatherLoading ? (
-							<p className="text-sm text-stone-500 dark:text-stone-400">{tr.weatherLoading}</p>
+							<p className="text-sm text-slate-500 dark:text-slate-400">{tr.weatherLoading}</p>
 						) : weatherError ? (
 							<p className="text-sm text-red-600 dark:text-red-300">{weatherError}</p>
 						) : (
 							<div className="overflow-x-auto">
 								<table className="min-w-full text-xs">
 									<thead>
-										<tr className="text-stone-500 dark:text-stone-400">
+										<tr className="text-slate-500 dark:text-slate-400">
 											<th className="text-left pr-3 py-1">{tr.dayLabel}</th>
 											<th className="text-left pr-3 py-1">{tr.tempLabel}</th>
 											<th className="text-left pr-3 py-1">{tr.rainLabel}</th>
@@ -581,7 +579,7 @@ export function CropStatisticsView() {
 									</thead>
 									<tbody>
 										{weatherDays.map((d) => (
-											<tr key={d.date} className="border-t border-stone-100 dark:border-stone-800">
+											<tr key={d.date} className="border-t border-slate-100 dark:border-slate-800">
 												<td className="py-1.5 pr-3">{new Date(d.date).toLocaleDateString(lang === "bg" ? "bg-BG" : "en-GB", { weekday: "short", day: "2-digit", month: "2-digit" })}</td>
 												<td className="py-1.5 pr-3">{Math.round(d.tempMinC)}° / {Math.round(d.tempMaxC)}°</td>
 												<td className="py-1.5 pr-3">{d.precipMm.toFixed(1)}</td>
@@ -598,30 +596,30 @@ export function CropStatisticsView() {
 
 			<div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 p-4 sm:p-5">
 				<div className="flex items-center justify-between gap-3 mb-2">
-					<h2 className="font-semibold text-stone-900 dark:text-stone-50 text-base">
+					<h2 className="font-semibold text-slate-900 dark:text-slate-50 text-base">
 						{lang === "bg" ? "RAG контекст за културата" : "RAG context for this crop"}
 					</h2>
 					<div className="flex items-center gap-2">
 						{ragMode ? (
-							<span className="text-[11px] uppercase tracking-wider text-stone-500 dark:text-stone-400">
+							<span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
 								{ragMode === "rag_hybrid" ? "RAG hybrid" : "BM25 fallback"}
 							</span>
 						) : null}
 						<Link
 							href={askAiHref}
-							className="rounded-md bg-[#0d9488] px-2.5 py-1.5 text-xs font-medium text-white">
+							className="brand-cta-bg rounded-md px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:brightness-105 transition">
 							{lang === "bg" ? "Попитай AI" : "Ask AI"}
 						</Link>
 					</div>
 				</div>
 				{ragLoading ? (
-					<p className="text-sm text-stone-600 dark:text-stone-400">
+					<p className="text-sm text-slate-600 dark:text-slate-400">
 						{lang === "bg" ? "Зареждам релевантен контекст..." : "Loading relevant context..."}
 					</p>
 				) : ragError ? (
 					<p className="text-sm text-red-600 dark:text-red-300">{ragError}</p>
 				) : ragInsights.length === 0 ? (
-					<p className="text-sm text-stone-600 dark:text-stone-400">
+					<p className="text-sm text-slate-600 dark:text-slate-400">
 						{lang === "bg"
 							? "Няма релевантни RAG резултати за тази култура."
 							: "No relevant RAG results for this crop."}
@@ -631,14 +629,14 @@ export function CropStatisticsView() {
 						{ragInsights.map((insight, idx) => (
 							<li
 								key={`${insight.title}-${idx}`}
-								className="rounded-lg border border-indigo-100 dark:border-indigo-900/40 bg-white/80 dark:bg-stone-900/60 px-3 py-2">
-								<p className="text-sm font-medium text-stone-900 dark:text-stone-100">
+								className="rounded-lg border border-indigo-100 dark:border-indigo-900/40 bg-white/80 dark:bg-slate-900/60 px-3 py-2">
+								<p className="text-sm font-medium text-slate-900 dark:text-slate-100">
 									{insight.title}
 								</p>
-								<p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+								<p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
 									{insight.source}
 								</p>
-								<p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">
+								<p className="text-sm text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
 									{insight.snippet}
 								</p>
 							</li>
@@ -647,7 +645,7 @@ export function CropStatisticsView() {
 				)}
 			</div>
 
-			<p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed rounded-xl border border-teal-100 dark:border-teal-900/40 bg-teal-50/40 dark:bg-teal-950/15 p-4">
+			<p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed rounded-xl border border-teal-100 dark:border-teal-900/40 bg-teal-50/40 dark:bg-teal-950/15 p-4">
 				{tr.disclaimer}
 			</p>
 		</div>

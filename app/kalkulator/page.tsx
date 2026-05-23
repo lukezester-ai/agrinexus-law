@@ -2,13 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-	ArrowLeft,
-	Calculator,
-	Check,
-	Copy,
-	Sparkles,
-} from "lucide-react";
+import { Calculator, Check, Copy, Sparkles } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 import {
 	estimateSubsidy,
 	formatShareSnippet,
@@ -88,42 +83,32 @@ export default function KalkulatorPage() {
 	};
 
 	return (
-		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800">
-				<div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
-					<Link
-						href="/"
-						className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white text-sm shrink-0">
-						<ArrowLeft size={16} aria-hidden />
-						Начало
-					</Link>
-					<span className="font-medium text-stone-900 dark:text-stone-100 text-sm sm:text-base truncate">
-						Калкулатор субсидии
-					</span>
-					<Link
-						href="/kalendar"
-						className="text-xs sm:text-sm text-[#0d9488] dark:text-teal-400 font-medium shrink-0">
-						Календар
+		<SitePageShell
+			maxWidth="xl"
+			subheader={
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Калкулатор субсидии</p>
+					<Link href="/kalendar" className="text-xs font-semibold text-emerald-700 hover:underline dark:text-emerald-300 sm:text-sm">
+						Сезонен календар
 					</Link>
 				</div>
-			</nav>
-
-			<main className="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-				<div className="text-center mb-8">
-					<div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 mb-4 border border-teal-200/80 dark:border-teal-800">
-						<Calculator size={28} aria-hidden />
-					</div>
-					<h1 className="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-stone-50 mb-2">
-						Колко приблизително може да получиш?
-					</h1>
-					<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-						Три полета — ориентировъчен диапазон в лева. Сподели резултата и се запиши за пълен достъп до екипа.
-					</p>
+			}
+		>
+			<div className="text-center mb-8">
+				<div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-teal-200/80 bg-teal-100 text-teal-800 dark:border-teal-800 dark:bg-teal-950/80 dark:text-teal-300">
+					<Calculator size={28} aria-hidden />
 				</div>
+				<h1 className="font-display mb-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+					Колко приблизително може да получиш?
+				</h1>
+				<p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+					Три полета — ориентировъчен диапазон в лева. Сподели резултата и се запиши за пълен достъп до екипа.
+				</p>
+			</div>
 
-				<div className="bg-white dark:bg-stone-900/95 rounded-2xl border border-stone-200 dark:border-stone-700 p-5 sm:p-6 shadow-sm space-y-5">
+			<div className="surface-card space-y-5 p-5 sm:p-6">
 					<div>
-						<label className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-1.5">
+						<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-1.5">
 							Декари (общо декларирана площ)
 						</label>
 						<input
@@ -132,13 +117,13 @@ export default function KalkulatorPage() {
 							step={0.5}
 							value={decares}
 							onChange={(e) => setDecares(e.target.value)}
-							className="w-full px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 text-lg font-medium"
+							className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-lg font-medium"
 						/>
-						<p className="text-xs text-stone-500 mt-1">10 декара = 1 хектар</p>
+						<p className="text-xs text-slate-500 mt-1">10 декара = 1 хектар</p>
 					</div>
 
 					<div>
-						<span className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-2">
+						<span className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
 							Какво отглеждаш основно?
 						</span>
 						<div className="grid gap-2">
@@ -149,8 +134,8 @@ export default function KalkulatorPage() {
 									onClick={() => setFocus(o.id)}
 									className={`text-left px-4 py-3 rounded-lg border text-sm transition ${
 										focus === o.id
-											? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50"
-											: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/80"
+											? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
+											: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/80"
 									}`}>
 									{o.label}
 								</button>
@@ -160,7 +145,7 @@ export default function KalkulatorPage() {
 
 					{focus === "livestock" && (
 						<div>
-							<label className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-1.5">
+							<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-1.5">
 								Брой млечни крави (за обвързано подпомагане, опционално)
 							</label>
 							<input
@@ -169,7 +154,7 @@ export default function KalkulatorPage() {
 								value={dairyCows}
 								onChange={(e) => setDairyCows(e.target.value)}
 								placeholder="напр. 20 или празно"
-								className="w-full px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-950 dark:text-stone-100"
+								className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-slate-100"
 							/>
 						</div>
 					)}
@@ -182,7 +167,7 @@ export default function KalkulatorPage() {
 								onChange={(e) => setYoungFarmer(e.target.checked)}
 								className="w-4 h-4 rounded"
 							/>
-							<span className="text-sm text-stone-800 dark:text-stone-200">
+							<span className="text-sm text-slate-800 dark:text-slate-200">
 								Млад земеделски производител (до 30 ха добавка — опростено)
 							</span>
 						</label>
@@ -193,7 +178,7 @@ export default function KalkulatorPage() {
 								onChange={(e) => setOrganicEco(e.target.checked)}
 								className="w-4 h-4 rounded"
 							/>
-							<span className="text-sm text-stone-800 dark:text-stone-200">
+							<span className="text-sm text-slate-800 dark:text-slate-200">
 								Био / екосхема за биологично или висок екологичен компонент (широк диапазон)
 							</span>
 						</label>
@@ -210,20 +195,20 @@ export default function KalkulatorPage() {
 							<p className="text-xs uppercase tracking-wide text-teal-900 dark:text-teal-300 font-semibold">
 								Прогнозен диапазон (годишно)
 							</p>
-							<p className="text-3xl font-semibold text-stone-900 dark:text-stone-50">
+							<p className="text-3xl font-semibold text-slate-900 dark:text-slate-50">
 								{result.totalLowBgn.toLocaleString("bg-BG")} –{" "}
 								{result.totalHighBgn.toLocaleString("bg-BG")}{" "}
-								<span className="text-lg font-normal text-stone-600 dark:text-stone-400">лв</span>
+								<span className="text-lg font-normal text-slate-600 dark:text-slate-400">лв</span>
 							</p>
-							<ul className="text-xs text-stone-600 dark:text-stone-400 space-y-1.5 border-t border-teal-200/60 dark:border-teal-800/60 pt-3">
+							<ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 border-t border-teal-200/60 dark:border-teal-800/60 pt-3">
 								{result.lines.map((L, i) => (
 									<li key={i}>
-										{L.label && <span className="font-medium text-stone-700 dark:text-stone-300">{L.label}: </span>}
+										{L.label && <span className="font-medium text-slate-700 dark:text-slate-300">{L.label}: </span>}
 										{L.lowBgn.toLocaleString("bg-BG")} – {L.highBgn.toLocaleString("bg-BG")} лв
 									</li>
 								))}
 							</ul>
-							<p className="text-[11px] text-stone-500 dark:text-stone-500 leading-relaxed">
+							<p className="text-[11px] text-slate-500 dark:text-slate-500 leading-relaxed">
 								Това не е официално изчисление на ДФЗ. Ставките са закръглени; реалната сума зависи от заявени схеми,
 								площи, санкции и актуализации за кампанията.
 							</p>
@@ -231,26 +216,25 @@ export default function KalkulatorPage() {
 								<button
 									type="button"
 									onClick={() => void onShare()}
-									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0d9488] text-white text-sm font-medium">
+									className="brand-cta-bg inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-105 transition">
 									{copied ? <Check size={16} /> : <Copy size={16} />}
 									{copied ? "Копирано" : "Сподели текст"}
 								</button>
 								<Link
 									href="/"
-									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-stone-300 dark:border-stone-600 text-sm font-medium text-stone-800 dark:text-stone-100">
+									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-800 dark:text-slate-100">
 									<Sparkles size={16} />
 									Към началото
 								</Link>
 								<Link
 									href="/"
-									className="inline-flex items-center px-4 py-2 rounded-lg text-sm text-[#0d9488] dark:text-teal-400 font-medium">
+									className="inline-flex items-center px-4 py-2 rounded-lg text-sm text-emerald-700 dark:text-teal-400 font-medium">
 									Към чат с Виктория →
 								</Link>
 							</div>
 						</div>
 					)}
 				</div>
-			</main>
-		</div>
+		</SitePageShell>
 	);
 }

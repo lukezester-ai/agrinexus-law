@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 import type { KnowledgeDoc } from "@/lib/knowledge/dfz-knowledge";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 import { isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
@@ -279,22 +280,14 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 border-b border-teal-100/80 bg-white/90 backdrop-blur-md shadow-sm dark:border-stone-800 dark:bg-stone-950/90">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white">
-            <ArrowLeft size={16} />
-            <span className="text-sm">Към началото</span>
-          </Link>
-          <div className="font-medium text-base dark:text-stone-100">AgriNexus-Law · Търсачка</div>
-        </div>
-      </nav>
-
-      <div className="max-w-4xl mx-auto px-6 py-10">
+    <SitePageShell
+      maxWidth="4xl"
+      subheader={<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Търсене в документи и схеми</p>}
+    >
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🔍</div>
-          <h1 className="text-2xl font-medium mb-2 dark:text-stone-50">Намери това, което търсиш</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+          <h1 className="font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white">Намери това, което търсиш</h1>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             Субсидии, наредби, срокове, процедури - всичко на едно място.
           </p>
         </div>
@@ -311,17 +304,17 @@ export default function SearchPage() {
           </div>
         )}
 
-        <div className="brand-soft-surface rounded-2xl border shadow-soft p-6 mb-6 dark:border-indigo-900/40 dark:bg-stone-900/95">
+        <div className="brand-soft-surface rounded-2xl shadow-soft p-6 mb-6">
           <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             <div className="flex gap-2 mb-4">
               <div className="flex-1 relative">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Например: 'биологично производство' или 'срокове 2025'"
-                  className="w-full pl-11 pr-4 py-3 border border-stone-200 dark:border-stone-600 rounded-lg text-sm focus:outline-none focus:border-stone-400 dark:focus:border-teal-500/50 bg-white dark:bg-stone-950/80 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:border-slate-400 dark:focus:border-teal-500/50 bg-white dark:bg-slate-950/80 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <button
@@ -341,7 +334,7 @@ export default function SearchPage() {
                   className={`px-3 py-1.5 text-xs rounded-md border transition ${
                     category === cat.id
                       ? "border-indigo-500 bg-indigo-600 text-white"
-                      : "border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-[#57534e] dark:text-stone-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                      : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
                   }`}
                 >
                   {cat.label}
@@ -352,14 +345,14 @@ export default function SearchPage() {
         </div>
 
         {!hasSearched && (
-          <div className="bg-white dark:bg-stone-900/90 rounded-2xl border border-stone-200 dark:border-stone-700 p-6 mb-6">
-            <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">Популярни търсения</p>
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-6">
+            <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Популярни търсения</p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTED_QUERIES.map(s => (
                 <button
                   key={s}
                   onClick={() => handleSuggestion(s)}
-                  className="px-3 py-2 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm rounded-md transition text-stone-700 dark:text-stone-200"
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm rounded-md transition text-slate-700 dark:text-slate-200"
                 >
                   {s}
                 </button>
@@ -379,17 +372,16 @@ export default function SearchPage() {
         )}
 
         {!loading && hasSearched && results.length === 0 && (
-          <div className="text-center py-12 bg-white dark:bg-stone-900/90 rounded-2xl border border-stone-200 dark:border-stone-700">
-            <p className="text-stone-600 dark:text-stone-300 mb-2">
+          <div className="text-center py-12 bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <p className="text-slate-600 dark:text-slate-300 mb-2">
               Нищо не намерихме за &ldquo;{query}&rdquo;
             </p>
-            <p className="text-sm text-stone-500 dark:text-stone-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Опитай с други ключови думи или питай Елена директно в чата.
             </p>
             <Link 
               href="/"
-              className="inline-block mt-4 px-4 py-2 text-white rounded-lg text-sm"
-              style={{ background: "#0d9488" }}
+              className="brand-cta-bg inline-block mt-4 px-4 py-2 text-white rounded-lg text-sm font-medium shadow-sm hover:brightness-105 transition"
             >
               Питай Елена →
             </Link>
@@ -398,13 +390,13 @@ export default function SearchPage() {
 
         {!loading && results.length > 0 && (
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <aside className="h-fit rounded-2xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900/95">
+            <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/95">
               <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">Филтри</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Филтри</p>
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="text-[11px] text-stone-500 underline underline-offset-2 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+                  className="text-[11px] text-slate-500 underline underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   Нулирай
                 </button>
@@ -416,8 +408,8 @@ export default function SearchPage() {
               ) : null}
               <div className="space-y-3">
                 <label className="block text-xs">
-                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Култура</span>
-                  <select value={cultureFilter} onChange={(e) => setCultureFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <span className="mb-1 block text-slate-500 dark:text-slate-400">Култура</span>
+                  <select value={cultureFilter} onChange={(e) => setCultureFilter(e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
                     {CULTURE_FILTERS.map((x) => (
                       (() => {
                         const count = x.id === "all" ? results.length : (countBy.culture.get(x.id) ?? 0);
@@ -431,8 +423,8 @@ export default function SearchPage() {
                   </select>
                 </label>
                 <label className="block text-xs">
-                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Регион</span>
-                  <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <span className="mb-1 block text-slate-500 dark:text-slate-400">Регион</span>
+                  <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
                     {REGION_FILTERS.map((x) => (
                       (() => {
                         const count = x.id === "all" ? results.length : (countBy.region.get(x.id) ?? 0);
@@ -446,8 +438,8 @@ export default function SearchPage() {
                   </select>
                 </label>
                 <label className="block text-xs">
-                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Година</span>
-                  <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <span className="mb-1 block text-slate-500 dark:text-slate-400">Година</span>
+                  <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
                     <option value="all">Всички години ({results.length})</option>
                     {resultYears.map((year) => (
                       (() => {
@@ -462,8 +454,8 @@ export default function SearchPage() {
                   </select>
                 </label>
                 <label className="block text-xs">
-                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Издател</span>
-                  <select value={issuerFilter} onChange={(e) => setIssuerFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <span className="mb-1 block text-slate-500 dark:text-slate-400">Издател</span>
+                  <select value={issuerFilter} onChange={(e) => setIssuerFilter(e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
                     {ISSUER_FILTERS.map((x) => (
                       (() => {
                         const count = x.id === "all" ? results.length : (countBy.issuer.get(x.id) ?? 0);
@@ -477,8 +469,8 @@ export default function SearchPage() {
                   </select>
                 </label>
                 <label className="block text-xs">
-                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Тип документ</span>
-                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <span className="mb-1 block text-slate-500 dark:text-slate-400">Тип документ</span>
+                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
                     {DOC_TYPE_FILTERS.map((x) => (
                       (() => {
                         const count = x.id === "all" ? results.length : (countBy.type.get(x.id) ?? 0);
@@ -492,8 +484,8 @@ export default function SearchPage() {
                   </select>
                 </label>
                 <label className="block text-xs">
-                  <span className="mb-1 block text-stone-500 dark:text-stone-400">Статус</span>
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-xs dark:border-stone-700 dark:bg-stone-900">
+                  <span className="mb-1 block text-slate-500 dark:text-slate-400">Статус</span>
+                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
                     {DOC_STATUS_FILTERS.map((x) => (
                       (() => {
                         const count = x.id === "all" ? results.length : (countBy.status.get(x.id) ?? 0);
@@ -511,10 +503,10 @@ export default function SearchPage() {
 
             <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm text-stone-600 dark:text-stone-400">Намерени {filteredResults.length} резултата</p>
-              <label className="text-xs text-stone-500 dark:text-stone-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400">Намерени {filteredResults.length} резултата</p>
+              <label className="text-xs text-slate-500 dark:text-slate-400">
                 Сортиране:{" "}
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as "relevance" | "date_desc" | "date_asc")} className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs dark:border-stone-700 dark:bg-stone-900">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as "relevance" | "date_desc" | "date_asc")} className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900">
                   <option value="relevance">По релевантност</option>
                   <option value="date_desc">Най-нови първо</option>
                   <option value="date_asc">Най-стари първо</option>
@@ -526,11 +518,11 @@ export default function SearchPage() {
                 <p className="text-xs uppercase tracking-wide text-sky-800 dark:text-sky-300 mb-2 font-semibold">
                   Кратък отговор (вътрешно AI, без външен модел)
                 </p>
-                <p className="text-sm text-stone-800 dark:text-stone-200 leading-relaxed whitespace-pre-line">{aiSummary}</p>
+                <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">{aiSummary}</p>
               </div>
             )}
             {!aiSummary && filteredResults.length > 0 ? (
-              <p className="mb-4 text-xs text-stone-500 dark:text-stone-400">
+              <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
                 Няма AI обобщение за тази заявка — използвай „Отвори документа“ за детайли.
               </p>
             ) : null}
@@ -541,22 +533,22 @@ export default function SearchPage() {
             ) : null}
             <div className="space-y-3">
               {filteredResults.map((doc) => (
-                <div key={doc.id} className="bg-white dark:bg-stone-900/95 rounded-xl border border-stone-200 dark:border-stone-700 p-5">
+                <div key={doc.id} className="bg-white dark:bg-slate-900/95 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200">
                           {doc.category}
                         </span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
                           {doc.type === "scheme" && "Схема"}
                           {doc.type === "regulation" && "Регулация"}
                           {doc.type === "procedure" && "Процедура"}
                           {doc.type === "deadline" && "Срокове"}
                         </span>
                       </div>
-                      <h3 className="font-medium text-stone-900 dark:text-stone-100 mb-2">{doc.title}</h3>
-                      <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-3 whitespace-pre-line">
+                      <h3 className="font-medium text-slate-900 dark:text-slate-100 mb-2">{doc.title}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 whitespace-pre-line">
                         {doc.content.substring(0, 200)}...
                       </p>
                     </div>
@@ -573,11 +565,11 @@ export default function SearchPage() {
                       {openDetailId === doc.id ? "Скрий пълната информация" : "Виж пълната информация"}
                     </button>
                     {openDetailId === doc.id && (
-                      <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-700">
-                        <pre className="text-sm text-stone-700 dark:text-stone-300 whitespace-pre-wrap font-sans leading-relaxed">
+                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <pre className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
                           {doc.content}
                         </pre>
-                        <p className="mt-3 text-xs text-stone-500 dark:text-stone-500">
+                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
                           Източник: {doc.source}
                         </p>
                         <div className="mt-1 flex items-center gap-3">
@@ -605,7 +597,6 @@ export default function SearchPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </SitePageShell>
   );
 }

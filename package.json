@@ -6,7 +6,7 @@
     "postcss": "8.5.10"
   },
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "node scripts/dev-next.cjs",
     "dev:3020": "next dev -p 3020",
     "build": "next build",
     "start": "next start",
@@ -52,6 +52,7 @@
     "pdfjs-dist": "^4.10.38",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-markdown": "^10.1.0",
     "recharts": "^2.15.1",
     "resend": "^4.0.1",
     "tesseract.js": "^5.1.1"

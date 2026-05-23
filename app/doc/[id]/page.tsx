@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 import {
   getDocumentStatus,
@@ -34,19 +35,19 @@ export default async function DocumentPage({ params }: Params) {
   const sourceUrl = getKnowledgeSourceUrl(doc);
 
   return (
-    <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 border-b border-teal-100/80 bg-white/90 backdrop-blur-md shadow-sm dark:border-stone-800 dark:bg-stone-950/90">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/search" className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white">
-            <ArrowLeft size={16} />
-            Към търсенето
+    <SitePageShell
+      maxWidth="5xl"
+      subheader={
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href="/search" className="text-sm font-semibold text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white">
+            ← Към търсенето
           </Link>
-          <div className="text-sm font-medium dark:text-stone-100">Документ</div>
+          <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Документ</span>
         </div>
-      </nav>
-
-      <main className="mx-auto max-w-5xl px-6 py-8">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+      }
+    >
+      <div className="space-y-8">
+        <section className="surface-card p-6 sm:p-8">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <span
               className={`rounded-full px-2 py-1 text-xs font-semibold ${
@@ -57,14 +58,14 @@ export default async function DocumentPage({ params }: Params) {
             >
               {statusLabel(status)}
             </span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {doc.category} · {doc.type} · {doc.effectiveDate}
             </span>
           </div>
-          <h1 className="text-2xl font-semibold dark:text-stone-50">{doc.title}</h1>
-          <p className="mt-4 text-sm leading-7 text-stone-700 dark:text-stone-300">{summary}</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{doc.title}</h1>
+          <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">{summary}</p>
           {isPublicDocumentId(id) ? (
-            <p className="mt-4 text-sm text-stone-600 dark:text-stone-400">
+            <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
               Това е индексиран държавен документ от ingest pipeline. Пълният текст е в RAG чата; отвори оригинала за PDF/HTML.
             </p>
           ) : null}
@@ -73,7 +74,7 @@ export default async function DocumentPage({ params }: Params) {
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
             >
               <ExternalLink size={16} />
               Официален източник
@@ -81,7 +82,7 @@ export default async function DocumentPage({ params }: Params) {
             {!isPublicDocumentId(id) ? (
               <a
                 href={`/api/documents/${doc.id}/download`}
-                className="inline-flex items-center gap-2 rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium dark:border-stone-600"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800 dark:border-slate-600 dark:text-slate-100"
               >
                 <Download size={16} />
                 Изтегли резюме (.txt)
@@ -91,15 +92,15 @@ export default async function DocumentPage({ params }: Params) {
         </section>
 
         {versions.length > 0 ? (
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold dark:text-stone-50">Версии</h2>
+          <section>
+            <h2 className="font-display text-lg font-bold text-slate-950 dark:text-white">Версии</h2>
             <ul className="mt-3 space-y-2">
               {versions.map((v) => (
-                <li key={v.id} className="rounded-lg border border-stone-200 p-3 text-sm dark:border-stone-700">
+                <li key={v.id} className="rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-700">
                   <Link href={`/doc/${v.id}`} className="font-medium text-teal-700 dark:text-teal-400">
                     {v.title}
                   </Link>
-                  <span className="ml-2 text-stone-500">{v.effectiveDate}</span>
+                  <span className="ml-2 text-slate-500">{v.effectiveDate}</span>
                 </li>
               ))}
             </ul>
@@ -107,14 +108,14 @@ export default async function DocumentPage({ params }: Params) {
         ) : null}
 
         {related.length > 0 ? (
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold dark:text-stone-50">Свързани документи</h2>
+          <section>
+            <h2 className="font-display text-lg font-bold text-slate-950 dark:text-white">Свързани документи</h2>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2">
               {related.map((r) => (
                 <li key={r.id}>
                   <Link
                     href={`/doc/${r.id}`}
-                    className="block rounded-lg border border-stone-200 p-3 text-sm hover:border-teal-400 dark:border-stone-700"
+                    className="block rounded-xl border border-slate-200 p-3 text-sm text-slate-800 hover:border-teal-400 dark:border-slate-700 dark:text-slate-100"
                   >
                     {r.title}
                   </Link>
@@ -123,7 +124,7 @@ export default async function DocumentPage({ params }: Params) {
             </ul>
           </section>
         ) : null}
-      </main>
-    </div>
+      </div>
+    </SitePageShell>
   );
 }

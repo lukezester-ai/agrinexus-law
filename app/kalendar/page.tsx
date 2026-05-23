@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 import {
 	CROP_LABELS,
 	CROP_ORDER,
@@ -47,49 +48,44 @@ export default function KalendarPage() {
 	}, [seasonFilter]);
 
 	return (
-		<div className="min-h-screen agri-page-bg">
-			<nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800">
-				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-y-2 gap-x-3">
-					<Link
-						href="/"
-						className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 text-sm">
-						<ArrowLeft size={16} aria-hidden />
-						Начало
-					</Link>
-					<span className="font-medium text-stone-900 dark:text-stone-100 text-sm sm:text-base order-last sm:order-none w-full sm:w-auto text-center sm:text-left">
-						Сезонен календар
-					</span>
-					<div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs sm:text-sm">
-						<Link href="/statistiki" className="text-[#0d9488] dark:text-teal-400 font-medium">
+		<SitePageShell
+			maxWidth="4xl"
+			subheader={
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Сезонен календар</p>
+					<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold sm:text-sm">
+						<Link href="/statistiki" className="text-emerald-700 hover:underline dark:text-emerald-300">
 							Статистика
 						</Link>
-						<Link href="/srokove" className="text-[#0d9488] dark:text-teal-400 font-medium">
+						<Link href="/srokove" className="text-emerald-700 hover:underline dark:text-emerald-300">
 							Срокове
 						</Link>
-						<Link href="/kalkulator" className="text-[#0d9488] dark:text-teal-400 font-medium">
+						<Link href="/kalkulator" className="text-emerald-700 hover:underline dark:text-emerald-300">
 							Калкулатор
 						</Link>
 					</div>
 				</div>
-			</nav>
-
-			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+			}
+		>
+			<div className="surface-card p-5 sm:p-8">
 				<div className="flex items-start gap-4 mb-8">
-					<div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950/60 flex items-center justify-center text-teal-800 dark:text-teal-300 shrink-0 border border-teal-200 dark:border-teal-800">
+					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-teal-200 bg-teal-100 text-teal-800 dark:border-teal-800 dark:bg-teal-950/60 dark:text-teal-300">
 						<CalendarDays size={24} aria-hidden />
 					</div>
 					<div>
-						<h1 className="text-2xl font-semibold text-stone-900 dark:text-stone-50 mb-1">
+						<h1 className="font-display mb-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white">
 							Какво правим месец по месец
 						</h1>
-						<p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-							Ориентир за България по месеци — комбинирай с местен агроном, метеорологична прогноза и официални указания на ДФЗ и БАБХ. Задачите са обобщени по типични полски операции; реалният ход зависи от сорт, район и година. По-долу са отделени ключови дати към кампанията по директни плащания (ориентир — провери текущата заповед).
+						<p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+							Ориентир за България по месеци — комбинирай с местен агроном, метеорологична прогноза и официални указания на ДФЗ и
+							БАБХ. Задачите са обобщени по типични полски операции; реалният ход зависи от сорт, район и година. По-долу са отделени
+							ключови дати към кампанията по директни плащания (ориентир — провери текущата заповед).
 						</p>
 					</div>
 				</div>
 
 				<div className="mb-8">
-					<label className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-2">
+					<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
 						Избери основна култура
 					</label>
 					<div className="flex flex-wrap gap-2">
@@ -100,8 +96,8 @@ export default function KalendarPage() {
 								onClick={() => setCrop(k)}
 								className={`px-3 py-2 rounded-lg text-sm border transition ${
 									crop === k
-										? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50"
-										: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800"
+										? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
+										: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
 								}`}>
 								{CROP_LABELS[k]}
 							</button>
@@ -110,7 +106,7 @@ export default function KalendarPage() {
 				</div>
 
 				<div className="mb-8">
-					<label className="block text-sm font-medium text-stone-800 dark:text-stone-100 mb-2">
+					<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
 						Избери сезон
 					</label>
 					<div className="flex flex-wrap gap-2">
@@ -121,8 +117,8 @@ export default function KalendarPage() {
 								onClick={() => setSeasonFilter(key)}
 								className={`px-3 py-2 rounded-lg text-sm border transition ${
 									seasonFilter === key
-										? "border-[#0d9488] bg-teal-50 dark:bg-teal-950/40 text-stone-900 dark:text-stone-50"
-										: "border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800"
+										? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
+										: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
 								}`}>
 								{seasonLabelBg(key)}
 							</button>
@@ -134,7 +130,7 @@ export default function KalendarPage() {
 					<p className="text-xs font-semibold uppercase tracking-wide text-teal-900 dark:text-teal-300 mb-3">
 						ДФЗ — ключови дати (ориентир кампания)
 					</p>
-					<ul className="space-y-2 text-sm text-stone-800 dark:text-stone-200">
+					<ul className="space-y-2 text-sm text-slate-800 dark:text-slate-200">
 						{DFZ_FIXED_DEADLINES.map((d, i) => (
 							<li key={i}>
 								<strong>
@@ -155,14 +151,14 @@ export default function KalendarPage() {
 						return (
 							<div
 								key={m}
-								className="bg-white dark:bg-stone-900/95 rounded-xl border border-stone-200 dark:border-stone-700 p-4 shadow-sm">
-								<h2 className="font-semibold text-stone-900 dark:text-stone-50 mb-2 flex items-center gap-2">
-									<span className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-sm">
+								className="bg-white dark:bg-slate-900/95 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
+								<h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-2 flex items-center gap-2">
+									<span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm">
 										{m}
 									</span>
 									{monthName}
 								</h2>
-								<ul className="text-sm text-stone-600 dark:text-stone-400 space-y-1.5 list-disc pl-5">
+								<ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1.5 list-disc pl-5">
 									{tasks.map((t, i) => (
 										<li key={i}>{t}</li>
 									))}
@@ -172,10 +168,10 @@ export default function KalendarPage() {
 					})}
 				</div>
 
-				<p className="text-xs text-stone-500 dark:text-stone-500 mt-8 text-center">
+				<p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-500">
 					За снимки на писма от ДФЗ или БАБХ и обяснение — ползвай чата с Елена (скоро и качване на снимка като отделна функция).
 				</p>
-			</main>
-		</div>
+			</div>
+		</SitePageShell>
 	);
 }

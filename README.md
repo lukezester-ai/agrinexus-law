@@ -10,7 +10,7 @@
 2. Регистрирайте се в OpenAI, Supabase, Resend (всички с безплатен старт)
 3. Изпълнете `supabase-setup.sql` в Supabase SQL Editor
 4. Копирайте `.env.example` → `.env.local` и попълнете ключовете (виж `DEPLOYMENT-GUIDE.md`)
-5. `npm install` и `npm run dev` (по подразбиране http://localhost:3002)
+5. `npm install` и `npm run dev` (първо опитва **http://localhost:3002**; ако портът е зает, автоматично минава на 3020, 3010, … — гледай съобщението в терминала)
 6. Push в GitHub, deploy на Vercel
 
 ## AI документация и оркестрация

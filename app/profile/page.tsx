@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Check, FolderOpen } from "lucide-react";
+import { Save, Check, FolderOpen } from "lucide-react";
+import { SitePageShell } from "@/components/site-page-shell";
 import { loadFarmProfile, persistFarmProfile } from "@/lib/farm-profile";
 
 const REGIONS = [
@@ -77,34 +78,24 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen agri-page-bg">
-      <nav className="sticky top-0 z-20 bg-white/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-teal-100/80 dark:border-stone-800 shadow-sm">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white">
-            <ArrowLeft size={16} />
-            <span className="text-sm">Към началото</span>
-          </Link>
-          <div className="font-medium text-base dark:text-stone-100">Профил на стопанството</div>
-        </div>
-      </nav>
-
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-3">🌾</div>
-          <h1 className="text-2xl font-medium mb-2 dark:text-stone-50">Разкажи ни за стопанството си</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+    <SitePageShell maxWidth="2xl" subheader={<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Профил на стопанството</p>}>
+        <div className="mb-8 text-center">
+          <div className="mb-3 text-4xl" aria-hidden>
+            🌾
+          </div>
+          <h1 className="font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white">Разкажи ни за стопанството си</h1>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             Колкото повече знаем, толкова по-точни ще са отговорите от Елена, Борис и Виктория.
           </p>
         </div>
 
-        <div className="bg-white dark:bg-stone-900/95 rounded-2xl border border-stone-200 dark:border-stone-700 p-6 space-y-6">
-          
+        <div className="surface-card space-y-6 p-6">
           <div>
-            <label className="block text-sm font-medium mb-2 text-stone-800 dark:text-stone-100">Тип стопанство</label>
+            <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Тип стопанство</label>
             <select 
               value={profile.farm_type}
               onChange={(e) => setProfile({...profile, farm_type: e.target.value})}
-              className="w-full px-4 py-3 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-stone-400"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
             >
               <option value="">Избери...</option>
               {FARM_TYPES.map(t => (
@@ -114,11 +105,11 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-stone-800 dark:text-stone-100">Област</label>
+            <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Област</label>
             <select 
               value={profile.region}
               onChange={(e) => setProfile({...profile, region: e.target.value})}
-              className="w-full px-4 py-3 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-stone-400"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
             >
               <option value="">Избери...</option>
               {REGIONS.map(r => (
@@ -128,19 +119,19 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-stone-800 dark:text-stone-100">Размер (декари)</label>
+            <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Размер (декари)</label>
             <input 
               type="number"
               value={profile.total_decares}
               onChange={(e) => setProfile({...profile, total_decares: e.target.value})}
               placeholder="напр. 50"
-              className="w-full px-4 py-3 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-stone-400"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
             />
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">1 хектар = 10 декара</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">1 хектар = 10 декара</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-stone-800 dark:text-stone-100">Какво отглеждаш?</label>
+            <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Какво отглеждаш?</label>
             <div className="flex flex-wrap gap-2">
               {COMMON_CROPS.map(crop => (
                 <button
@@ -148,13 +139,10 @@ export default function ProfilePage() {
                   type="button"
                   onClick={() => toggleCrop(crop)}
                   className={`px-3 py-1.5 text-sm rounded-md border transition ${
-                    !profile.crops.includes(crop) ? "bg-white dark:bg-stone-800 dark:text-stone-200 dark:border-stone-600 text-[#1c1917]" : ""
+                    profile.crops.includes(crop)
+                      ? "border-emerald-600 bg-emerald-600 text-white"
+                      : "border-slate-200 bg-white text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
                   }`}
-                  style={{
-                    background: profile.crops.includes(crop) ? "#0d9488" : undefined,
-                    color: profile.crops.includes(crop) ? "white" : undefined,
-                    borderColor: profile.crops.includes(crop) ? "#0d9488" : "#e7e5e4"
-                  }}
                 >
                   {crop}
                 </button>
@@ -170,15 +158,14 @@ export default function ProfilePage() {
               onChange={(e) => setProfile({...profile, is_organic: e.target.checked})}
               className="w-4 h-4"
             />
-            <label htmlFor="organic" className="text-sm dark:text-stone-300">
+            <label htmlFor="organic" className="text-sm dark:text-slate-300">
               Биологично производство (имам сертификат или съм в преход)
             </label>
           </div>
 
           <button
             onClick={handleSave}
-            className="w-full py-3 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
-            style={{ background: "#0d9488" }}
+            className="brand-cta-bg w-full py-3 text-white rounded-lg text-sm font-medium transition shadow-sm hover:brightness-105 flex items-center justify-center gap-2"
           >
             {saved ? (
               <>
@@ -193,25 +180,24 @@ export default function ProfilePage() {
             )}
           </button>
 
-          <p className="text-xs text-stone-500 dark:text-stone-400 text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
             Профилът се пази в браузъра ти (localStorage) и се вкарва автоматично в чата за по-персонални отговори — не се качва към наш сървър.
           </p>
 
           <Link
             href="/documents"
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-medium border border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/80 transition">
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition">
             <FolderOpen size={16} aria-hidden />
             Мои документи (PDF и др.)
           </Link>
         </div>
 
-        <Link 
+        <Link
           href="/"
-          className="block text-center mt-6 text-sm text-stone-600 dark:text-teal-300/90 hover:text-stone-900 dark:hover:text-white"
+          className="mt-6 block text-center text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
         >
-          Готов съм - към чата →
+          Готов съм — към чата →
         </Link>
-      </div>
-    </div>
+    </SitePageShell>
   );
 }

@@ -28,6 +28,8 @@ import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { HOME_CATEGORY_SEARCH } from "@/lib/knowledge/document-taxonomy";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 import { isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
+import { ChatMarkdown } from "@/components/chat-markdown";
+import { SiteHeader } from "@/components/site-header";
 
 type SearchResponse = {
 	results?: KnowledgeDoc[];
@@ -108,6 +110,7 @@ export default function Home() {
 	const [deadlineRisks, setDeadlineRisks] = useState<DeadlineRiskRow[]>([]);
 	const [liveStatsLoading, setLiveStatsLoading] = useState(true);
 	const [ragHealthy, setRagHealthy] = useState<boolean | null>(null);
+	const [ragStatusHints, setRagStatusHints] = useState<string[]>([]);
 
 	useEffect(() => {
 		if (typeof window === "undefined") return;
@@ -126,6 +129,11 @@ export default function Home() {
 				if (data.tiles?.length) setLiveTiles(data.tiles);
 				if (data.deadlineRisks?.length) setDeadlineRisks(data.deadlineRisks);
 				setRagHealthy(Boolean(data.rag?.healthy));
+				setRagStatusHints(
+					Array.isArray(data.rag?.hints)
+						? data.rag.hints.filter((h): h is string => typeof h === "string" && h.trim().length > 0)
+						: [],
+				);
 			} catch {
 				/* keep placeholders */
 			} finally {
@@ -246,26 +254,46 @@ export default function Home() {
 				const decoder = new TextDecoder("utf-8");
 				let done = false;
 				let text = "";
-				
+
 				// Добавяме празно съобщение, което ще обновяваме
 				setChatMessages((prev) => [
 					...prev,
 					{ role: "assistant", content: "", chatLogId },
 				]);
-				
+
 				if (reader) {
-					while (!done) {
-						const { value, done: readerDone } = await reader.read();
-						done = readerDone;
-						if (value) {
-							text += decoder.decode(value, { stream: true });
+					try {
+						while (!done) {
+							const { value, done: readerDone } = await reader.read();
+							done = readerDone;
+							if (value) {
+								text += decoder.decode(value, { stream: true });
+								setChatMessages((prev) => {
+									const newMessages = [...prev];
+									const lastIndex = newMessages.length - 1;
+									newMessages[lastIndex] = { ...newMessages[lastIndex], content: text };
+									return newMessages;
+								});
+							}
+						}
+						text += decoder.decode();
+						if (text) {
 							setChatMessages((prev) => {
 								const newMessages = [...prev];
-								newMessages[newMessages.length - 1].content = text;
+								const lastIndex = newMessages.length - 1;
+								newMessages[lastIndex] = { ...newMessages[lastIndex], content: text };
 								return newMessages;
 							});
 						}
+					} catch (streamErr) {
+						const m =
+							streamErr instanceof Error ? streamErr.message : "Прекъснат стрийм на отговора.";
+						setChatMessages((prev) => prev.slice(0, -1));
+						throw new Error(m);
 					}
+				} else {
+					setChatMessages((prev) => prev.slice(0, -1));
+					setChatError("Няма тяло на отговора от сървъра (стрийм). Опресни и опитай пак.");
 				}
 			}
 		} catch (err) {
@@ -300,40 +328,7 @@ export default function Home() {
 
 	return (
 		<div className="agri-mobile-safe min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
-			<header className="sticky top-0 z-30 border-b border-white/10 bg-white/70 backdrop-blur-2xl dark:border-slate-800/50 dark:bg-slate-950/70">
-				<div className="mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6">
-					<Link href="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3" aria-label="AgriNexus.Law">
-						<span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-emerald-950 text-white shadow-sm sm:h-10 sm:w-10 dark:bg-emerald-500 dark:text-emerald-950">
-							<Leaf size={21} />
-						</span>
-						<span className="min-w-0 leading-tight">
-							<span className="block text-xs font-black tracking-[0.1em] text-slate-950 sm:text-sm sm:tracking-[0.18em] dark:text-white">
-								AGRINEXUS
-							</span>
-							<span className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 sm:block sm:text-[11px] sm:tracking-[0.28em] dark:text-emerald-300">
-								Law Intelligence
-							</span>
-						</span>
-					</Link>
-					<nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300 md:flex">
-						<Link href="/search" className="hover:text-slate-950 dark:hover:text-white">Документи</Link>
-						<Link href="/srokove" className="hover:text-slate-950 dark:hover:text-white">Срокове</Link>
-						<Link href="/kalkulator" className="hover:text-slate-950 dark:hover:text-white">Калкулатори</Link>
-						<Link href="/statistiki" className="hover:text-slate-950 dark:hover:text-white">Статистики</Link>
-						<Link href="/moya-ferma" className="font-bold text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100">Моята ферма</Link>
-						<Link href="/admin" className="hover:text-slate-950 dark:hover:text-white">Качи PDF</Link>
-					</nav>
-					<button
-						type="button"
-						onClick={() => jumpToSearch()}
-						className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 sm:gap-2 sm:px-4 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-100"
-						aria-label="Търсене"
-					>
-						<Search size={16} aria-hidden />
-						<span className="sr-only sm:not-sr-only">Търси</span>
-					</button>
-				</div>
-			</header>
+			<SiteHeader />
 
 			<main>
 				<section className="relative overflow-hidden border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,250,252,0.62))] dark:border-slate-800 dark:bg-[linear-gradient(180deg,rgba(2,6,23,0.82),rgba(15,23,42,0.72))]">
@@ -422,11 +417,18 @@ export default function Home() {
 										}`}
 										title={
 											ragHealthy === false
-												? "RAG индексът изисква внимание — виж /api/health"
-												: "Услугата е онлайн"
+												? [
+														"Статус на векторния индекс (RAG): таблица knowledge_chunks в Supabase, брой chunks и embeddings.",
+														"Чатът работи и без това (вътрешна база + OpenAI), но семантичното търсене в индексирани документи може да е ограничено.",
+														ragStatusHints[0] ?? "",
+														"JSON диагностика: GET /api/health",
+													]
+														.filter(Boolean)
+														.join(" ")
+												: "Услугата е онлайн; RAG индексът е в норма."
 										}
 									>
-										{liveStatsLoading ? "…" : ragHealthy === false ? "RAG проверка" : "онлайн"}
+										{liveStatsLoading ? "…" : ragHealthy === false ? "RAG не е готов" : "онлайн"}
 									</span>
 								</div>
 								<div className="grid gap-4 p-4 sm:p-5">
@@ -604,22 +606,24 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="chat" className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
-					<div>
+				<section id="chat" className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
+					<div className="lg:pt-1">
 						<p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">AI асистент</p>
-						<h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Задай въпрос към специалист</h2>
-						<p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+						<h2 className="mt-2 font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+							Задай въпрос към специалист
+						</h2>
+						<p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-300">
 							Избери профил според задачата. Отговорите могат да се оценяват, за да се подобрява вътрешната база.
 						</p>
 					</div>
 
-					<div className="border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-						<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-							<h3 className="text-sm font-black text-slate-950 dark:text-white">Консултация</h3>
+					<div className="surface-card overflow-hidden p-5 sm:p-6">
+						<div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800/80">
+							<h3 className="font-display text-sm font-black tracking-tight text-slate-950 dark:text-white">Консултация</h3>
 							<select
 								value={chatCharacter}
 								onChange={(e) => setChatCharacter(e.target.value as "elena" | "boris" | "viktoria")}
-								className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-900"
+								className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm outline-none transition hover:border-emerald-300/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-emerald-600/50"
 							>
 								<option value="elena">Елена · право/ДФЗ</option>
 								<option value="boris">Борис · поле</option>
@@ -627,17 +631,26 @@ export default function Home() {
 							</select>
 						</div>
 
-						<div className="mb-4 max-h-80 overflow-auto border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-4 max-h-80 overflow-auto rounded-xl border border-slate-200/90 bg-slate-50/90 p-3 shadow-inner dark:border-slate-700/90 dark:bg-slate-900/50">
 							{chatMessages.length === 0 ? (
-								<p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+								<p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
 									Задай казус: култура, регион, документ или срок. Под всеки AI отговор можеш да дадеш обратна връзка.
 								</p>
 							) : (
 								<div className="space-y-3">
 									{chatMessages.map((msg, idx) => (
-										<div key={`${msg.role}-${idx}`} className={`p-3 text-sm ${msg.role === "user" ? "bg-white dark:bg-slate-950" : "bg-emerald-50 dark:bg-emerald-950/30"}`}>
-											<p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{msg.role === "user" ? "Ти" : "Асистент"}</p>
-											<p className="whitespace-pre-wrap leading-6">{msg.content}</p>
+										<div
+											key={`${msg.role}-${idx}`}
+											className={`rounded-xl border p-3.5 text-sm shadow-sm ${
+												msg.role === "user"
+													? "border-slate-200/90 bg-white dark:border-slate-700 dark:bg-slate-950"
+													: "border-emerald-200/50 bg-emerald-50/90 dark:border-emerald-900/40 dark:bg-emerald-950/25"
+											}`}
+										>
+											<p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+												{msg.role === "user" ? "Ти" : "Асистент"}
+											</p>
+											<ChatMarkdown content={msg.content} variant={msg.role} />
 											{msg.role === "assistant" && msg.chatLogId ? (
 												<div className="mt-3 flex flex-wrap items-center gap-2">
 													{(() => {
@@ -675,18 +688,18 @@ export default function Home() {
 							)}
 						</div>
 
-						{chatError ? <p className="mb-3 text-xs font-medium text-red-600">{chatError}</p> : null}
-						<form onSubmit={sendChat} className="grid gap-2 sm:grid-cols-[1fr_auto]">
+						{chatError ? <p className="mb-3 text-xs font-medium text-red-600 dark:text-red-400">{chatError}</p> : null}
+						<form onSubmit={sendChat} className="grid gap-2 sm:grid-cols-[1fr_auto] sm:gap-3">
 							<input
 								value={chatInput}
 								onChange={(e) => setChatInput(e.target.value)}
 								placeholder="Например: Имам 120 дка пшеница в Добрич. Какво да проверя?"
-								className="min-w-0 rounded-md border border-slate-300 px-3 py-3 text-sm outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-900"
+								className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none ring-emerald-500/0 transition placeholder:text-slate-400 focus:border-emerald-500/70 focus:ring-4 focus:ring-emerald-500/15 dark:border-slate-600 dark:bg-slate-900 dark:focus:border-emerald-500/50"
 							/>
 							<button
 								type="submit"
 								disabled={chatBusy || !chatInput.trim()}
-								className="inline-flex items-center justify-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950"
+								className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-900 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-100"
 							>
 								{chatBusy ? "Изпращам..." : "Изпрати"} <ArrowRight size={16} />
 							</button>

@@ -40,8 +40,8 @@ export function CookieConsentBanner() {
 	if (!visible) return null;
 
 	return (
-		<div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 rounded-xl border border-stone-200 bg-white/95 p-4 shadow-lg backdrop-blur dark:border-stone-700 dark:bg-stone-900/95">
-			<p className="text-sm text-stone-700 dark:text-stone-200">
+		<div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+			<p className="text-sm text-slate-700 dark:text-slate-200">
 				Използваме технически бисквитки и аналитика за подобрение на услугата.
 				Прочети{" "}
 				<Link href="/privacy" className="underline">
@@ -56,7 +56,7 @@ export function CookieConsentBanner() {
 						writeConsent("rejected");
 						setVisible(false);
 					}}
-					className="rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-700 dark:border-stone-600 dark:text-stone-200">
+					className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:text-slate-200">
 					Откажи
 				</button>
 				<button
@@ -65,7 +65,7 @@ export function CookieConsentBanner() {
 						writeConsent("accepted");
 						setVisible(false);
 					}}
-					className="rounded-lg bg-[#0d9488] px-3 py-2 text-sm font-medium text-white">
+					className="brand-cta-bg rounded-lg px-3 py-2 text-sm font-medium text-white shadow-sm hover:brightness-105 transition">
 					Приеми
 				</button>
 			</div>
