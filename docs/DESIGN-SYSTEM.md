@@ -48,7 +48,7 @@ npx shadcn@latest add dialog dropdown-menu sheet
 
 Персонажи (accent): Елена — cyan; Борис — emerald green; Виктория — amber/gold (`lib/characters.ts`).
 
-**Тъмен hero:** основният ред на H1 използва **Ultra Soft White** `#F7FAFC` (`.dark .ai-hero-heading`); градиентната дума — `.dark .text-gradient-ai` със светли стопове + `drop-shadow` за четимост върху Deep Navy.
+**Тъмен hero:** заглавието е **два реда** — ред 1 „Правна и аграрна“ (`#F7FAFC`), ред 2 „документация“ (градиент `.text-gradient-ai`); в hero **няма** `filter: drop-shadow` върху gradient text (размазва `background-clip`). Анимацията на градиента е **изключена** в `.dark .ai-hero-section`.
 
 ## Препоръки
 

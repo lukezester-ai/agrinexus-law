@@ -380,9 +380,14 @@ export default function Home() {
 							</motion.div>
 							<motion.h1
 								variants={heroItem(reducedMotion)}
-								className="ai-hero-heading w-full max-w-full text-balance break-words font-display text-[2rem] font-black leading-[1.1] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl"
+								className="ai-hero-heading w-full max-w-4xl font-display text-[2rem] font-black leading-[1.12] tracking-tight sm:text-5xl sm:leading-[1.1] md:text-6xl md:leading-[1.08] lg:text-7xl"
 							>
-								Правна и аграрна <span className="text-gradient-ai">документация</span>
+								<span className="ai-hero-title-line block text-slate-950 dark:text-[#F7FAFC]">
+									Правна и аграрна
+								</span>
+								<span className="mt-2 block sm:mt-3">
+									<span className="text-gradient-ai">документация</span>
+								</span>
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
