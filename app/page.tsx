@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import {
 	ArrowRight,
 	BadgeCheck,
@@ -23,17 +24,27 @@ import {
 	Sprout,
 	ThumbsDown,
 	ThumbsUp,
+	User,
 } from "lucide-react";
+import { AiCharacterAvatar } from "@/components/ai-character-avatar";
+import type { CharacterId } from "@/lib/characters";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { HOME_CATEGORY_SEARCH } from "@/lib/knowledge/document-taxonomy";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
 import { isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
 import { ChatMarkdown } from "@/components/chat-markdown";
 import { SiteHeader } from "@/components/site-header";
+import {
+	chatBubble,
+	chatListContainer,
+	heroContainer,
+	heroItem,
+	panelReveal,
+} from "@/lib/motion-variants";
 
 type SearchResponse = {
 	results?: KnowledgeDoc[];
-	engine?: "meili+internal" | "internal-ai";
+	engine?: "meili+internal" | "typesense+internal" | "internal-ai";
 	aiSummary?: string;
 	error?: string;
 };
@@ -42,6 +53,8 @@ type ChatMessage = {
 	role: "user" | "assistant";
 	content: string;
 	chatLogId?: string | null;
+	/** Кой специалист е отговорил (за аватар в балона). */
+	characterId?: CharacterId;
 };
 
 type FeedbackState = {
@@ -111,6 +124,7 @@ export default function Home() {
 	const [liveStatsLoading, setLiveStatsLoading] = useState(true);
 	const [ragHealthy, setRagHealthy] = useState<boolean | null>(null);
 	const [ragStatusHints, setRagStatusHints] = useState<string[]>([]);
+	const reducedMotion = useReducedMotion();
 
 	useEffect(() => {
 		if (typeof window === "undefined") return;
@@ -206,6 +220,7 @@ export default function Home() {
 		e.preventDefault();
 		const text = chatInput.trim();
 		if (!text || chatBusy) return;
+		const assistantCharacter = chatCharacter;
 		const nextMessages: ChatMessage[] = [...chatMessages, { role: "user", content: text }];
 		setChatMessages(nextMessages);
 		setChatInput("");
@@ -245,7 +260,12 @@ export default function Home() {
 				};
 				setChatMessages((prev) => [
 					...prev,
-					{ role: "assistant", content: data.response || "", chatLogId: data.chatLogId ?? null },
+					{
+						role: "assistant",
+						content: data.response || "",
+						chatLogId: data.chatLogId ?? null,
+						characterId: assistantCharacter,
+					},
 				]);
 			} else {
 				// Streaming text response
@@ -258,7 +278,7 @@ export default function Home() {
 				// Добавяме празно съобщение, което ще обновяваме
 				setChatMessages((prev) => [
 					...prev,
-					{ role: "assistant", content: "", chatLogId },
+					{ role: "assistant", content: "", chatLogId, characterId: assistantCharacter },
 				]);
 
 				if (reader) {
@@ -327,27 +347,52 @@ export default function Home() {
 	};
 
 	return (
-		<div className="agri-mobile-safe min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
+		<div className="agri-mobile-safe agri-floating-header-pad min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
 			<SiteHeader />
 
 			<main>
-				<section className="relative overflow-hidden border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,250,252,0.62))] dark:border-slate-800 dark:bg-[linear-gradient(180deg,rgba(2,6,23,0.82),rgba(15,23,42,0.72))]">
+				<section className="relative overflow-hidden border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,250,252,0.62))] dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(3,7,18,0.92),rgba(12,18,34,0.88))]">
+					<motion.div
+						className="ai-mesh-bg"
+						aria-hidden="true"
+						animate={
+							reducedMotion
+								? false
+								: { opacity: [0.72, 0.94, 0.72], scale: [1, 1.02, 1] }
+						}
+						transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+					/>
 					<div className="hero-field-visual absolute inset-y-0 right-0 hidden w-[48%] opacity-90 lg:block" aria-hidden="true" />
-					<div className="mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
-						<div className="relative z-10 min-w-0 max-w-3xl">
-							<div className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs font-bold uppercase leading-snug tracking-[0.12em] text-teal-800 shadow-sm dark:border-teal-800/50 dark:bg-teal-950/30 dark:text-teal-300">
+					<div className="relative z-10 mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
+						<motion.div
+							className="relative z-10 min-w-0 max-w-3xl"
+							variants={heroContainer(reducedMotion)}
+							initial="hidden"
+							animate="visible"
+						>
+							<motion.div
+								variants={heroItem(reducedMotion)}
+								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs font-bold uppercase leading-snug tracking-[0.12em] text-teal-800 shadow-sm dark:border-teal-800/50 dark:bg-teal-950/30 dark:text-teal-300"
+							>
 								<LockKeyhole size={16} className="shrink-0" />
 								<span className="sm:hidden">Проверими източници</span>
 								<span className="hidden sm:inline">Проверими източници, не свободни догадки</span>
-							</div>
-							<h1 className="w-full max-w-full text-balance break-words font-display text-[2rem] font-black leading-[1.1] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl">
-								Правна и аграрна <span className="text-gradient">документация</span>
-							</h1>
-							<p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl">
+							</motion.div>
+							<motion.h1
+								variants={heroItem(reducedMotion)}
+								className="w-full max-w-full text-balance break-words font-display text-[2rem] font-black leading-[1.1] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
+							>
+								Правна и аграрна <span className="text-gradient-ai">документация</span>
+							</motion.h1>
+							<motion.p
+								variants={heroItem(reducedMotion)}
+								className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl"
+							>
 								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
-							</p>
+							</motion.p>
 
-							<form onSubmit={onSearch} className="mt-8 max-w-3xl">
+							<motion.div variants={heroItem(reducedMotion)} className="mt-8 max-w-3xl">
+							<form onSubmit={onSearch} className="max-w-3xl">
 								<div
 									ref={searchFormRef}
 									className={`grid gap-4 rounded-3xl glass-panel p-4 transition-all ${
@@ -379,7 +424,7 @@ export default function Home() {
 												key={item}
 												type="button"
 												onClick={() => jumpToSearch(item, true)}
-												className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-emerald-300 hover:text-emerald-800 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-700"
+												className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/70 hover:text-emerald-800 hover:shadow-sm dark:border-slate-700 dark:text-slate-300 dark:hover:border-teal-500/50 dark:hover:text-teal-200"
 											>
 												{item}
 											</button>
@@ -387,23 +432,32 @@ export default function Home() {
 									</div>
 								</div>
 							</form>
+							</motion.div>
 
-							<div className="mt-8 grid gap-3 sm:grid-cols-3">
+							<motion.div variants={heroItem(reducedMotion)} className="mt-8 grid gap-3 sm:grid-cols-3">
 								{TRUST_POINTS.map((item) => {
 									const Icon = item.icon;
 									return (
-										<div key={item.label} className="border-l-2 border-emerald-600 bg-white/58 px-4 py-3 dark:bg-slate-900/42">
-											<Icon className="mb-2 text-emerald-700 dark:text-emerald-300" size={18} />
+										<div
+											key={item.label}
+											className="group border-l-2 border-emerald-600 bg-white/58 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md dark:bg-slate-900/42 dark:hover:border-teal-400/80 dark:hover:shadow-teal-500/10"
+										>
+											<Icon className="mb-2 text-emerald-700 transition-transform duration-300 group-hover:scale-110 dark:text-emerald-300" size={18} />
 											<p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{item.label}</p>
 											<p className="mt-1 text-sm font-bold text-slate-950 dark:text-white">{item.value}</p>
 										</div>
 									);
 								})}
-							</div>
-						</div>
+							</motion.div>
+						</motion.div>
 
-						<div className="relative z-10 min-w-0 lg:pl-6">
-							<div className="dashboard-preview min-w-0 rounded-3xl glass-panel shadow-2xl shadow-teal-900/10">
+						<motion.div
+							className="relative z-10 min-w-0 lg:pl-6"
+							variants={panelReveal(reducedMotion, "right")}
+							initial="hidden"
+							animate="visible"
+						>
+							<div className="dashboard-preview glass-card min-w-0 shadow-2xl shadow-teal-900/10 dark:shadow-teal-950/40">
 								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200/50 px-6 py-5 dark:border-slate-800/50">
 									<div className="min-w-0">
 										<p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700 dark:text-teal-300">Live Intelligence</p>
@@ -436,7 +490,7 @@ export default function Home() {
 										{liveTiles.map((tile) => (
 											<div
 												key={tile.label}
-												className="border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
+												className="border border-slate-100 bg-slate-50 p-4 transition duration-300 hover:border-teal-300/60 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-500/35 dark:hover:shadow-teal-500/10"
 											>
 												<p className="text-2xl font-black text-slate-950 dark:text-white">
 													{liveStatsLoading ? "…" : tile.value}
@@ -484,7 +538,7 @@ export default function Home() {
 									</div>
 								</div>
 							</div>
-						</div>
+						</motion.div>
 					</div>
 				</section>
 
@@ -507,7 +561,7 @@ export default function Home() {
 						</select>
 					</div>
 
-					<div className="rounded-3xl glass-panel p-6 sm:p-8">
+					<div className="glass-card p-6 sm:p-8">
 						{engine ? <p className="mb-4 text-xs font-semibold text-slate-500 dark:text-slate-400">Search engine: {engine}</p> : null}
 						{aiSummary ? (
 							<div className="mb-5 border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm dark:bg-emerald-950/30">
@@ -617,36 +671,78 @@ export default function Home() {
 						</p>
 					</div>
 
-					<div className="surface-card overflow-hidden p-5 sm:p-6">
+					<div className="glass-card overflow-hidden p-5 sm:p-6">
 						<div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800/80">
 							<h3 className="font-display text-sm font-black tracking-tight text-slate-950 dark:text-white">Консултация</h3>
-							<select
-								value={chatCharacter}
-								onChange={(e) => setChatCharacter(e.target.value as "elena" | "boris" | "viktoria")}
-								className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm outline-none transition hover:border-emerald-300/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-emerald-600/50"
-							>
-								<option value="elena">Елена · право/ДФЗ</option>
-								<option value="boris">Борис · поле</option>
-								<option value="viktoria">Виктория · финанси</option>
-							</select>
+							<div className="flex flex-wrap items-center gap-2" role="group" aria-label="Избор на AI специалист">
+								{(["elena", "boris", "viktoria"] as const).map((id) => (
+									<button
+										key={id}
+										type="button"
+										onClick={() => setChatCharacter(id)}
+										aria-pressed={chatCharacter === id}
+										className={`flex items-center gap-2 rounded-2xl border px-2 py-1.5 text-left text-xs font-bold transition-all duration-300 sm:px-3 ${
+											chatCharacter === id
+												? "border-teal-500/70 bg-teal-50/90 shadow-md shadow-teal-500/15 dark:border-teal-400/50 dark:bg-teal-950/40 dark:shadow-teal-500/20"
+												: "border-slate-200/90 bg-white/80 hover:border-teal-300/50 hover:shadow-sm dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-teal-600/40"
+										}`}
+									>
+										<AiCharacterAvatar id={id} size="sm" selected={chatCharacter === id} />
+										<span className="hidden min-w-0 sm:block">
+											<span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+												{id === "elena" ? "Право" : id === "boris" ? "Поле" : "Финанси"}
+											</span>
+											<span className="block truncate text-slate-900 dark:text-slate-100">
+												{id === "elena" ? "Елена" : id === "boris" ? "Борис" : "Виктория"}
+											</span>
+										</span>
+									</button>
+								))}
+							</div>
 						</div>
 
 						<div className="mb-4 max-h-80 overflow-auto rounded-xl border border-slate-200/90 bg-slate-50/90 p-3 shadow-inner dark:border-slate-700/90 dark:bg-slate-900/50">
 							{chatMessages.length === 0 ? (
-								<p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-									Задай казус: култура, регион, документ или срок. Под всеки AI отговор можеш да дадеш обратна връзка.
-								</p>
+								<div className="space-y-4">
+									<p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+										Задай казус: култура, регион, документ или срок. Под всеки AI отговор можеш да дадеш обратна връзка.
+									</p>
+									<div className="flex items-center gap-3 border-t border-slate-200/80 pt-4 dark:border-slate-700/80">
+										<span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Екип</span>
+										<div className="flex -space-x-2">
+											{(["elena", "boris", "viktoria"] as const).map((id) => (
+												<AiCharacterAvatar key={id} id={id} size="sm" className="ring-2 ring-slate-100 dark:ring-slate-900" />
+											))}
+										</div>
+									</div>
+								</div>
 							) : (
-								<div className="space-y-3">
+								<motion.div
+									className="space-y-3"
+									variants={chatListContainer(reducedMotion)}
+									initial="hidden"
+									animate="visible"
+								>
 									{chatMessages.map((msg, idx) => (
-										<div
-											key={`${msg.role}-${idx}`}
-											className={`rounded-xl border p-3.5 text-sm shadow-sm ${
+										<motion.div
+											key={`${msg.role}-${idx}-${msg.chatLogId ?? ""}`}
+											variants={chatBubble(reducedMotion)}
+											className={`flex gap-3 rounded-xl border p-3.5 text-sm shadow-sm transition-all duration-300 hover:shadow-md ${
 												msg.role === "user"
 													? "border-slate-200/90 bg-white dark:border-slate-700 dark:bg-slate-950"
 													: "border-emerald-200/50 bg-emerald-50/90 dark:border-emerald-900/40 dark:bg-emerald-950/25"
 											}`}
 										>
+											<div className="shrink-0 pt-0.5">
+												{msg.role === "user" ? (
+													<span className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+														<User size={16} aria-hidden />
+													</span>
+												) : (
+													<AiCharacterAvatar id={msg.characterId ?? "elena"} size="sm" />
+												)}
+											</div>
+											<div className="min-w-0 flex-1">
 											<p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
 												{msg.role === "user" ? "Ти" : "Асистент"}
 											</p>
@@ -682,9 +778,10 @@ export default function Home() {
 													</button>
 												</div>
 											) : null}
-										</div>
+											</div>
+										</motion.div>
 									))}
-								</div>
+								</motion.div>
 							)}
 						</div>
 

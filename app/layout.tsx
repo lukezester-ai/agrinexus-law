@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { AnalyticsLoader } from "@/components/analytics-loader";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { PwaHelpButton } from "@/components/pwa-help-button";
@@ -107,7 +107,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body
-				className={`${inter.variable} ${outfit.variable} agri-mobile-safe min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100 font-sans`}
+				className={`${inter.variable} ${outfit.variable} agri-mobile-safe agri-body-surface min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-[#030712] dark:text-slate-100 font-sans`}
 			>
 				{children}
 				<PwaRegister />

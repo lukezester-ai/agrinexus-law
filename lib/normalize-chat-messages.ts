@@ -1,4 +1,4 @@
-/** Normalizes user/assistant message history for LLM chat APIs. */
+/** Нормализира история user/assistant за LLM чат API (OpenAI през AI SDK). */
 export function normalizeChatMessages(
 	messages: Array<{ role: string; content: string }>,
 ): Array<{ role: "user" | "assistant"; content: string }> {

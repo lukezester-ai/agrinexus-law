@@ -188,6 +188,9 @@ export function sortDocuments(
 	const typeRank: Record<DocType, number> = {
 		deadline: 4,
 		procedure: 3,
+		lesson: 3,
+		video: 2.8,
+		pdf: 2.6,
 		scheme: 2,
 		regulation: 1,
 	};
@@ -209,7 +212,7 @@ export function formatTaxonomyForRag(): string {
 	);
 	return [
 		"=== ТАКСОНОМИЯ НА ДОКУМЕНТИ (сортиране и класификация) ===",
-		"Типове: scheme (схема/субсидия), regulation (наредба/закон), procedure (процедура/образец), deadline (срок).",
+		"Типове: scheme (схема/субсидия), regulation (наредба/закон), procedure (процедура/образец), deadline (срок), video, pdf, lesson (Typesense / обучително съдържание).",
 		"При отговор групирай по категория, после по тип; спешните срокове — първи.",
 		lines.join("\n"),
 	].join("\n");

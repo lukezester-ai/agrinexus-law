@@ -2,6 +2,10 @@
 
 Ръководство за разработчици и оператори: LLM, RAG, API, променливи на средата и проверки.
 
+**Стратегия и „защо OpenAI“:** виж **`docs/AI-SYSTEM.md`** (основен LLM доставчик, voice/vision/agents/multimodal като продуктова посока).
+
+**RAG (документи, PDF, LlamaIndex в Python):** виж **`docs/RAG-SYSTEM.md`**.
+
 ## Стек
 
 | Компонент | Технология |
@@ -10,7 +14,7 @@
 | Модел по подразбиране | `gpt-4o-mini` (override: `OPENAI_MODEL`) |
 | Embeddings | `text-embedding-3-small`, 1536 dim (`OPENAI_EMBEDDING_MODEL`) |
 | Векторно DB | Supabase + pgvector (`knowledge_chunks`) |
-| Lexical търсене | Вътрешно + Meilisearch за `/api/search` (ако е конфигурирано) |
+| Lexical търсене | Вътрешно + **Typesense** (видеа/PDF/уроци, приоритет) + опционално Meilisearch за `/api/search` — виж `docs/SEARCH-SYSTEM.md` |
 | Rate limits | Upstash Redis (чат, търсене) |
 
 ## Променливи на средата (основни)
@@ -25,7 +29,8 @@
 | `RAG_ENABLED` | `0` изключва vector частта (логика в `lib/rag/config.ts`) |
 | `RAG_MATCH_THRESHOLD`, `RAG_VECTOR_TOP_K`, `RAG_LEXICAL_TOP_K`, `RAG_FINAL_TOP_K` | Fine-tuning на retrieval |
 | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | RAG индекс, learned knowledge, логове |
-| `MEILI_*` | Meilisearch за публично търсене (виж `lib/meilisearch.ts`) |
+| `TYPESENSE_*` | Typesense за публично търсене в обучително съдържание (виж `lib/typesense.ts`, `docs/SEARCH-SYSTEM.md`) |
+| `MEILI_*` | Meilisearch — fallback лексикален слой (виж `lib/meilisearch.ts`) |
 | `INGEST_ADMIN_TOKEN` | Защита на `/api/ingest/run`, `/api/ingest/upload`, `/api/rag/reindex` |
 
 Пълен списък и deploy стъпки: `DEPLOYMENT-GUIDE.md`.
@@ -36,7 +41,7 @@
 |---------|-------|----------|
 | `/api/chat` | POST | Стриймван чат; използва AI лидера за контекст → OpenAI |
 | `/api/chat-feedback` | POST | Обратна връзка (учене / логове) |
-| `/api/search` | POST | Търсене; Meili + вътрешни източници |
+| `/api/search` | POST | Търсене: Typesense → Meilisearch → merge с ДФЗ база + learned + public docs |
 | `/api/rag/reindex` | POST | Преиндексиране (админ токен) |
 | `/api/rag/dryrun` | POST/GET | Оценка на reindex без пълно изпълнение |
 | `/api/ingest/run` | POST | Ingest pipeline |

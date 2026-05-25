@@ -1,5 +1,5 @@
 /**
- * Обединява Meilisearch и вътрешно BM25 търсене за по-бързи и по-релевантни DFZ резултати.
+ * Обединява външно лексикално търсене (Typesense / Meilisearch) с вътрешно BM25 за ДФЗ базата.
  */
 import type { KnowledgeDoc } from "@/lib/knowledge/dfz-knowledge";
 import { KNOWLEDGE_BASE } from "@/lib/knowledge/dfz-knowledge";
@@ -38,7 +38,7 @@ function dfzIntentBoost(doc: KnowledgeDoc, queryNorm: string): number {
 
 export function mergeKnowledgeSearchResults(
 	query: string,
-	meiliHits: KnowledgeDoc[],
+	externalLexicalHits: KnowledgeDoc[],
 ): KnowledgeDoc[] {
 	const { results: internalRanked, scores } = internalKnowledgeSearch(
 		query,
@@ -54,7 +54,7 @@ export function mergeKnowledgeSearchResults(
 	const mergedIds = new Set<string>();
 	const merged: KnowledgeDoc[] = [];
 
-	for (const d of meiliHits) {
+	for (const d of externalLexicalHits) {
 		if (!mergedIds.has(d.id)) {
 			merged.push(d);
 			mergedIds.add(d.id);

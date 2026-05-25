@@ -1,6 +1,6 @@
 # Графичен дизайн · AgriNexus.Law MVP
 
-Кратък бриф за визуалния език на публичния UI (Next.js + Tailwind).
+Кратък бриф за визуалния език на публичния UI (**Next.js 15 + Tailwind CSS 4 + ShadCN UI**).
 
 ## Типография
 
@@ -51,4 +51,13 @@
 
 ---
 
-При нови екрани: приоритет **съгласуван slate + emerald/teal**, избягвай произволни hex извън `globals.css` / `tailwind.config.ts`, освен ако не се добавят като токени.
+При нови екрани: приоритет **съгласуван slate + emerald/teal**, избягвай произволни hex извън `app/globals.css` (токени в `:root` / `.dark` и блока `@theme inline`), освен ако не се регистрират като цветови токени.
+
+## ShadCN UI и дизайн токени
+
+- Конфигурация: `components.json` (стил **new-york**, RSC, Lucide).
+- Глобални променливи и мапване към Tailwind: `app/globals.css` (`@import "tailwindcss"`, `@theme inline`, `@custom-variant dark`).
+- Примитиви: `components/ui/*` (напр. `Button`, `Card`). Нови блокове: `npx shadcn@latest add <component>`.
+- Утилита `cn()`: `lib/utils.ts` (`clsx` + `tailwind-merge`).
+
+Подробности: `docs/DESIGN-SYSTEM.md`.

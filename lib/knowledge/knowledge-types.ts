@@ -4,7 +4,7 @@ export interface KnowledgeDoc {
 	id: string;
 	title: string;
 	category: string;
-	type: "scheme" | "regulation" | "procedure" | "deadline";
+	type: "scheme" | "regulation" | "procedure" | "deadline" | "video" | "pdf" | "lesson";
 	content: string;
 	keywords: string[];
 	source: string;

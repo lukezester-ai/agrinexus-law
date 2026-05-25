@@ -18,6 +18,13 @@ tsconfig.tsbuildinfo
 .gradle/
 local.properties
 
+# Python (FastAPI services)
+**/.venv/
+**/__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
 # Локални Android / IDE (Capacitor `android/` се комитира; това е машинен кеш)
 app/build/
 app/.gradle/

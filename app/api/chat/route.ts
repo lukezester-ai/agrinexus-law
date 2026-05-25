@@ -6,7 +6,7 @@ import { farmProfileToPromptText } from "@/lib/farm-profile-server";
 import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
 import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { normalizeChatMessages } from "@/lib/anthropic-messages";
+import { normalizeChatMessages } from "@/lib/normalize-chat-messages";
 import { formatTaxonomyForRag } from "@/lib/knowledge/document-taxonomy";
 import { runChatKnowledgePipeline } from "@/lib/ai-leader/chat-knowledge-pipeline";
 

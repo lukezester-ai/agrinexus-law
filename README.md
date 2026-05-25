@@ -15,8 +15,13 @@
 
 ## AI документация и оркестрация
 
+- **`docs/AI-SYSTEM.md`** — основен LLM (OpenAI), защо, какво е live, какво следва (voice/vision/agents)
 - **`docs/AI-DOCUMENTATION.md`** — LLM, RAG, API, env, troubleshooting
 - **`docs/AI-LEADER-ARCHITECTURE.md`** — „AI лидер“: автоматизация между RAG, ДФЗ база, learned knowledge и Furrow (`lib/ai-leader/`)
+- **`docs/BACKEND-ARCHITECTURE.md`** — backend „мозък“: препоръка **FastAPI (Python)**, хибрид с Next.js, старт в `services/agrinexus-brain/`
+- **`docs/RAG-SYSTEM.md`** — RAG: PDF/книги/отговори по документи; **LlamaIndex** за Python път; връзка към текущия TS pipeline
+- **`docs/SEARCH-SYSTEM.md`** — **Typesense** за AI търсене във видеа, PDF и уроци; env, схема на колекция, връзка с `/api/search`
+- **`docs/FILE-STORAGE.md`** — **Cloudflare R2** за оригинални файлове (PDF, DOCX, изображения, сертификати); интеграция с админ upload и миграция от Supabase Storage
 
 ```
 agrinexus-mvp/
@@ -37,6 +42,8 @@ agrinexus-mvp/
 │   ├── supabase.ts       # Database client
 │   └── utils/
 │       └── rate-limit.ts # Защита от abuse
+├── services/
+│   └── agrinexus-brain/  # FastAPI старт (мозъкът) — виж docs/BACKEND-ARCHITECTURE.md
 ├── supabase-setup.sql    # SQL скрипт за DB
 └── DEPLOYMENT-GUIDE.md   # Пълно ръководство
 ```

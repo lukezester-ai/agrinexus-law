@@ -7,6 +7,7 @@ import { searchLearnedKnowledge } from "@/lib/knowledge/learned-knowledge";
 import { mergeKnowledgeSearchResults } from "@/lib/knowledge/merged-search";
 import { searchPublicDocuments } from "@/lib/knowledge/public-documents-search";
 import { isMeiliConfigured, searchWithMeili } from "@/lib/meilisearch";
+import { isTypesenseConfigured, searchWithTypesense } from "@/lib/typesense";
 import { searchRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 
 export async function POST(req: Request) {
@@ -27,23 +28,40 @@ export async function POST(req: Request) {
     }
 
     const q = query.trim();
-    let meiliSlice: KnowledgeDoc[] = [];
-    let engine: "meili+internal" | "internal-ai" = "internal-ai";
+    let externalSlice: KnowledgeDoc[] = [];
+    let lexicalSource: "typesense" | "meili" | "none" = "none";
 
-    if (isMeiliConfigured()) {
+    if (isTypesenseConfigured()) {
       try {
-        meiliSlice = await searchWithMeili(q, category);
-        engine = "meili+internal";
+        externalSlice = await searchWithTypesense(q, category);
+        if (externalSlice.length > 0) lexicalSource = "typesense";
+      } catch (tsErr) {
+        console.error("Typesense fallback:", tsErr);
+      }
+    }
+
+    if (lexicalSource === "none" && isMeiliConfigured()) {
+      try {
+        externalSlice = await searchWithMeili(q, category);
+        if (externalSlice.length > 0) lexicalSource = "meili";
       } catch (meiliErr) {
         console.error("Meilisearch fallback to internal-ai:", meiliErr);
       }
     }
+
+    let engine: "typesense+internal" | "meili+internal" | "internal-ai" =
+      lexicalSource === "typesense"
+        ? "typesense+internal"
+        : lexicalSource === "meili"
+          ? "meili+internal"
+          : "internal-ai";
+
     const [learnedSlice, publicSlice] = await Promise.all([
       searchLearnedKnowledge(q, category),
       searchPublicDocuments(q, 8),
     ]);
 
-    let results = mergeKnowledgeSearchResults(q, meiliSlice);
+    let results = mergeKnowledgeSearchResults(q, externalSlice);
     if (learnedSlice.length || publicSlice.length) {
       const mergedById = new Map<string, KnowledgeDoc>();
       for (const doc of [...publicSlice, ...learnedSlice, ...results]) {

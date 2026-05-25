@@ -29,7 +29,10 @@ function rowToKnowledgeDoc(row: PublicRow): KnowledgeDoc {
 		row.doc_type === "scheme" ||
 		row.doc_type === "regulation" ||
 		row.doc_type === "procedure" ||
-		row.doc_type === "deadline"
+		row.doc_type === "deadline" ||
+		row.doc_type === "video" ||
+		row.doc_type === "pdf" ||
+		row.doc_type === "lesson"
 			? row.doc_type
 			: classified.type;
 

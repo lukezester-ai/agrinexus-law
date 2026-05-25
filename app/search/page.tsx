@@ -59,6 +59,9 @@ const DOC_TYPE_FILTERS = [
   { id: "regulation", label: "Нормативен акт" },
   { id: "procedure", label: "Процедура" },
   { id: "deadline", label: "Срок" },
+  { id: "video", label: "Видео" },
+  { id: "pdf", label: "PDF / материал" },
+  { id: "lesson", label: "Урок" },
 ] as const;
 
 const DOC_STATUS_FILTERS = [
@@ -220,7 +223,7 @@ export default function SearchPage() {
       let data: {
         results?: KnowledgeDoc[];
         error?: string;
-        engine?: "internal-ai" | "meili+internal";
+        engine?: "internal-ai" | "meili+internal" | "typesense+internal";
         aiSummary?: string | null;
       } = {};
       try {
@@ -237,11 +240,15 @@ export default function SearchPage() {
       }
       if (data.engine === "internal-ai") {
         setEngineHint(
-          "DFZ база: бързо ранжиране по субсидии, наредби и срокове (вградено, без Meilisearch)."
+          "DFZ база: бързо ранжиране по субсидии, наредби и срокове (вградено, без Typesense/Meilisearch)."
         );
       } else if (data.engine === "meili+internal") {
         setEngineHint(
           "Meilisearch + DFZ база — обединено ранжиране за по-точни хитове."
+        );
+      } else if (data.engine === "typesense+internal") {
+        setEngineHint(
+          "Typesense (видеа, PDF, уроци) + DFZ база — обединено ранжиране."
         );
       }
       setAiSummary(typeof data.aiSummary === "string" && data.aiSummary.trim() ? data.aiSummary : null);
@@ -545,6 +552,9 @@ export default function SearchPage() {
                           {doc.type === "regulation" && "Регулация"}
                           {doc.type === "procedure" && "Процедура"}
                           {doc.type === "deadline" && "Срокове"}
+                          {doc.type === "video" && "Видео"}
+                          {doc.type === "pdf" && "PDF"}
+                          {doc.type === "lesson" && "Урок"}
                         </span>
                       </div>
                       <h3 className="font-medium text-slate-900 dark:text-slate-100 mb-2">{doc.title}</h3>

@@ -30,7 +30,7 @@ type Props = {
 export function SitePageShell({ children, maxWidth = "7xl", subheader, mainClassName = "" }: Props) {
 	const mw = maxWidths[maxWidth];
 	return (
-		<div className="agri-mobile-safe min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
+		<div className="agri-mobile-safe agri-floating-header-pad min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
 			<SiteHeader />
 			{subheader ? (
 				<div className="border-b border-slate-200/70 bg-white/55 backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/55">
