@@ -351,7 +351,7 @@ export default function Home() {
 			<SiteHeader />
 
 			<main>
-				<section className="relative overflow-hidden border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,250,252,0.62))] dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(3,7,18,0.92),rgba(12,18,34,0.88))]">
+				<section className="ai-hero-section ai-hero-orbs relative overflow-hidden">
 					<motion.div
 						className="ai-mesh-bg"
 						aria-hidden="true"
@@ -372,7 +372,7 @@ export default function Home() {
 						>
 							<motion.div
 								variants={heroItem(reducedMotion)}
-								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs font-bold uppercase leading-snug tracking-[0.12em] text-teal-800 shadow-sm dark:border-teal-800/50 dark:bg-teal-950/30 dark:text-teal-300"
+								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-emerald-200/50 bg-white/35 px-4 py-2 text-xs font-bold uppercase leading-snug tracking-[0.12em] text-emerald-800 shadow-sm backdrop-blur-md dark:border-cyan-500/25 dark:bg-slate-950/35 dark:text-cyan-200"
 							>
 								<LockKeyhole size={16} className="shrink-0" />
 								<span className="sm:hidden">Проверими източници</span>
@@ -396,12 +396,12 @@ export default function Home() {
 								<div
 									ref={searchFormRef}
 									className={`grid gap-4 rounded-3xl glass-panel p-4 transition-all ${
-										searchFocusPulse ? "ring-4 ring-teal-500/30" : ""
+										searchFocusPulse ? "ring-4 ring-cyan-400/35" : ""
 									}`}
 								>
 									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 										<div className="flex min-w-0 flex-1 items-center gap-3 px-2">
-											<Search className="shrink-0 text-teal-600 dark:text-teal-400" size={24} />
+											<Search className="shrink-0 text-emerald-600 dark:text-cyan-400" size={24} />
 											<input
 												ref={searchInputRef}
 												value={query}
@@ -413,7 +413,7 @@ export default function Home() {
 										<button
 											type="submit"
 											disabled={loading || !query.trim()}
-											className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+											className="brand-cta-bg inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-900 shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:transform-none sm:w-auto"
 										>
 											{loading ? "Търся..." : "Търси"} <ArrowRight size={16} />
 										</button>
@@ -424,7 +424,7 @@ export default function Home() {
 												key={item}
 												type="button"
 												onClick={() => jumpToSearch(item, true)}
-												className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/70 hover:text-emerald-800 hover:shadow-sm dark:border-slate-700 dark:text-slate-300 dark:hover:border-teal-500/50 dark:hover:text-teal-200"
+												className="rounded-full border border-white/50 bg-white/30 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:text-emerald-800 hover:shadow-md dark:border-slate-600/50 dark:bg-slate-900/40 dark:text-slate-300 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200"
 											>
 												{item}
 											</button>
@@ -440,9 +440,9 @@ export default function Home() {
 									return (
 										<div
 											key={item.label}
-											className="group border-l-2 border-emerald-600 bg-white/58 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md dark:bg-slate-900/42 dark:hover:border-teal-400/80 dark:hover:shadow-teal-500/10"
+											className="group rounded-2xl border border-white/40 bg-white/30 px-4 py-3 shadow-sm backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-emerald-200/60 hover:shadow-lg dark:border-white/10 dark:bg-slate-950/35 dark:hover:border-cyan-500/25 dark:hover:shadow-cyan-500/10"
 										>
-											<Icon className="mb-2 text-emerald-700 transition-transform duration-300 group-hover:scale-110 dark:text-emerald-300" size={18} />
+											<Icon className="mb-2 text-emerald-600 transition-transform duration-300 group-hover:scale-110 dark:text-cyan-400" size={18} />
 											<p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{item.label}</p>
 											<p className="mt-1 text-sm font-bold text-slate-950 dark:text-white">{item.value}</p>
 										</div>

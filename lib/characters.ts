@@ -99,9 +99,9 @@ export const CHARACTERS: Record<CharacterId, Character> = {
 		productTagline: "Норми, срокове, схеми за подпомагане",
 		avatar: "⚖️",
 		emoji: "📋",
-		primaryColorHex: "#1565A8",
-		bgColor: "#E3EEF9",
-		textColor: "#0A3D66",
+		primaryColorHex: "#22D3EE",
+		bgColor: "#ECFEFF",
+		textColor: "#0C4A6E",
 		greeting: "Здравей, аз съм Елена.",
 		introduction:
 			"Помагам с разбиране на правила, срокове и процедури около ДФЗ и земеделското законодателство — ясно и без излишен жаргон.",
@@ -127,9 +127,9 @@ export const CHARACTERS: Record<CharacterId, Character> = {
 		productTagline: "Технологии, наблюдения, сезонни решения",
 		avatar: "🌱",
 		emoji: "🚜",
-		primaryColorHex: "#0D6847",
-		bgColor: "#E8F4EA",
-		textColor: "#1E4628",
+		primaryColorHex: "#4ADE80",
+		bgColor: "#F0FDF4",
+		textColor: "#14532D",
 		greeting: "Здрасти, Борис съм.",
 		introduction:
 			"Говорим за култури, почва и какво се случва на полето — практично, с уважение към труда ти.",
@@ -155,9 +155,9 @@ export const CHARACTERS: Record<CharacterId, Character> = {
 		productTagline: "Субсидии, бюджет, опростени модели",
 		avatar: "📊",
 		emoji: "💶",
-		primaryColorHex: "#5B4BB3",
-		bgColor: "#EDEAFB",
-		textColor: "#342A75",
+		primaryColorHex: "#F59E0B",
+		bgColor: "#FFFBEB",
+		textColor: "#78350F",
 		greeting: "Привет, Виктория съм.",
 		introduction:
 			"Подреждам числата: какво може да влезе като подкрепа, как да планираш разходи и къде са неизвестните.",
@@ -188,9 +188,9 @@ export function getAllCharacters(): Character[] {
 
 /** Tailwind класове за акцент при избор на карта в тъмна тема. */
 export const CHARACTER_ACCENT: Record<CharacterId, string> = {
-	elena: "text-[#1565A8] dark:text-sky-400",
-	boris: "text-[#0D6847] dark:text-teal-400",
-	viktoria: "text-[#5B4BB3] dark:text-violet-400",
+	elena: "text-cyan-500 dark:text-cyan-300",
+	boris: "text-emerald-500 dark:text-emerald-300",
+	viktoria: "text-amber-500 dark:text-amber-300",
 };
 
 export const RAG_DOCUMENT_RULES = `ПРАВИЛА ЗА ДОКУМЕНТИ (RAG):

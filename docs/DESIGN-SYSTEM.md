@@ -29,7 +29,24 @@ npx shadcn@latest add dialog dropdown-menu sheet
 - Споделени easing / variants: `lib/motion-variants.ts` (кинематографски easing, hero stagger, чат балони, навигационна лента).
 - **`useReducedMotion()`** — при системна настройка за намален фон анимациите се „изключват“ (празни variants / без keyframe mesh).
 
-## Препоръки
+## AI University палитра (2025)
+
+Светъл, „premium SaaS“, без тъмно зелено и тежки рамки:
+
+| Роля | Стойност | Бележка |
+|------|----------|---------|
+| Основен фон | `#F4F7FB` / `#F7FAFC` | `--agri-bg-ultra`, `--agri-bg-soft`, body |
+| Neon Agri Green | `#4ADE80` (alt `#6EE7B7`) | CTA градиент, AI акценти, `--brand-ai-green` |
+| Aqua / Cyan | `#22D3EE` (alt `#67E8F9`) | втори край на CTA, мрежови „orbs“, `--brand-ai-cyan` |
+| Emerald accent | `#10B981` | текстови градиенти, `--brand-emerald` |
+| Glass | `rgba(255,255,255,0.22–0.3)` + `blur(18–20px)` | `.glass-panel`, `.glass-card` |
+| Hero | `linear-gradient(135deg, #F4F7FB → #DFF7EA → #D9F4FF → #fff)` | `.ai-hero-section` + `.ai-hero-orbs` |
+| Primary CTA | `linear-gradient(135deg, #4ADE80, #22D3EE)` | `.brand-cta-bg`, `Button variant="brand"` |
+| Заглавия | **Space Grotesk** (`--font-space-grotesk`) | кирилица → Inter fallback |
+| Текст | **Inter** | `--font-inter` |
+
+Персонажи (accent): Елена — cyan; Борис — emerald green; Виктория — amber/gold (`lib/characters.ts`).
+
 
 - Публични страници: `SitePageShell` + ShadCN `Button` / `Card` за повторяеми CTA и карти.
 - Не смесвай произволни Tailwind цветове извън токените — за нови нюанси добави `--color-*` в `@theme inline` и източник в `:root`.
