@@ -38,7 +38,8 @@ npx shadcn@latest add dialog dropdown-menu sheet
 | Основен фон | `#F4F7FB` / `#F7FAFC` | `--agri-bg-ultra`, `--agri-bg-soft`, body |
 | Neon Agri Green | `#4ADE80` (alt `#6EE7B7`) | CTA градиент, AI акценти, `--brand-ai-green` |
 | Aqua / Cyan | `#22D3EE` (alt `#67E8F9`) | втори край на CTA, мрежови „orbs“, `--brand-ai-cyan` |
-| Emerald accent | `#10B981` | текстови градиенти, `--brand-emerald` |
+| Emerald accent | `#10B981` | `--brand-emerald`, текстови градиенти (light) |
+| **Soft Purple** | `#A78BFA` | Опционален AI glow / акценти в тъмна тема |
 | Glass | `rgba(255,255,255,0.22–0.3)` + `blur(18–20px)` | `.glass-panel`, `.glass-card` |
 | Hero | `linear-gradient(135deg, #F4F7FB → #DFF7EA → #D9F4FF → #fff)` | `.ai-hero-section` + `.ai-hero-orbs` |
 | Primary CTA | `linear-gradient(135deg, #4ADE80, #22D3EE)` | `.brand-cta-bg`, `Button variant="brand"` |
@@ -47,6 +48,9 @@ npx shadcn@latest add dialog dropdown-menu sheet
 
 Персонажи (accent): Елена — cyan; Борис — emerald green; Виктория — amber/gold (`lib/characters.ts`).
 
+**Тъмен hero:** основният ред на H1 използва **Ultra Soft White** `#F7FAFC` (`.dark .ai-hero-heading`); градиентната дума — `.dark .text-gradient-ai` със светли стопове + `drop-shadow` за четимост върху Deep Navy.
+
+## Препоръки
 
 - Публични страници: `SitePageShell` + ShadCN `Button` / `Card` за повторяеми CTA и карти.
 - Не смесвай произволни Tailwind цветове извън токените — за нови нюанси добави `--color-*` в `@theme inline` и източник в `:root`.

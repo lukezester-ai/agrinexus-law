@@ -380,7 +380,7 @@ export default function Home() {
 							</motion.div>
 							<motion.h1
 								variants={heroItem(reducedMotion)}
-								className="w-full max-w-full text-balance break-words font-display text-[2rem] font-black leading-[1.1] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
+								className="ai-hero-heading w-full max-w-full text-balance break-words font-display text-[2rem] font-black leading-[1.1] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl"
 							>
 								Правна и аграрна <span className="text-gradient-ai">документация</span>
 							</motion.h1>
