@@ -391,7 +391,7 @@ export default function Home() {
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
-								className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl"
+								className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-200 sm:text-xl"
 							>
 								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
 							</motion.p>

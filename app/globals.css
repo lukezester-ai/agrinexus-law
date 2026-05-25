@@ -302,6 +302,11 @@ h6,
 	opacity: 1;
 }
 
+/* По-малко „шум“ зад hero текста в dark */
+.dark .ai-hero-section .ai-mesh-bg {
+	opacity: 0.48;
+}
+
 html.dark .agri-body-surface {
 	background-image:
 		radial-gradient(ellipse 100% 70% at 50% -25%, rgba(74, 222, 128, 0.08), transparent 50%),
@@ -395,6 +400,8 @@ html.dark .agri-body-surface {
 }
 
 .dark .agri-page-bg {
+	/* Deep Navy / body — иначе остава #F7FAFC от light и „тъмният“ профил се чупи */
+	background-color: var(--bg-paper);
 	background-image:
 		radial-gradient(circle at 14% 44%, rgba(74, 222, 128, 0.09), transparent 28%),
 		radial-gradient(circle at 84% 26%, rgba(34, 211, 238, 0.08), transparent 30%),
