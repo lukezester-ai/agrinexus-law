@@ -50,7 +50,7 @@ export default function LoginPage() {
   }
 
   return (
-    <SitePageShell maxWidth="lg">
+    <SitePageShell maxWidth="xl">
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
