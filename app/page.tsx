@@ -351,17 +351,7 @@ export default function Home() {
 			<SiteHeader />
 
 			<main>
-				<section className="ai-hero-section ai-hero-orbs relative overflow-hidden">
-					<motion.div
-						className="ai-mesh-bg"
-						aria-hidden="true"
-						animate={
-							reducedMotion
-								? false
-								: { opacity: [0.72, 0.94, 0.72], scale: [1, 1.02, 1] }
-						}
-						transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-					/>
+				<section className="relative overflow-hidden pt-12">
 					<div className="hero-field-visual absolute inset-y-0 right-0 hidden w-[48%] opacity-90 lg:block" aria-hidden="true" />
 					<div className="relative z-10 mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
 						<motion.div
@@ -380,18 +370,18 @@ export default function Home() {
 							</motion.div>
 							<motion.h1
 								variants={heroItem(reducedMotion)}
-								className="ai-hero-heading w-full max-w-4xl font-display text-[2rem] font-black leading-[1.12] tracking-tight sm:text-5xl sm:leading-[1.1] md:text-6xl md:leading-[1.08] lg:text-7xl"
+								className="w-full max-w-4xl font-display text-[2.5rem] font-black leading-[1.05] tracking-tight sm:text-6xl sm:leading-[1.05] md:text-7xl md:leading-[1.02] lg:text-[5.5rem]"
 							>
-								<span className="ai-hero-title-line block text-slate-950 dark:text-[#F7FAFC]">
+								<span className="block text-slate-950 dark:text-[#F7FAFC]">
 									Правна и аграрна
 								</span>
-								<span className="mt-2 block sm:mt-3">
-									<span className="text-gradient-ai">документация</span>
+								<span className="mt-2 block sm:mt-3 text-slate-900 dark:text-white">
+									документация
 								</span>
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
-								className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-200 sm:text-xl"
+								className="mt-8 max-w-2xl text-xl leading-relaxed text-slate-600 dark:text-slate-300 sm:text-2xl font-light tracking-wide"
 							>
 								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
 							</motion.p>
@@ -400,30 +390,30 @@ export default function Home() {
 							<form onSubmit={onSearch} className="max-w-3xl">
 								<div
 									ref={searchFormRef}
-									className={`grid gap-4 rounded-3xl glass-panel p-4 transition-all ${
-										searchFocusPulse ? "ring-4 ring-cyan-400/35" : ""
+									className={`grid gap-4 rounded-3xl bg-white/70 backdrop-blur-2xl p-3 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-black/5 dark:border-white/10 dark:bg-slate-900/60 transition-all ${
+										searchFocusPulse ? "ring-4 ring-emerald-500/20" : ""
 									}`}
 								>
 									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-										<div className="flex min-w-0 flex-1 items-center gap-3 px-2">
-											<Search className="shrink-0 text-emerald-600 dark:text-cyan-400" size={24} />
+										<div className="flex min-w-0 flex-1 items-center gap-3 px-3">
+											<Search className="shrink-0 text-slate-400 dark:text-slate-500" size={24} />
 											<input
 												ref={searchInputRef}
 												value={query}
 												onChange={(e) => setQuery(e.target.value)}
 												placeholder="Попитай за срок, субсидия, наредба или документ..."
-												className="min-w-0 w-full flex-1 bg-transparent text-base font-medium text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
+												className="min-w-0 w-full flex-1 bg-transparent text-lg font-medium text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
 											/>
 										</div>
 										<button
 											type="submit"
 											disabled={loading || !query.trim()}
-											className="brand-cta-bg inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-900 shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:transform-none sm:w-auto"
+											className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 py-4 text-sm font-bold text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-slate-800 dark:bg-white dark:text-slate-950 sm:w-auto"
 										>
 											{loading ? "Търся..." : "Търси"} <ArrowRight size={16} />
 										</button>
 									</div>
-									<div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+									<div className="flex flex-wrap gap-2 px-2 pb-1">
 										{EXAMPLE_QUERIES.map((item) => (
 											<button
 												key={item}
@@ -445,11 +435,11 @@ export default function Home() {
 									return (
 										<div
 											key={item.label}
-											className="group rounded-2xl border border-white/40 bg-white/30 px-4 py-3 shadow-sm backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-emerald-200/60 hover:shadow-lg dark:border-white/10 dark:bg-slate-950/35 dark:hover:border-cyan-500/25 dark:hover:shadow-cyan-500/10"
+											className="group rounded-2xl bg-transparent px-2 py-3 transition duration-300"
 										>
-											<Icon className="mb-2 text-emerald-600 transition-transform duration-300 group-hover:scale-110 dark:text-cyan-400" size={18} />
-											<p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{item.label}</p>
-											<p className="mt-1 text-sm font-bold text-slate-950 dark:text-white">{item.value}</p>
+											<Icon className="mb-3 text-slate-400 transition-transform duration-300 group-hover:scale-110 dark:text-slate-500" size={24} />
+											<p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">{item.label}</p>
+											<p className="mt-1 text-sm font-bold tracking-tight text-slate-950 dark:text-white">{item.value}</p>
 										</div>
 									);
 								})}

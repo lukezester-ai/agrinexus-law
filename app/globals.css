@@ -79,29 +79,29 @@
 	--chart-4: oklch(0.828 0.189 84.429);
 	--chart-5: oklch(0.769 0.188 70.08);
 
-	/* AI University palette — светъл, premium, не „тежък агро“ */
-	--agri-bg-ultra: #f4f7fb;
-	--agri-bg-soft: #f7fafc;
-	--agri-neon-green: #4ade80;
-	--agri-neon-green-soft: #6ee7b7;
-	--agri-cyan: #22d3ee;
-	--agri-cyan-soft: #67e8f9;
-	--agri-emerald: #10b981;
+	/* Document/Legal minimalist palette for light theme */
+	--agri-bg-ultra: #ffffff;
+	--agri-bg-soft: #f8fafc;
+	--agri-neon-green: #0f766e;
+	--agri-neon-green-soft: #14b8a6;
+	--agri-cyan: #0284c7;
+	--agri-cyan-soft: #38bdf8;
+	--agri-emerald: #047857;
 
-	--brand-ai-green: #4ade80;
-	--brand-ai-cyan: #22d3ee;
-	--brand-emerald: #10b981;
-	--brand-teal: #10b981;
-	--brand-teal-light: #34d399;
-	--brand-indigo: #0e7490;
-	--brand-blue: #0891b2;
-	--brand-cyan: #22d3ee;
+	--brand-ai-green: #0f766e;
+	--brand-ai-cyan: #0284c7;
+	--brand-emerald: #047857;
+	--brand-teal: #0f766e;
+	--brand-teal-light: #14b8a6;
+	--brand-indigo: #4338ca;
+	--brand-blue: #0369a1;
+	--brand-cyan: #0284c7;
 	--brand-ink: #0f172a;
 
-	--bg-paper: var(--agri-bg-ultra);
-	--bg-subtle: var(--agri-bg-soft);
+	--bg-paper: #ffffff;
+	--bg-subtle: #f8fafc;
 
-	--text-primary: #0f172a;
+	--text-primary: #020617;
 	--text-secondary: #475569;
 }
 
@@ -244,20 +244,7 @@ h6,
 }
 
 .text-gradient-ai {
-	background: linear-gradient(
-		90deg,
-		#10b981,
-		#4ade80,
-		#22d3ee,
-		#67e8f9,
-		#10b981
-	);
-	background-size: 200% auto;
-	-webkit-background-clip: text;
-	background-clip: text;
-	color: transparent;
-	-webkit-text-fill-color: transparent;
-	animation: ai-gradient-flow 9s ease-in-out infinite;
+	color: #0f766e; /* Solid dark emerald for light mode */
 }
 
 .dark .text-gradient-ai {
@@ -271,6 +258,10 @@ h6,
 		#cffafe 100%
 	);
 	background-size: 100% auto;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
 }
 
 /* В hero: статичен градиент в dark (без „движещ се“ фон по буквите) */
@@ -287,11 +278,8 @@ h6,
 	pointer-events: none;
 	position: absolute;
 	inset: 0;
-	background:
-		radial-gradient(ellipse 85% 55% at 12% 38%, rgba(74, 222, 128, 0.22), transparent 52%),
-		radial-gradient(ellipse 70% 48% at 88% 16%, rgba(34, 211, 238, 0.18), transparent 48%),
-		radial-gradient(ellipse 55% 42% at 52% 92%, rgba(103, 232, 249, 0.12), transparent 44%);
-	opacity: 0.85;
+	background: transparent;
+	opacity: 0;
 }
 
 .dark .ai-mesh-bg {
@@ -386,17 +374,8 @@ html.dark .agri-body-surface {
 }
 
 .agri-page-bg {
-	background-color: var(--agri-bg-soft);
-	background-image:
-		radial-gradient(circle at 14% 42%, rgba(74, 222, 128, 0.06), transparent 26%),
-		radial-gradient(circle at 86% 24%, rgba(34, 211, 238, 0.055), transparent 28%),
-		radial-gradient(ellipse 88% 48% at 50% -18%, rgba(103, 232, 249, 0.07), transparent 58%),
-		radial-gradient(rgba(16, 185, 129, 0.045) 1px, transparent 1px);
-	background-size:
-		auto,
-		auto,
-		auto,
-		28px 28px;
+	background-color: #f5f5f7; /* Apple light gray background */
+	background-image: none; /* No dot grid for pure Apple look */
 }
 
 .dark .agri-page-bg {
@@ -415,14 +394,12 @@ html.dark .agri-body-surface {
 }
 
 .surface-card {
-	border-radius: 1.5rem;
-	border: 1px solid rgba(255, 255, 255, 0.35);
-	background: rgba(255, 255, 255, 0.42);
-	backdrop-filter: blur(18px);
-	-webkit-backdrop-filter: blur(18px);
-	box-shadow:
-		0 1px 0 rgba(255, 255, 255, 0.65) inset,
-		0 16px 44px -26px rgba(15, 23, 42, 0.1);
+	border-radius: 1.25rem;
+	border: 1px solid rgba(0, 0, 0, 0.04);
+	background: rgba(255, 255, 255, 0.75);
+	backdrop-filter: saturate(180%) blur(24px);
+	-webkit-backdrop-filter: saturate(180%) blur(24px);
+	box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
 }
 
 .dark .surface-card {
@@ -442,12 +419,11 @@ html.dark .agri-body-surface {
 	background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 211, 238, 0.07));
 }
 
-/* Hero: cinematic gradient + soft orbs (Linear / OpenAI vibe) */
 .ai-hero-section {
 	position: relative;
 	overflow: hidden;
-	background: linear-gradient(135deg, #f4f7fb 0%, #dff7ea 35%, #d9f4ff 70%, #ffffff 100%);
-	border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+	background: #ffffff;
+	border-bottom: 1px solid rgba(226, 232, 240, 1);
 }
 
 .dark .ai-hero-section {
@@ -520,7 +496,7 @@ html.dark .agri-body-surface {
 
 @layer components {
 	.brand-soft-surface {
-		@apply border border-emerald-200/40 bg-white/55 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/45;
+		@apply border border-black/5 bg-white/70 backdrop-blur-xl saturate-150 dark:border-white/10 dark:bg-slate-950/45;
 	}
 
 	.brand-cta-bg {
@@ -561,14 +537,12 @@ html.dark .agri-body-surface {
 	}
 
 	.glass-card {
-		border-radius: 1.5rem;
-		background: rgba(255, 255, 255, 0.25);
-		backdrop-filter: blur(18px);
-		-webkit-backdrop-filter: blur(18px);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		box-shadow:
-			0 0 0 1px rgba(255, 255, 255, 0.35) inset,
-			0 22px 56px -30px rgba(15, 23, 42, 0.12);
+		border-radius: 1.25rem;
+		border: 1px solid rgba(0, 0, 0, 0.04);
+		background: rgba(255, 255, 255, 0.65);
+		backdrop-filter: saturate(180%) blur(24px);
+		-webkit-backdrop-filter: saturate(180%) blur(24px);
+		box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.06);
 		transition:
 			border-color 0.4s ease,
 			box-shadow 0.45s ease,
@@ -593,11 +567,8 @@ html.dark .agri-body-surface {
 
 	.glass-card-interactive:hover {
 		transform: translateY(-4px);
-		border-color: color-mix(in srgb, var(--brand-ai-cyan) 40%, white);
-		box-shadow:
-			0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-			0 26px 60px -24px rgba(74, 222, 128, 0.22),
-			0 0 56px -20px rgba(34, 211, 238, 0.2);
+		border-color: rgba(0, 0, 0, 0.08);
+		box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.08);
 	}
 
 	.dark .glass-card-interactive:hover {

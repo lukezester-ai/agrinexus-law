@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Leaf, Search } from "lucide-react";
+import { Leaf, Search, User as UserIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navBarReveal } from "@/lib/motion-variants";
 
@@ -26,6 +29,24 @@ const NAV_LINKS = [
 export function SiteHeader() {
 	const router = useRouter();
 	const reducedMotion = useReducedMotion();
+	const [user, setUser] = useState<User | null>(null);
+	const supabase = createClient();
+
+	useEffect(() => {
+		supabase.auth.getSession().then(({ data: { session } }) => {
+			setUser(session?.user ?? null);
+		});
+		const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+			setUser(session?.user ?? null);
+		});
+		return () => subscription.unsubscribe();
+	}, [supabase.auth]);
+
+	const handleLogout = async () => {
+		await supabase.auth.signOut();
+		router.push("/");
+		router.refresh();
+	};
 
 	return (
 		<header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 sm:px-5 sm:pt-4">
@@ -64,17 +85,44 @@ export function SiteHeader() {
 						</Link>
 					))}
 				</nav>
-				<Button
-					type="button"
-					variant="brand"
-					size="sm"
-					onClick={() => router.push("/search")}
-					className="shrink-0 gap-2 sm:px-4"
-					aria-label="Отвори търсене в документи"
-				>
-					<Search size={16} aria-hidden className="opacity-90" />
-					<span className="sr-only sm:not-sr-only">Търси</span>
-				</Button>
+				<div className="flex shrink-0 items-center gap-2">
+					<Button
+						type="button"
+						variant="brand"
+						size="sm"
+						onClick={() => router.push("/search")}
+						className="shrink-0 gap-2 sm:px-4"
+						aria-label="Отвори търсене в документи"
+					>
+						<Search size={16} aria-hidden className="opacity-90" />
+						<span className="sr-only sm:not-sr-only">Търси</span>
+					</Button>
+					{user ? (
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={handleLogout}
+							className="shrink-0 gap-2"
+							aria-label="Изход"
+						>
+							<LogOut size={16} aria-hidden />
+							<span className="hidden md:inline">Изход</span>
+						</Button>
+					) : (
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => router.push("/vhod")}
+							className="shrink-0 gap-2 text-teal-600 dark:text-teal-400 border-teal-200 dark:border-teal-800"
+							aria-label="Вход"
+						>
+							<UserIcon size={16} aria-hidden />
+							<span className="hidden md:inline">Вход</span>
+						</Button>
+					)}
+				</div>
 			</motion.div>
 		</header>
 	);

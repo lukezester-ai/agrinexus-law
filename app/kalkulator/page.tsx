@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Calculator, Check, Copy, Sparkles } from "lucide-react";
+import { Calculator, Check, Copy, Sparkles, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
+import { createClient } from "@/lib/supabase/client";
 import {
 	estimateSubsidy,
 	formatShareSnippet,
@@ -28,15 +29,36 @@ export default function KalkulatorPage() {
 	const [youngFarmer, setYoungFarmer] = useState(false);
 	const [dairyCows, setDairyCows] = useState<string>("");
 	const [copied, setCopied] = useState(false);
-	const [validationError, setValidationError] = useState<string | null>(null);
+
+	const [hasAccess, setHasAccess] = useState(false);
+	const [leadEmail, setLeadEmail] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const supabase = createClient();
 
 	useEffect(() => {
 		const p = loadFarmProfile();
-		if (!p) return;
-		if (p.total_decares && p.total_decares > 0) {
+		if (p && p.total_decares && p.total_decares > 0) {
 			setDecares(String(p.total_decares));
 		}
+		
+		supabase.auth.getSession().then(({ data: { session } }) => {
+			if (session?.user) setHasAccess(true);
+		});
 	}, []);
+
+	const handleUnlock = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!leadEmail) return;
+		setIsSubmitting(true);
+		try {
+			await supabase.from("leads").insert([{ email: leadEmail }]);
+		} catch (err) {
+			console.error("Error saving lead", err);
+		} finally {
+			setHasAccess(true); // Allow access even if insert fails
+			setIsSubmitting(false);
+		}
+	};
 
 	const input = useMemo((): SubsidyCalculatorInput => {
 		const d = Number(String(decares).replace(",", "."));
@@ -53,12 +75,11 @@ export default function KalkulatorPage() {
 		};
 	}, [decares, focus, organicEco, youngFarmer, dairyCows]);
 
+	const validationError = validateCalculatorInput(input);
 	const result = useMemo(() => {
-		const err = validateCalculatorInput(input);
-		setValidationError(err);
-		if (err) return null;
+		if (validationError) return null;
 		return estimateSubsidy(input);
-	}, [input]);
+	}, [input, validationError]);
 
 	const siteUrl =
 		(typeof process !== "undefined" &&
@@ -190,7 +211,37 @@ export default function KalkulatorPage() {
 						</p>
 					)}
 
-					{result && (
+					{result && !hasAccess && (
+						<div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/30 p-6 space-y-4 text-center shadow-lg">
+							<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 mb-2">
+								<Mail size={24} />
+							</div>
+							<h3 className="text-xl font-bold text-slate-900 dark:text-white">Изчисляването приключи!</h3>
+							<p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+								За да отключите пълната разбивка на вашите субсидии и да запазите резултатите, моля въведете своя имейл.
+							</p>
+							<form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-3 mt-4 max-w-sm mx-auto">
+								<input
+									type="email"
+									required
+									value={leadEmail}
+									onChange={(e) => setLeadEmail(e.target.value)}
+									placeholder="vasil@ferma.bg"
+									className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+								/>
+								<button
+									type="submit"
+									disabled={isSubmitting}
+									className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-70"
+								>
+									{isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Отключи'}
+									<ArrowRight size={16} />
+								</button>
+							</form>
+						</div>
+					)}
+
+					{result && hasAccess && (
 						<div className="rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50/80 dark:bg-teal-950/25 p-4 space-y-3">
 							<p className="text-xs uppercase tracking-wide text-teal-900 dark:text-teal-300 font-semibold">
 								Прогнозен диапазон (годишно)
