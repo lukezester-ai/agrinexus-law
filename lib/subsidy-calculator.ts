@@ -51,12 +51,65 @@ export function validateCalculatorInput(input: SubsidyCalculatorInput): string |
 	}
 	if (input.focus === "livestock") {
 		const c = input.dairyCows ?? 0;
-		if (c > 0 && c < 5) {
-			return "За обвързано по млечни крави обикновено се изискват минимум 5 животни — уточни бройката или остави 0 за общ ориентир.";
-		}
 		if (c > 50000) return "Нереалистичен брой животни.";
 	}
 	return null;
+}
+
+/** Ориентировъчни €/ха за БИСС по тип стопанство (опростен модел). */
+const FOCUS_BISS_EUR_HA: Record<Exclude<FarmProductionFocus, "livestock">, readonly [number, number]> = {
+	/** Типично зърнено / полско — базов ориентир */
+	grain: [85, 90],
+	/** Смесено: по-ниска средна интензивност на площта в сметката */
+	mixed: [80, 86],
+	/** Зеленчуци/овощия: по-високи разходи/спецификации в ориентира */
+	horticulture: [92, 102],
+	/** Лозя: многогодишни насаждения — друг кошник ставки в опростения модел */
+	vine: [72, 84],
+};
+
+/** Ориентировъчни €/ха за ПНДП (първи до 30 ха) по фокус */
+const FOCUS_PNDP_EUR_HA: Record<Exclude<FarmProductionFocus, "livestock">, readonly [number, number]> = {
+	grain: [24, 26],
+	mixed: [22, 25],
+	horticulture: [26, 30],
+	vine: [18, 23],
+};
+
+function focusLandFactor(f: FarmProductionFocus): number {
+	if (f === "mixed") return 0.92;
+	return 1;
+}
+
+function focusBissLabel(f: FarmProductionFocus): string {
+	const tail = " — ориентир по избран тип";
+	switch (f) {
+		case "grain":
+			return `БИСС (зърнени / полски${tail})`;
+		case "mixed":
+			return `БИСС (смесено стопанство${tail})`;
+		case "horticulture":
+			return `БИСС (зеленчуци / овощия${tail})`;
+		case "vine":
+			return `БИСС (лозя${tail})`;
+		default:
+			return `БИСС (площ${tail})`;
+	}
+}
+
+function focusPndpLabel(f: FarmProductionFocus): string {
+	switch (f) {
+		case "grain":
+			return "ПНДП за първите до 30 ха (зърнено/полско)";
+		case "mixed":
+			return "ПНДП за първите до 30 ха (смесено)";
+		case "horticulture":
+			return "ПНДП за първите до 30 ха (зеленчуци/овощия)";
+		case "vine":
+			return "ПНДП за първите до 30 ха (лозя)";
+		default:
+			return "ПНДП за първите до 30 ха";
+	}
 }
 
 /**
@@ -74,20 +127,26 @@ export function estimateSubsidy(input: SubsidyCalculatorInput): SubsidyEstimateR
 				lowBgn: cows * 250,
 				highBgn: cows * 300,
 			});
+		} else if (cows > 0) {
+			lines.push({
+				label: "Обвързано по млечни крави: под 5 животни обикновено не се отчита схемата — ориентир 0 до уточнение в ДФЗ",
+				lowBgn: 0,
+				highBgn: 0,
+			});
 		} else {
 			lines.push({
-				label: "Животновъдство без достатъчен брой крави за автоматична сметка — попитай Виктория или Елена в чата за твоя случай",
+				label: "Животновъдство: въведи брой млечни крави (≥5) за обвързано, или ползвай чата за други животни",
 				lowBgn: 0,
 				highBgn: 0,
 			});
 		}
 		if (ha >= 0.05) {
-			const biss = eurRangeToBgn(85, 90, ha);
+			const biss = eurRangeToBgn(82, 88, ha);
 			biss.label =
-				"Директни плащания върху декларирана площ (БИСС — ако кандидатстваш за площ)";
+				"Директни плащания върху декларирана площ (БИСС — пасища/фуражна база, ориентир)";
 			lines.push(biss);
 			const pndpHa = Math.min(ha, 30);
-			const pndp = eurRangeToBgn(24, 26, pndpHa);
+			const pndp = eurRangeToBgn(22, 25, pndpHa);
 			pndp.label = "ПНДП (до 30 ха — ако отговаряш на условията)";
 			lines.push(pndp);
 			if (input.youngFarmer) {
@@ -98,23 +157,19 @@ export function estimateSubsidy(input: SubsidyCalculatorInput): SubsidyEstimateR
 			}
 		}
 	} else {
-		const landFactor =
-			input.focus === "mixed"
-				? 0.92
-				: input.focus === "horticulture"
-					? 1
-					: input.focus === "vine"
-						? 1
-						: 1;
+		const f = input.focus;
+		const [bLow, bHigh] = FOCUS_BISS_EUR_HA[f];
+		const [pLow, pHigh] = FOCUS_PNDP_EUR_HA[f];
+		const landFactor = focusLandFactor(f);
 		const effHa = ha * landFactor;
 
-		const biss = eurRangeToBgn(85, 90, effHa);
-		biss.label = "БИСС (директно подпомагане на хектар — ориентир)";
+		const biss = eurRangeToBgn(bLow, bHigh, effHa);
+		biss.label = focusBissLabel(f);
 		lines.push(biss);
 
 		const pndpHa = Math.min(effHa, 30);
-		const pndp = eurRangeToBgn(24, 26, pndpHa);
-		pndp.label = "ПНДП за първите до 30 ха";
+		const pndp = eurRangeToBgn(pLow, pHigh, pndpHa);
+		pndp.label = focusPndpLabel(f);
 		lines.push(pndp);
 
 		if (input.youngFarmer) {
@@ -134,6 +189,10 @@ export function estimateSubsidy(input: SubsidyCalculatorInput): SubsidyEstimateR
 			if (input.focus === "vine") {
 				lowE = 75;
 				highE = 198;
+			}
+			if (input.focus === "mixed") {
+				lowE = 42;
+				highE = 100;
 			}
 			const ecoHa = Math.min(effHa, 30);
 			const eco = eurRangeToBgn(lowE, highE, ecoHa);

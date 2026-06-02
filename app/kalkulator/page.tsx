@@ -33,18 +33,18 @@ export default function KalkulatorPage() {
 	const [hasAccess, setHasAccess] = useState(false);
 	const [leadEmail, setLeadEmail] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const supabase = createClient();
+	const supabase = useMemo(() => createClient(), []);
 
 	useEffect(() => {
 		const p = loadFarmProfile();
 		if (p && p.total_decares && p.total_decares > 0) {
 			setDecares(String(p.total_decares));
 		}
-		
+
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			if (session?.user) setHasAccess(true);
 		});
-	}, []);
+	}, [supabase]);
 
 	const handleUnlock = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -144,18 +144,24 @@ export default function KalkulatorPage() {
 					</div>
 
 					<div>
-						<span className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
+						<span id="kalkulator-focus-label" className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
 							Какво отглеждаш основно?
 						</span>
-						<div className="grid gap-2">
+						<div
+							className="grid gap-2"
+							role="radiogroup"
+							aria-labelledby="kalkulator-focus-label"
+						>
 							{FOCUS_OPTIONS.map((o) => (
 								<button
 									key={o.id}
 									type="button"
+									role="radio"
+									aria-checked={focus === o.id}
 									onClick={() => setFocus(o.id)}
 									className={`text-left px-4 py-3 rounded-lg border text-sm transition ${
 										focus === o.id
-											? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
+											? "border-emerald-600 bg-teal-50 ring-1 ring-emerald-500/30 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
 											: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/80"
 									}`}>
 									{o.label}
@@ -211,37 +217,7 @@ export default function KalkulatorPage() {
 						</p>
 					)}
 
-					{result && !hasAccess && (
-						<div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/30 p-6 space-y-4 text-center shadow-lg">
-							<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 mb-2">
-								<Mail size={24} />
-							</div>
-							<h3 className="text-xl font-bold text-slate-900 dark:text-white">Изчисляването приключи!</h3>
-							<p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
-								За да отключите пълната разбивка на вашите субсидии и да запазите резултатите, моля въведете своя имейл.
-							</p>
-							<form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-3 mt-4 max-w-sm mx-auto">
-								<input
-									type="email"
-									required
-									value={leadEmail}
-									onChange={(e) => setLeadEmail(e.target.value)}
-									placeholder="vasil@ferma.bg"
-									className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-								/>
-								<button
-									type="submit"
-									disabled={isSubmitting}
-									className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-70"
-								>
-									{isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Отключи'}
-									<ArrowRight size={16} />
-								</button>
-							</form>
-						</div>
-					)}
-
-					{result && hasAccess && (
+					{result && (
 						<div className="rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50/80 dark:bg-teal-950/25 p-4 space-y-3">
 							<p className="text-xs uppercase tracking-wide text-teal-900 dark:text-teal-300 font-semibold">
 								Прогнозен диапазон (годишно)
@@ -251,38 +227,76 @@ export default function KalkulatorPage() {
 								{result.totalHighBgn.toLocaleString("bg-BG")}{" "}
 								<span className="text-lg font-normal text-slate-600 dark:text-slate-400">лв</span>
 							</p>
-							<ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 border-t border-teal-200/60 dark:border-teal-800/60 pt-3">
-								{result.lines.map((L, i) => (
-									<li key={i}>
-										{L.label && <span className="font-medium text-slate-700 dark:text-slate-300">{L.label}: </span>}
-										{L.lowBgn.toLocaleString("bg-BG")} – {L.highBgn.toLocaleString("bg-BG")} лв
-									</li>
-								))}
-							</ul>
-							<p className="text-[11px] text-slate-500 dark:text-slate-500 leading-relaxed">
-								Това не е официално изчисление на ДФЗ. Ставките са закръглени; реалната сума зависи от заявени схеми,
-								площи, санкции и актуализации за кампанията.
+							<p className="text-xs text-slate-600 dark:text-slate-400">
+								Сумата се променя при избор на тип стопанство, декари и отметките по-горе.
 							</p>
-							<div className="flex flex-wrap gap-2 pt-2">
-								<button
-									type="button"
-									onClick={() => void onShare()}
-									className="brand-cta-bg inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-105 transition">
-									{copied ? <Check size={16} /> : <Copy size={16} />}
-									{copied ? "Копирано" : "Сподели текст"}
-								</button>
-								<Link
-									href="/"
-									className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-800 dark:text-slate-100">
-									<Sparkles size={16} />
-									Към началото
-								</Link>
-								<Link
-									href="/"
-									className="inline-flex items-center px-4 py-2 rounded-lg text-sm text-emerald-700 dark:text-teal-400 font-medium">
-									Към чат с Виктория →
-								</Link>
-							</div>
+
+							{hasAccess ? (
+								<>
+									<ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 border-t border-teal-200/60 dark:border-teal-800/60 pt-3">
+										{result.lines.map((L, i) => (
+											<li key={i}>
+												{L.label && (
+													<span className="font-medium text-slate-700 dark:text-slate-300">{L.label}: </span>
+												)}
+												{L.lowBgn.toLocaleString("bg-BG")} – {L.highBgn.toLocaleString("bg-BG")} лв
+											</li>
+										))}
+									</ul>
+									<p className="text-[11px] text-slate-500 dark:text-slate-500 leading-relaxed">
+										Това не е официално изчисление на ДФЗ. Ставките са закръглени; реалната сума зависи от заявени схеми,
+										площи, санкции и актуализации за кампанията.
+									</p>
+									<div className="flex flex-wrap gap-2 pt-2">
+										<button
+											type="button"
+											onClick={() => void onShare()}
+											className="brand-cta-bg inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-105 transition">
+											{copied ? <Check size={16} /> : <Copy size={16} />}
+											{copied ? "Копирано" : "Сподели текст"}
+										</button>
+										<Link
+											href="/"
+											className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-800 dark:text-slate-100">
+											<Sparkles size={16} />
+											Към началото
+										</Link>
+										<Link
+											href="/"
+											className="inline-flex items-center px-4 py-2 rounded-lg text-sm text-emerald-700 dark:text-teal-400 font-medium">
+											Към чат с Виктория →
+										</Link>
+									</div>
+								</>
+							) : (
+								<div className="space-y-4 border-t border-teal-200/60 dark:border-teal-800/60 pt-4 text-center">
+									<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+										<Mail size={24} />
+									</div>
+									<h3 className="text-lg font-semibold text-slate-900 dark:text-white">Пълна разбивка по редове</h3>
+									<p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+										Въведи имейл, за да видиш детайлните редове и да запазиш контакт с екипа.
+									</p>
+									<form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
+										<input
+											type="email"
+											required
+											value={leadEmail}
+											onChange={(e) => setLeadEmail(e.target.value)}
+											placeholder="vasil@ferma.bg"
+											className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+										/>
+										<button
+											type="submit"
+											disabled={isSubmitting}
+											className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-70"
+										>
+											{isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Покажи разбивката"}
+											<ArrowRight size={16} />
+										</button>
+									</form>
+								</div>
+							)}
 						</div>
 					)}
 				</div>
