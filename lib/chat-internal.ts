@@ -14,8 +14,7 @@ export type NormalizedChatMessage = { role: "user" | "assistant"; content: strin
 const FORCE_EXTERNAL =
 	/подробно|подробен|разширен|детайл|стъпка\s*по\s*стъпка|обясни\s+ми\s+цялата|напиши\s+есе/i;
 
-/** След толкова потребителски съобщения отиваме директно към външен AI. */
-export const INTERNAL_REPLY_MAX_USER_TURNS = 2;
+export const INTERNAL_REPLY_MAX_USER_TURNS = 0;
 
 /** Минимална дължина на въпроса за опит за вътрешен отговор. */
 const MIN_USER_LEN_FOR_INTERNAL = 12;
