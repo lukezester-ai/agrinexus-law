@@ -31,9 +31,12 @@
 | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | RAG индекс, learned knowledge, логове |
 | `TYPESENSE_*` | Typesense за публично търсене в обучително съдържание (виж `lib/typesense.ts`, `docs/SEARCH-SYSTEM.md`) |
 | `MEILI_*` | Meilisearch — fallback лексикален слой (виж `lib/meilisearch.ts`) |
-| `INGEST_ADMIN_TOKEN` | Защита на `/api/ingest/run`, `/api/ingest/upload`, `/api/rag/reindex` |
+| `INGEST_ADMIN_TOKEN` | Защита на ingest/reindex + `GET /api/ingest/cron` (виж `docs/INGEST-GITHUB-ACTIONS.md`) |
+| `INGEST_CRON_AUTO_REINDEX` | `1` = след `GET /api/ingest/cron` без `reindex` в URL пуска chunk+embed (`public_doc_content`) |
+| `INGEST_CRON_REINDEX_LIMIT` | Лимит документи за embed при auto (по подразбиране 35) |
+| `CRON_SECRET` | Опционално: `Authorization: Bearer` за Vercel Cron |
 
-Пълен списък и deploy стъпки: `DEPLOYMENT-GUIDE.md`.
+Пълен списък и deploy стъпки: `DEPLOYMENT-GUIDE.md`. Планиран ingest през GitHub Actions: **`docs/INGEST-GITHUB-ACTIONS.md`**.
 
 ## HTTP API (AI-свързани)
 
@@ -45,6 +48,7 @@
 | `/api/rag/reindex` | POST | Преиндексиране (админ токен) |
 | `/api/rag/dryrun` | POST/GET | Оценка на reindex без пълно изпълнение |
 | `/api/ingest/run` | POST | Ingest pipeline |
+| `/api/ingest/cron` | GET | Ingest + опционално RAG (`?reindex=1` или `INGEST_CRON_AUTO_REINDEX=1`); виж `docs/INGEST-GITHUB-ACTIONS.md` |
 | `/api/ingest/upload` | POST | Качване на PDF → chunks + embeddings (**админ токен**, като при reindex) |
 | `/api/stats/live` | GET | Публични метрики, включително RAG health |
 

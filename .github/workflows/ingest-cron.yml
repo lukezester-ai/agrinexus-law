@@ -1,0 +1,42 @@
+# Планирано теглене на документи (ДФЗ/МЗХ sitemap) — GET /api/ingest/cron
+# Настрой в GitHub → Settings → Secrets and variables → Actions:
+#   INGEST_CRON_URL   — пълен URL, напр.
+#     https://www.agrinexuslaw.com/api/ingest/cron?limit=8&reindex=1&reindexLimit=30
+#     (reindex=1 = chunk+embed за семантично търсене; без това само сваля файлове)
+#   INGEST_ADMIN_TOKEN — същата стойност като INGEST_ADMIN_TOKEN във Vercel (.env)
+# Заявката изпраща header x-ingest-token (виж docs/INGEST-GITHUB-ACTIONS.md).
+
+name: Ingest documents (scheduled)
+
+on:
+  schedule:
+    # 02:15 UTC всеки ден (~04:15 EET зимно)
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Ping ingest cron
+        env:
+          INGEST_CRON_URL: ${{ secrets.INGEST_CRON_URL }}
+          INGEST_ADMIN_TOKEN: ${{ secrets.INGEST_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${INGEST_CRON_URL:-}" ] || [ -z "${INGEST_ADMIN_TOKEN:-}" ]; then
+            echo "::error::Задай repository secrets INGEST_CRON_URL и INGEST_ADMIN_TOKEN (виж коментарите в началото на този workflow)."
+            exit 1
+          fi
+          echo "Calling ingest endpoint…"
+          code=$(curl -sS -o /tmp/ingest-body.json -w "%{http_code}" \
+            -H "x-ingest-token: ${INGEST_ADMIN_TOKEN}" \
+            -H "User-Agent: GitHub-Actions-Ingest/1.0" \
+            "$INGEST_CRON_URL")
+          echo "HTTP ${code}"
+          cat /tmp/ingest-body.json
+          if [ "$code" != "200" ]; then
+            echo "::error::Expected HTTP 200, got ${code}"
+            exit 1
+          fi

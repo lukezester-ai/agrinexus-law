@@ -5,28 +5,24 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
 	ArrowRight,
-	BadgeCheck,
 	Bell,
-	BookOpenCheck,
-	Bot,
-	Calculator,
-	Database,
 	ExternalLink,
-	FileDown,
-	FileText,
-	Leaf,
-	LineChart,
 	LockKeyhole,
-	Scale,
 	Search,
-	ShieldCheck,
 	Sparkles,
-	Sprout,
 	ThumbsDown,
 	ThumbsUp,
 	User,
 } from "lucide-react";
 import { AiCharacterAvatar } from "@/components/ai-character-avatar";
+import {
+	HOME_CATEGORY_GLYPHS,
+	HudGlyphAi,
+	HudGlyphDatabase,
+	HudGlyphFocus,
+	HudGlyphLineTrend,
+	IotHudTile,
+} from "@/components/iot-hud-home";
 import type { CharacterId } from "@/lib/characters";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 import { HOME_CATEGORY_SEARCH } from "@/lib/knowledge/document-taxonomy";
@@ -72,11 +68,9 @@ type LiveStatsResponse = {
 	rag?: { healthy?: boolean; hints?: string[] };
 };
 
-const CATEGORY_ICONS = [Sprout, Scale, ShieldCheck, Leaf, BookOpenCheck, FileText, FileDown, Calculator] as const;
-
 const CATEGORY_CARDS = HOME_CATEGORY_SEARCH.map((card, i) => ({
 	...card,
-	icon: CATEGORY_ICONS[i] ?? FileText,
+	Glyph: HOME_CATEGORY_GLYPHS[i] ?? HOME_CATEGORY_GLYPHS[HOME_CATEGORY_GLYPHS.length - 1],
 }));
 
 const UPDATES = [
@@ -86,9 +80,9 @@ const UPDATES = [
 ];
 
 const TRUST_POINTS = [
-	{ label: "Свързана база", value: "Supabase", icon: Database },
-	{ label: "AI търсене", value: "RAG + документи", icon: Bot },
-	{ label: "Фокус", value: "Българско земеделие", icon: BadgeCheck },
+	{ label: "Свързана база", value: "Supabase", Glyph: HudGlyphDatabase },
+	{ label: "AI търсене", value: "RAG + документи", Glyph: HudGlyphAi },
+	{ label: "Фокус", value: "Българско земеделие", Glyph: HudGlyphFocus },
 ];
 
 const EXAMPLE_QUERIES = [
@@ -351,8 +345,8 @@ export default function Home() {
 			<SiteHeader />
 
 			<main>
-				<section className="relative overflow-hidden pt-12">
-					<div className="hero-field-visual absolute inset-y-0 right-0 hidden w-[48%] opacity-90 lg:block" aria-hidden="true" />
+				<section className="iot-hero-section relative overflow-hidden pt-12">
+					<div className="iot-hero-grid" aria-hidden="true" />
 					<div className="relative z-10 mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
 						<motion.div
 							className="relative z-10 min-w-0 max-w-3xl"
@@ -362,7 +356,7 @@ export default function Home() {
 						>
 							<motion.div
 								variants={heroItem(reducedMotion)}
-								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-emerald-200/50 bg-white/35 px-4 py-2 text-xs font-medium uppercase leading-snug tracking-[0.08em] text-emerald-800 shadow-sm backdrop-blur-md dark:border-cyan-500/25 dark:bg-slate-950/35 dark:text-cyan-200"
+								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-sm border border-cyan-600/30 bg-cyan-50/90 px-4 py-2 text-xs font-medium uppercase leading-snug tracking-[0.12em] text-cyan-900 shadow-[0_0_24px_-8px_rgba(6,182,212,0.45)] backdrop-blur-md dark:border-cyan-400/35 dark:bg-cyan-950/50 dark:text-cyan-100 dark:shadow-[0_0_32px_-6px_rgba(34,211,238,0.25)]"
 							>
 								<LockKeyhole size={16} className="shrink-0" />
 								<span className="sm:hidden">Проверими източници</span>
@@ -372,16 +366,16 @@ export default function Home() {
 								variants={heroItem(reducedMotion)}
 								className="w-full max-w-4xl font-display text-[2.05rem] font-light leading-[1.1] tracking-tight sm:text-5xl sm:leading-[1.08] md:text-6xl md:leading-[1.05] lg:text-[3.65rem]"
 							>
-								<span className="block text-slate-950 dark:text-[#F7FAFC]">
+								<span className="block bg-gradient-to-r from-slate-900 via-cyan-800 to-slate-800 bg-clip-text text-transparent dark:from-cyan-100 dark:via-white dark:to-cyan-200">
 									Правна и аграрна
 								</span>
-								<span className="mt-2 block sm:mt-3 text-slate-900 dark:text-white">
+								<span className="mt-2 block bg-gradient-to-r from-cyan-700 via-teal-700 to-slate-900 bg-clip-text text-transparent sm:mt-3 dark:from-cyan-300 dark:via-teal-200 dark:to-cyan-100">
 									документация
 								</span>
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
-								className="mt-7 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg font-light tracking-wide"
+								className="mt-7 max-w-2xl text-base font-light leading-relaxed tracking-wide text-slate-600 dark:text-slate-300 sm:text-lg"
 							>
 								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
 							</motion.p>
@@ -390,8 +384,8 @@ export default function Home() {
 							<form onSubmit={onSearch} className="max-w-3xl">
 								<div
 									ref={searchFormRef}
-									className={`grid gap-4 rounded-3xl bg-white/70 backdrop-blur-2xl p-3 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-black/5 dark:border-white/10 dark:bg-slate-900/60 transition-all ${
-										searchFocusPulse ? "ring-4 ring-emerald-500/20" : ""
+									className={`iot-hud-search grid gap-4 p-3 transition-all ${
+										searchFocusPulse ? "ring-4 ring-cyan-400/25 dark:ring-cyan-400/20" : ""
 									}`}
 								>
 									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -408,7 +402,7 @@ export default function Home() {
 										<button
 											type="submit"
 											disabled={loading || !query.trim()}
-											className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 py-4 text-sm font-semibold text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-slate-800 dark:bg-white dark:text-slate-950 sm:w-auto"
+											className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm border border-cyan-600/30 bg-gradient-to-br from-cyan-600 to-teal-700 px-6 py-4 text-sm font-semibold text-white shadow-[0_0_28px_-8px_rgba(6,182,212,0.55)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:from-cyan-500 dark:to-teal-600 dark:shadow-[0_0_36px_-6px_rgba(34,211,238,0.35)]"
 										>
 											{loading ? "Търся..." : "Търси"} <ArrowRight size={16} />
 										</button>
@@ -419,7 +413,7 @@ export default function Home() {
 												key={item}
 												type="button"
 												onClick={() => jumpToSearch(item, true)}
-												className="rounded-full border border-white/50 bg-white/30 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:text-emerald-800 hover:shadow-md dark:border-slate-600/50 dark:bg-slate-900/40 dark:text-slate-300 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200"
+											className="rounded-sm border border-cyan-600/20 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-500/50 hover:text-cyan-800 hover:shadow-[0_0_20px_-6px_rgba(6,182,212,0.45)] dark:border-cyan-500/25 dark:bg-slate-900/50 dark:text-cyan-100/90 dark:hover:border-cyan-300/50 dark:hover:text-cyan-50"
 											>
 												{item}
 											</button>
@@ -431,16 +425,15 @@ export default function Home() {
 
 							<motion.div variants={heroItem(reducedMotion)} className="mt-8 grid gap-3 sm:grid-cols-3">
 								{TRUST_POINTS.map((item) => {
-									const Icon = item.icon;
+									const Glyph = item.Glyph;
 									return (
-										<div
-											key={item.label}
-											className="group rounded-2xl bg-transparent px-2 py-3 transition duration-300"
-										>
-											<Icon className="mb-3 text-slate-400 transition-transform duration-300 group-hover:scale-110 dark:text-slate-500" size={24} />
-											<p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">{item.label}</p>
-											<p className="mt-1 text-sm font-semibold tracking-tight text-slate-950 dark:text-white">{item.value}</p>
-										</div>
+										<IotHudTile key={item.label} className="flex min-h-[104px] flex-col justify-between p-3 sm:p-4">
+											<Glyph className="mx-auto h-9 w-9 shrink-0 opacity-90 sm:mx-0" />
+											<div>
+												<p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{item.label}</p>
+												<p className="mt-1 text-sm font-semibold tracking-tight text-slate-950 dark:text-white">{item.value}</p>
+											</div>
+										</IotHudTile>
 									);
 								})}
 							</motion.div>
@@ -452,17 +445,17 @@ export default function Home() {
 							initial="hidden"
 							animate="visible"
 						>
-							<div className="dashboard-preview glass-card min-w-0 shadow-2xl shadow-teal-900/10 dark:shadow-teal-950/40">
-								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200/50 px-6 py-5 dark:border-slate-800/50">
+							<div className="dashboard-preview iot-live-hud-panel min-w-0">
+								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-cyan-600/15 px-6 py-5 dark:border-cyan-400/15">
 									<div className="min-w-0">
-										<p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700 dark:text-teal-300">Live Intelligence</p>
+										<p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">IOT · Live</p>
 										<p className="mt-1 font-display text-xl font-medium text-slate-950 dark:text-white">Кампания и документи</p>
 									</div>
 									<span
-										className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold ${
+										className={`shrink-0 rounded-sm border px-3 py-1.5 text-xs font-semibold ${
 											ragHealthy === false
-												? "bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300"
-												: "bg-teal-50 text-teal-700 dark:bg-teal-950/30 dark:text-teal-300"
+												? "border-rose-400/40 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+												: "border-cyan-500/35 bg-cyan-50 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200"
 										}`}
 										title={
 											ragHealthy === false
@@ -483,21 +476,18 @@ export default function Home() {
 								<div className="grid gap-4 p-4 sm:p-5">
 									<div className="grid grid-cols-3 gap-2 sm:gap-3">
 										{liveTiles.map((tile) => (
-											<div
-												key={tile.label}
-												className="border border-slate-100 bg-slate-50 p-4 transition duration-300 hover:border-teal-300/60 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-500/35 dark:hover:shadow-teal-500/10"
-											>
-												<p className="text-2xl font-medium text-slate-950 dark:text-white">
+											<IotHudTile key={tile.label} className="p-3 sm:p-4">
+												<p className="text-2xl font-medium tabular-nums text-slate-950 dark:text-white">
 													{liveStatsLoading ? "…" : tile.value}
 												</p>
-												<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{tile.label}</p>
-											</div>
+												<p className="mt-1 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{tile.label}</p>
+											</IotHudTile>
 										))}
 									</div>
-									<div className="rounded-2xl bg-white/50 p-5 dark:bg-slate-900/50">
-										<div className="mb-4 flex items-center justify-between">
+									<IotHudTile className="rounded-sm p-5">
+										<div className="mb-4 flex items-center justify-between gap-2">
 											<p className="font-display text-base font-semibold text-slate-950 dark:text-white">Спешност по срокове</p>
-											<LineChart size={20} className="text-teal-600 dark:text-teal-400" />
+											<HudGlyphLineTrend className="h-6 w-6 shrink-0 text-cyan-600 dark:text-cyan-300" />
 										</div>
 										<div className="space-y-3">
 											{(deadlineRisks.length
@@ -509,27 +499,27 @@ export default function Home() {
 														<span>{row.label}</span>
 														<span>{row.percent}%</span>
 													</div>
-													<div className="h-2 bg-slate-100 dark:bg-slate-800">
+													<div className="h-2 bg-slate-100 dark:bg-slate-800/80">
 														<div
-															className="h-full bg-emerald-600 transition-[width] duration-500"
+															className="h-full bg-gradient-to-r from-cyan-600 to-teal-500 transition-[width] duration-500 dark:from-cyan-400 dark:to-teal-400"
 															style={{ width: `${row.percent}%` }}
 														/>
 													</div>
 												</div>
 											))}
 										</div>
-									</div>
+									</IotHudTile>
 									<div className="grid gap-3 sm:grid-cols-2">
-										<div className="border border-slate-100 p-4 dark:border-slate-800">
-											<p className="text-xs uppercase tracking-[0.16em] text-slate-500">Асистент</p>
-											<p className="mt-2 text-sm font-semibold">Елена · право и ДФЗ</p>
-											<p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">Отговаря със структура, източници и следваща стъпка.</p>
-										</div>
-										<div className="border border-slate-100 p-4 dark:border-slate-800">
-											<p className="text-xs uppercase tracking-[0.16em] text-slate-500">Контрол</p>
-											<p className="mt-2 text-sm font-semibold">Feedback loop</p>
-											<p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">Полезно/неточно се записва за подобрение.</p>
-										</div>
+										<IotHudTile className="p-4">
+											<p className="text-xs uppercase tracking-[0.16em] text-cyan-700 dark:text-cyan-400/90">Асистент</p>
+											<p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Елена · право и ДФЗ</p>
+											<p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">Отговаря със структура, източници и следваща стъпка.</p>
+										</IotHudTile>
+										<IotHudTile className="p-4">
+											<p className="text-xs uppercase tracking-[0.16em] text-cyan-700 dark:text-cyan-400/90">Контрол</p>
+											<p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Feedback loop</p>
+											<p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">Полезно/неточно се записва за подобрение.</p>
+										</IotHudTile>
 									</div>
 								</div>
 							</div>
@@ -604,7 +594,7 @@ export default function Home() {
 
 				<section className="mx-auto grid max-w-7xl gap-8 px-4 pb-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
 					<div>
-						<p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">Категории</p>
+						<p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">Категории</p>
 						<h2 className="mt-2 text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Бърз достъп до най-честите казуси</h2>
 						<p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
 							Вместо хаотично търсене по сайтове и PDF-и, започни от конкретна тема и получи проверими документи.
@@ -612,18 +602,17 @@ export default function Home() {
 					</div>
 					<div className="grid grid-cols-2 gap-3 md:grid-cols-4">
 						{CATEGORY_CARDS.map((card) => {
-							const Icon = card.icon;
+							const Glyph = card.Glyph;
 							return (
-								<button
+								<IotHudTile
 									key={card.title}
-									type="button"
 									onClick={() => jumpToSearch(card.searchQuery, true)}
-									className="group rounded-2xl glass-panel p-6 text-left hover-elevate transition-all"
+									className="flex min-h-[132px] flex-col p-4 text-left sm:min-h-[140px] sm:p-5"
 								>
-									<Icon size={24} className="mb-4 text-teal-600 dark:text-teal-400" />
+									<Glyph className="mb-3 h-8 w-8 shrink-0 sm:h-9 sm:w-9" />
 									<p className="font-display text-base font-medium text-slate-950 dark:text-white">{card.title}</p>
-									<p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{card.subtitle}</p>
-								</button>
+									<p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{card.subtitle}</p>
+								</IotHudTile>
 							);
 						})}
 					</div>

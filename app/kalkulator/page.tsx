@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Calculator, Check, Copy, Sparkles, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
@@ -22,6 +22,45 @@ const FOCUS_OPTIONS: Array<{ id: FarmProductionFocus; label: string }> = [
 	{ id: "livestock", label: "Животновъдство (с площ)" },
 ];
 
+const FOCUS_IDS = new Set<FarmProductionFocus>(FOCUS_OPTIONS.map((o) => o.id));
+
+/** Версия на запазеното състояние — при промяна на формулите вдигни, за да не се ползват стари сметки от sessionStorage. */
+const CALC_STATE_KEY = "agrinexus-kalkulator-state";
+const CALC_STATE_VERSION = 2;
+
+type CalcPersisted = {
+	v: number;
+	decares: string;
+	focus: FarmProductionFocus;
+	organicEco: boolean;
+	youngFarmer: boolean;
+	dairyCows: string;
+};
+
+function readPersistedCalculator(): CalcPersisted | null {
+	if (typeof window === "undefined") return null;
+	try {
+		const raw = sessionStorage.getItem(CALC_STATE_KEY);
+		if (!raw) return null;
+		const s = JSON.parse(raw) as Partial<CalcPersisted>;
+		if (s?.v !== CALC_STATE_VERSION || typeof s.decares !== "string") return null;
+		const focus =
+			s.focus && FOCUS_IDS.has(s.focus as FarmProductionFocus)
+				? (s.focus as FarmProductionFocus)
+				: "grain";
+		return {
+			v: CALC_STATE_VERSION,
+			decares: s.decares,
+			focus,
+			organicEco: Boolean(s.organicEco),
+			youngFarmer: Boolean(s.youngFarmer),
+			dairyCows: typeof s.dairyCows === "string" ? s.dairyCows : "",
+		};
+	} catch {
+		return null;
+	}
+}
+
 export default function KalkulatorPage() {
 	const [decares, setDecares] = useState<string>("50");
 	const [focus, setFocus] = useState<FarmProductionFocus>("grain");
@@ -34,17 +73,82 @@ export default function KalkulatorPage() {
 	const [leadEmail, setLeadEmail] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const supabase = useMemo(() => createClient(), []);
+	const canPersist = useRef(false);
+
+	/** Еднократно: последна сесия (sessionStorage) → иначе профил от „Моята ферма“. */
+	useEffect(() => {
+		const saved = readPersistedCalculator();
+		if (saved) {
+			setDecares(saved.decares);
+			setFocus(saved.focus);
+			setOrganicEco(saved.organicEco);
+			setYoungFarmer(saved.youngFarmer);
+			setDairyCows(saved.dairyCows);
+		} else {
+			const p = loadFarmProfile();
+			if (p && p.total_decares && p.total_decares > 0) {
+				setDecares(String(p.total_decares));
+			}
+			if (p?.is_organic) setOrganicEco(true);
+		}
+		queueMicrotask(() => {
+			canPersist.current = true;
+		});
+	}, []);
 
 	useEffect(() => {
-		const p = loadFarmProfile();
-		if (p && p.total_decares && p.total_decares > 0) {
-			setDecares(String(p.total_decares));
-		}
-
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			if (session?.user) setHasAccess(true);
 		});
 	}, [supabase]);
+
+	useEffect(() => {
+		if (!canPersist.current || typeof window === "undefined") return;
+		try {
+			const payload: CalcPersisted = {
+				v: CALC_STATE_VERSION,
+				decares,
+				focus,
+				organicEco,
+				youngFarmer,
+				dairyCows,
+			};
+			sessionStorage.setItem(CALC_STATE_KEY, JSON.stringify(payload));
+		} catch {
+			/* квота / частен режим */
+		}
+	}, [decares, focus, organicEco, youngFarmer, dairyCows]);
+
+	const resetCalculatorToProfile = () => {
+		try {
+			sessionStorage.removeItem(CALC_STATE_KEY);
+		} catch {
+			/* ignore */
+		}
+		const p = loadFarmProfile();
+		const nextDecares = p && p.total_decares && p.total_decares > 0 ? String(p.total_decares) : "50";
+		const nextOrganic = Boolean(p?.is_organic);
+		setDecares(nextDecares);
+		setFocus("grain");
+		setOrganicEco(nextOrganic);
+		setYoungFarmer(false);
+		setDairyCows("");
+		try {
+			sessionStorage.setItem(
+				CALC_STATE_KEY,
+				JSON.stringify({
+					v: CALC_STATE_VERSION,
+					decares: nextDecares,
+					focus: "grain" as FarmProductionFocus,
+					organicEco: nextOrganic,
+					youngFarmer: false,
+					dairyCows: "",
+				} satisfies CalcPersisted),
+			);
+		} catch {
+			/* ignore */
+		}
+	};
 
 	const handleUnlock = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -140,7 +244,16 @@ export default function KalkulatorPage() {
 							onChange={(e) => setDecares(e.target.value)}
 							className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-lg font-medium"
 						/>
-						<p className="text-xs text-slate-500 mt-1">10 декара = 1 хектар</p>
+						<p className="text-xs text-slate-500 mt-1">
+							10 декара = 1 хектар. За този раздел стойностите се помнят в сесията (до затваряне на прозореца), за да не се връщат стари декари от профила при всяко посещение.
+						</p>
+						<button
+							type="button"
+							onClick={resetCalculatorToProfile}
+							className="mt-2 text-xs font-medium text-emerald-700 underline underline-offset-2 hover:text-cyan-700 dark:text-emerald-300 dark:hover:text-cyan-200"
+						>
+							Нулирай и зареди от „Моята ферма“
+						</button>
 					</div>
 
 					<div>
