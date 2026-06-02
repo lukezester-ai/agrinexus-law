@@ -1,3 +1,5 @@
+import { search } from "duck-duck-scrape";
+
 export type GoogleCseHit = {
   link: string;
   title: string;
@@ -45,46 +47,40 @@ export function isEligibleDocumentUrl(urlStr: string): boolean {
 }
 
 /**
- * Google Programmable Search JSON API (Custom Search).
- * @see https://developers.google.com/custom-search/v1/overview
+ * Използваме DuckDuckGo (безплатен скрапер) вместо Google CSE.
+ * Запазваме името на функцията, за да не чупим останалия код.
  */
 export async function googleCustomSearch(
   query: string,
   num: number,
 ): Promise<GoogleCseHit[]> {
-  const key = process.env.GOOGLE_CSE_API_KEY?.trim();
-  const cx = process.env.GOOGLE_CSE_CX?.trim();
-  if (!key || !cx) {
-    throw new Error(
-      "Липсват GOOGLE_CSE_API_KEY или GOOGLE_CSE_CX — нужни са за търсене в мрежата.",
-    );
-  }
+  const n = Math.min(Math.max(Math.floor(num), 1), 20);
+  
+  // Добавяме filetype:pdf ако не е изрично казано (това е хак, но върши работа)
+  let ddgQuery = query;
 
-  const n = Math.min(Math.max(Math.floor(num), 1), 10);
-  const url = new URL("https://www.googleapis.com/customsearch/v1");
-  url.searchParams.set("key", key);
-  url.searchParams.set("cx", cx);
-  url.searchParams.set("q", query);
-  url.searchParams.set("num", String(n));
-
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`Google CSE HTTP ${res.status}: ${text.slice(0, 240)}`);
+  try {
+    const searchResults = await search(ddgQuery);
+    const items = searchResults.results || [];
+    
+    const out: GoogleCseHit[] = [];
+    let count = 0;
+    
+    for (const it of items) {
+      if (count >= n) break;
+      const link = typeof it.url === "string" ? it.url.trim() : "";
+      if (!link || !isEligibleDocumentUrl(link)) continue;
+      
+      out.push({
+        link,
+        title: (it.title ?? "").replace(/<[^>]+>/g, "").trim() || link,
+        snippet: (it.description ?? "").replace(/<[^>]+>/g, "").trim(),
+      });
+      count++;
+    }
+    return out;
+  } catch (error) {
+    console.error("DuckDuckGo search error:", error);
+    throw new Error(`Грешка при търсене с DuckDuckGo: ${error instanceof Error ? error.message : "Неизвестна грешка"}`);
   }
-  const json = JSON.parse(text) as {
-    items?: { link?: string; title?: string; snippet?: string }[];
-  };
-  const items = json.items ?? [];
-  const out: GoogleCseHit[] = [];
-  for (const it of items) {
-    const link = typeof it.link === "string" ? it.link.trim() : "";
-    if (!link || !isEligibleDocumentUrl(link)) continue;
-    out.push({
-      link,
-      title: (it.title ?? "").replace(/<[^>]+>/g, "").trim() || link,
-      snippet: (it.snippet ?? "").replace(/<[^>]+>/g, "").trim(),
-    });
-  }
-  return out;
 }
