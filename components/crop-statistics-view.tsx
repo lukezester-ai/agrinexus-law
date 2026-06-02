@@ -12,13 +12,17 @@ import {
 	Tooltip,
 	XAxis,
 	YAxis,
+	PieChart,
+	Pie,
+	Cell
 } from "recharts";
-import { BarChart3, Droplets, TrendingUp } from "lucide-react";
+import { BarChart3, Droplets, TrendingUp, Loader2, MapPin } from "lucide-react";
 import {
 	analyzeCropOutlook,
 	CROP_PROFILES,
 	type CropKey,
 	type CropStatsLang,
+	type CropProfile,
 	forecastProductionKt,
 	isDryStressLikely,
 	OUTLOOK_FACTOR_LABELS,
@@ -26,140 +30,88 @@ import {
 	pickL,
 } from "@/lib/crop-statistics-data";
 
-const STRINGS: Record<
-	CropStatsLang,
-	{
-		title: string;
-		subtitle: string;
-		pickCrop: string;
-		yAxisKt: string;
-		ktShort: string;
-		legendHarvest: string;
-		legendTrend: string;
-		yearLabel: string;
-		forecastTitle: string;
-		forecastIntro: string;
-		compareHeading: string;
-		vsLastDetail: string;
-		vsAvgDetail: string;
-		rangeDetail: string;
-		outlookHeadwind: string;
-		outlookTailwind: string;
-		outlookMixed: string;
-		irrigationTitle: string;
-		dryBadge: string;
-		dryLead: string;
-		normalLead: string;
-		normalIrrigationExtra: string;
-		disclaimer: string;
-		langLabel: string;
-		bulletsTitle: string;
-		bullet1: string;
-		bullet2: string;
-		bullet3: string;
-		weather7dTitle: string;
-		weatherLoading: string;
-		weatherError: string;
-		dayLabel: string;
-		tempLabel: string;
-		rainLabel: string;
-		windLabel: string;
-	}
-> = {
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#ec4899'];
+
+const STRINGS: Record<CropStatsLang, any> = {
 	bg: {
 		title: "Статистика за основни култури в България",
-		subtitle:
-			"Избери култура по-долу — виж демонстрационна графика с производство в хиляди тонове за пет последователни години, наложена линейна тенденция и точкова прогноза за следващата кампания. Блокът „напояване“ подчертава сушови години по проста евристика върху същите примерни данни — не е климатологична услуга. За реални решения сравни с официални източници (НСИ, Eurostat, отчети на сектора, борсови цени).",
+		subtitle: "Интерактивна статистика, цени и анализ на тенденциите. Изберете култура и период по-долу.",
 		pickCrop: "Култура",
-		yAxisKt: "хил. т",
-		ktShort: "хил. т",
-		legendHarvest: "Реколта (демо)",
+		yAxisKt: "хил. т / млн. л",
+		yAxisPrice: "Цена (лв.)",
+		ktShort: "обем",
+		priceShort: "цена",
+		legendHarvest: "Реколта/Обем",
 		legendTrend: "Линейна тенденция",
+		legendPrice: "Средна изкупна цена",
 		yearLabel: "Година",
-		forecastTitle: "Прогноза за следващата година (линеен модел)",
-		forecastIntro:
-			"Ориентировъчна точкова прогноза за {year}: около {kt} хил. т от линейната тенденция върху демо данните — не е официална статистика.",
-		compareHeading: "Сравнения спрямо примерната серия",
-		vsLastDetail:
-			"Спрямо последната година в графиката ({year}: {lastKt} хил. т) тенденцията предполага промяна с около {pctSigned} за {nextYear}.",
-		vsAvgDetail: "Спрямо средното за петте години (~{avgKt} хил. т): около {pctSigned}.",
-		rangeDetail:
-			"В рамките на петте точки: минимум {minKt} хил. т ({minYear}), максимум {maxKt} хил. т ({maxYear}). Голям размах обикновено означава доминиращи метеорологични или пазарни години.",
-		outlookHeadwind:
-			"Интерпретация на модела (демо): очаква се по-трудна стопанска година за тази култура основно заради: {reasons}. Ползвай само за ориентация.",
-		outlookTailwind:
-			"Интерпретация на модела (демо): обемите изглеждат относително подкрепящи спрямо последните години, защото: {reasons}. Въпреки това провери маржовете.",
-		outlookMixed:
-			"Интерпретация на модела (демо): смесени сигнали — нито ясно „лека“, нито „тежка“ година; сред основните бележки: {reasons}.",
-		irrigationTitle: "Напояване и вода",
+		forecastTitle: "Прогноза за следващата година",
+		forecastIntro: "Ориентировъчна точкова прогноза за {year}: около {kt} {unit} от линейната тенденция.",
+		compareHeading: "Сравнения спрямо серията",
+		vsLastDetail: "Спрямо последната година в графиката ({year}: {lastKt} {unit}) тенденцията предполага промяна с около {pctSigned} за {nextYear}.",
+		vsAvgDetail: "Спрямо средното за периода (~{avgKt} {unit}): около {pctSigned}.",
+		rangeDetail: "В рамките на периода: минимум {minKt} ({minYear}), максимум {maxKt} ({maxYear}).",
+		outlookHeadwind: "Интерпретация на модела: очаква се по-трудна стопанска година основно заради: {reasons}. Ползвай само за ориентация.",
+		outlookTailwind: "Интерпретация на модела: обемите изглеждат относително подкрепящи спрямо последните години, защото: {reasons}.",
+		outlookMixed: "Интерпретация на модела: смесени сигнали — нито ясно „лека“, нито „тежка“ година; сред основните бележки: {reasons}.",
+		irrigationTitle: "Специфики и уязвимост",
 		dryBadge: "Суша",
 		dryLead: "При суша (ориентир):",
 		normalLead: "При нормални валежи:",
-		normalIrrigationExtra:
-			"Напояването често е избирателно; следи песъчливи почви и долинни инверсии при първи признаци на дефицит.",
-		disclaimer:
-			"Всички количества, проценти и „тоновете“ на прогнозата са синтетични демо данни за интерфейса на AgriNexus.Law. Не ги ползвай за търговия със стока, за банкови изисквания или за официално деклариране пред ДФЗ. Винаги валидирай с НСИ, Eurostat, публични документи на ДФЗ и консултант на полето.",
+		normalIrrigationExtra: "Напояването често е избирателно; следи песъчливи почви и долинни инверсии при първи признаци на дефицит.",
+		disclaimer: "Всички количества, проценти и прогнози са визуализация. За официални справки ползвайте НСИ, Eurostat и ДФЗ.",
 		langLabel: "Език",
-		bulletsTitle: "Как да четеш екрана",
-		bullet1:
-			"Стълбовете са примерни количества; линията показва математическа тенденция, не експертна прогноза.",
-		bullet2:
-			"Сравненията спрямо средно и миналогодишно ти дават контекст вътре в демо серията — не заместват пазарен или климатичен анализ.",
-		bullet3:
-			"При смяна на културата виж как се променят текстовете за вода и регионални акценти под графиката.",
-		weather7dTitle: "7-дневна метео прогноза (безплатен Open-Meteo)",
+		weather7dTitle: "7-дневна метео прогноза",
 		weatherLoading: "Зареждам прогноза...",
 		weatherError: "Неуспешно зареждане на прогноза.",
 		dayLabel: "Ден",
 		tempLabel: "Темп. (°C)",
 		rainLabel: "Валеж (мм)",
 		windLabel: "Вятър (м/с)",
+		period5: "Последни 5 г.",
+		period10: "Последни 10 г.",
+		regionsTitle: "Регионално разпределение (%)",
+		regionsEmpty: "Няма регионални данни."
 	},
 	en: {
-		title: "Bulgaria crop production — 5-year view & outlook",
-		subtitle:
-			"Pick a crop to see an illustrative five-year production chart (kt), a simple linear trend line, and a next-year numeric outlook.",
+		title: "Bulgaria crop production & statistics",
+		subtitle: "Interactive statistics, prices and trend analysis. Select a crop and period below.",
 		pickCrop: "Crop",
-		yAxisKt: "1000 t",
-		ktShort: "kt",
-		legendHarvest: "Harvest (demo)",
+		yAxisKt: "Volume",
+		yAxisPrice: "Price (BGN)",
+		ktShort: "vol",
+		priceShort: "price",
+		legendHarvest: "Harvest/Volume",
 		legendTrend: "Linear trend",
+		legendPrice: "Avg Market Price",
 		yearLabel: "Year",
-		forecastTitle: "Next-year outlook (linear model)",
-		forecastIntro:
-			"Illustrative point forecast for {year}: about {kt} thousand tonnes from the linear trend on demo data — not an official statistic.",
-		compareHeading: "Benchmarks on the demo series",
-		vsLastDetail:
-			"Compared with the latest year in the chart ({year}: {lastKt} kt), the trend implies about {pctSigned} for {nextYear}.",
-		vsAvgDetail: "Compared with the five-year demo average (~{avgKt} kt): about {pctSigned}.",
-		rangeDetail:
-			"Across the five points: low {minKt} kt ({minYear}), high {maxKt} kt ({maxYear}) — wide spreads usually mean weather or policy shocks dominated some seasons.",
-		outlookHeadwind:
-			"Reading of the model (demo): expect a harder planning year for this crop, mainly because: {reasons}. Use this only as orientation.",
-		outlookTailwind:
-			"Reading of the model (demo): volumes look relatively supportive versus recent history because: {reasons}. Still stress-test margins.",
-		outlookMixed:
-			"Reading of the model (demo): mixed signals — neither clearly easy nor harsh — notably: {reasons}.",
-		irrigationTitle: "Water & irrigation hints",
+		forecastTitle: "Next-year outlook",
+		forecastIntro: "Illustrative point forecast for {year}: about {kt} {unit} from the linear trend.",
+		compareHeading: "Benchmarks on the series",
+		vsLastDetail: "Compared with the latest year in the chart ({year}: {lastKt} {unit}), the trend implies about {pctSigned} for {nextYear}.",
+		vsAvgDetail: "Compared with the average (~{avgKt} {unit}): about {pctSigned}.",
+		rangeDetail: "Across the points: low {minKt} ({minYear}), high {maxKt} ({maxYear}).",
+		outlookHeadwind: "Reading of the model: expect a harder planning year mainly because: {reasons}. Use this only as orientation.",
+		outlookTailwind: "Reading of the model: volumes look relatively supportive because: {reasons}.",
+		outlookMixed: "Reading of the model: mixed signals — notably: {reasons}.",
+		irrigationTitle: "Specifics & Vulnerabilities",
 		dryBadge: "Dry risk",
 		dryLead: "Dry-pattern emphasis:",
 		normalLead: "Typical season:",
-		normalIrrigationExtra:
-			"Irrigation is often supplemental; monitor sandy soils and valley frost pockets first when rainfall is near normal.",
-		disclaimer:
-			"All production figures and forecasts are synthetic demo data for UI testing. Do not use for trading or policy decisions.",
+		normalIrrigationExtra: "Irrigation is often supplemental; monitor sandy soils and valley frost pockets first.",
+		disclaimer: "All figures are visualizations. For official reporting use NSI, Eurostat.",
 		langLabel: "Language",
-		bulletsTitle: "How to read this screen",
-		bullet1: "Bars are illustrative volumes; the line is a mathematical trend, not an expert forecast.",
-		bullet2: "Benchmarks vs average / prior year are in-demo context only — not market or climate analysis.",
-		bullet3: "Switch crops to see irrigation hints change below the chart.",
-		weather7dTitle: "7-day weather outlook (free Open-Meteo)",
+		weather7dTitle: "7-day weather outlook",
 		weatherLoading: "Loading forecast...",
 		weatherError: "Could not load forecast.",
 		dayLabel: "Day",
 		tempLabel: "Temp (°C)",
 		rainLabel: "Rain (mm)",
 		windLabel: "Wind (m/s)",
+		period5: "Last 5 yrs",
+		period10: "Last 10 yrs",
+		regionsTitle: "Regional Breakdown (%)",
+		regionsEmpty: "No regional data available."
 	},
 };
 
@@ -184,27 +136,45 @@ const CROP_COORDS: Record<CropKey, { lat: number; lon: number }> = {
 	tomatoes: { lat: 42.15, lon: 24.75 }, // Plovdiv
 	grapes: { lat: 42.03, lon: 24.87 }, // Asenovgrad/Plovdiv
 	apples: { lat: 42.73, lon: 25.48 }, // Central BG
+	rapeseed: { lat: 43.4, lon: 26.5 },
+	lavender: { lat: 43.5, lon: 27.5 },
+	rose: { lat: 42.6, lon: 25.4 }, // Kazanlak
+	cow_milk: { lat: 42.5, lon: 25.5 }, // Central
 };
 
-function buildChartRows(profile: (typeof CROP_PROFILES)[number]) {
-	const { series } = profile;
+function buildChartRows(profile: CropProfile, yearsCount: number) {
+	// Взимаме само последните X години
+	const fullSeries = [...profile.series].sort((a, b) => a.year - b.year);
+	const series = fullSeries.slice(Math.max(0, fullSeries.length - yearsCount));
+	
 	const { nextYear, forecastKt, slopeKtPerYear, intercept } = forecastProductionKt(series);
 	const rows = series.map(p => ({
 		yearLabel: String(p.year),
 		actual: p.kt as number | undefined,
+		price: p.priceBgn,
 		fit: intercept + slopeKtPerYear * p.year,
 	}));
 	rows.push({
 		yearLabel: String(nextYear),
 		actual: undefined,
+		price: undefined,
 		fit: forecastKt,
 	});
-	return { rows, nextYear, forecastKt, slopeKtPerYear, dry: isDryStressLikely(series, slopeKtPerYear) };
+	
+	// Взимаме регионите от последната налична година
+	const lastRegions = series[series.length - 1]?.regions || {};
+	const regionsData = Object.entries(lastRegions).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+
+	return { rows, nextYear, forecastKt, slopeKtPerYear, dry: isDryStressLikely(series, slopeKtPerYear), regionsData, series };
 }
 
 export function CropStatisticsView() {
 	const [lang, setLang] = useState<CropStatsLang>("bg");
-	const [cropKey, setCropKey] = useState<CropKey>("tomatoes");
+	const [cropKey, setCropKey] = useState<CropKey>("wheat_barley");
+	const [yearsCount, setYearsCount] = useState<number>(10);
+	const [profiles, setProfiles] = useState<CropProfile[]>(CROP_PROFILES);
+	const [isLoadingData, setIsLoadingData] = useState(true);
+
 	const tr = STRINGS[lang];
 	const [weatherDays, setWeatherDays] = useState<ForecastDay[]>([]);
 	const [weatherLoading, setWeatherLoading] = useState(false);
@@ -214,17 +184,32 @@ export function CropStatisticsView() {
 	const [ragLoading, setRagLoading] = useState(false);
 	const [ragError, setRagError] = useState<string | null>(null);
 
+	// Изтегляне на истинските данни от базата
+	useEffect(() => {
+		fetch("/api/statistiki/data")
+			.then(r => r.json())
+			.then(d => {
+				if (d.ok && Array.isArray(d.data)) {
+					setProfiles(d.data);
+				}
+			})
+			.catch(err => console.error("Error fetching stats:", err))
+			.finally(() => setIsLoadingData(false));
+	}, []);
+
 	const profile = useMemo(
-		() => CROP_PROFILES.find(c => c.key === cropKey) ?? CROP_PROFILES[0],
-		[cropKey],
+		() => profiles.find(c => c.key === cropKey) ?? profiles[0],
+		[cropKey, profiles],
 	);
-	const { rows, nextYear, forecastKt, slopeKtPerYear, dry } = useMemo(
-		() => buildChartRows(profile),
-		[profile],
+
+	const { rows, nextYear, forecastKt, slopeKtPerYear, dry, regionsData, series } = useMemo(
+		() => buildChartRows(profile, yearsCount),
+		[profile, yearsCount],
 	);
+
 	const outlook = useMemo(
-		() => analyzeCropOutlook(profile.series, slopeKtPerYear, forecastKt, dry),
-		[profile.series, slopeKtPerYear, forecastKt, dry],
+		() => analyzeCropOutlook(series, slopeKtPerYear, forecastKt, dry),
+		[series, slopeKtPerYear, forecastKt, dry],
 	);
 
 	const fmtPctSigned = (p: number) => {
@@ -334,7 +319,7 @@ export function CropStatisticsView() {
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div className="flex items-start gap-3 min-w-0">
 					<div className="w-11 h-11 rounded-xl bg-teal-100 dark:bg-teal-950/60 flex items-center justify-center text-teal-800 dark:text-teal-300 shrink-0 border border-teal-200 dark:border-teal-800">
-						<BarChart3 size={22} aria-hidden />
+						{isLoadingData ? <Loader2 className="animate-spin" size={22} /> : <BarChart3 size={22} />}
 					</div>
 					<div>
 						<h1 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-50">
@@ -346,49 +331,24 @@ export function CropStatisticsView() {
 					</div>
 				</div>
 				<div className="flex items-center gap-2 shrink-0">
-					<span className="text-xs text-slate-500 dark:text-slate-400">{tr.langLabel}</span>
+					<div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden mr-2">
+						<button onClick={() => setYearsCount(5)} className={`px-3 py-1.5 text-xs font-medium transition ${yearsCount === 5 ? "bg-slate-800 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+							{tr.period5}
+						</button>
+						<button onClick={() => setYearsCount(10)} className={`px-3 py-1.5 text-xs font-medium transition ${yearsCount === 10 ? "bg-slate-800 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+							{tr.period10}
+						</button>
+					</div>
 					<div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
-						<button
-							type="button"
-							onClick={() => setLang("bg")}
-							className={`px-3 py-1.5 text-xs font-medium transition ${
-								lang === "bg"
-									? "bg-emerald-600 text-white"
-									: "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-							}`}>
-							BG
-						</button>
-						<button
-							type="button"
-							onClick={() => setLang("en")}
-							className={`px-3 py-1.5 text-xs font-medium transition ${
-								lang === "en"
-									? "bg-emerald-600 text-white"
-									: "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-							}`}>
-							EN
-						</button>
+						<button onClick={() => setLang("bg")} className={`px-3 py-1.5 text-xs font-medium transition ${lang === "bg" ? "bg-emerald-600 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>BG</button>
+						<button onClick={() => setLang("en")} className={`px-3 py-1.5 text-xs font-medium transition ${lang === "en" ? "bg-emerald-600 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>EN</button>
 					</div>
 				</div>
 			</div>
 
-			<div className="rounded-xl border border-slate-200/90 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/50 px-4 py-3">
-				<p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-2">
-					{tr.bulletsTitle}
-				</p>
-				<ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1.5 list-disc pl-5 leading-relaxed">
-					<li>{tr.bullet1}</li>
-					<li>{tr.bullet2}</li>
-					<li>{tr.bullet3}</li>
-				</ul>
-			</div>
-
 			<div>
-				<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
-					{tr.pickCrop}
-				</label>
 				<div className="flex flex-wrap gap-2">
-					{CROP_PROFILES.map(c => (
+					{profiles.map(c => (
 						<button
 							key={c.key}
 							type="button"
@@ -410,7 +370,7 @@ export function CropStatisticsView() {
 			</div>
 
 			<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-gradient-to-br from-teal-50/90 to-white dark:from-teal-950/30 dark:to-slate-900/90 p-4 sm:p-5">
-				<div className="w-full h-[300px] sm:h-[340px]">
+				<div className="w-full h-[300px] sm:h-[360px]">
 					<ResponsiveContainer width="100%" height="100%">
 						<ComposedChart data={rows} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
 							<defs>
@@ -427,14 +387,30 @@ export function CropStatisticsView() {
 								axisLine={{ stroke: "rgba(148,163,184,0.25)" }}
 							/>
 							<YAxis
+								yAxisId="left"
 								tick={{ fill: "#64748b", fontSize: 11 }}
 								tickLine={false}
 								axisLine={{ stroke: "rgba(148,163,184,0.25)" }}
 								width={48}
 								label={{
-									value: tr.yAxisKt,
+									value: profile.unitLabel ? pickL(profile.unitLabel, lang) : tr.yAxisKt,
 									angle: -90,
 									position: "insideLeft",
+									fill: "#64748b",
+									fontSize: 11,
+								}}
+							/>
+							<YAxis
+								yAxisId="right"
+								orientation="right"
+								tick={{ fill: "#64748b", fontSize: 11 }}
+								tickLine={false}
+								axisLine={{ stroke: "rgba(148,163,184,0.25)" }}
+								width={48}
+								label={{
+									value: profile.priceUnitLabel ? pickL(profile.priceUnitLabel, lang) : tr.yAxisPrice,
+									angle: 90,
+									position: "insideRight",
 									fill: "#64748b",
 									fontSize: 11,
 								}}
@@ -449,7 +425,17 @@ export function CropStatisticsView() {
 								formatter={(value: unknown, name: unknown) => {
 									const n = typeof value === "number" ? value : Number(value);
 									if (value == null || Number.isNaN(n)) return ["—", String(name)];
-									return [`${Math.round(n)} ${tr.ktShort}`, String(name)];
+									const unit = name === "actual" || name === "fit" 
+										? (profile.unitLabel ? pickL(profile.unitLabel, lang) : tr.ktShort)
+										: (profile.priceUnitLabel ? pickL(profile.priceUnitLabel, lang) : "BGN");
+									
+									// Преводи за тултипа
+									let labelName = String(name);
+									if (name === "actual") labelName = tr.legendHarvest;
+									if (name === "fit") labelName = tr.legendTrend;
+									if (name === "price") labelName = tr.legendPrice;
+
+									return [`${Math.round(n)} ${unit}`, labelName];
 								}}
 								labelFormatter={label => `${tr.yearLabel}: ${label}`}
 							/>
@@ -458,10 +444,12 @@ export function CropStatisticsView() {
 								formatter={value => {
 									if (value === "actual") return tr.legendHarvest;
 									if (value === "fit") return tr.legendTrend;
+									if (value === "price") return tr.legendPrice;
 									return value;
 								}}
 							/>
 							<Bar
+								yAxisId="left"
 								dataKey="actual"
 								name="actual"
 								fill={`url(#barGrad-${profile.key})`}
@@ -469,12 +457,24 @@ export function CropStatisticsView() {
 								maxBarSize={48}
 							/>
 							<Line
+								yAxisId="left"
 								type="monotone"
 								dataKey="fit"
 								name="fit"
 								stroke="#38bdf8"
 								strokeWidth={2.5}
-								dot={{ r: 4, fill: "#38bdf8", strokeWidth: 0 }}
+								strokeDasharray="4 4"
+								dot={{ r: 0 }}
+								activeDot={{ r: 6 }}
+							/>
+							<Line
+								yAxisId="right"
+								type="monotone"
+								dataKey="price"
+								name="price"
+								stroke="#f43f5e"
+								strokeWidth={3}
+								dot={{ r: 4, fill: "#f43f5e", strokeWidth: 0 }}
 								activeDot={{ r: 6 }}
 							/>
 						</ComposedChart>
@@ -482,14 +482,54 @@ export function CropStatisticsView() {
 				</div>
 			</div>
 
-			<div className="grid gap-4 sm:grid-cols-2">
-				<div className="rounded-xl border border-sky-200/80 dark:border-sky-900/50 bg-sky-50/50 dark:bg-sky-950/20 p-4 sm:p-5">
+			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+				<div className="md:col-span-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 flex flex-col items-center justify-center">
+					<h3 className="font-semibold text-slate-800 dark:text-slate-100 text-sm mb-4 w-full flex items-center gap-2"><MapPin size={16} className="text-teal-500"/> {tr.regionsTitle}</h3>
+					{regionsData.length > 0 ? (
+						<div className="w-full h-[180px]">
+							<ResponsiveContainer width="100%" height="100%">
+								<PieChart>
+									<Pie
+										data={regionsData}
+										cx="50%"
+										cy="50%"
+										innerRadius={40}
+										outerRadius={70}
+										paddingAngle={3}
+										dataKey="value"
+									>
+										{regionsData.map((entry, index) => (
+											<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+										))}
+									</Pie>
+									<Tooltip 
+										formatter={(val: number) => [`${val}%`, 'Дял']}
+										contentStyle={{ borderRadius: 8, background: "rgba(15,23,42,0.92)", color: "#fff", border: "none" }}
+										itemStyle={{ color: "#fff" }}
+									/>
+								</PieChart>
+							</ResponsiveContainer>
+							<div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[10px] text-slate-500 justify-center">
+								{regionsData.map((r, i) => (
+									<span key={r.name} className="flex items-center gap-1">
+										<span className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }}></span>
+										{r.name}
+									</span>
+								))}
+							</div>
+						</div>
+					) : (
+						<p className="text-sm text-slate-500">{tr.regionsEmpty}</p>
+					)}
+				</div>
+
+				<div className="md:col-span-2 rounded-xl border border-sky-200/80 dark:border-sky-900/50 bg-sky-50/50 dark:bg-sky-950/20 p-4 sm:p-5">
 					<h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-2 flex items-center gap-2 text-base">
 						<TrendingUp size={18} className="text-sky-600 dark:text-sky-400 shrink-0" aria-hidden />
 						{tr.forecastTitle}
 					</h2>
 					<p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-						{tr.forecastIntro.replace(/\{year\}/g, String(nextYear)).replace(/\{kt\}/g, String(Math.round(forecastKt)))}
+						{tr.forecastIntro.replace(/\{year\}/g, String(nextYear)).replace(/\{kt\}/g, String(Math.round(forecastKt))).replace(/\{unit\}/g, profile.unitLabel ? pickL(profile.unitLabel, lang) : tr.ktShort)}
 					</p>
 					<p className="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						{tr.compareHeading}
@@ -500,11 +540,13 @@ export function CropStatisticsView() {
 								.replace(/\{year\}/g, String(outlook.lastYear))
 								.replace(/\{lastKt\}/g, String(Math.round(outlook.lastKt)))
 								.replace(/\{pctSigned\}/g, fmtPctSigned(outlook.pctVsLast))
+								.replace(/\{unit\}/g, profile.unitLabel ? pickL(profile.unitLabel, lang) : tr.ktShort)
 								.replace(/\{nextYear\}/g, String(nextYear))}
 						</li>
 						<li>
 							{tr.vsAvgDetail
 								.replace(/\{avgKt\}/g, String(Math.round(outlook.avgKt)))
+								.replace(/\{unit\}/g, profile.unitLabel ? pickL(profile.unitLabel, lang) : tr.ktShort)
 								.replace(/\{pctSigned\}/g, fmtPctSigned(outlook.pctVsAvg))}
 						</li>
 						<li>
@@ -529,7 +571,9 @@ export function CropStatisticsView() {
 						{pickL(profile.genNotes, lang)}
 					</p>
 				</div>
+			</div>
 
+			<div className="grid gap-4 sm:grid-cols-2">
 				<div
 					className={`rounded-xl border p-4 sm:p-5 ${
 						dry
@@ -592,57 +636,57 @@ export function CropStatisticsView() {
 						)}
 					</div>
 				</div>
-			</div>
 
-			<div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 p-4 sm:p-5">
-				<div className="flex items-center justify-between gap-3 mb-2">
-					<h2 className="font-semibold text-slate-900 dark:text-slate-50 text-base">
-						{lang === "bg" ? "RAG контекст за културата" : "RAG context for this crop"}
-					</h2>
-					<div className="flex items-center gap-2">
-						{ragMode ? (
-							<span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
-								{ragMode === "rag_hybrid" ? "RAG hybrid" : "BM25 fallback"}
-							</span>
-						) : null}
-						<Link
-							href={askAiHref}
-							className="brand-cta-bg rounded-md px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:brightness-105 transition">
-							{lang === "bg" ? "Попитай AI" : "Ask AI"}
-						</Link>
+				<div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 p-4 sm:p-5">
+					<div className="flex items-center justify-between gap-3 mb-2">
+						<h2 className="font-semibold text-slate-900 dark:text-slate-50 text-base">
+							{lang === "bg" ? "RAG контекст за културата" : "RAG context for this crop"}
+						</h2>
+						<div className="flex items-center gap-2">
+							{ragMode ? (
+								<span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+									{ragMode === "rag_hybrid" ? "RAG hybrid" : "BM25 fallback"}
+								</span>
+							) : null}
+							<Link
+								href={askAiHref}
+								className="brand-cta-bg rounded-md px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:brightness-105 transition">
+								{lang === "bg" ? "Попитай AI" : "Ask AI"}
+							</Link>
+						</div>
 					</div>
+					{ragLoading ? (
+						<p className="text-sm text-slate-600 dark:text-slate-400">
+							{lang === "bg" ? "Зареждам релевантен контекст..." : "Loading relevant context..."}
+						</p>
+					) : ragError ? (
+						<p className="text-sm text-red-600 dark:text-red-300">{ragError}</p>
+					) : ragInsights.length === 0 ? (
+						<p className="text-sm text-slate-600 dark:text-slate-400">
+							{lang === "bg"
+								? "Няма релевантни RAG резултати за тази култура."
+								: "No relevant RAG results for this crop."}
+						</p>
+					) : (
+						<ul className="space-y-2">
+							{ragInsights.map((insight, idx) => (
+								<li
+									key={`${insight.title}-${idx}`}
+									className="rounded-lg border border-indigo-100 dark:border-indigo-900/40 bg-white/80 dark:bg-slate-900/60 px-3 py-2">
+									<p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+										{insight.title}
+									</p>
+									<p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+										{insight.source}
+									</p>
+									<p className="text-sm text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
+										{insight.snippet}
+									</p>
+								</li>
+							))}
+						</ul>
+					)}
 				</div>
-				{ragLoading ? (
-					<p className="text-sm text-slate-600 dark:text-slate-400">
-						{lang === "bg" ? "Зареждам релевантен контекст..." : "Loading relevant context..."}
-					</p>
-				) : ragError ? (
-					<p className="text-sm text-red-600 dark:text-red-300">{ragError}</p>
-				) : ragInsights.length === 0 ? (
-					<p className="text-sm text-slate-600 dark:text-slate-400">
-						{lang === "bg"
-							? "Няма релевантни RAG резултати за тази култура."
-							: "No relevant RAG results for this crop."}
-					</p>
-				) : (
-					<ul className="space-y-2">
-						{ragInsights.map((insight, idx) => (
-							<li
-								key={`${insight.title}-${idx}`}
-								className="rounded-lg border border-indigo-100 dark:border-indigo-900/40 bg-white/80 dark:bg-slate-900/60 px-3 py-2">
-								<p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-									{insight.title}
-								</p>
-								<p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-									{insight.source}
-								</p>
-								<p className="text-sm text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
-									{insight.snippet}
-								</p>
-							</li>
-						))}
-					</ul>
-				)}
 			</div>
 
 			<p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed rounded-xl border border-teal-100 dark:border-teal-900/40 bg-teal-50/40 dark:bg-teal-950/15 p-4">

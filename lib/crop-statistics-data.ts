@@ -8,7 +8,11 @@ export type CropKey =
 	| "maize"
 	| "tomatoes"
 	| "grapes"
-	| "apples";
+	| "apples"
+	| "rapeseed"
+	| "lavender"
+	| "rose"
+	| "cow_milk";
 
 export function pickL(t: Localized, lang: CropStatsLang): string {
 	if (lang === "bg") return t.bg;
@@ -16,17 +20,24 @@ export function pickL(t: Localized, lang: CropStatsLang): string {
 }
 
 /** Production in thousand tonnes (хил. т) — илюстративни стойности за демо графика. */
-export type YearPoint = { year: number; kt: number };
+export type YearPoint = { 
+	year: number; 
+	kt: number;
+	priceBgn?: number; // Средна изкупна цена (лв./тон)
+	regions?: Record<string, number>; // Разпределение по региони в %
+};
 
 export type CropProfile = {
 	key: CropKey;
 	chartColor: string;
 	label: Localized;
-	/** Производство (хил. т) за последните 5 завършени кампании */
+	/** Fallback демо данни */
 	series: YearPoint[];
 	genNotes: Localized;
 	irrigationGeneral: Localized;
 	irrigationIfDry: Localized;
+	unitLabel?: Localized;
+	priceUnitLabel?: Localized;
 };
 
 /** Линейна регресия y = a + b·year → прогноза за следващата година */
@@ -39,10 +50,7 @@ export function forecastProductionKt(series: YearPoint[]): {
 	const ys = series.map(p => p.year);
 	const vs = series.map(p => p.kt);
 	const n = ys.length;
-	let sx = 0,
-		sy = 0,
-		sxx = 0,
-		sxy = 0;
+	let sx = 0, sy = 0, sxx = 0, sxy = 0;
 	for (let i = 0; i < n; i++) {
 		sx += ys[i];
 		sy += vs[i];
@@ -85,28 +93,28 @@ export type OutlookFactor =
 
 export const OUTLOOK_FACTOR_LABELS: Record<OutlookFactor, Localized> = {
 	trend_down: {
-		bg: "отрицателен наклон на тенденцията в примерните данни (спад обем при екстраполация)",
-		en: "negative slope in the demo trend (declining volumes if extrapolated)",
+		bg: "отрицателен наклон на тенденцията",
+		en: "negative slope in the trend",
 	},
 	trend_up: {
-		bg: "положителен наклон на тенденцията в примерните данни",
-		en: "positive slope in the demo trend",
+		bg: "положителен наклон на тенденцията",
+		en: "positive slope in the trend",
 	},
 	dry_heuristic: {
-		bg: "сигнал за суша по евристика (рязък спад последна спрямо предходна година или стръмен отрицателен наклон)",
-		en: "dry-pattern heuristic (sharp drop vs prior year or steep negative slope)",
+		bg: "сигнал за суша по евристика (рязък спад)",
+		en: "dry-pattern heuristic (sharp drop)",
 	},
 	forecast_below_avg: {
-		bg: "прогнозният обем е под средното на петте години в серията",
-		en: "forecast volume sits below the five-year demo average",
+		bg: "прогнозният обем е под средното на годините в серията",
+		en: "forecast volume sits below the average",
 	},
 	forecast_above_avg: {
-		bg: "прогнозният обем е над средното на петте години в серията",
-		en: "forecast volume sits above the five-year demo average",
+		bg: "прогнозният обем е над средното на годините",
+		en: "forecast volume sits above average",
 	},
 	high_volatility: {
-		bg: "големи колебания между годините (непостоянен добив в примерните данни)",
-		en: "large year-to-year swings (uneven harvest in the demo series)",
+		bg: "големи колебания между годините (непостоянен добив)",
+		en: "large year-to-year swings (uneven harvest)",
 	},
 };
 
@@ -136,6 +144,9 @@ export function analyzeCropOutlook(
 	forecastKt: number,
 	dry: boolean,
 ): CropOutlookAnalysis {
+	if (!series || series.length === 0) {
+		return { lastYear: 0, lastKt: 0, minKt: 0, maxKt: 0, minYear: 0, maxYear: 0, avgKt: 0, pctVsLast: 0, pctVsAvg: 0, cvSeries: 0, factors: [], tone: "mixed" };
+	}
 	const n = series.length;
 	const last = series[n - 1];
 	const lastKt = last.kt;
@@ -200,163 +211,171 @@ export const CROP_PROFILES: CropProfile[] = [
 	{
 		key: "wheat_barley",
 		chartColor: "#c9a227",
-		label: {
-			bg: "Пшеница и ечемик (общо)",
-			en: "Wheat & barley (combined)",
-		},
+		label: { bg: "Пшеница и ечемик", en: "Wheat & barley" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
 		series: [
-			{ year: 2021, kt: 5980 },
-			{ year: 2022, kt: 6310 },
-			{ year: 2023, kt: 6145 },
-			{ year: 2024, kt: 6420 },
-			{ year: 2025, kt: 6280 },
+			{ year: 2021, kt: 5980, priceBgn: 350 },
+			{ year: 2022, kt: 6310, priceBgn: 450 },
+			{ year: 2023, kt: 6145, priceBgn: 410 },
+			{ year: 2024, kt: 6420, priceBgn: 380 },
+			{ year: 2025, kt: 6280, priceBgn: 390 },
 		],
-		genNotes: {
-			bg: "Зърното доминира в Добруджа и горнотракийската низина; прогнозата следва тенденцията от таблицата (демо).",
-			en: "Grain is concentrated in Dobruja and the Upper Thracian Plain; the forecast extrapolates the demo trend.",
-		},
-		irrigationGeneral: {
-			bg: "При зърнено обикновено се разчита на валежи; напояването е ограничено, но напръскване при горещ етап на пшеницата и подпомагане при „фиданкови“ посеви на царевица/слънчоглед по поречия.",
-			en: "Rainfed dominates for cereals; irrigation is limited — consider supplemental water for critical stages or downstream crops in valleys.",
-		},
-		irrigationIfDry: {
-			bg: "При суша: приоритет на напояване в Добруджа и Източна България (по-ниски валежи през пролетта), както и по Черноморското крайбрежие при дефицит на влага при закласяване.",
-			en: "In dry spells: prioritise irrigated blocks in Dobruja & eastern Bulgaria, plus coastal strips if moisture fails during grain fill.",
-		},
+		genNotes: { bg: "Зърното доминира в Добруджа и горнотракийската низина.", en: "Grain is concentrated in Dobruja and Thrace." },
+		irrigationGeneral: { bg: "При зърнено обикновено се разчита на валежи.", en: "Rainfed dominates for cereals." },
+		irrigationIfDry: { bg: "При суша: приоритет на напояване в Източна България.", en: "In dry spells: prioritise eastern Bulgaria." },
 	},
 	{
 		key: "sunflower",
 		chartColor: "#f4b400",
-		label: {
-			bg: "Слънчоглед",
-			en: "Sunflower",
-		},
+		label: { bg: "Слънчоглед", en: "Sunflower" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
 		series: [
-			{ year: 2021, kt: 1680 },
-			{ year: 2022, kt: 1820 },
-			{ year: 2023, kt: 1755 },
-			{ year: 2024, kt: 1890 },
-			{ year: 2025, kt: 1780 },
+			{ year: 2021, kt: 1680, priceBgn: 750 },
+			{ year: 2022, kt: 1820, priceBgn: 850 },
+			{ year: 2023, kt: 1755, priceBgn: 820 },
+			{ year: 2024, kt: 1890, priceBgn: 780 },
+			{ year: 2025, kt: 1780, priceBgn: 800 },
 		],
-		genNotes: {
-			bg: "Слънчогледът е чувствителен на влага при цъфтеж и пълнене на семена — тенденцията в графиката е образец.",
-			en: "Sunflower is moisture-sensitive at flowering and seed fill — chart shows illustrative volumes.",
-		},
-		irrigationGeneral: {
-			bg: "При напояване: равномерна влага по време на цъфтеж; избягване на преполиване преди жътва.",
-			en: "If irrigating: keep even moisture through flowering; avoid waterlogging before harvest.",
-		},
-		irrigationIfDry: {
-			bg: "Сухо: силно засегнати са лесните почви в Северна България и участъци без задържане на влага — подпомагане на инвазионни полета по Янтра, Осъм, Дунавска равнина.",
-			en: "Dry years: lighter soils in northern Bulgaria suffer first — prioritise fields along Yantra, Osam and Danube plain corridors.",
-		},
+		genNotes: { bg: "Слънчогледът е чувствителен на влага при цъфтеж.", en: "Sunflower is moisture-sensitive at flowering." },
+		irrigationGeneral: { bg: "При напояване: равномерна влага по време на цъфтеж.", en: "If irrigating: keep even moisture through flowering." },
+		irrigationIfDry: { bg: "Подпомагане на инвазионни полета по Янтра, Осъм.", en: "Prioritise fields along Yantra, Osam corridors." },
 	},
 	{
 		key: "maize",
 		chartColor: "#e8c547",
-		label: {
-			bg: "Царевица",
-			en: "Maize",
-		},
+		label: { bg: "Царевица", en: "Maize" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
 		series: [
-			{ year: 2021, kt: 2100 },
-			{ year: 2022, kt: 2380 },
-			{ year: 2023, kt: 2240 },
-			{ year: 2024, kt: 2510 },
-			{ year: 2025, kt: 2395 },
+			{ year: 2021, kt: 2100, priceBgn: 380 },
+			{ year: 2022, kt: 2380, priceBgn: 410 },
+			{ year: 2023, kt: 2240, priceBgn: 390 },
+			{ year: 2024, kt: 2510, priceBgn: 360 },
+			{ year: 2025, kt: 2395, priceBgn: 375 },
 		],
-		genNotes: {
-			bg: "Царевицата отговаря силно на напояване; числата са демо за визуализация на тенденция.",
-			en: "Maize responds strongly to irrigation; numbers are demo-only for trend visualisation.",
-		},
-		irrigationGeneral: {
-			bg: "Критични фази: къмцване, метличина, наливане на зърно — типично напояване по полета в Горна Тракия и край речни корита.",
-			en: "Critical stages: knee-high, tasselling, grain fill — irrigation clusters often in Upper Thrace and river corridors.",
-		},
-		irrigationIfDry: {
-			bg: "При продължителна суша: приоритет на напоителни масиви в Пловдивско, Пазарджишко, Свиленград–Харманли и край Марица.",
-			en: "Prolonged drought: prioritise irrigated blocks around Plovdiv, Pazardzhik, Svilengrad–Harmanli and Maritsa valley.",
-		},
+		genNotes: { bg: "Царевицата отговаря силно на напояване.", en: "Maize responds strongly to irrigation." },
+		irrigationGeneral: { bg: "Критични фази: метличина, наливане на зърно.", en: "Critical stages: tasselling, grain fill." },
+		irrigationIfDry: { bg: "Приоритет на напоителни масиви в Пловдивско.", en: "Prioritise irrigated blocks around Plovdiv." },
 	},
 	{
 		key: "tomatoes",
 		chartColor: "#ef4444",
-		label: {
-			bg: "Домати (пресни)",
-			en: "Tomatoes (fresh)",
-		},
+		label: { bg: "Домати", en: "Tomatoes" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
 		series: [
-			{ year: 2021, kt: 168 },
-			{ year: 2022, kt: 182 },
-			{ year: 2023, kt: 155 },
-			{ year: 2024, kt: 191 },
-			{ year: 2025, kt: 172 },
+			{ year: 2021, kt: 168, priceBgn: 1200 },
+			{ year: 2022, kt: 182, priceBgn: 1400 },
+			{ year: 2023, kt: 155, priceBgn: 1350 },
+			{ year: 2024, kt: 191, priceBgn: 1150 },
+			{ year: 2025, kt: 172, priceBgn: 1250 },
 		],
-		genNotes: {
-			bg: "Доматите са концентрирани в Южна България и край големи преработватели; колебанията имитират метеорологични години.",
-			en: "Tomatoes cluster in southern Bulgaria and near processors; swings mimic weather-driven seasons.",
-		},
-		irrigationGeneral: {
-			bg: "Капково и фертигация са стандарт при интензивно производство; избягване на мокрене на листата при горещини.",
-			en: "Drip + fertigation is standard for intensive outdoor/tomato fields; avoid leaf wetting in heat.",
-		},
-		irrigationIfDry: {
-			bg: "Суша: най-уязвими са ранните полета в Хасковско, Свиленград, Пазарджик и край Струма–Петрич (дефицит на валежи + високи температури).",
-			en: "Drought: monitor early fields in Haskovo, Svilengrad, Pazardzhik and Struma–Petrich belts first.",
-		},
+		genNotes: { bg: "Доматите са концентрирани в Южна България.", en: "Tomatoes cluster in southern Bulgaria." },
+		irrigationGeneral: { bg: "Капково и фертигация са стандарт.", en: "Drip + fertigation is standard." },
+		irrigationIfDry: { bg: "Най-уязвими са ранните полета в Хасковско.", en: "Monitor early fields in Haskovo." },
 	},
 	{
 		key: "grapes",
 		chartColor: "#a855f7",
-		label: {
-			bg: "Грозде (вино и маса)",
-			en: "Grapes (wine & table)",
-		},
+		label: { bg: "Грозде (вино и маса)", en: "Grapes" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
 		series: [
-			{ year: 2021, kt: 1180 },
-			{ year: 2022, kt: 1245 },
-			{ year: 2023, kt: 1095 },
-			{ year: 2024, kt: 1270 },
-			{ year: 2025, kt: 1140 },
+			{ year: 2021, kt: 1180, priceBgn: 650 },
+			{ year: 2022, kt: 1245, priceBgn: 700 },
+			{ year: 2023, kt: 1095, priceBgn: 680 },
+			{ year: 2024, kt: 1270, priceBgn: 620 },
+			{ year: 2025, kt: 1140, priceBgn: 670 },
 		],
-		genNotes: {
-			bg: "Гроздето варира с пролетни слани и летни горещини; прогнозата е математическа екстраполация на демо данни.",
-			en: "Grape harvest varies with spring frost and summer heat — forecast is pure extrapolation on demo data.",
-		},
-		irrigationGeneral: {
-			bg: "Напояването е регламентирано за лозя в различни региони; контрол на вегетацията преди беритба.",
-			en: "Irrigation rules differ by PDO/PGI areas; manage canopy and water stress before harvest.",
-		},
-		irrigationIfDry: {
-			bg: "При суша: долините на Розова долина, Мелник, Пловдивско и Черноморието често изискват подпомагане при малки гроздове.",
-			en: "Dry years: Rose Valley, Melnik, Plovdiv subregions and parts of the coast may need deficit irrigation strategies.",
-		},
+		genNotes: { bg: "Гроздето варира с пролетни слани и летни горещини.", en: "Grape harvest varies with spring frost and summer heat." },
+		irrigationGeneral: { bg: "Контрол на вегетацията преди беритба.", en: "Manage canopy and water stress before harvest." },
+		irrigationIfDry: { bg: "Мелник, Пловдивско изискват подпомагане.", en: "Melnik, Plovdiv subregions may need deficit irrigation." },
 	},
 	{
 		key: "apples",
 		chartColor: "#22c55e",
-		label: {
-			bg: "Ябълки",
-			en: "Apples",
-		},
+		label: { bg: "Ябълки", en: "Apples" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
 		series: [
-			{ year: 2021, kt: 62 },
-			{ year: 2022, kt: 68 },
-			{ year: 2023, kt: 59 },
-			{ year: 2024, kt: 71 },
-			{ year: 2025, kt: 64 },
+			{ year: 2021, kt: 62, priceBgn: 900 },
+			{ year: 2022, kt: 68, priceBgn: 1000 },
+			{ year: 2023, kt: 59, priceBgn: 950 },
+			{ year: 2024, kt: 71, priceBgn: 850 },
+			{ year: 2025, kt: 64, priceBgn: 920 },
 		],
-		genNotes: {
-			bg: "Овощарството е локализирано (Старозагорско, Пловдивско, Родопи); малки обеми спрямо зърното.",
-			en: "Orchards are localised (Stara Zagora, Plovdiv, Rhodopes) — small volumes vs grains.",
-		},
-		irrigationGeneral: {
-			bg: "Капково на контура; критични периоди цъфтеж и уголемяване на плода.",
-			en: "Drip along contour; critical periods flowering and fruit sizing.",
-		},
-		irrigationIfDry: {
-			bg: "Суша: по-нагорни райони в Родопите и Западна България без достъп до язовирна вода са по-уязвими.",
-			en: "Drought: upland Rhodopes and western pockets without reservoir access are more vulnerable.",
-		},
+		genNotes: { bg: "Овощарството е локализирано в Пловдивско, Родопите.", en: "Orchards are localised in Plovdiv, Rhodopes." },
+		irrigationGeneral: { bg: "Капково на контура; критични периоди цъфтеж.", en: "Drip along contour; critical periods flowering." },
+		irrigationIfDry: { bg: "По-нагорни райони без язовирна вода са уязвими.", en: "Upland pockets without reservoir access are vulnerable." },
+	},
+	{
+		key: "rapeseed",
+		chartColor: "#fcd34d",
+		label: { bg: "Рапица", en: "Rapeseed" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/т", en: "BGN/t" },
+		series: [
+			{ year: 2021, kt: 380, priceBgn: 800 },
+			{ year: 2022, kt: 420, priceBgn: 950 },
+			{ year: 2023, kt: 360, priceBgn: 900 },
+			{ year: 2024, kt: 450, priceBgn: 750 },
+			{ year: 2025, kt: 390, priceBgn: 820 },
+		],
+		genNotes: { bg: "Основна експортна култура с висока волатилност на добивите.", en: "Key export crop with high yield volatility." },
+		irrigationGeneral: { bg: "Рядко се напоява, разчита се на зимна/пролетна влага.", en: "Rarely irrigated, relies on winter/spring moisture." },
+		irrigationIfDry: { bg: "Силно уязвима при суха есен, което пречи на поникването.", en: "Highly vulnerable in dry autumns, hindering emergence." },
+	},
+	{
+		key: "lavender",
+		chartColor: "#d8b4e2",
+		label: { bg: "Лавандула", en: "Lavender" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/кг", en: "BGN/kg" },
+		series: [
+			{ year: 2021, kt: 35, priceBgn: 85 },
+			{ year: 2022, kt: 42, priceBgn: 90 },
+			{ year: 2023, kt: 38, priceBgn: 75 },
+			{ year: 2024, kt: 50, priceBgn: 50 },
+			{ year: 2025, kt: 45, priceBgn: 60 },
+		],
+		genNotes: { bg: "България е световен лидер, но пазарът често се пренасища.", en: "Bulgaria is a global leader, but market often oversupplies." },
+		irrigationGeneral: { bg: "Силно сухоустойчива култура.", en: "Highly drought-resistant crop." },
+		irrigationIfDry: { bg: "Издържа на суша по-добре от повечето култури.", en: "Withstands drought better than most crops." },
+	},
+	{
+		key: "rose",
+		chartColor: "#fecdd3",
+		label: { bg: "Маслодайна роза", en: "Oil-bearing Rose" },
+		unitLabel: { bg: "хил. т", en: "kt" },
+		priceUnitLabel: { bg: "лв/кг", en: "BGN/kg" },
+		series: [
+			{ year: 2021, kt: 12, priceBgn: 3.5 },
+			{ year: 2022, kt: 14, priceBgn: 4.0 },
+			{ year: 2023, kt: 11, priceBgn: 3.8 },
+			{ year: 2024, kt: 15, priceBgn: 4.2 },
+			{ year: 2025, kt: 13, priceBgn: 4.5 },
+		],
+		genNotes: { bg: "Традиционен сектор в Розовата долина със специфични изисквания за бране.", en: "Traditional sector in Rose Valley with specific harvesting needs." },
+		irrigationGeneral: { bg: "Често се напоява капково.", en: "Often drip-irrigated." },
+		irrigationIfDry: { bg: "Сушата по време на цъфтеж драстично намалява добива на масло.", en: "Drought during flowering drastically reduces oil yield." },
+	},
+	{
+		key: "cow_milk",
+		chartColor: "#cbd5e1",
+		label: { bg: "Краве мляко", en: "Cow Milk" },
+		unitLabel: { bg: "млн. л.", en: "mln. L" },
+		priceUnitLabel: { bg: "лв/л", en: "BGN/L" },
+		series: [
+			{ year: 2021, kt: 850, priceBgn: 0.70 },
+			{ year: 2022, kt: 820, priceBgn: 1.05 },
+			{ year: 2023, kt: 790, priceBgn: 0.95 },
+			{ year: 2024, kt: 770, priceBgn: 0.90 },
+			{ year: 2025, kt: 760, priceBgn: 0.92 },
+		],
+		genNotes: { bg: "Тенденция на концентрация в по-големи ферми.", en: "Trend of concentration in larger farms." },
+		irrigationGeneral: { bg: "Водата е критична за пасищата и хигиената.", en: "Water is critical for pastures and hygiene." },
+		irrigationIfDry: { bg: "Сушата увеличава разходите за фураж.", en: "Drought increases feed costs." },
 	},
 ];
