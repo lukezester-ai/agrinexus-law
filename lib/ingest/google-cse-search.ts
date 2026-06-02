@@ -60,7 +60,7 @@ export async function googleCustomSearch(
   let ddgQuery = query;
 
   try {
-    const searchResults = await search(ddgQuery);
+    const searchResults = await search(ddgQuery, { time: "y" });
     const items = searchResults.results || [];
     
     const out: GoogleCseHit[] = [];
