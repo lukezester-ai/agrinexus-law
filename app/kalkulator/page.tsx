@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Calculator, Check, Copy, Sparkles, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { createClient } from "@/lib/supabase/client";
+import { createOptionalClient } from "@/lib/supabase/client";
 import {
 	estimateSubsidy,
 	formatShareSnippet,
@@ -26,6 +26,7 @@ const FOCUS_IDS = new Set<FarmProductionFocus>(FOCUS_OPTIONS.map((o) => o.id));
 
 /** Версия на запазеното състояние — при промяна на формулите вдигни, за да не се ползват стари сметки от sessionStorage. */
 const CALC_STATE_KEY = "agrinexus-kalkulator-state";
+const CALC_ACCESS_KEY = "agrinexus-kalkulator-access";
 const CALC_STATE_VERSION = 2;
 
 type CalcPersisted = {
@@ -61,6 +62,12 @@ function readPersistedCalculator(): CalcPersisted | null {
 	}
 }
 
+function parseDecimalInput(value: string): number {
+	const normalized = value.trim().replace(/\s+/g, "").replace(",", ".");
+	if (!normalized) return Number.NaN;
+	return Number(normalized);
+}
+
 export default function KalkulatorPage() {
 	const [decares, setDecares] = useState<string>("50");
 	const [focus, setFocus] = useState<FarmProductionFocus>("grain");
@@ -72,7 +79,7 @@ export default function KalkulatorPage() {
 	const [hasAccess, setHasAccess] = useState(false);
 	const [leadEmail, setLeadEmail] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const supabase = useMemo(() => createClient(), []);
+	const supabase = useMemo(() => createOptionalClient(), []);
 	const canPersist = useRef(false);
 
 	/** Еднократно: последна сесия (sessionStorage) → иначе профил от „Моята ферма“. */
@@ -97,6 +104,14 @@ export default function KalkulatorPage() {
 	}, []);
 
 	useEffect(() => {
+		try {
+			if (sessionStorage.getItem(CALC_ACCESS_KEY) === "1") {
+				setHasAccess(true);
+			}
+		} catch {
+			/* ignore */
+		}
+		if (!supabase) return;
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			if (session?.user) setHasAccess(true);
 		});
@@ -152,30 +167,36 @@ export default function KalkulatorPage() {
 
 	const handleUnlock = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!leadEmail) return;
+		const email = leadEmail.trim();
+		if (!email) return;
 		setIsSubmitting(true);
 		try {
-			await supabase.from("leads").insert([{ email: leadEmail }]);
+			if (supabase) {
+				await supabase.from("leads").insert([{ email }]);
+			}
 		} catch (err) {
 			console.error("Error saving lead", err);
 		} finally {
 			setHasAccess(true); // Allow access even if insert fails
+			try {
+				sessionStorage.setItem(CALC_ACCESS_KEY, "1");
+			} catch {
+				/* ignore */
+			}
 			setIsSubmitting(false);
 		}
 	};
 
 	const input = useMemo((): SubsidyCalculatorInput => {
-		const d = Number(String(decares).replace(",", "."));
+		const d = parseDecimalInput(decares);
 		const cowRaw = dairyCows.trim();
-		const cowNum = cowRaw === "" ? undefined : Number(cowRaw);
-		const cows =
-			cowNum !== undefined && Number.isFinite(cowNum) ? cowNum : undefined;
+		const cowNum = cowRaw === "" ? undefined : parseDecimalInput(cowRaw);
 		return {
-			decares: Number.isFinite(d) ? d : 0,
+			decares: d,
 			focus,
 			organicEco,
 			youngFarmer,
-			dairyCows: cows,
+			dairyCows: cowNum,
 		};
 	}, [decares, focus, organicEco, youngFarmer, dairyCows]);
 
@@ -237,7 +258,8 @@ export default function KalkulatorPage() {
 							Декари (общо декларирана площ)
 						</label>
 						<input
-							type="number"
+							type="text"
+							inputMode="decimal"
 							min={0.5}
 							step={0.5}
 							value={decares}
@@ -289,7 +311,8 @@ export default function KalkulatorPage() {
 								Брой млечни крави (за обвързано подпомагане, опционално)
 							</label>
 							<input
-								type="number"
+								type="text"
+								inputMode="numeric"
 								min={0}
 								value={dairyCows}
 								onChange={(e) => setDairyCows(e.target.value)}

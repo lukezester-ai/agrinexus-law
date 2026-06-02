@@ -51,6 +51,8 @@ export function validateCalculatorInput(input: SubsidyCalculatorInput): string |
 	}
 	if (input.focus === "livestock") {
 		const c = input.dairyCows ?? 0;
+		if (!Number.isFinite(c) || c < 0) return "Въведи валиден неотрицателен брой животни.";
+		if (!Number.isInteger(c)) return "Броят животни трябва да е цяло число.";
 		if (c > 50000) return "Нереалистичен брой животни.";
 	}
 	return null;

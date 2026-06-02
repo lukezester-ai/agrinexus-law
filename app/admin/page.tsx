@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Upload, FileText, CircleCheck, AlertCircle } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 
@@ -16,15 +16,6 @@ export default function AdminPage() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [ingestToken, setIngestToken] = useState("");
-
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem("agrinexus_ingest_admin_token");
-      if (saved) setIngestToken(saved);
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -73,11 +64,6 @@ export default function AdminPage() {
 
       setStatus("success");
       setMessage(`Документът е качен и индексиран успешно! Създадени са ${data.chunksCreated} парчета.`);
-      try {
-        sessionStorage.setItem("agrinexus_ingest_admin_token", ingestToken.trim());
-      } catch {
-        /* ignore */
-      }
       
       // Clear form
       setFile(null);
@@ -122,7 +108,7 @@ export default function AdminPage() {
                 className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition font-mono text-sm"
               />
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Запазва се само в този браузър (sessionStorage) след успешно качване — не се изпраща към трети страни.
+                Токенът стои само в текущата форма и не се запазва в браузъра след презареждане.
               </p>
             </div>
 

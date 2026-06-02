@@ -66,6 +66,16 @@ export const visitCounterPostRateLimit = redis
     })
   : null;
 
+/** Feedback updates are cheap, but should not be scriptable without friction. */
+export const chatFeedbackRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(20, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:chat-feedback",
+    })
+  : null;
+
 export async function checkRateLimit(
   rateLimit: Ratelimit | null,
   identifier: string

@@ -1,6 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function adminEmailAllowlist(): Set<string> | null {
+  const raw = process.env.ADMIN_EMAILS?.trim()
+  if (!raw) return null
+  const emails = raw
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+  return emails.length > 0 ? new Set(emails) : null
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -34,14 +44,27 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const isProfilePath = request.nextUrl.pathname.startsWith('/profile')
+  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
+
   if (
     !user &&
-    request.nextUrl.pathname.startsWith('/profile')
+    (isProfilePath || isAdminPath)
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/vhod'
     return NextResponse.redirect(url)
+  }
+
+  if (user && isAdminPath) {
+    const allowlist = adminEmailAllowlist()
+    const email = user.email?.toLowerCase()
+    if (allowlist && (!email || !allowlist.has(email))) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

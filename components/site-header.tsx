@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
+import { createOptionalClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
@@ -30,9 +30,10 @@ export function SiteHeader() {
 	const router = useRouter();
 	const reducedMotion = useReducedMotion();
 	const [user, setUser] = useState<User | null>(null);
-	const supabase = createClient();
+	const supabase = useMemo(() => createOptionalClient(), []);
 
 	useEffect(() => {
+		if (!supabase) return;
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			setUser(session?.user ?? null);
 		});
@@ -40,9 +41,10 @@ export function SiteHeader() {
 			setUser(session?.user ?? null);
 		});
 		return () => subscription.unsubscribe();
-	}, [supabase.auth]);
+	}, [supabase]);
 
 	const handleLogout = async () => {
+		if (!supabase) return;
 		await supabase.auth.signOut();
 		router.push("/");
 		router.refresh();

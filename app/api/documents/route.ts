@@ -1,10 +1,7 @@
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    return Response.json({ error: "Supabase is not configured." }, { status: 503 });
-  }
+  const supabase = await createClient();
 
   const url = new URL(req.url);
   const limitRaw = Number(url.searchParams.get("limit") ?? "30");

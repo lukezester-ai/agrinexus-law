@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Leaf, Mail, Lock, Loader2 } from 'lucide-react'
 import { SitePageShell } from '@/components/site-page-shell'
-import { createClient } from '@/lib/supabase/client'
+import { createOptionalClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -14,10 +14,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<'sign-in' | 'sign-up'>('sign-in')
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createOptionalClient(), [])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) {
+      setError('Supabase не е конфигуриран. Добавете NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY.')
+      return
+    }
     setIsLoading(true)
     setError(null)
 
