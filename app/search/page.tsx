@@ -293,7 +293,7 @@ export default function SearchPage() {
     >
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🔍</div>
-          <h1 className="font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white">Намери това, което търсиш</h1>
+          <h1 className="font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Намери това, което търсиш</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-400">
             Субсидии, наредби, срокове, процедури - всичко на едно място.
           </p>

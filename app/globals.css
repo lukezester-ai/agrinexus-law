@@ -178,6 +178,8 @@
 }
 
 html {
+	/* Леко по-компактен ритъм от стандартните 16px */
+	font-size: 15px;
 	scroll-behavior: smooth;
 	overflow-x: hidden;
 	width: 100%;
@@ -200,7 +202,7 @@ h5,
 h6,
 .font-display {
 	font-family: var(--font-display);
-	letter-spacing: -0.02em;
+	letter-spacing: -0.012em;
 }
 
 /* Glassmorphism — premium SaaS / AI university */
@@ -533,7 +535,7 @@ html.dark .agri-body-surface {
 	}
 
 	.brand-link {
-		@apply font-semibold text-emerald-600 underline underline-offset-2 hover:text-cyan-600 dark:text-emerald-300 dark:hover:text-cyan-200;
+		@apply font-medium text-emerald-600 underline underline-offset-2 hover:text-cyan-600 dark:text-emerald-300 dark:hover:text-cyan-200;
 	}
 
 	.glass-card {

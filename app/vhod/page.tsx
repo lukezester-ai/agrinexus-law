@@ -57,7 +57,7 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-400 mb-6 border border-teal-200 dark:border-teal-800">
               <Leaf size={32} />
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white mb-3">
+            <h1 className="text-3xl font-medium tracking-tight text-slate-900 dark:text-white mb-3">
               {view === 'sign-in' ? 'Добре дошли отново' : 'Създайте профил'}
             </h1>
             <p className="text-slate-600 dark:text-slate-400">

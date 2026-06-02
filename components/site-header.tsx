@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/button";
 import { navBarReveal } from "@/lib/motion-variants";
 
 const navClass =
-	"relative rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-300 after:absolute after:inset-x-2 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-emerald-400 after:to-cyan-400 after:transition-transform after:duration-300 hover:text-slate-950 hover:after:scale-x-100 dark:text-slate-400 dark:hover:text-white";
+	"relative rounded-xl px-3 py-2 text-sm font-normal text-slate-600 transition-all duration-300 after:absolute after:inset-x-2 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-emerald-400 after:to-cyan-400 after:transition-transform after:duration-300 hover:text-slate-950 hover:after:scale-x-100 dark:text-slate-400 dark:hover:text-white";
 
 const navHighlight =
-	"font-bold text-emerald-600 transition-colors duration-300 hover:text-cyan-700 dark:text-emerald-300 dark:hover:text-cyan-200";
+	"font-medium text-emerald-600 transition-colors duration-300 hover:text-cyan-700 dark:text-emerald-300 dark:hover:text-cyan-200";
 
 const NAV_LINKS = [
 	{ href: "/search", label: "Документи", highlight: false },
@@ -66,10 +66,10 @@ export function SiteHeader() {
 						<Leaf size={21} className="relative drop-shadow-sm" />
 					</span>
 					<span className="min-w-0 leading-tight">
-						<span className="block text-xs font-black tracking-[0.1em] text-slate-950 sm:text-sm sm:tracking-[0.18em] dark:text-white">
+						<span className="block text-xs font-medium tracking-[0.06em] text-slate-950 sm:text-sm sm:tracking-[0.1em] dark:text-white">
 							AGRINEXUS
 						</span>
-						<span className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-600 sm:block sm:text-[11px] sm:tracking-[0.28em] dark:text-cyan-300">
+						<span className="hidden text-[10px] font-normal uppercase tracking-[0.12em] text-emerald-600 sm:block sm:text-[11px] sm:tracking-[0.18em] dark:text-cyan-300">
 							Law Intelligence
 						</span>
 					</span>

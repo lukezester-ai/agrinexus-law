@@ -73,7 +73,7 @@ export default function KalendarPage() {
 						<CalendarDays size={24} aria-hidden />
 					</div>
 					<div>
-						<h1 className="font-display mb-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white">
+						<h1 className="font-display mb-1 text-2xl font-medium tracking-tight text-slate-950 dark:text-white">
 							Какво правим месец по месец
 						</h1>
 						<p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">

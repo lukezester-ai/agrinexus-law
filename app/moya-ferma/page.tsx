@@ -46,7 +46,7 @@ export default function MoyaFermaPage() {
     <SitePageShell maxWidth="2xl" subheader={<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Моята ферма</p>}>
         <div className="glass-panel overflow-hidden rounded-3xl">
           <div className="p-8 border-b border-white/10 bg-teal-50/50 dark:bg-teal-950/20">
-            <h1 className="font-display text-3xl font-black text-slate-950 dark:text-white flex items-center gap-3">
+            <h1 className="font-display text-3xl font-medium text-slate-950 dark:text-white flex items-center gap-3">
               <Sprout className="text-teal-600 dark:text-teal-400" /> Моята ферма
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm leading-relaxed">

@@ -27,13 +27,13 @@ export function ChatMarkdown({ content, variant = "assistant" }: Props) {
 			<ReactMarkdown
 				components={{
 					h1: ({ children }) => (
-						<h3 className="mb-2 mt-4 text-base font-black text-slate-950 first:mt-0 dark:text-white">{children}</h3>
+						<h3 className="mb-2 mt-4 text-base font-medium text-slate-950 first:mt-0 dark:text-white">{children}</h3>
 					),
 					h2: ({ children }) => (
-						<h3 className="mb-2 mt-4 text-sm font-black text-slate-950 first:mt-0 dark:text-white">{children}</h3>
+						<h3 className="mb-2 mt-4 text-sm font-medium text-slate-950 first:mt-0 dark:text-white">{children}</h3>
 					),
 					h3: ({ children }) => (
-						<h3 className="mb-2 mt-3 text-sm font-black text-slate-900 first:mt-0 dark:text-emerald-50">{children}</h3>
+						<h3 className="mb-2 mt-3 text-sm font-medium text-slate-900 first:mt-0 dark:text-emerald-50">{children}</h3>
 					),
 					p: ({ children }) => <p className="mb-2 last:mb-0 leading-6">{children}</p>,
 					ul: ({ children }) => (

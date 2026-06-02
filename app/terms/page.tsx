@@ -7,7 +7,7 @@ export default function TermsPage() {
 		<SitePageShell maxWidth="3xl">
 			<header className="mb-8 text-center sm:text-left">
 				<p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Правна информация</p>
-				<h1 className="font-display mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+				<h1 className="font-display mt-2 text-3xl font-medium tracking-tight text-slate-950 dark:text-white">
 					Условия за ползване
 				</h1>
 				<p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Последна актуализация: 1 май 2026</p>

@@ -101,7 +101,7 @@ export default function AdminPage() {
     >
         <div className="glass-panel rounded-3xl overflow-hidden">
           <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
-            <h1 className="font-display text-3xl font-black text-slate-950 dark:text-white flex items-center gap-3">
+            <h1 className="font-display text-3xl font-medium text-slate-950 dark:text-white flex items-center gap-3">
               <Upload className="text-teal-600" /> Качване на нов документ
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm leading-relaxed">

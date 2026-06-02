@@ -10,12 +10,18 @@ import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
+const inter = Inter({
+	subsets: ["latin", "cyrillic"],
+	variable: "--font-inter",
+	display: "swap",
+	weight: ["300", "400", "500", "600"],
+});
 /** Заглавия: Space Grotesk (латиница); кирилица — Inter fallback (виж globals.css). */
 const spaceGrotesk = Space_Grotesk({
 	subsets: ["latin", "latin-ext"],
 	variable: "--font-space-grotesk",
 	display: "swap",
+	weight: ["300", "400", "500", "600"],
 });
 
 const themeInitScript = `(function(){try{var k='agrinexus-theme';var f='agrinexus-theme-user-set';var s=localStorage.getItem(k);var u=localStorage.getItem(f)==='1';if(u&&s==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`;
@@ -111,7 +117,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body
-				className={`${inter.variable} ${spaceGrotesk.variable} agri-mobile-safe agri-body-surface min-h-screen bg-[var(--agri-bg-ultra)] text-slate-900 antialiased dark:bg-[#030712] dark:text-slate-100 font-sans`}
+				className={`${inter.variable} ${spaceGrotesk.variable} agri-mobile-safe agri-body-surface min-h-screen bg-[var(--agri-bg-ultra)] text-slate-900 antialiased dark:bg-[#030712] dark:text-slate-100 font-sans font-normal`}
 			>
 				{children}
 				<PwaRegister />

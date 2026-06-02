@@ -119,7 +119,7 @@ export default function KalkulatorPage() {
 				<div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-teal-200/80 bg-teal-100 text-teal-800 dark:border-teal-800 dark:bg-teal-950/80 dark:text-teal-300">
 					<Calculator size={28} aria-hidden />
 				</div>
-				<h1 className="font-display mb-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+				<h1 className="font-display mb-2 text-2xl font-medium tracking-tight text-slate-950 dark:text-white sm:text-3xl">
 					Колко приблизително може да получиш?
 				</h1>
 				<p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">

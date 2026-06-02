@@ -83,7 +83,7 @@ export default function ProfilePage() {
           <div className="mb-3 text-4xl" aria-hidden>
             🌾
           </div>
-          <h1 className="font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white">Разкажи ни за стопанството си</h1>
+          <h1 className="font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Разкажи ни за стопанството си</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-400">
             Колкото повече знаем, толкова по-точни ще са отговорите от Елена, Борис и Виктория.
           </p>

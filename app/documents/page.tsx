@@ -111,7 +111,7 @@ export default function DocumentsPage() {
 				<div className="mb-3 text-4xl" aria-hidden>
 					📂
 				</div>
-				<h1 className="font-display text-2xl font-black tracking-tight text-slate-950 dark:text-white">Твоите файлове от ДФЗ и др.</h1>
+				<h1 className="font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Твоите файлове от ДФЗ и др.</h1>
 				<p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-slate-600 dark:text-slate-400">
 					Файловете се пазят <strong className="text-slate-900 dark:text-white">само в този браузър</strong> (IndexedDB). Не се изисква вход —
 					достъпни са веднага на това устройство.
