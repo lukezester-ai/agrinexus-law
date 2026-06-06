@@ -6,12 +6,15 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
 	ArrowRight,
 	Bell,
+	CalendarDays,
+	FileSearch,
 	ExternalLink,
-	LockKeyhole,
 	Search,
+	ShieldCheck,
 	Sparkles,
 	ThumbsDown,
 	ThumbsUp,
+	Tractor,
 	User,
 } from "lucide-react";
 import { AiCharacterAvatar } from "@/components/ai-character-avatar";
@@ -90,6 +93,27 @@ const EXAMPLE_QUERIES = [
 	"Кои са сроковете за директни плащания тази кампания?",
 	"Обясни ми изискванията за дневници при био стопанство.",
 ];
+
+const HERO_ACTIONS = [
+	{
+		label: "Провери срокове",
+		description: "Кампания, заявления и оперативни рискове",
+		href: "/srokove",
+		Icon: CalendarDays,
+	},
+	{
+		label: "Намери документ",
+		description: "Наредби, процедури и PDF източници",
+		href: "/search",
+		Icon: FileSearch,
+	},
+	{
+		label: "Моята ферма",
+		description: "Профил за по-точни AI отговори",
+		href: "/moya-ferma",
+		Icon: Tractor,
+	},
+] as const;
 
 export default function Home() {
 	const resultsSectionRef = useRef<HTMLElement | null>(null);
@@ -356,71 +380,87 @@ export default function Home() {
 						>
 							<motion.div
 								variants={heroItem(reducedMotion)}
-								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-sm border border-cyan-600/30 bg-cyan-50/90 px-4 py-2 text-xs font-medium uppercase leading-snug tracking-[0.12em] text-cyan-900 shadow-[0_0_24px_-8px_rgba(6,182,212,0.45)] backdrop-blur-md dark:border-cyan-400/35 dark:bg-cyan-950/50 dark:text-cyan-100 dark:shadow-[0_0_32px_-6px_rgba(34,211,238,0.25)]"
+								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-cyan-600/30 bg-cyan-50/90 px-4 py-2 text-xs font-medium uppercase leading-snug tracking-[0.12em] text-cyan-900 shadow-[0_0_24px_-8px_rgba(6,182,212,0.45)] backdrop-blur-md dark:border-cyan-400/35 dark:bg-cyan-950/50 dark:text-cyan-100 dark:shadow-[0_0_32px_-6px_rgba(34,211,238,0.25)]"
 							>
-								<LockKeyhole size={16} className="shrink-0" />
-								<span className="sm:hidden">Проверими източници</span>
-								<span className="hidden sm:inline">Проверими източници, не свободни догадки</span>
+								<ShieldCheck size={16} className="shrink-0" />
+								<span className="sm:hidden">AI copilot за фермери</span>
+								<span className="hidden sm:inline">AI правен и оперативен copilot за български фермери</span>
 							</motion.div>
 							<motion.h1
 								variants={heroItem(reducedMotion)}
 								className="w-full max-w-4xl font-display text-[2.05rem] font-light leading-[1.1] tracking-tight sm:text-5xl sm:leading-[1.08] md:text-6xl md:leading-[1.05] lg:text-[3.65rem]"
 							>
 								<span className="block bg-gradient-to-r from-slate-900 via-cyan-800 to-slate-800 bg-clip-text text-transparent dark:from-cyan-100 dark:via-white dark:to-cyan-200">
-									Правна и аграрна
+									Решения за стопанството
 								</span>
 								<span className="mt-2 block bg-gradient-to-r from-cyan-700 via-teal-700 to-slate-900 bg-clip-text text-transparent sm:mt-3 dark:from-cyan-300 dark:via-teal-200 dark:to-cyan-100">
-									документация
+									с проверима AI логика
 								</span>
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
 								className="mt-7 max-w-2xl text-base font-light leading-relaxed tracking-wide text-slate-600 dark:text-slate-300 sm:text-lg"
 							>
-								AgriNexus.Law комбинира търсене в документи, AI резюмета, срокове и практически инструменти за стопанства, консултанти и агро екипи.
+								Питай за субсидии, договори, срокове и документи. Получаваш структуриран отговор, източници и следваща практическа стъпка за твоята ферма.
 							</motion.p>
 
 							<motion.div variants={heroItem(reducedMotion)} className="mt-8 max-w-3xl">
-							<form onSubmit={onSearch} className="max-w-3xl">
-								<div
-									ref={searchFormRef}
-									className={`iot-hud-search grid gap-4 p-3 transition-all ${
-										searchFocusPulse ? "ring-4 ring-cyan-400/25 dark:ring-cyan-400/20" : ""
-									}`}
-								>
-									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-										<div className="flex min-w-0 flex-1 items-center gap-3 px-3">
-											<Search className="shrink-0 text-slate-400 dark:text-slate-500" size={24} />
-											<input
-												ref={searchInputRef}
-												value={query}
-												onChange={(e) => setQuery(e.target.value)}
-												placeholder="Попитай за срок, субсидия, наредба или документ..."
-												className="min-w-0 w-full flex-1 bg-transparent text-base font-normal text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
-											/>
-										</div>
-										<button
-											type="submit"
-											disabled={loading || !query.trim()}
-											className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm border border-cyan-600/30 bg-gradient-to-br from-cyan-600 to-teal-700 px-6 py-4 text-sm font-semibold text-white shadow-[0_0_28px_-8px_rgba(6,182,212,0.55)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:from-cyan-500 dark:to-teal-600 dark:shadow-[0_0_36px_-6px_rgba(34,211,238,0.35)]"
-										>
-											{loading ? "Търся..." : "Търси"} <ArrowRight size={16} />
-										</button>
-									</div>
-									<div className="flex flex-wrap gap-2 px-2 pb-1">
-										{EXAMPLE_QUERIES.map((item) => (
+								<form onSubmit={onSearch} className="max-w-3xl">
+									<div
+										ref={searchFormRef}
+										className={`iot-hud-search grid gap-4 p-3 transition-all ${
+											searchFocusPulse ? "ring-4 ring-cyan-400/25 dark:ring-cyan-400/20" : ""
+										}`}
+									>
+										<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+											<div className="flex min-w-0 flex-1 items-center gap-3 px-3">
+												<Search className="shrink-0 text-slate-400 dark:text-slate-500" size={24} />
+												<input
+													ref={searchInputRef}
+													value={query}
+													onChange={(e) => setQuery(e.target.value)}
+													placeholder="Напр. какво трябва да направя за директни плащания?"
+													className="min-w-0 w-full flex-1 bg-transparent text-base font-normal text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
+												/>
+											</div>
 											<button
-												key={item}
-												type="button"
-												onClick={() => jumpToSearch(item, true)}
-											className="rounded-sm border border-cyan-600/20 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-500/50 hover:text-cyan-800 hover:shadow-[0_0_20px_-6px_rgba(6,182,212,0.45)] dark:border-cyan-500/25 dark:bg-slate-900/50 dark:text-cyan-100/90 dark:hover:border-cyan-300/50 dark:hover:text-cyan-50"
+												type="submit"
+												disabled={loading || !query.trim()}
+												className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm border border-cyan-600/30 bg-gradient-to-br from-cyan-600 to-teal-700 px-6 py-4 text-sm font-semibold text-white shadow-[0_0_28px_-8px_rgba(6,182,212,0.55)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:from-cyan-500 dark:to-teal-600 dark:shadow-[0_0_36px_-6px_rgba(34,211,238,0.35)]"
 											>
-												{item}
+												{loading ? "Търся..." : "Питай AI"} <ArrowRight size={16} />
 											</button>
-										))}
+										</div>
+										<div className="flex flex-wrap gap-2 px-2 pb-1">
+											{EXAMPLE_QUERIES.map((item) => (
+												<button
+													key={item}
+													type="button"
+													onClick={() => jumpToSearch(item, true)}
+													className="rounded-full border border-cyan-600/20 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-500/50 hover:text-cyan-800 hover:shadow-[0_0_20px_-6px_rgba(6,182,212,0.45)] dark:border-cyan-500/25 dark:bg-slate-900/50 dark:text-cyan-100/90 dark:hover:border-cyan-300/50 dark:hover:text-cyan-50"
+												>
+													{item}
+												</button>
+											))}
+										</div>
 									</div>
-								</div>
-							</form>
+								</form>
+							</motion.div>
+
+							<motion.div variants={heroItem(reducedMotion)} className="mt-5 grid gap-3 sm:grid-cols-3">
+								{HERO_ACTIONS.map(({ label, description, href, Icon }) => (
+									<Link
+										key={href}
+										href={href}
+										className="group rounded-2xl border border-white/60 bg-white/72 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/70 hover:shadow-[0_18px_44px_-24px_rgba(6,182,212,0.55)] dark:border-white/10 dark:bg-slate-950/48 dark:hover:border-cyan-400/35"
+									>
+										<div className="mb-3 grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-100 to-cyan-100 text-cyan-800 transition group-hover:scale-105 dark:from-emerald-950 dark:to-cyan-950 dark:text-cyan-200">
+											<Icon size={18} />
+										</div>
+										<p className="text-sm font-semibold text-slate-950 dark:text-white">{label}</p>
+										<p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">{description}</p>
+									</Link>
+								))}
 							</motion.div>
 
 							<motion.div variants={heroItem(reducedMotion)} className="mt-8 grid gap-3 sm:grid-cols-3">

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AnalyticsLoader } from "@/components/analytics-loader";
+import { CommandPalette } from "@/components/command-palette";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
+import { MobileActionDock } from "@/components/mobile-action-dock";
 import { PwaHelpButton } from "@/components/pwa-help-button";
 import { PwaOnboarding } from "@/components/pwa-onboarding";
 import { PwaRegister } from "@/components/pwa-register";
@@ -120,6 +122,8 @@ export default function RootLayout({
 				className={`${inter.variable} ${spaceGrotesk.variable} agri-mobile-safe agri-body-surface min-h-screen bg-[var(--agri-bg-ultra)] text-slate-900 antialiased dark:bg-[#030712] dark:text-slate-100 font-sans font-normal`}
 			>
 				{children}
+				<CommandPalette />
+				<MobileActionDock />
 				<PwaRegister />
 				<PwaHelpButton />
 				<PwaOnboarding />

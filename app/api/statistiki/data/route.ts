@@ -4,6 +4,14 @@ import { CROP_PROFILES } from "@/lib/crop-statistics-data";
 
 export const revalidate = 3600; // Cache for 1 hour
 
+function isMissingCropStatisticsTableError(error: { code?: string; message?: string }) {
+	const message = error.message?.toLowerCase() || "";
+	return (
+		error.code === "42P01" ||
+		message.includes("crop_statistics") && message.includes("schema cache")
+	);
+}
+
 export async function GET() {
 	try {
 		const supabase = getSupabaseAdmin();
@@ -18,7 +26,9 @@ export async function GET() {
 			.order("year", { ascending: true });
 
 		if (error) {
-			console.error("[api/statistiki] supabase error:", error.message);
+			if (!isMissingCropStatisticsTableError(error)) {
+				console.error("[api/statistiki] supabase error:", error.message);
+			}
 			// Fallback към локалните данни
 			return NextResponse.json({ ok: false, fallback: true, data: CROP_PROFILES });
 		}

@@ -193,6 +193,12 @@ body {
 	overscroll-behavior-x: none;
 }
 
+@media (max-width: 767px) {
+	body {
+		padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+	}
+}
+
 /* Typography: Space Grotesk за латиница в заглавия; кирилица → Inter fallback. */
 h1,
 h2,
