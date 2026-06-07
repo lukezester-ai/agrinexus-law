@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
 	ArrowRight,
 	CalendarDays,
+	ClipboardCheck,
 	FileSearch,
 	Gauge,
 	Keyboard,
@@ -30,6 +31,13 @@ const commands = [
 		href: "/search",
 		keywords: "документи наредби процедури pdf търсене",
 		Icon: FileSearch,
+	},
+	{
+		label: "AI преглед на документ",
+		description: "Подготви договор, ДФЗ документ или уведомление за structured AI анализ",
+		href: "/document-review",
+		keywords: "преглед документ договор дфз анализ checklist ai",
+		Icon: ClipboardCheck,
 	},
 	{
 		label: "Срокове и кампании",

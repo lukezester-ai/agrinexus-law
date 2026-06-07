@@ -18,10 +18,11 @@ const navHighlight =
 
 const NAV_LINKS = [
 	{ href: "/search", label: "Документи", highlight: false },
+	{ href: "/document-review", label: "AI преглед", highlight: true },
 	{ href: "/srokove", label: "Срокове", highlight: false },
 	{ href: "/kalkulator", label: "Калкулатори", highlight: false },
 	{ href: "/statistiki", label: "Статистики", highlight: false },
-	{ href: "/moya-ferma", label: "Моята ферма", highlight: true },
+	{ href: "/moya-ferma", label: "Моята ферма", highlight: false },
 	{ href: "/admin", label: "Качи PDF", highlight: false },
 ] as const;
 

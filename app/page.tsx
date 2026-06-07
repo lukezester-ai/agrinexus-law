@@ -7,6 +7,7 @@ import {
 	ArrowRight,
 	Bell,
 	CalendarDays,
+	ClipboardCheck,
 	FileSearch,
 	ExternalLink,
 	Search,
@@ -14,7 +15,6 @@ import {
 	Sparkles,
 	ThumbsDown,
 	ThumbsUp,
-	Tractor,
 	User,
 } from "lucide-react";
 import { AiCharacterAvatar } from "@/components/ai-character-avatar";
@@ -108,10 +108,10 @@ const HERO_ACTIONS = [
 		Icon: FileSearch,
 	},
 	{
-		label: "Моята ферма",
-		description: "Профил за по-точни AI отговори",
-		href: "/moya-ferma",
-		Icon: Tractor,
+		label: "AI преглед",
+		description: "Провери договор, ДФЗ документ или писмо",
+		href: "/document-review",
+		Icon: ClipboardCheck,
 	},
 ] as const;
 
