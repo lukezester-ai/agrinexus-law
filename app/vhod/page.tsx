@@ -24,7 +24,7 @@ export default function LoginPage() {
     try {
       if (view === 'sign-in') {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim().toLowerCase(),
           password,
         })
         if (error) throw error
@@ -32,7 +32,7 @@ export default function LoginPage() {
         router.refresh()
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim().toLowerCase(),
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
@@ -43,13 +43,16 @@ export default function LoginPage() {
         setError('Успешна регистрация! Моля, влезте в профила си (или потвърдете имейла си, ако се изисква).')
       }
     } catch (err: any) {
+      console.error('[auth]', err)
       // Превод на най-честите грешки от Supabase
-      let msg = err.message || 'Възникна грешка.';
-      if (msg.includes('rate limit')) msg = 'Твърде много опити. Моля, изчакайте малко и опитайте отново.';
-      else if (msg.includes('User already registered')) msg = 'Този имейл вече е регистриран. Моля, влезте в профила си.';
-      else if (msg.includes('Password should be at least')) msg = 'Паролата трябва да съдържа поне 6 символа.';
-      else if (msg.includes('Invalid login credentials')) msg = 'Грешен имейл или парола.';
-      else if (msg.includes('Email link is invalid or has expired')) msg = 'Линкът за потвърждение е невалиден или е изтекъл.';
+      let msg = err?.message || 'Възникна грешка.'
+      if (msg.includes('Failed to fetch') || err?.name === 'TypeError') {
+        msg = 'Не успяхме да се свържем със Supabase Auth. Проверете интернет връзката, production env настройките във Vercel и дали браузърът/разширение не блокира заявката.'
+      } else if (msg.includes('rate limit')) msg = 'Твърде много опити. Моля, изчакайте малко и опитайте отново.'
+      else if (msg.includes('User already registered')) msg = 'Този имейл вече е регистриран. Моля, влезте в профила си.'
+      else if (msg.includes('Password should be at least')) msg = 'Паролата трябва да съдържа поне 6 символа.'
+      else if (msg.includes('Invalid login credentials')) msg = 'Грешен имейл или парола.'
+      else if (msg.includes('Email link is invalid or has expired')) msg = 'Линкът за потвърждение е невалиден или е изтекъл.'
 
       setError(msg)
     } finally {
