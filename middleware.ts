@@ -1,13 +1,17 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const BUILT_IN_ADMIN_EMAILS = ['lukezester@gmail.com']
+
 function adminEmailAllowlist(): Set<string> | null {
-  const raw = process.env.ADMIN_EMAILS?.trim()
-  if (!raw) return null
-  const emails = raw
+  const raw = process.env.ADMIN_EMAILS?.trim().replace(/^"+|"+$/g, '')
+  const configuredEmails = raw
+    ? raw
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean)
+    : []
+  const emails = [...new Set([...BUILT_IN_ADMIN_EMAILS, ...configuredEmails])]
   return emails.length > 0 ? new Set(emails) : null
 }
 

@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { COMMAND_DEADLINES, type CommandDeadline } from "@/lib/command-center-data";
 import { getRagIndexStatus } from "@/lib/rag/rag-index-status";
 import {
-	getSiteVisitTotal,
+	getSiteVisitStats,
 	isSiteVisitCounterConfigured,
 } from "@/lib/site-visit-counter";
 
@@ -79,7 +79,7 @@ export type LiveIntelligencePayload = {
 	deadlineRisks: DeadlineRiskRow[];
 	rag: Awaited<ReturnType<typeof getRagIndexStatus>>;
 	online: boolean;
-	visits: { configured: boolean; total: number | null };
+	visits: { configured: boolean; total: number | null; totalVisits: number | null; uniqueVisitors: number | null };
 };
 
 export async function getLiveIntelligenceStats(): Promise<LiveIntelligencePayload> {
@@ -103,7 +103,9 @@ export async function getLiveIntelligenceStats(): Promise<LiveIntelligencePayloa
 
 	const pagesCount = PUBLIC_SITE_PAGES.length;
 	const visitsConfigured = isSiteVisitCounterConfigured();
-	const visitTotal = visitsConfigured ? await getSiteVisitTotal() : null;
+	const visitStats = visitsConfigured ? await getSiteVisitStats() : null;
+	const visitTotal = visitStats?.totalVisits ?? null;
+	const uniqueVisitors = visitStats?.uniqueVisitors ?? null;
 
 	const tiles: LiveStatTile[] = [
 		{
@@ -112,8 +114,8 @@ export async function getLiveIntelligenceStats(): Promise<LiveIntelligencePayloa
 		},
 		visitsConfigured && visitTotal !== null
 			? {
-					value: formatCount(visitTotal),
-					label: visitTotal === 1 ? "посещение" : "посещения",
+					value: formatCount(uniqueVisitors ?? visitTotal),
+					label: (uniqueVisitors ?? visitTotal) === 1 ? "посетител" : "посетители",
 				}
 			: {
 					value: formatCount(publicDocs > 0 ? publicDocs : pagesCount),
@@ -139,6 +141,8 @@ export async function getLiveIntelligenceStats(): Promise<LiveIntelligencePayloa
 		visits: {
 			configured: visitsConfigured,
 			total: visitTotal,
+			totalVisits: visitTotal,
+			uniqueVisitors,
 		},
 	};
 }

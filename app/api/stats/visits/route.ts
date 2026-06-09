@@ -1,5 +1,6 @@
+import { createHash } from "crypto";
 import {
-  getSiteVisitTotal,
+  getSiteVisitStats,
   incrementSiteVisitTotal,
   isSiteVisitCounterConfigured,
 } from "@/lib/site-visit-counter";
@@ -11,6 +12,15 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function buildVisitorId(req: Request): string {
+  const ip = extractClientIp(req);
+  const userAgent = req.headers.get("user-agent") || "unknown";
+  const language = req.headers.get("accept-language") || "unknown";
+  return createHash("sha256")
+    .update(`${ip}|${userAgent}|${language}`)
+    .digest("hex");
+}
+
 /** Публично четене на брояча (без секрет). */
 export async function GET() {
   const configured = isSiteVisitCounterConfigured();
@@ -21,8 +31,14 @@ export async function GET() {
       total: null,
     });
   }
-  const total = await getSiteVisitTotal();
-  return Response.json({ ok: true as const, configured: true, total });
+  const stats = await getSiteVisitStats();
+  return Response.json({
+    ok: true as const,
+    configured: true,
+    total: stats.totalVisits,
+    totalVisits: stats.totalVisits,
+    uniqueVisitors: stats.uniqueVisitors,
+  });
 }
 
 /**
@@ -50,10 +66,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const total = await incrementSiteVisitTotal();
+  const stats = await incrementSiteVisitTotal(buildVisitorId(req));
   return Response.json({
     ok: true as const,
-    total: total ?? 0,
+    total: stats?.totalVisits ?? 0,
+    totalVisits: stats?.totalVisits ?? 0,
+    uniqueVisitors: stats?.uniqueVisitors ?? 0,
     remaining: rl.remaining,
   });
 }

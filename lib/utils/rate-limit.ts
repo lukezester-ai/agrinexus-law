@@ -88,12 +88,17 @@ export async function checkRateLimit(
     return { success: true };
   }
 
-  const result = await rateLimit.limit(identifier);
-  return {
-    success: result.success,
-    limit: result.limit,
-    remaining: result.remaining,
-  };
+  try {
+    const result = await rateLimit.limit(identifier);
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+    };
+  } catch (error) {
+    console.error("[rate-limit] continuing without rate limit:", error);
+    return { success: true };
+  }
 }
 
 export function extractClientIp(req: Request): string {

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import { getRagIndexStatus } from "@/lib/rag/rag-index-status";
+import { getSiteVisitStats, isSiteVisitCounterConfigured } from "@/lib/site-visit-counter";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -35,12 +36,15 @@ type CockpitData = {
 		nodeEnv: string;
 		siteUrl: string | null;
 		supabaseConfigured: boolean;
+		visitCounterConfigured: boolean;
 	};
 	counts: {
 		chatLogs: number;
 		publicDocuments: number;
 		documentReviews: number;
 		learnedItems: number;
+		totalVisits: number;
+		uniqueVisitors: number;
 	};
 	latestDocuments: LatestDocument[];
 	rag: Awaited<ReturnType<typeof getRagIndexStatus>>;
@@ -118,13 +122,15 @@ async function getLatestDocuments(): Promise<LatestDocument[]> {
 }
 
 async function getCockpitData(): Promise<CockpitData> {
-	const [rag, chatLogs, publicDocuments, documentReviews, learnedItems, latestDocuments] = await Promise.all([
+	const visitCounterConfigured = isSiteVisitCounterConfigured();
+	const [rag, chatLogs, publicDocuments, documentReviews, learnedItems, latestDocuments, visitStats] = await Promise.all([
 		getRagIndexStatus(),
 		safeCount("chat_logs"),
 		safeCount("public_documents"),
 		safeCount("document_reviews"),
 		safeCount("knowledge_learned_items"),
 		getLatestDocuments(),
+		visitCounterConfigured ? getSiteVisitStats() : Promise.resolve({ totalVisits: 0, uniqueVisitors: 0 }),
 	]);
 
 	return {
@@ -133,12 +139,15 @@ async function getCockpitData(): Promise<CockpitData> {
 			nodeEnv: process.env.NODE_ENV || "development",
 			siteUrl: process.env.NEXT_PUBLIC_SITE_URL || null,
 			supabaseConfigured: Boolean(getSupabaseAdmin()),
+			visitCounterConfigured,
 		},
 		counts: {
 			chatLogs,
 			publicDocuments,
 			documentReviews,
 			learnedItems,
+			totalVisits: visitStats.totalVisits,
+			uniqueVisitors: visitStats.uniqueVisitors,
 		},
 		latestDocuments,
 		rag,
@@ -223,8 +232,9 @@ export default async function AdminCockpitPage() {
 					</div>
 				</section>
 
-				<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+				<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
 					<MetricCard label="AI заявки" value={formatCount(data.counts.chatLogs)} description="Записи в chat_logs за измерване на AI usage." Icon={Sparkles} />
+					<MetricCard label="Посетители" value={formatCount(data.counts.uniqueVisitors)} description={`Уникални посетители по хеширан браузър/IP отпечатък. Общо посещения: ${formatCount(data.counts.totalVisits)}.`} Icon={Users} />
 					<MetricCard label="Документи" value={formatCount(data.counts.publicDocuments)} description="Публични документи в Supabase knowledge pipeline." Icon={FileText} />
 					<MetricCard label="AI прегледи" value={formatCount(data.counts.documentReviews)} description="Document Intelligence case reviews в Agrinexus Law." Icon={Scale} />
 					<MetricCard label="RAG coverage" value={`${ragCoverage}%`} description={`${formatCount(data.rag.withEmbedding)} от ${formatCount(data.rag.totalChunks)} chunks имат embedding.`} Icon={Database} />
@@ -243,6 +253,7 @@ export default async function AdminCockpitPage() {
 						<div className="space-y-3 text-sm">
 							<p className="flex justify-between gap-4"><span className="text-slate-500">Mode</span><span className="font-semibold">{data.runtime.nodeEnv}</span></p>
 							<p className="flex justify-between gap-4"><span className="text-slate-500">Supabase</span><span className="font-semibold">{data.runtime.supabaseConfigured ? "configured" : "missing"}</span></p>
+							<p className="flex justify-between gap-4"><span className="text-slate-500">Visit counter</span><span className="font-semibold">{data.runtime.visitCounterConfigured ? "configured" : "missing"}</span></p>
 							<p className="grid gap-1"><span className="text-slate-500">URL</span><span className="break-all font-mono text-xs">{data.runtime.siteUrl || "локална среда"}</span></p>
 							<p className="grid gap-1"><span className="text-slate-500">Updated</span><span className="font-mono text-xs">{data.timestamp}</span></p>
 						</div>
