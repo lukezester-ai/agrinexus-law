@@ -26,7 +26,7 @@ const NAV_LINKS: readonly NavLink[] = [
 	{ href: "/statistiki", label: "Статистики", highlight: false },
 	{ href: "/moya-ferma", label: "Моята ферма", highlight: false },
 	{ href: "https://www.terraiq.me", label: "TerraIQ", highlight: true, external: true },
-	{ href: "https://fieldlot-agrinexus-projects.vercel.app", label: "FIELDLOT", highlight: false, external: true },
+	{ href: "https://www.fieldlot.io", label: "FIELDLOT", highlight: false, external: true },
 	{ href: "/admin", label: "Качи PDF", highlight: false },
 ];
 
