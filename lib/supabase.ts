@@ -1,8 +1,17 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-/** Lazy admin client — avoids crashing route modules when env vars are missing (local dev). */
+/** Lazy admin client - avoids crashing route modules when env vars are missing or invalid. */
 let adminClient: SupabaseClient | null = null;
 let adminResolved = false;
+
+function isValidHttpUrl(value: string): boolean {
+	try {
+		const url = new URL(value);
+		return url.protocol === "http:" || url.protocol === "https:";
+	} catch {
+		return false;
+	}
+}
 
 export function getSupabaseAdmin(): SupabaseClient | null {
 	if (adminResolved) return adminClient;
@@ -11,11 +20,15 @@ export function getSupabaseAdmin(): SupabaseClient | null {
 		process.env.SUPABASE_URL?.trim() ||
 		process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 	const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-	if (!url || !key) {
+	if (!url || !key || !isValidHttpUrl(url)) {
 		adminClient = null;
 		return null;
 	}
-	adminClient = createClient(url, key);
+	try {
+		adminClient = createClient(url, key);
+	} catch {
+		adminClient = null;
+	}
 	return adminClient;
 }
 
