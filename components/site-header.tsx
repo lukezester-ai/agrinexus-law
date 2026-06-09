@@ -16,15 +16,19 @@ const navClass =
 const navHighlight =
 	"font-medium text-emerald-600 transition-colors duration-300 hover:text-cyan-700 dark:text-emerald-300 dark:hover:text-cyan-200";
 
-const NAV_LINKS = [
+type NavLink = { href: string; label: string; highlight: boolean; external?: boolean };
+
+const NAV_LINKS: readonly NavLink[] = [
 	{ href: "/search", label: "Документи", highlight: false },
 	{ href: "/document-review", label: "AI преглед", highlight: true },
 	{ href: "/srokove", label: "Срокове", highlight: false },
 	{ href: "/kalkulator", label: "Калкулатори", highlight: false },
 	{ href: "/statistiki", label: "Статистики", highlight: false },
 	{ href: "/moya-ferma", label: "Моята ферма", highlight: false },
+	{ href: "https://www.terraiq.me", label: "TerraIQ", highlight: true, external: true },
+	{ href: "https://fieldlot-agrinexus-projects.vercel.app", label: "FIELDLOT", highlight: false, external: true },
 	{ href: "/admin", label: "Качи PDF", highlight: false },
-] as const;
+];
 
 /** Единна плаваща навигация — стъклена лента + Framer Motion. */
 export function SiteHeader() {
@@ -78,15 +82,27 @@ export function SiteHeader() {
 					</span>
 				</Link>
 				<nav className="hidden min-w-0 items-center gap-1 text-sm md:flex lg:gap-2" aria-label="Основна навигация">
-					{NAV_LINKS.map((item) => (
-						<Link
-							key={item.href}
-							href={item.href}
-							className={item.highlight ? `${navClass} ${navHighlight}` : navClass}
-						>
-							{item.label}
-						</Link>
-					))}
+					{NAV_LINKS.map((item) =>
+						item.external ? (
+							<a
+								key={item.href}
+								href={item.href}
+								target="_blank"
+								rel="noreferrer"
+								className={item.highlight ? `${navClass} ${navHighlight}` : navClass}
+							>
+								{item.label}
+							</a>
+						) : (
+							<Link
+								key={item.href}
+								href={item.href}
+								className={item.highlight ? `${navClass} ${navHighlight}` : navClass}
+							>
+								{item.label}
+							</Link>
+						),
+					)}
 				</nav>
 				<div className="flex shrink-0 items-center gap-2">
 					<Button
