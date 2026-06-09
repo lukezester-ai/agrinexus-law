@@ -9,9 +9,10 @@
 1. Прочетете `DEPLOYMENT-GUIDE.md` за подробни инструкции
 2. Регистрирайте се в OpenAI, Supabase, Resend (всички с безплатен старт)
 3. Изпълнете `supabase-setup.sql` в Supabase SQL Editor
-4. Копирайте `.env.example` → `.env.local` и попълнете ключовете (виж `DEPLOYMENT-GUIDE.md`)
-5. `npm install` и `npm run dev` (първо опитва **http://localhost:3002**; ако портът е зает, автоматично минава на 3020, 3010, … — гледай съобщението в терминала)
-6. Push в GitHub, deploy на Vercel
+4. По желание за Document Intelligence case memory изпълнете `supabase-document-reviews.sql`
+5. Копирайте `.env.example` → `.env.local` и попълнете ключовете (виж `DEPLOYMENT-GUIDE.md`)
+6. `npm install` и `npm run dev` (първо опитва **http://localhost:3002**; ако портът е зает, автоматично минава на 3020, 3010, … — гледай съобщението в терминала)
+7. Push в GitHub, deploy на Vercel
 
 ## AI документация и оркестрация
 
@@ -19,6 +20,7 @@
 - **`docs/AI-DOCUMENTATION.md`** — LLM, RAG, API, env, troubleshooting
 - **`docs/AI-LEADER-ARCHITECTURE.md`** — „AI лидер“: автоматизация между RAG, ДФЗ база, learned knowledge и Furrow (`lib/ai-leader/`)
 - **`docs/BACKEND-ARCHITECTURE.md`** — backend „мозък“: препоръка **FastAPI (Python)**, хибрид с Next.js, старт в `services/agrinexus-brain/`
+- **`docs/AGRINEXUS-2.0-ROADMAP.md`** — Enterprise roadmap: Agrinexus като операционна система за агробизнеса, AI Brain, Knowledge Graph, Document Intelligence и Executive Cockpit
 - **`docs/RAG-SYSTEM.md`** — RAG: PDF/книги/отговори по документи; **LlamaIndex** за Python път; връзка към текущия TS pipeline
 - **`docs/SEARCH-SYSTEM.md`** — **Typesense** за AI търсене във видеа, PDF и уроци; env, схема на колекция, връзка с `/api/search`
 - **`docs/FILE-STORAGE.md`** — **Cloudflare R2** за оригинални файлове (PDF, DOCX, изображения, сертификати); интеграция с админ upload и миграция от Supabase Storage

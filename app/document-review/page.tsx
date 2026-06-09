@@ -29,6 +29,17 @@ type ReviewHistoryItem = {
 	createdAt: string;
 };
 
+type AnalysisResult = {
+	reviewId: string | null;
+	caseId: string | null;
+	fileName: string;
+	modeLabel: string;
+	model: string;
+	extractedCharacters: number;
+	truncated: boolean;
+	analysis: string;
+};
+
 const historyStorageKey = "agrinexus-document-review-history";
 
 const reviewModes: Record<ReviewMode, { label: string; description: string; checks: string[] }> = {
@@ -69,10 +80,14 @@ const reviewBenefits: { title: string; subtitle: string; Icon: LucideIcon }[] = 
 export default function DocumentReviewPage() {
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const [mode, setMode] = useState<ReviewMode>("subsidy");
+	const [file, setFile] = useState<File | null>(null);
 	const [fileName, setFileName] = useState("");
 	const [context, setContext] = useState("");
 	const [copied, setCopied] = useState(false);
 	const [history, setHistory] = useState<ReviewHistoryItem[]>([]);
+	const [analysisLoading, setAnalysisLoading] = useState(false);
+	const [analysisError, setAnalysisError] = useState("");
+	const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 	const selectedMode = reviewModes[mode];
 	const aiPrompt = useMemo(() => {
 		const target = fileName || "качения документ";
@@ -118,6 +133,35 @@ export default function DocumentReviewPage() {
 
 	const clearHistory = () => {
 		persistHistory([]);
+	};
+
+	const analyzeDocument = async () => {
+		if (!file) {
+			setAnalysisError("Избери PDF, DOCX или TXT документ за анализ.");
+			return;
+		}
+		setAnalysisLoading(true);
+		setAnalysisError("");
+		setAnalysisResult(null);
+		const formData = new FormData();
+		formData.append("file", file);
+		formData.append("mode", mode);
+		formData.append("context", context);
+		try {
+			const response = await fetch("/api/document-review/analyze", {
+				method: "POST",
+				body: formData,
+			});
+			const payload = await response.json();
+			if (!response.ok) {
+				throw new Error(payload.error || "Неуспешен анализ на документа.");
+			}
+			setAnalysisResult(payload as AnalysisResult);
+		} catch (error) {
+			setAnalysisError(error instanceof Error ? error.message : "Неуспешен анализ на документа.");
+		} finally {
+			setAnalysisLoading(false);
+		}
 	};
 
 	const copyPrompt = async () => {
@@ -176,9 +220,15 @@ export default function DocumentReviewPage() {
 					<input
 						ref={inputRef}
 						type="file"
-						accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp"
+						accept=".pdf,.docx,.txt"
 						className="hidden"
-						onChange={(event) => setFileName(event.target.files?.[0]?.name || "")}
+						onChange={(event) => {
+							const selected = event.target.files?.[0] || null;
+							setFile(selected);
+							setFileName(selected?.name || "");
+							setAnalysisError("");
+							setAnalysisResult(null);
+						}}
 					/>
 					<button
 						type="button"
@@ -218,6 +268,9 @@ export default function DocumentReviewPage() {
 							className="mt-2 w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/15 dark:border-slate-800 dark:bg-slate-950/45 dark:text-white dark:focus:border-cyan-600"
 						/>
 					</label>
+					<div className="mt-5 rounded-2xl border border-cyan-200 bg-cyan-50/70 p-4 text-xs leading-5 text-cyan-950 dark:border-cyan-900/70 dark:bg-cyan-950/25 dark:text-cyan-100">
+						MVP анализът поддържа PDF, DOCX и TXT. Сканирани изображения ще изискват OCR в следваща версия.
+					</div>
 				</section>
 			</div>
 
@@ -256,6 +309,22 @@ export default function DocumentReviewPage() {
 					<div className="mt-5 flex flex-wrap gap-3">
 						<button
 							type="button"
+							onClick={() => void analyzeDocument()}
+							disabled={analysisLoading || !file}
+							className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							{analysisLoading ? (
+								<>
+									<span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> Анализиране...
+								</>
+							) : (
+								<>
+									<Sparkles size={16} /> Анализирай документа
+								</>
+							)}
+						</button>
+						<button
+							type="button"
 							onClick={saveCurrentReview}
 							className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-800 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-100 dark:border-emerald-900/70 dark:bg-emerald-950/30 dark:text-emerald-200 dark:hover:border-emerald-700"
 						>
@@ -275,8 +344,38 @@ export default function DocumentReviewPage() {
 							Изпрати към AI асистента <ArrowRight size={16} />
 						</Link>
 					</div>
+					{analysisError ? (
+						<div className="mt-4 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">
+							{analysisError}
+						</div>
+					) : null}
 				</div>
 			</section>
+
+			{analysisResult ? (
+				<section className="mt-8 rounded-3xl border border-emerald-200/80 bg-emerald-50/55 p-6 shadow-sm backdrop-blur-xl dark:border-emerald-900/70 dark:bg-emerald-950/25">
+					<div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+						<div>
+							<div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200">
+								<CheckCircle2 size={14} /> Document Intelligence result
+							</div>
+							<h2 className="mt-3 font-display text-2xl font-medium text-slate-950 dark:text-white">{analysisResult.fileName}</h2>
+							<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+								{analysisResult.modeLabel} · {analysisResult.model} · {analysisResult.extractedCharacters.toLocaleString("bg-BG")} символа
+								{analysisResult.truncated ? " · анализиран е първият голям откъс" : ""}
+							</p>
+						</div>
+						{analysisResult.caseId || analysisResult.reviewId ? (
+							<span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
+								Case Memory: {analysisResult.caseId || analysisResult.reviewId}
+							</span>
+						) : null}
+					</div>
+					<div className="whitespace-pre-line rounded-2xl border border-white/70 bg-white/80 p-5 text-sm leading-7 text-slate-800 dark:border-white/10 dark:bg-slate-950/45 dark:text-slate-100">
+						{analysisResult.analysis}
+					</div>
+				</section>
+			) : null}
 
 			<section className="mt-8 rounded-3xl border border-slate-200/80 bg-white/62 p-6 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/45">
 				<div className="mb-4 flex flex-wrap items-center justify-between gap-3">

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
 	ArrowRight,
+	BarChart3,
 	CalendarDays,
 	ClipboardCheck,
 	FileSearch,
@@ -73,6 +74,13 @@ const commands = [
 		href: "/admin",
 		keywords: "admin pdf качи документ индекс rag",
 		Icon: Upload,
+	},
+	{
+		label: "Executive Cockpit",
+		description: "Админ контролен панел за AI, RAG, документи и Agrinexus 2.0 readiness",
+		href: "/admin/cockpit",
+		keywords: "executive cockpit admin kpi rag ai документи readiness инвеститор",
+		Icon: BarChart3,
 	},
 	{
 		label: "Диагностика",

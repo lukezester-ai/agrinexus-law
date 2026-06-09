@@ -1,4 +1,5 @@
-import { Activity, AlertTriangle, CheckCircle2, Database, KeyRound, Server } from "lucide-react";
+import Link from "next/link";
+import { Activity, AlertTriangle, BarChart3, CheckCircle2, Database, KeyRound, Server } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import { getRagIndexStatus } from "@/lib/rag/rag-index-status";
 
@@ -102,7 +103,15 @@ export default async function AdminDiagnosticsPage() {
 								Проверява runtime конфигурация, готовност на ключови integrations и RAG индекса, без да показва тайни стойности.
 							</p>
 						</div>
-						<StatusBadge ok={Boolean(diagnostics?.ok && diagnostics.rag.healthy)} />
+						<div className="flex flex-wrap gap-2">
+							<StatusBadge ok={Boolean(diagnostics?.ok && diagnostics.rag.healthy)} />
+							<Link
+								href="/admin/cockpit"
+								className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-cyan-300 hover:text-cyan-800 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-200"
+							>
+								<BarChart3 size={14} /> Executive Cockpit
+							</Link>
+						</div>
 					</div>
 				</div>
 
