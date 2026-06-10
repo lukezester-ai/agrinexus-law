@@ -117,6 +117,42 @@ export default function RootLayout({
 					type="application/ld+json"
 					dangerouslySetInnerHTML={{ __html: jsonLdGraph }}
 				/>
+				{/* AuditNexus Auto-Generated GEO FAQ Schema */}
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify({
+							"@context": "https://schema.org",
+							"@type": "FAQPage",
+							"mainEntity": [
+								{
+									"@type": "Question",
+									"name": "What is AgriNexus?",
+									"acceptedAnswer": {
+										"@type": "Answer",
+										"text": "AgriNexus is an open intelligence platform designed for modern farming, providing market intelligence, insights from satellites, agents, and commodity data, all free for farmers."
+									}
+								},
+								{
+									"@type": "Question",
+									"name": "How does AgriNexus support farmers?",
+									"acceptedAnswer": {
+										"@type": "Answer",
+										"text": "AgriNexus supports farmers by offering free access to market information and analytical forecasts, funded by sponsors, allowing farmers to make informed decisions without any cost."
+									}
+								},
+								{
+									"@type": "Question",
+									"name": "What types of data does AgriNexus analyze?",
+									"acceptedAnswer": {
+										"@type": "Answer",
+										"text": "AgriNexus analyzes various types of data including market data, news, weather, and foreign exchange information, utilizing 18 specialist agents to provide insights and forecasts."
+									}
+								}
+							]
+						})
+					}}
+				/>
 			</head>
 			<body
 				className={`${inter.variable} ${spaceGrotesk.variable} agri-mobile-safe agri-body-surface min-h-screen bg-[var(--agri-bg-ultra)] text-slate-900 antialiased dark:bg-[#030712] dark:text-slate-100 font-sans font-normal`}
