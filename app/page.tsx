@@ -697,7 +697,7 @@ export default function Home() {
 						<div className="grid md:grid-cols-3 gap-6">
 							<div>
 								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Официални данни</h3>
-								<p className="text-sm text-slate-600 dark:text-slate-400">Всички отговори стъпват върху официалните наредби на Държавен фонд "Земеделие" (ДФЗ) и Министерството на земеделието.</p>
+								<p className="text-sm text-slate-600 dark:text-slate-400">Всички отговори стъпват върху официалните наредби на Държавен фонд &quot;Земеделие&quot; (ДФЗ) и Министерството на земеделието.</p>
 							</div>
 							<div>
 								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Проверима AI логика</h3>
@@ -717,7 +717,7 @@ export default function Home() {
 					<dl className="space-y-6">
 						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
 							<dt className="font-medium text-slate-900 dark:text-white text-lg">Какви са сроковете за директни плащания от ДФЗ?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Сроковете се обявяват ежегодно от Държавен фонд 'Земеделие'. AgriNexus.Law следи и известява автоматично за активните прозорци за заявления.</dd>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Сроковете се обявяват ежегодно от Държавен фонд &apos;Земеделие&apos;. AgriNexus.Law следи и известява автоматично за активните прозорци за заявления.</dd>
 						</div>
 						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
 							<dt className="font-medium text-slate-900 dark:text-white text-lg">Как AgriNexus.Law помага на българските фермери?</dt>
@@ -725,7 +725,7 @@ export default function Home() {
 						</div>
 						<div className="pb-6">
 							<dt className="font-medium text-slate-900 dark:text-white text-lg">Мога ли да проверя договор или земеделски документ тук?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, чрез секцията 'AI преглед' можете да качите PDF документ, и нашият асистент ще обобщи ключовите рискове и задължения.</dd>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, чрез секцията &apos;AI преглед&apos; можете да качите PDF документ, и нашият асистент ще обобщи ключовите рискове и задължения.</dd>
 						</div>
 					</dl>
 				</section>
