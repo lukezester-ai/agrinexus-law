@@ -383,25 +383,25 @@ export default function Home() {
 								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-cyan-600/30 bg-cyan-50/90 px-4 py-2 text-xs font-medium uppercase leading-snug tracking-[0.12em] text-cyan-900 shadow-[0_0_24px_-8px_rgba(6,182,212,0.45)] backdrop-blur-md dark:border-cyan-400/35 dark:bg-cyan-950/50 dark:text-cyan-100 dark:shadow-[0_0_32px_-6px_rgba(34,211,238,0.25)]"
 							>
 								<ShieldCheck size={16} className="shrink-0" />
-								<span className="sm:hidden">AI copilot за фермери</span>
-								<span className="hidden sm:inline">AI правен и оперативен copilot за български фермери</span>
+								<span className="sm:hidden">AI асистент за фермери</span>
+								<span className="hidden sm:inline">Вашият интелигентен помощник за земеделски субсидии и срокове</span>
 							</motion.div>
 							<motion.h1
 								variants={heroItem(reducedMotion)}
 								className="w-full max-w-4xl font-display text-[2.05rem] font-light leading-[1.1] tracking-tight sm:text-5xl sm:leading-[1.08] md:text-6xl md:leading-[1.05] lg:text-[3.65rem]"
 							>
 								<span className="block bg-gradient-to-r from-slate-900 via-cyan-800 to-slate-800 bg-clip-text text-transparent dark:from-cyan-100 dark:via-white dark:to-cyan-200">
-									Решения за стопанството
+									Отговори за вашето стопанство
 								</span>
 								<span className="mt-2 block bg-gradient-to-r from-cyan-700 via-teal-700 to-slate-900 bg-clip-text text-transparent sm:mt-3 dark:from-cyan-300 dark:via-teal-200 dark:to-cyan-100">
-									с проверима AI логика
+									директно от наредбите на ДФЗ
 								</span>
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
 								className="mt-7 max-w-2xl text-base font-light leading-relaxed tracking-wide text-slate-600 dark:text-slate-300 sm:text-lg"
 							>
-								Питай за субсидии, договори, срокове и документи. Получаваш структуриран отговор, източници и следваща практическа стъпка за твоята ферма.
+								Търсете информация за субсидии, договори и срокове на едно място. Получавате ясни отговори с точен източник и съвет за следваща стъпка.
 							</motion.p>
 
 							<motion.div variants={heroItem(reducedMotion)} className="mt-8 max-w-3xl">
@@ -419,14 +419,17 @@ export default function Home() {
 													ref={searchInputRef}
 													value={query}
 													onChange={(e) => setQuery(e.target.value)}
-													placeholder="Напр. какво трябва да направя за директни плащания?"
+													placeholder="Напр. какви са изискванията за директни плащания?"
+													aria-label="Въпрос за търсене"
+													title="Търсачка за агро въпроси"
 													className="min-w-0 w-full flex-1 bg-transparent text-base font-normal text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
 												/>
 											</div>
 											<button
 												type="submit"
 												disabled={loading || !query.trim()}
-												className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm border border-cyan-600/30 bg-gradient-to-br from-cyan-600 to-teal-700 px-6 py-4 text-sm font-semibold text-white shadow-[0_0_28px_-8px_rgba(6,182,212,0.55)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:from-cyan-500 dark:to-teal-600 dark:shadow-[0_0_36px_-6px_rgba(34,211,238,0.35)]"
+												aria-label="Изпрати въпрос"
+												className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm border border-cyan-600/30 bg-gradient-to-br from-cyan-600 to-teal-700 px-6 py-4 text-sm font-semibold text-white shadow-[0_0_28px_-8px_rgba(6,182,212,0.55)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:from-cyan-500 dark:to-teal-600 dark:shadow-[0_0_36px_-6px_rgba(34,211,238,0.35)]"
 											>
 												{loading ? "Търся..." : "Питай AI"} <ArrowRight size={16} />
 											</button>
@@ -682,6 +685,49 @@ export default function Home() {
 							))}
 						</div>
 					</div>
+				</section>
+
+				{/* TRUST & SOURCES SECTION */}
+				<section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+					<div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 p-8 border border-slate-200 dark:from-slate-900 dark:to-slate-950 dark:border-slate-800">
+						<div className="flex items-center gap-3 mb-6">
+							<ShieldCheck className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+							<h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Източници и Достоверност</h2>
+						</div>
+						<div className="grid md:grid-cols-3 gap-6">
+							<div>
+								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Официални данни</h3>
+								<p className="text-sm text-slate-600 dark:text-slate-400">Всички отговори стъпват върху официалните наредби на Държавен фонд "Земеделие" (ДФЗ) и Министерството на земеделието.</p>
+							</div>
+							<div>
+								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Проверима AI логика</h3>
+								<p className="text-sm text-slate-600 dark:text-slate-400">Всяко твърдение е подкрепено с директен линк (цитат) към оригиналния нормативен акт.</p>
+							</div>
+							<div>
+								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Защита на данните</h3>
+								<p className="text-sm text-slate-600 dark:text-slate-400">Документите, които качвате за преглед, не се споделят с трети страни и са криптирани.</p>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				{/* FAQ SECTION */}
+				<section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+					<h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-8 text-center">Често задавани въпроси</h2>
+					<dl className="space-y-6">
+						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
+							<dt className="font-medium text-slate-900 dark:text-white text-lg">Какви са сроковете за директни плащания от ДФЗ?</dt>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Сроковете се обявяват ежегодно от Държавен фонд 'Земеделие'. AgriNexus.Law следи и известява автоматично за активните прозорци за заявления.</dd>
+						</div>
+						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
+							<dt className="font-medium text-slate-900 dark:text-white text-lg">Как AgriNexus.Law помага на българските фермери?</dt>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Платформата предлага интелигентен асистент, който отговаря на въпроси за субсидии и екосхеми, търсейки директно в официални документи.</dd>
+						</div>
+						<div className="pb-6">
+							<dt className="font-medium text-slate-900 dark:text-white text-lg">Мога ли да проверя договор или земеделски документ тук?</dt>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, чрез секцията 'AI преглед' можете да качите PDF документ, и нашият асистент ще обобщи ключовите рискове и задължения.</dd>
+						</div>
+					</dl>
 				</section>
 
 				<section id="chat" className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">

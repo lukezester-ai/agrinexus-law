@@ -127,26 +127,26 @@ export default function RootLayout({
 							"mainEntity": [
 								{
 									"@type": "Question",
-									"name": "What is AgriNexus?",
+									"name": "Какви са сроковете за директни плащания от ДФЗ?",
 									"acceptedAnswer": {
 										"@type": "Answer",
-										"text": "AgriNexus is an open intelligence platform designed for modern farming, providing market intelligence, insights from satellites, agents, and commodity data, all free for farmers."
+										"text": "Сроковете за директни плащания се обявяват ежегодно от Държавен фонд 'Земеделие' (ДФЗ). AgriNexus.Law следи и автоматично известява за активните прозорци за кандидатстване и подаване на заявления."
 									}
 								},
 								{
 									"@type": "Question",
-									"name": "How does AgriNexus support farmers?",
+									"name": "Как AgriNexus.Law помага на българските фермери?",
 									"acceptedAnswer": {
 										"@type": "Answer",
-										"text": "AgriNexus supports farmers by offering free access to market information and analytical forecasts, funded by sponsors, allowing farmers to make informed decisions without any cost."
+										"text": "Платформата предлага AI асистент, който отговаря на въпроси за субсидии, екосхеми и регулации, търсейки директно в официални наредби и документи на Министерството на земеделието."
 									}
 								},
 								{
 									"@type": "Question",
-									"name": "What types of data does AgriNexus analyze?",
+									"name": "Мога ли да проверя договор или земеделски документ тук?",
 									"acceptedAnswer": {
 										"@type": "Answer",
-										"text": "AgriNexus analyzes various types of data including market data, news, weather, and foreign exchange information, utilizing 18 specialist agents to provide insights and forecasts."
+										"text": "Да, системата включва 'AI преглед', чрез който можете да качите договор или писмо от ДФЗ, и нашият изкуствен интелект ще обобщи ключовите рискове и задължения."
 									}
 								}
 							]
