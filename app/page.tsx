@@ -399,7 +399,7 @@ export default function Home() {
 							</motion.h1>
 							<motion.p
 								variants={heroItem(reducedMotion)}
-								className="mt-7 max-w-2xl text-base font-light leading-relaxed tracking-wide text-slate-600 dark:text-slate-300 sm:text-lg"
+								className="mt-7 max-w-2xl text-lg font-light leading-relaxed tracking-wide text-slate-700 dark:text-slate-200 sm:text-xl"
 							>
 								Търсете информация за субсидии, договори и срокове на едно място. Получавате ясни отговори с точен източник и съвет за следваща стъпка.
 							</motion.p>
@@ -690,9 +690,15 @@ export default function Home() {
 				{/* TRUST & SOURCES SECTION */}
 				<section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
 					<div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 p-8 border border-slate-200 dark:from-slate-900 dark:to-slate-950 dark:border-slate-800">
-						<div className="flex items-center gap-3 mb-6">
-							<ShieldCheck className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
-							<h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Източници и Достоверност</h2>
+						<div className="flex items-center justify-between mb-6">
+							<div className="flex items-center gap-3">
+								<ShieldCheck className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+								<h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Източници и Достоверност</h2>
+							</div>
+							<div className="hidden sm:flex items-center gap-2 bg-emerald-100/50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+								<span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+								<span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-widest">SSL Protected & Verified</span>
+							</div>
 						</div>
 						<div className="grid md:grid-cols-3 gap-6">
 							<div>
@@ -723,9 +729,17 @@ export default function Home() {
 							<dt className="font-medium text-slate-900 dark:text-white text-lg">Как AgriNexus.Law помага на българските фермери?</dt>
 							<dd className="mt-2 text-slate-600 dark:text-slate-400">Платформата предлага интелигентен асистент, който отговаря на въпроси за субсидии и екосхеми, търсейки директно в официални документи.</dd>
 						</div>
-						<div className="pb-6">
+						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
 							<dt className="font-medium text-slate-900 dark:text-white text-lg">Мога ли да проверя договор или земеделски документ тук?</dt>
 							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, чрез секцията &apos;AI преглед&apos; можете да качите PDF документ, и нашият асистент ще обобщи ключовите рискове и задължения.</dd>
+						</div>
+						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
+							<dt className="font-medium text-slate-900 dark:text-white text-lg">Има ли информация за европейски програми и субсидии?</dt>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, поддържаме пълна база данни с актуалните мерки от ПРСР и стратегическия план за развитие на селските райони.</dd>
+						</div>
+						<div className="pb-6">
+							<dt className="font-medium text-slate-900 dark:text-white text-lg">Мога ли да задавам специфични въпроси за моята ферма?</dt>
+							<dd className="mt-2 text-slate-600 dark:text-slate-400">Категорично. Нашият AI е обучен да отговаря конкретно за биологично земеделие, животновъдство и зърнопроизводство в България.</dd>
 						</div>
 					</dl>
 				</section>
