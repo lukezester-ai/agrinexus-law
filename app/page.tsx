@@ -1,893 +1,377 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
 	ArrowRight,
-	Bell,
+	BarChart3,
+	BookOpenText,
+	Calculator,
 	CalendarDays,
-	ClipboardCheck,
+	CheckCircle2,
 	FileSearch,
-	ExternalLink,
-	Search,
+	Lock,
+	MessageSquareText,
 	ShieldCheck,
 	Sparkles,
-	ThumbsDown,
-	ThumbsUp,
-	User,
+	UploadCloud,
 } from "lucide-react";
-import { AiCharacterAvatar } from "@/components/ai-character-avatar";
-import {
-	HOME_CATEGORY_GLYPHS,
-	HudGlyphAi,
-	HudGlyphDatabase,
-	HudGlyphFocus,
-	HudGlyphLineTrend,
-	IotHudTile,
-} from "@/components/iot-hud-home";
-import type { CharacterId } from "@/lib/characters";
-import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
-import { HOME_CATEGORY_SEARCH } from "@/lib/knowledge/document-taxonomy";
-import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
-import { isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
-import { ChatMarkdown } from "@/components/chat-markdown";
-import { SiteHeader } from "@/components/site-header";
-import {
-	chatBubble,
-	chatListContainer,
-	heroContainer,
-	heroItem,
-	panelReveal,
-} from "@/lib/motion-variants";
 
-type SearchResponse = {
-	results?: KnowledgeDoc[];
-	engine?: "meili+internal" | "typesense+internal" | "internal-ai";
-	aiSummary?: string;
-	error?: string;
-};
-
-type ChatMessage = {
-	role: "user" | "assistant";
-	content: string;
-	chatLogId?: string | null;
-	/** Кой специалист е отговорил (за аватар в балона). */
-	characterId?: CharacterId;
-};
-
-type FeedbackState = {
-	vote: 1 | -1;
-	status: "saving" | "saved" | "error";
-};
-
-type LiveStatTile = { value: string; label: string };
-type DeadlineRiskRow = { label: string; percent: number };
-
-type LiveStatsResponse = {
-	ok?: boolean;
-	tiles?: LiveStatTile[];
-	deadlineRisks?: DeadlineRiskRow[];
-	rag?: { healthy?: boolean; hints?: string[] };
-};
-
-const CATEGORY_CARDS = HOME_CATEGORY_SEARCH.map((card, i) => ({
-	...card,
-	Glyph: HOME_CATEGORY_GLYPHS[i] ?? HOME_CATEGORY_GLYPHS[HOME_CATEGORY_GLYPHS.length - 1],
-}));
-
-const UPDATES = [
-	{ badge: "СРОК", title: "Директни плащания и корекции по заявления", meta: "ДФЗ · проследяване на активните прозорци" },
-	{ badge: "ПРАВИЛА", title: "Био производство, контрол и задължителни дневници", meta: "Регламенти · консолидирани източници" },
-	{ badge: "ДОКУМЕНТИ", title: "Образци за стопанства, заявления и справки", meta: "Вътрешна база · готови за търсене" },
+const navLinks = [
+	{ label: "Документи", href: "/documents" },
+	{ label: "AI преглед", href: "/document-review" },
+	{ label: "Срокове", href: "/srokove" },
+	{ label: "Калкулатор", href: "/kalkulator" },
+	{ label: "Статистики", href: "/statistiki" },
 ];
 
-const TRUST_POINTS = [
-	{ label: "Свързана база", value: "Supabase", Glyph: HudGlyphDatabase },
-	{ label: "AI търсене", value: "RAG + документи", Glyph: HudGlyphAi },
-	{ label: "Фокус", value: "Българско земеделие", Glyph: HudGlyphFocus },
-];
-
-const EXAMPLE_QUERIES = [
-	"Какви документи трябват за био сертификат на пшеница?",
-	"Кои са сроковете за директни плащания тази кампания?",
-	"Обясни ми изискванията за дневници при био стопанство.",
-];
-
-const HERO_ACTIONS = [
+const heroActions = [
 	{
-		label: "Провери срокове",
-		description: "Кампания, заявления и оперативни рискове",
+		title: "Провери срокове",
+		body: "Кампании, заявления и важни дати на едно място.",
 		href: "/srokove",
-		Icon: CalendarDays,
+		icon: CalendarDays,
+		tone: "bg-[#f5f5f7] text-[#1d1d1f]",
 	},
 	{
-		label: "Намери документ",
-		description: "Наредби, процедури и PDF източници",
-		href: "/search",
-		Icon: FileSearch,
+		title: "Намери документ",
+		body: "Наредби, образци и PDF източници без губене на време.",
+		href: "/documents",
+		icon: FileSearch,
+		tone: "bg-[#1d1d1f] text-white",
 	},
 	{
-		label: "AI преглед",
-		description: "Провери договор, ДФЗ документ или писмо",
+		title: "AI преглед",
+		body: "Качи договор или писмо и получи практически анализ.",
 		href: "/document-review",
-		Icon: ClipboardCheck,
+		icon: Sparkles,
+		tone: "bg-[#0f766e] text-white",
 	},
-] as const;
+];
+
+const categories = [
+	["Субсидии", "Директни плащания и заявления"],
+	["Закони", "Наредби, укази и промени"],
+	["Сертификати", "Био, качество и проверки"],
+	["Растителна защита", "Дневници и препарати"],
+	["ЕС регламенти", "Правила и общи политики"],
+	["Калкулатори", "Бюджет, площи и сценарии"],
+];
+
+const stats = [
+	["12+", "ключови модула"],
+	["3", "AI специалиста"],
+	["24/7", "достъп до знания"],
+	["<1 мин", "до първи отговор"],
+];
+
+const comparison = [
+	["Намиране на информация", "Веднага", "30-60 мин"],
+	["Точен източник", "Да", "Ръчна проверка"],
+	["Следваща стъпка", "Ясна", "Неясна"],
+	["AI преглед на документ", "Вграден", "Няма"],
+];
+
+function SectionLabel({ children }: { children: string }) {
+	return (
+		<p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#0071e3]">
+			{children}
+		</p>
+	);
+}
 
 export default function Home() {
-	const resultsSectionRef = useRef<HTMLElement | null>(null);
-	const searchFormRef = useRef<HTMLDivElement | null>(null);
-	const searchInputRef = useRef<HTMLInputElement | null>(null);
-	const [query, setQuery] = useState("");
-	const [results, setResults] = useState<KnowledgeDoc[]>([]);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [aiSummary, setAiSummary] = useState("");
-	const [engine, setEngine] = useState<string>("");
-	const [filterType, setFilterType] = useState<"all" | KnowledgeDoc["type"]>("all");
-	const [chatCharacter, setChatCharacter] = useState<"elena" | "boris" | "viktoria">("elena");
-	const [chatInput, setChatInput] = useState("");
-	const [chatBusy, setChatBusy] = useState(false);
-	const [chatError, setChatError] = useState<string | null>(null);
-	const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-	const [feedbackByLogId, setFeedbackByLogId] = useState<Record<string, FeedbackState>>({});
-	const [searchFocusPulse, setSearchFocusPulse] = useState(false);
-	const [liveTiles, setLiveTiles] = useState<LiveStatTile[]>([
-		{ value: "…", label: "чат записа" },
-		{ value: "…", label: "страници" },
-		{ value: "…", label: "RAG" },
-	]);
-	const [deadlineRisks, setDeadlineRisks] = useState<DeadlineRiskRow[]>([]);
-	const [liveStatsLoading, setLiveStatsLoading] = useState(true);
-	const [ragHealthy, setRagHealthy] = useState<boolean | null>(null);
-	const [ragStatusHints, setRagStatusHints] = useState<string[]>([]);
-	const reducedMotion = useReducedMotion();
-
-	useEffect(() => {
-		if (typeof window === "undefined") return;
-		const chatQ = new URLSearchParams(window.location.search).get("chatQ");
-		if (!chatQ) return;
-		setChatInput((prev) => (prev.trim() ? prev : chatQ));
-	}, []);
-
-	useEffect(() => {
-		let cancelled = false;
-		(async () => {
-			try {
-				const res = await fetch("/api/stats/live", { cache: "no-store" });
-				const data = (await res.json().catch(() => ({}))) as LiveStatsResponse;
-				if (cancelled || !data.ok) return;
-				if (data.tiles?.length) setLiveTiles(data.tiles);
-				if (data.deadlineRisks?.length) setDeadlineRisks(data.deadlineRisks);
-				setRagHealthy(Boolean(data.rag?.healthy));
-				setRagStatusHints(
-					Array.isArray(data.rag?.hints)
-						? data.rag.hints.filter((h): h is string => typeof h === "string" && h.trim().length > 0)
-						: [],
-				);
-			} catch {
-				/* keep placeholders */
-			} finally {
-				if (!cancelled) setLiveStatsLoading(false);
-			}
-		})();
-		return () => {
-			cancelled = true;
-		};
-	}, []);
-
-	const executeSearch = async (rawQuery: string) => {
-		const trimmed = rawQuery.trim();
-		if (!trimmed) return;
-		resultsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-		setLoading(true);
-		setError(null);
-		setAiSummary("");
-		try {
-			const res = await fetch("/api/search", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ query: trimmed, category: "all" }),
-			});
-			const data = (await res.json().catch(() => ({}))) as SearchResponse;
-			if (!res.ok) {
-				setError(data.error || "Грешка при търсене.");
-				setResults([]);
-				return;
-			}
-			setResults(data.results ?? []);
-			setAiSummary(data.aiSummary ?? "");
-			setEngine(data.engine ?? "");
-		} catch {
-			setError("Мрежова грешка. Опитай отново.");
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const filteredResults = useMemo(
-		() => results.filter((doc) => (filterType === "all" ? true : doc.type === filterType)),
-		[results, filterType],
-	);
-
-	const onSearch = async (e: FormEvent) => {
-		e.preventDefault();
-		await executeSearch(query);
-	};
-
-	const jumpToSearch = (prefill?: string, autoRun = false) => {
-		const next = (prefill ?? query).trim();
-		if (prefill) setQuery(prefill);
-		searchFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-		window.setTimeout(() => {
-			searchInputRef.current?.focus();
-			searchInputRef.current?.setSelectionRange(
-				searchInputRef.current.value.length,
-				searchInputRef.current.value.length,
-			);
-			setSearchFocusPulse(true);
-			window.setTimeout(() => setSearchFocusPulse(false), 900);
-			if (autoRun && next) {
-				void executeSearch(next);
-			}
-		}, 260);
-	};
-
-	const sendChat = async (e: FormEvent) => {
-		e.preventDefault();
-		const text = chatInput.trim();
-		if (!text || chatBusy) return;
-		const assistantCharacter = chatCharacter;
-		const nextMessages: ChatMessage[] = [...chatMessages, { role: "user", content: text }];
-		setChatMessages(nextMessages);
-		setChatInput("");
-		setChatBusy(true);
-		setChatError(null);
-		try {
-			// Вземаме профила от localStorage, ако има такъв
-			let userProfile = undefined;
-			try {
-				const stored = localStorage.getItem("agrinexus_farm_profile");
-				if (stored) userProfile = JSON.parse(stored);
-			} catch (e) {
-				console.error("Failed to parse farm profile", e);
-			}
-
-			const res = await fetch("/api/chat", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					characterId: chatCharacter,
-					userProfile,
-					messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
-				}),
-			});
-			
-			if (!res.ok) {
-				const errData = await res.json().catch(() => ({}));
-				throw new Error(errData.error || "Грешка при чат заявка.");
-			}
-
-			const contentType = res.headers.get("content-type") || "";
-			
-			if (contentType.includes("application/json")) {
-				const data = (await res.json()) as {
-					response?: string;
-					chatLogId?: string | null;
-				};
-				setChatMessages((prev) => [
-					...prev,
-					{
-						role: "assistant",
-						content: data.response || "",
-						chatLogId: data.chatLogId ?? null,
-						characterId: assistantCharacter,
-					},
-				]);
-			} else {
-				// Streaming text response
-				const chatLogId = res.headers.get("X-Chat-Log-Id") || null;
-				const reader = res.body?.getReader();
-				const decoder = new TextDecoder("utf-8");
-				let done = false;
-				let text = "";
-
-				// Добавяме празно съобщение, което ще обновяваме
-				setChatMessages((prev) => [
-					...prev,
-					{ role: "assistant", content: "", chatLogId, characterId: assistantCharacter },
-				]);
-
-				if (reader) {
-					try {
-						while (!done) {
-							const { value, done: readerDone } = await reader.read();
-							done = readerDone;
-							if (value) {
-								text += decoder.decode(value, { stream: true });
-								setChatMessages((prev) => {
-									const newMessages = [...prev];
-									const lastIndex = newMessages.length - 1;
-									newMessages[lastIndex] = { ...newMessages[lastIndex], content: text };
-									return newMessages;
-								});
-							}
-						}
-						text += decoder.decode();
-						if (text) {
-							setChatMessages((prev) => {
-								const newMessages = [...prev];
-								const lastIndex = newMessages.length - 1;
-								newMessages[lastIndex] = { ...newMessages[lastIndex], content: text };
-								return newMessages;
-							});
-						}
-					} catch (streamErr) {
-						const m =
-							streamErr instanceof Error ? streamErr.message : "Прекъснат стрийм на отговора.";
-						setChatMessages((prev) => prev.slice(0, -1));
-						throw new Error(m);
-					}
-				} else {
-					setChatMessages((prev) => prev.slice(0, -1));
-					setChatError("Няма тяло на отговора от сървъра (стрийм). Опресни и опитай пак.");
-				}
-			}
-		} catch (err) {
-			const msg = err instanceof Error ? err.message : "Грешка при чат заявка.";
-			setChatError(msg);
-		} finally {
-			setChatBusy(false);
-		}
-	};
-
-	const sendFeedback = async (chatLogId: string, feedback: 1 | -1) => {
-		if (!chatLogId) return;
-		setFeedbackByLogId((prev) => ({ ...prev, [chatLogId]: { vote: feedback, status: "saving" } }));
-		try {
-			const res = await fetch("/api/chat-feedback", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ chatLogId, feedback }),
-			});
-			if (!res.ok) throw new Error("feedback failed");
-			setFeedbackByLogId((prev) => ({ ...prev, [chatLogId]: { vote: feedback, status: "saved" } }));
-		} catch {
-			setFeedbackByLogId((prev) => {
-				const current = prev[chatLogId];
-				return {
-					...prev,
-					[chatLogId]: { vote: current?.vote ?? feedback, status: "error" },
-				};
-			});
-		}
-	};
-
 	return (
-		<div className="agri-mobile-safe agri-floating-header-pad min-h-screen agri-page-bg text-slate-950 dark:text-slate-100">
-			<SiteHeader />
+		<main className="min-h-screen bg-white text-[#1d1d1f]">
+			<header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-2xl">
+				<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+					<Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+						<span className="grid h-8 w-8 place-items-center rounded-full bg-[#1d1d1f] text-white">
+							<Sparkles size={16} />
+						</span>
+						<span>AgriNexus.Law</span>
+					</Link>
 
-			<main>
-				<section className="iot-hero-section relative overflow-hidden pt-12">
-					<div className="iot-hero-grid" aria-hidden="true" />
-					<div className="relative z-10 mx-auto grid min-w-0 max-w-7xl gap-10 px-3 py-12 sm:px-6 sm:py-14 md:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
-						<motion.div
-							className="relative z-10 min-w-0 max-w-3xl"
-							variants={heroContainer(reducedMotion)}
-							initial="hidden"
-							animate="visible"
-						>
-							<motion.div
-								variants={heroItem(reducedMotion)}
-								className="mb-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-cyan-600/30 bg-cyan-50/90 px-4 py-2 text-xs font-medium uppercase leading-snug tracking-[0.12em] text-cyan-900 shadow-[0_0_24px_-8px_rgba(6,182,212,0.45)] backdrop-blur-md dark:border-cyan-400/35 dark:bg-cyan-950/50 dark:text-cyan-100 dark:shadow-[0_0_32px_-6px_rgba(34,211,238,0.25)]"
-							>
-								<ShieldCheck size={16} className="shrink-0" />
-								<span className="sm:hidden">AI асистент за фермери</span>
-								<span className="hidden sm:inline">Вашият интелигентен помощник за земеделски субсидии и срокове</span>
-							</motion.div>
-							<motion.h1
-								variants={heroItem(reducedMotion)}
-								className="w-full max-w-4xl font-display text-[2.05rem] font-light leading-[1.1] tracking-tight sm:text-5xl sm:leading-[1.08] md:text-6xl md:leading-[1.05] lg:text-[3.65rem]"
-							>
-								<span className="block bg-gradient-to-r from-slate-900 via-cyan-800 to-slate-800 bg-clip-text text-transparent dark:from-cyan-100 dark:via-white dark:to-cyan-200">
-									Отговори за вашето стопанство
-								</span>
-								<span className="mt-2 block bg-gradient-to-r from-cyan-700 via-teal-700 to-slate-900 bg-clip-text text-transparent sm:mt-3 dark:from-cyan-300 dark:via-teal-200 dark:to-cyan-100">
-									директно от наредбите на ДФЗ
-								</span>
-							</motion.h1>
-							<motion.p
-								variants={heroItem(reducedMotion)}
-								className="mt-7 max-w-2xl text-lg font-light leading-relaxed tracking-wide text-slate-700 dark:text-slate-200 sm:text-xl"
-							>
-								Търсете информация за субсидии, договори и срокове на едно място. Получавате ясни отговори с точен източник и съвет за следваща стъпка.
-							</motion.p>
+					<nav className="hidden items-center gap-7 text-sm text-[#6e6e73] lg:flex">
+						{navLinks.map((link) => (
+							<Link key={link.href} href={link.href} className="transition-colors hover:text-[#1d1d1f]">
+								{link.label}
+							</Link>
+						))}
+					</nav>
 
-							<motion.div variants={heroItem(reducedMotion)} className="mt-8 max-w-3xl">
-								<form onSubmit={onSearch} className="max-w-3xl">
-									<div
-										ref={searchFormRef}
-										className={`iot-hud-search grid gap-4 p-3 transition-all ${
-											searchFocusPulse ? "ring-4 ring-cyan-400/25 dark:ring-cyan-400/20" : ""
-										}`}
-									>
-										<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-											<div className="flex min-w-0 flex-1 items-center gap-3 px-3">
-												<Search className="shrink-0 text-slate-400 dark:text-slate-500" size={24} />
-												<input
-													ref={searchInputRef}
-													value={query}
-													onChange={(e) => setQuery(e.target.value)}
-													placeholder="Напр. какви са изискванията за директни плащания?"
-													aria-label="Въпрос за търсене"
-													title="Търсачка за агро въпроси"
-													className="min-w-0 w-full flex-1 bg-transparent text-base font-normal text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
-												/>
-											</div>
-											<button
-												type="submit"
-												disabled={loading || !query.trim()}
-												aria-label="Изпрати въпрос"
-												className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm border border-cyan-600/30 bg-gradient-to-br from-cyan-600 to-teal-700 px-6 py-4 text-sm font-semibold text-white shadow-[0_0_28px_-8px_rgba(6,182,212,0.55)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:from-cyan-500 dark:to-teal-600 dark:shadow-[0_0_36px_-6px_rgba(34,211,238,0.35)]"
-											>
-												{loading ? "Търся..." : "Питай AI"} <ArrowRight size={16} />
-											</button>
-										</div>
-										<div className="flex flex-wrap gap-2 px-2 pb-1">
-											{EXAMPLE_QUERIES.map((item) => (
-												<button
-													key={item}
-													type="button"
-													onClick={() => jumpToSearch(item, true)}
-													className="rounded-full border border-cyan-600/20 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-500/50 hover:text-cyan-800 hover:shadow-[0_0_20px_-6px_rgba(6,182,212,0.45)] dark:border-cyan-500/25 dark:bg-slate-900/50 dark:text-cyan-100/90 dark:hover:border-cyan-300/50 dark:hover:text-cyan-50"
-												>
-													{item}
-												</button>
-											))}
-										</div>
-									</div>
-								</form>
-							</motion.div>
+					<Link
+						href="/vhod"
+						className="rounded-full bg-[#1d1d1f] px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.02]"
+					>
+						Вход
+					</Link>
+				</div>
+			</header>
 
-							<motion.div variants={heroItem(reducedMotion)} className="mt-5 grid gap-3 sm:grid-cols-3">
-								{HERO_ACTIONS.map(({ label, description, href, Icon }) => (
-									<Link
-										key={href}
-										href={href}
-										className="group rounded-2xl border border-white/60 bg-white/72 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/70 hover:shadow-[0_18px_44px_-24px_rgba(6,182,212,0.55)] dark:border-white/10 dark:bg-slate-950/48 dark:hover:border-cyan-400/35"
-									>
-										<div className="mb-3 grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-100 to-cyan-100 text-cyan-800 transition group-hover:scale-105 dark:from-emerald-950 dark:to-cyan-950 dark:text-cyan-200">
-											<Icon size={18} />
-										</div>
-										<p className="text-sm font-semibold text-slate-950 dark:text-white">{label}</p>
-										<p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">{description}</p>
-									</Link>
-								))}
-							</motion.div>
-
-							<motion.div variants={heroItem(reducedMotion)} className="mt-8 grid gap-3 sm:grid-cols-3">
-								{TRUST_POINTS.map((item) => {
-									const Glyph = item.Glyph;
-									return (
-										<IotHudTile key={item.label} className="flex min-h-[104px] flex-col justify-between p-3 sm:p-4">
-											<Glyph className="mx-auto h-9 w-9 shrink-0 opacity-90 sm:mx-0" />
-											<div>
-												<p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{item.label}</p>
-												<p className="mt-1 text-sm font-semibold tracking-tight text-slate-950 dark:text-white">{item.value}</p>
-											</div>
-										</IotHudTile>
-									);
-								})}
-							</motion.div>
-						</motion.div>
-
-						<motion.div
-							className="relative z-10 min-w-0 lg:pl-6"
-							variants={panelReveal(reducedMotion, "right")}
-							initial="hidden"
-							animate="visible"
-						>
-							<div className="dashboard-preview iot-live-hud-panel min-w-0">
-								<div className="flex flex-wrap items-start justify-between gap-2 border-b border-cyan-600/15 px-6 py-5 dark:border-cyan-400/15">
-									<div className="min-w-0">
-										<p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">IOT · Live</p>
-										<p className="mt-1 font-display text-xl font-medium text-slate-950 dark:text-white">Кампания и документи</p>
-									</div>
-									<span
-										className={`shrink-0 rounded-sm border px-3 py-1.5 text-xs font-semibold ${
-											ragHealthy === false
-												? "border-rose-400/40 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-												: "border-cyan-500/35 bg-cyan-50 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200"
-										}`}
-										title={
-											ragHealthy === false
-												? [
-														"Статус на векторния индекс (RAG): таблица knowledge_chunks в Supabase, брой chunks и embeddings.",
-														"Чатът работи и без това (вътрешна база + OpenAI), но семантичното търсене в индексирани документи може да е ограничено.",
-														ragStatusHints[0] ?? "",
-														"JSON диагностика: GET /api/health",
-													]
-														.filter(Boolean)
-														.join(" ")
-												: "Услугата е онлайн; RAG индексът е в норма."
-										}
-									>
-										{liveStatsLoading ? "…" : ragHealthy === false ? "RAG не е готов" : "онлайн"}
-									</span>
-								</div>
-								<div className="grid gap-4 p-4 sm:p-5">
-									<div className="grid grid-cols-3 gap-2 sm:gap-3">
-										{liveTiles.map((tile) => (
-											<IotHudTile key={tile.label} className="p-3 sm:p-4">
-												<p className="text-2xl font-medium tabular-nums text-slate-950 dark:text-white">
-													{liveStatsLoading ? "…" : tile.value}
-												</p>
-												<p className="mt-1 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{tile.label}</p>
-											</IotHudTile>
-										))}
-									</div>
-									<IotHudTile className="rounded-sm p-5">
-										<div className="mb-4 flex items-center justify-between gap-2">
-											<p className="font-display text-base font-semibold text-slate-950 dark:text-white">Спешност по срокове</p>
-											<HudGlyphLineTrend className="h-6 w-6 shrink-0 text-cyan-600 dark:text-cyan-300" />
-										</div>
-										<div className="space-y-3">
-											{(deadlineRisks.length
-												? deadlineRisks
-												: [{ label: "Зареждане…", percent: 0 }]
-											).map((row) => (
-												<div key={row.label}>
-													<div className="mb-1 flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-														<span>{row.label}</span>
-														<span>{row.percent}%</span>
-													</div>
-													<div className="h-2 bg-slate-100 dark:bg-slate-800/80">
-														<div
-															className="h-full bg-gradient-to-r from-cyan-600 to-teal-500 transition-[width] duration-500 dark:from-cyan-400 dark:to-teal-400"
-															style={{ width: `${row.percent}%` }}
-														/>
-													</div>
-												</div>
-											))}
-										</div>
-									</IotHudTile>
-									<div className="grid gap-3 sm:grid-cols-2">
-										<IotHudTile className="p-4">
-											<p className="text-xs uppercase tracking-[0.16em] text-cyan-700 dark:text-cyan-400/90">Асистент</p>
-											<p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Елена · право и ДФЗ</p>
-											<p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">Отговаря със структура, източници и следваща стъпка.</p>
-										</IotHudTile>
-										<IotHudTile className="p-4">
-											<p className="text-xs uppercase tracking-[0.16em] text-cyan-700 dark:text-cyan-400/90">Контрол</p>
-											<p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Feedback loop</p>
-											<p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">Полезно/неточно се записва за подобрение.</p>
-										</IotHudTile>
-									</div>
-								</div>
-							</div>
-						</motion.div>
-					</div>
-				</section>
-
-				<section ref={resultsSectionRef} className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-					<div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-						<div>
-							<p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">Документи и отговори</p>
-							<h2 className="mt-2 text-2xl font-medium tracking-tight text-slate-950 dark:text-white">AI търсене с ясни резултати</h2>
+			<section className="relative overflow-hidden px-5 py-20 text-center sm:px-8 lg:py-28">
+				<div className="absolute left-1/2 top-12 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(15,118,110,0.16),transparent_65%)]" />
+				<div className="relative mx-auto max-w-6xl">
+					<motion.div
+						initial={{ opacity: 0, y: 18 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+					>
+						<div className="mb-7 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-[#6e6e73] shadow-sm">
+							<span className="h-2 w-2 rounded-full bg-[#30d158]" />
+							Официални данни, AI насоки и фермерски инструменти
 						</div>
-						<select
-							value={filterType}
-							onChange={(e) => setFilterType(e.target.value as "all" | KnowledgeDoc["type"])}
-							className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium dark:border-slate-700 dark:bg-slate-900"
-						>
-							<option value="all">Всички типове</option>
-							<option value="scheme">Схеми</option>
-							<option value="regulation">Нормативни актове</option>
-							<option value="procedure">Процедури</option>
-							<option value="deadline">Срокове</option>
-						</select>
-					</div>
 
-					<div className="glass-card p-6 sm:p-8">
-						{engine ? <p className="mb-4 text-xs font-semibold text-slate-500 dark:text-slate-400">Search engine: {engine}</p> : null}
-						{aiSummary ? (
-							<div className="mb-5 border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm dark:bg-emerald-950/30">
-								<p className="font-semibold text-emerald-950 dark:text-emerald-100">AI обобщение</p>
-								<p className="mt-1 leading-6 text-emerald-900 dark:text-emerald-200">{aiSummary}</p>
-							</div>
-						) : null}
-						{error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
-						{!error && filteredResults.length === 0 ? (
-							<div className="grid gap-4 py-8 text-center">
-								<Sparkles className="mx-auto text-emerald-700 dark:text-emerald-300" size={30} />
-								<p className="text-sm text-slate-500 dark:text-slate-400">Използвай търсачката по-горе, за да видиш документи, резюме и следващи действия.</p>
-							</div>
-						) : (
-							<div className="grid gap-4 md:grid-cols-2">
-								{filteredResults.map((doc) => (
-									<article key={doc.id} className="rounded-2xl glass-panel p-6 hover-elevate transition-all">
-										<p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{doc.category} · {doc.type}</p>
-										<h3 className="font-display text-lg font-medium text-slate-950 dark:text-white">{doc.title}</h3>
-										<p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{doc.content}</p>
-										<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Източник: {doc.source} · {doc.effectiveDate}</p>
-										<div className="mt-4 flex flex-wrap items-center gap-2">
-											<button
-												type="button"
-												onClick={() => jumpToSearch(`Обясни накратко: ${doc.title}`, true)}
-												className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold hover:border-emerald-500 dark:border-slate-700"
-											>
-												Попитай AI
-											</button>
-											{!isPublicDocumentId(doc.id) ? (
-												<Link href={`/doc/${doc.id}`} className="rounded-md bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white dark:bg-white dark:text-slate-950">
-													Отвори
-												</Link>
-											) : null}
-											<a href={getKnowledgeSourceUrl(doc)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-												{isPublicDocumentId(doc.id) ? "PDF / оригинал" : "Оригинал"} <ExternalLink size={12} />
-											</a>
-										</div>
-									</article>
-								))}
-							</div>
-						)}
-					</div>
-				</section>
+						<h1 className="mx-auto max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-7xl lg:text-8xl">
+							Земеделските правила.
+							<br />
+							Обяснени ясно.
+						</h1>
 
-				<section className="mx-auto grid max-w-7xl gap-8 px-4 pb-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
-					<div>
-						<p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">Категории</p>
-						<h2 className="mt-2 text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Бърз достъп до най-честите казуси</h2>
-						<p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-							Вместо хаотично търсене по сайтове и PDF-и, започни от конкретна тема и получи проверими документи.
+						<p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-[#6e6e73] sm:text-xl">
+							AgriNexus събира документи, срокове, калкулатори и AI преглед в един минимален център за български фермери.
 						</p>
-					</div>
-					<div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-						{CATEGORY_CARDS.map((card) => {
-							const Glyph = card.Glyph;
+
+						<div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+							<Link
+								href="/document-review"
+								className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0071e3] px-7 py-3 text-base font-semibold text-white transition-transform hover:scale-[1.02]"
+							>
+								Пробвай AI преглед <ArrowRight size={18} />
+							</Link>
+							<Link
+								href="/documents"
+								className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f5f5f7] px-7 py-3 text-base font-semibold text-[#1d1d1f] transition-transform hover:scale-[1.02]"
+							>
+								Виж документи
+							</Link>
+						</div>
+					</motion.div>
+
+					<div className="mt-16 grid gap-4 md:grid-cols-3">
+						{heroActions.map((action, index) => {
+							const Icon = action.icon;
 							return (
-								<IotHudTile
-									key={card.title}
-									onClick={() => jumpToSearch(card.searchQuery, true)}
-									className="flex min-h-[132px] flex-col p-4 text-left sm:min-h-[140px] sm:p-5"
+								<motion.div
+									key={action.href}
+									initial={{ opacity: 0, y: 24 }}
+									whileInView={{ opacity: 1, y: 0 }}
+									viewport={{ once: true }}
+									transition={{ delay: index * 0.08, duration: 0.45 }}
 								>
-									<Glyph className="mb-3 h-8 w-8 shrink-0 sm:h-9 sm:w-9" />
-									<p className="font-display text-base font-medium text-slate-950 dark:text-white">{card.title}</p>
-									<p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{card.subtitle}</p>
-								</IotHudTile>
+									<Link
+										href={action.href}
+										className={`group flex min-h-[250px] flex-col justify-between rounded-[2rem] p-7 text-left transition-transform hover:-translate-y-1 ${action.tone}`}
+									>
+										<Icon size={32} />
+										<div>
+											<h2 className="mb-3 text-2xl font-semibold tracking-[-0.03em]">{action.title}</h2>
+											<p className="text-base leading-7 opacity-75">{action.body}</p>
+										</div>
+										<span className="inline-flex items-center gap-2 text-sm font-semibold">
+											Отвори <ArrowRight className="transition-transform group-hover:translate-x-1" size={16} />
+										</span>
+									</Link>
+								</motion.div>
 							);
 						})}
 					</div>
-				</section>
+				</div>
+			</section>
 
-				<section className="border-y border-slate-200 bg-white/78 dark:border-slate-800 dark:bg-slate-950/70">
-					<div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-3">
-						<div className="lg:col-span-1">
-							<div className="flex items-center gap-2">
-								<Bell size={18} className="text-emerald-700 dark:text-emerald-300" />
-								<p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">Оперативен фокус</p>
-							</div>
-							<h2 className="mt-3 text-2xl font-medium text-slate-950 dark:text-white">Последни промени и срокове</h2>
-							<Link href="/srokove" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-								Виж всички <ArrowRight size={15} />
-							</Link>
+			<section className="border-y border-black/5 bg-[#f5f5f7] px-5 py-5 sm:px-8">
+				<div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-[#6e6e73]">
+					<span className="text-[#ff3b30]">Активно: директни плащания</span>
+					<span>Еко-схеми: нов прием</span>
+					<span>Документи: дневници и заявления</span>
+					<span className="text-[#0f766e]">RAG база: включена</span>
+				</div>
+			</section>
+
+			<section className="px-5 py-24 sm:px-8">
+				<div className="mx-auto max-w-6xl">
+					<div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+						<div>
+							<SectionLabel>Как работи</SectionLabel>
+							<h2 className="text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-6xl">
+								Питай като човек. Получаваш точен отговор.
+							</h2>
 						</div>
-						<div className="grid gap-3 lg:col-span-2">
-							{UPDATES.map((item) => (
-								<div key={item.title} className="grid gap-2 border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[86px_1fr] dark:border-slate-800 dark:bg-slate-900">
-									<span className="w-fit rounded-sm bg-emerald-700 px-2 py-1 text-[10px] font-medium text-white">{item.badge}</span>
+						<div className="grid gap-4">
+							{[
+								["1", "Задай въпрос", "Напиши казуса си на разговорен български."],
+								["2", "AI търси в документите", "Системата проверява база от наредби, срокове и вътрешни знания."],
+								["3", "Получи следваща стъпка", "Отговорът е кратък, практичен и насочва към действие."],
+							].map(([num, title, body]) => (
+								<div key={num} className="flex gap-5 rounded-3xl bg-[#f5f5f7] p-6">
+									<span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white font-semibold text-[#0071e3]">
+										{num}
+									</span>
 									<div>
-										<p className="text-sm font-medium text-slate-950 dark:text-white">{item.title}</p>
-										<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.meta}</p>
+										<h3 className="text-xl font-semibold">{title}</h3>
+										<p className="mt-2 leading-7 text-[#6e6e73]">{body}</p>
 									</div>
 								</div>
 							))}
 						</div>
 					</div>
-				</section>
+				</div>
+			</section>
 
-				{/* TRUST & SOURCES SECTION */}
-				<section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-					<div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 p-8 border border-slate-200 dark:from-slate-900 dark:to-slate-950 dark:border-slate-800">
-						<div className="flex items-center justify-between mb-6">
-							<div className="flex items-center gap-3">
-								<ShieldCheck className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
-								<h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Източници и Достоверност</h2>
-							</div>
-							<div className="hidden sm:flex items-center gap-2 bg-emerald-100/50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-								<span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-								<span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-widest">SSL Protected & Verified</span>
-							</div>
-						</div>
-						<div className="grid md:grid-cols-3 gap-6">
-							<div>
-								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Официални данни</h3>
-								<p className="text-sm text-slate-600 dark:text-slate-400">Всички отговори стъпват върху официалните наредби на Държавен фонд &quot;Земеделие&quot; (ДФЗ) и Министерството на земеделието.</p>
-							</div>
-							<div>
-								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Проверима AI логика</h3>
-								<p className="text-sm text-slate-600 dark:text-slate-400">Всяко твърдение е подкрепено с директен линк (цитат) към оригиналния нормативен акт.</p>
-							</div>
-							<div>
-								<h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Защита на данните</h3>
-								<p className="text-sm text-slate-600 dark:text-slate-400">Документите, които качвате за преглед, не се споделят с трети страни и са криптирани.</p>
-							</div>
-						</div>
-					</div>
-				</section>
-
-				{/* FAQ SECTION */}
-				<section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-					<h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-8 text-center">Често задавани въпроси</h2>
-					<dl className="space-y-6">
-						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
-							<dt className="font-medium text-slate-900 dark:text-white text-lg">Какви са сроковете за директни плащания от ДФЗ?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Сроковете се обявяват ежегодно от Държавен фонд &apos;Земеделие&apos;. AgriNexus.Law следи и известява автоматично за активните прозорци за заявления.</dd>
-						</div>
-						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
-							<dt className="font-medium text-slate-900 dark:text-white text-lg">Как AgriNexus.Law помага на българските фермери?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Платформата предлага интелигентен асистент, който отговаря на въпроси за субсидии и екосхеми, търсейки директно в официални документи.</dd>
-						</div>
-						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
-							<dt className="font-medium text-slate-900 dark:text-white text-lg">Мога ли да проверя договор или земеделски документ тук?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, чрез секцията &apos;AI преглед&apos; можете да качите PDF документ, и нашият асистент ще обобщи ключовите рискове и задължения.</dd>
-						</div>
-						<div className="border-b border-slate-200 pb-6 dark:border-slate-800">
-							<dt className="font-medium text-slate-900 dark:text-white text-lg">Има ли информация за европейски програми и субсидии?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Да, поддържаме пълна база данни с актуалните мерки от ПРСР и стратегическия план за развитие на селските райони.</dd>
-						</div>
-						<div className="pb-6">
-							<dt className="font-medium text-slate-900 dark:text-white text-lg">Мога ли да задавам специфични въпроси за моята ферма?</dt>
-							<dd className="mt-2 text-slate-600 dark:text-slate-400">Категорично. Нашият AI е обучен да отговаря конкретно за биологично земеделие, животновъдство и зърнопроизводство в България.</dd>
-						</div>
-					</dl>
-				</section>
-
-				<section id="chat" className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
-					<div className="lg:pt-1">
-						<p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">AI асистент</p>
-						<h2 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-							Задай въпрос към специалист
+			<section className="bg-black px-5 py-24 text-white sm:px-8">
+				<div className="mx-auto max-w-6xl">
+					<div className="mb-14 text-center">
+						<p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Модули</p>
+						<h2 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+							Всичко важно за стопанството.
 						</h2>
-						<p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-							Избери профил според задачата. Отговорите могат да се оценяват, за да се подобрява вътрешната база.
-						</p>
 					</div>
 
-					<div className="glass-card overflow-hidden p-5 sm:p-6">
-						<div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800/80">
-							<h3 className="font-display text-sm font-medium tracking-tight text-slate-950 dark:text-white">Консултация</h3>
-							<div className="flex flex-wrap items-center gap-2" role="group" aria-label="Избор на AI специалист">
-								{(["elena", "boris", "viktoria"] as const).map((id) => (
-									<button
-										key={id}
-										type="button"
-										onClick={() => setChatCharacter(id)}
-										aria-pressed={chatCharacter === id}
-										className={`flex items-center gap-2 rounded-2xl border px-2 py-1.5 text-left text-xs font-semibold transition-all duration-300 sm:px-3 ${
-											chatCharacter === id
-												? "border-teal-500/70 bg-teal-50/90 shadow-md shadow-teal-500/15 dark:border-teal-400/50 dark:bg-teal-950/40 dark:shadow-teal-500/20"
-												: "border-slate-200/90 bg-white/80 hover:border-teal-300/50 hover:shadow-sm dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-teal-600/40"
-										}`}
-									>
-										<AiCharacterAvatar id={id} size="sm" selected={chatCharacter === id} />
-										<span className="hidden min-w-0 sm:block">
-											<span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-												{id === "elena" ? "Право" : id === "boris" ? "Поле" : "Финанси"}
-											</span>
-											<span className="block truncate text-slate-900 dark:text-slate-100">
-												{id === "elena" ? "Елена" : id === "boris" ? "Борис" : "Виктория"}
-											</span>
-										</span>
-									</button>
-								))}
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{[
+							["Календар", "Сезонни задачи по култури", "/kalendar", CalendarDays],
+							["Калкулатор", "Ориентировъчни субсидии", "/kalkulator", Calculator],
+							["Статистики", "Култури, добиви и сравнения", "/statistiki", BarChart3],
+							["Документи", "Библиотека от източници", "/documents", BookOpenText],
+							["Търсене", "Бърза справка по тема", "/search", FileSearch],
+							["Моя ферма", "Профил и персонализация", "/moya-ferma", ShieldCheck],
+						].map(([title, body, href, Icon]) => (
+							<Link key={href as string} href={href as string} className="group rounded-[1.75rem] bg-white/[0.08] p-6 transition-colors hover:bg-white/[0.13]">
+								<Icon className="mb-10 text-white/75" size={28} />
+								<h3 className="text-2xl font-semibold tracking-[-0.03em]">{title as string}</h3>
+								<p className="mt-3 leading-7 text-white/55">{body as string}</p>
+							</Link>
+						))}
+					</div>
+				</div>
+			</section>
+
+			<section className="px-5 py-24 sm:px-8">
+				<div className="mx-auto max-w-6xl">
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						{stats.map(([value, label]) => (
+							<div key={label} className="rounded-[1.75rem] bg-[#f5f5f7] p-7">
+								<p className="text-4xl font-semibold tracking-[-0.04em]">{value}</p>
+								<p className="mt-3 text-sm text-[#6e6e73]">{label}</p>
 							</div>
-						</div>
-
-						<div className="mb-4 max-h-80 overflow-auto rounded-xl border border-slate-200/90 bg-slate-50/90 p-3 shadow-inner dark:border-slate-700/90 dark:bg-slate-900/50">
-							{chatMessages.length === 0 ? (
-								<div className="space-y-4">
-									<p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-										Задай казус: култура, регион, документ или срок. Под всеки AI отговор можеш да дадеш обратна връзка.
-									</p>
-									<div className="flex items-center gap-3 border-t border-slate-200/80 pt-4 dark:border-slate-700/80">
-										<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Екип</span>
-										<div className="flex -space-x-2">
-											{(["elena", "boris", "viktoria"] as const).map((id) => (
-												<AiCharacterAvatar key={id} id={id} size="sm" className="ring-2 ring-slate-100 dark:ring-slate-900" />
-											))}
-										</div>
-									</div>
-								</div>
-							) : (
-								<motion.div
-									className="space-y-3"
-									variants={chatListContainer(reducedMotion)}
-									initial="hidden"
-									animate="visible"
-								>
-									{chatMessages.map((msg, idx) => (
-										<motion.div
-											key={`${msg.role}-${idx}-${msg.chatLogId ?? ""}`}
-											variants={chatBubble(reducedMotion)}
-											className={`flex gap-3 rounded-xl border p-3.5 text-sm shadow-sm transition-all duration-300 hover:shadow-md ${
-												msg.role === "user"
-													? "border-slate-200/90 bg-white dark:border-slate-700 dark:bg-slate-950"
-													: "border-emerald-200/50 bg-emerald-50/90 dark:border-emerald-900/40 dark:bg-emerald-950/25"
-											}`}
-										>
-											<div className="shrink-0 pt-0.5">
-												{msg.role === "user" ? (
-													<span className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
-														<User size={16} aria-hidden />
-													</span>
-												) : (
-													<AiCharacterAvatar id={msg.characterId ?? "elena"} size="sm" />
-												)}
-											</div>
-											<div className="min-w-0 flex-1">
-											<p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-												{msg.role === "user" ? "Ти" : "Асистент"}
-											</p>
-											<ChatMarkdown content={msg.content} variant={msg.role} />
-											{msg.role === "assistant" && msg.chatLogId ? (
-												<div className="mt-3 flex flex-wrap items-center gap-2">
-													{(() => {
-														const state = feedbackByLogId[msg.chatLogId];
-														if (!state) return null;
-														if (state.status === "saving") return <span className="text-[11px] text-slate-500">Запазва се...</span>;
-														if (state.status === "saved") return <span className="text-[11px] text-emerald-700 dark:text-emerald-300">Feedback е записан</span>;
-														return <span className="text-[11px] text-red-600 dark:text-red-300">Неуспешен запис</span>;
-													})()}
-													<button
-														type="button"
-														onClick={() => void sendFeedback(msg.chatLogId as string, 1)}
-														disabled={feedbackByLogId[msg.chatLogId]?.status === "saving"}
-														className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold disabled:opacity-60 ${
-															feedbackByLogId[msg.chatLogId]?.vote === 1 ? "border-emerald-500 text-emerald-700 dark:text-emerald-300" : "border-slate-300 dark:border-slate-600"
-														}`}
-													>
-														<ThumbsUp size={12} /> Полезно
-													</button>
-													<button
-														type="button"
-														onClick={() => void sendFeedback(msg.chatLogId as string, -1)}
-														disabled={feedbackByLogId[msg.chatLogId]?.status === "saving"}
-														className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold disabled:opacity-60 ${
-															feedbackByLogId[msg.chatLogId]?.vote === -1 ? "border-rose-500 text-rose-700 dark:text-rose-300" : "border-slate-300 dark:border-slate-600"
-														}`}
-													>
-														<ThumbsDown size={12} /> Неточно
-													</button>
-												</div>
-											) : null}
-											</div>
-										</motion.div>
-									))}
-								</motion.div>
-							)}
-						</div>
-
-						{chatError ? <p className="mb-3 text-xs font-medium text-red-600 dark:text-red-400">{chatError}</p> : null}
-						<form onSubmit={sendChat} className="grid gap-2 sm:grid-cols-[1fr_auto] sm:gap-3">
-							<input
-								value={chatInput}
-								onChange={(e) => setChatInput(e.target.value)}
-								placeholder="Например: Имам 120 дка пшеница в Добрич. Какво да проверя?"
-								className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none ring-emerald-500/0 transition placeholder:text-slate-400 focus:border-emerald-500/70 focus:ring-4 focus:ring-emerald-500/15 dark:border-slate-600 dark:bg-slate-900 dark:focus:border-emerald-500/50"
-							/>
-							<button
-								type="submit"
-								disabled={chatBusy || !chatInput.trim()}
-								className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-900 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-100"
-							>
-								{chatBusy ? "Изпращам..." : "Изпрати"} <ArrowRight size={16} />
-							</button>
-						</form>
+						))}
 					</div>
-				</section>
-			</main>
-		</div>
+				</div>
+			</section>
+
+			<section className="bg-[#f5f5f7] px-5 py-24 sm:px-8">
+				<div className="mx-auto max-w-6xl">
+					<div className="mb-12">
+						<SectionLabel>Категории</SectionLabel>
+						<h2 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+							Организирано като работен плот.
+						</h2>
+					</div>
+
+					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+						{categories.map(([title, subtitle]) => (
+							<div key={title} className="rounded-3xl bg-white p-6 shadow-sm">
+								<h3 className="text-xl font-semibold">{title}</h3>
+								<p className="mt-2 text-[#6e6e73]">{subtitle}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
+			<section className="px-5 py-24 sm:px-8">
+				<div className="mx-auto max-w-6xl">
+					<div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+						<div>
+							<SectionLabel>Сравнение</SectionLabel>
+							<h2 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+								По-малко търсене. Повече яснота.
+							</h2>
+							<p className="mt-6 text-lg leading-8 text-[#6e6e73]">
+								Вместо да прескачаш между сайтове, PDF-и и стари бележки, започваш от един център.
+							</p>
+						</div>
+
+						<div className="overflow-hidden rounded-[2rem] border border-black/10">
+							<div className="grid grid-cols-3 bg-[#f5f5f7] p-4 text-sm font-semibold">
+								<span>Функция</span>
+								<span>AgriNexus</span>
+								<span>Ръчно</span>
+							</div>
+							{comparison.map(([feature, agri, manual]) => (
+								<div key={feature} className="grid grid-cols-3 border-t border-black/10 p-4 text-sm">
+									<span>{feature}</span>
+									<span className="font-semibold text-[#0071e3]">{agri}</span>
+									<span className="text-[#6e6e73]">{manual}</span>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section className="bg-black px-5 py-24 text-white sm:px-8">
+				<div className="mx-auto max-w-6xl text-center">
+					<p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Доверие</p>
+					<h2 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+						Всеки отговор трябва да бъде проверим.
+					</h2>
+					<div className="mt-14 grid gap-4 md:grid-cols-3">
+						{[
+							[CheckCircle2, "Официални източници", "Фокус върху документи и наредби, не върху слухове."],
+							[Lock, "Защита на данните", "Файловете и профилите се третират като чувствителна информация."],
+							[UploadCloud, "Готово за развитие", "RAG, документи, профил на ферма и мобилна обвивка."],
+						].map(([Icon, title, body]) => (
+							<div key={title as string} className="rounded-[1.75rem] bg-white/[0.08] p-7 text-left">
+								<Icon className="mb-8 text-white/60" size={28} />
+								<h3 className="text-xl font-semibold">{title as string}</h3>
+								<p className="mt-3 leading-7 text-white/55">{body as string}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
+			<section className="px-5 py-24 sm:px-8">
+				<div className="mx-auto max-w-6xl rounded-[2.5rem] bg-[#f5f5f7] p-8 sm:p-12 lg:p-16">
+					<div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+						<div>
+							<SectionLabel>AI асистент</SectionLabel>
+							<h2 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+								Задай въпрос към специалист.
+							</h2>
+							<p className="mt-6 text-lg leading-8 text-[#6e6e73]">
+								Право, поле и финанси - три гледни точки за по-практични решения.
+							</p>
+						</div>
+						<div className="rounded-[2rem] bg-white p-5 shadow-sm">
+							<div className="mb-5 flex gap-3 border-b border-black/10 pb-4 text-sm font-semibold text-[#6e6e73]">
+								<span className="text-[#1d1d1f]">Право</span>
+								<span>Поле</span>
+								<span>Финанси</span>
+							</div>
+							<div className="rounded-2xl bg-[#f5f5f7] p-6 text-[#6e6e73]">
+								<MessageSquareText className="mb-5 text-[#0071e3]" />
+								<p>Напиши казус: култура, регион, документ или срок.</p>
+							</div>
+							<Link href="/document-review" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0071e3] px-6 py-3 font-semibold text-white">
+								Започни AI преглед <ArrowRight size={18} />
+							</Link>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<footer className="border-t border-black/10 px-5 py-8 text-sm text-[#6e6e73] sm:px-8">
+				<div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
+					<p>Copyright 2026 AgriNexus.Law. Всички права запазени.</p>
+					<div className="flex flex-wrap justify-center gap-5">
+						<Link href="/privacy">Поверителност</Link>
+						<Link href="/terms">Условия</Link>
+						<Link href="/vhod">Вход</Link>
+					</div>
+				</div>
+			</footer>
+		</main>
 	);
 }
