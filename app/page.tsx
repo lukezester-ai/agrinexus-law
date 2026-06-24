@@ -28,21 +28,21 @@ const navLinks = [
 const heroActions = [
 	{
 		title: "Провери срокове",
-		body: "Кампании, заявления и важни дати на едно място.",
+		body: "Интелигентно проследяване на крайни дати за ДФЗ и активните кампании.",
 		href: "/srokove",
 		icon: CalendarDays,
 		tone: "bg-[#f5f5f7] text-[#1d1d1f]",
 	},
 	{
 		title: "Намери документ",
-		body: "Наредби, образци и PDF източници без губене на време.",
+		body: "Пълен архив от наредби, образци и заявления в PDF формат.",
 		href: "/documents",
 		icon: FileSearch,
 		tone: "bg-[#1d1d1f] text-white",
 	},
 	{
 		title: "AI преглед",
-		body: "Качи договор или писмо и получи практически анализ.",
+		body: "Автоматичен анализ на договори и писма спрямо актуални изисквания.",
 		href: "/document-review",
 		icon: Sparkles,
 		tone: "bg-[#0f766e] text-white",
@@ -50,12 +50,12 @@ const heroActions = [
 ];
 
 const categories = [
-	["Субсидии", "Директни плащания и заявления"],
-	["Закони", "Наредби, укази и промени"],
-	["Сертификати", "Био, качество и проверки"],
-	["Растителна защита", "Дневници и препарати"],
-	["ЕС регламенти", "Правила и общи политики"],
-	["Калкулатори", "Бюджет, площи и сценарии"],
+	["Субсидии", "Директни плащания", "/search?q=субсидии"],
+	["Закони", "Наредби и укази", "/search?q=закони"],
+	["Сертификати", "Био и качество", "/search?q=сертификати"],
+	["Био производство", "Еко стандарти", "/search?q=био производство"],
+	["Растителна защита", "Дневници и препарати", "/search?q=растителна защита"],
+	["Калкулатори", "Бюджет и ДДС", "/kalkulator"],
 ];
 
 const stats = [
@@ -123,13 +123,13 @@ export default function Home() {
 						</div>
 
 						<h1 className="mx-auto max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-7xl lg:text-8xl">
-							Земеделските правила.
+							Отговори за
 							<br />
-							Обяснени ясно.
+							вашето стопанство.
 						</h1>
 
 						<p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-[#6e6e73] sm:text-xl">
-							AgriNexus събира документи, срокове, калкулатори и AI преглед в един минимален център за български фермери.
+							Търсете субсидии, договори и срокове на едно място. Ясни отговори с точен източник.
 						</p>
 
 						<div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
@@ -137,7 +137,7 @@ export default function Home() {
 								href="/document-review"
 								className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0071e3] px-7 py-3 text-base font-semibold text-white transition-transform hover:scale-[1.02]"
 							>
-								Пробвай AI преглед <ArrowRight size={18} />
+								Питай AI <ArrowRight size={18} />
 							</Link>
 							<Link
 								href="/documents"
@@ -169,7 +169,7 @@ export default function Home() {
 											<p className="text-base leading-7 opacity-75">{action.body}</p>
 										</div>
 										<span className="inline-flex items-center gap-2 text-sm font-semibold">
-											Отвори <ArrowRight className="transition-transform group-hover:translate-x-1" size={16} />
+											Виж всички <ArrowRight className="transition-transform group-hover:translate-x-1" size={16} />
 										</span>
 									</Link>
 								</motion.div>
@@ -194,8 +194,11 @@ export default function Home() {
 						<div>
 							<SectionLabel>Как работи</SectionLabel>
 							<h2 className="text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-6xl">
-								Питай като човек. Получаваш точен отговор.
+								Три стъпки до отговора.
 							</h2>
+							<p className="mt-5 text-lg leading-8 text-[#6e6e73]">
+								Без PDF-та, без търсене по сайтове.
+							</p>
 						</div>
 						<div className="grid gap-4">
 							{[
@@ -262,18 +265,24 @@ export default function Home() {
 			<section className="bg-[#f5f5f7] px-5 py-24 sm:px-8">
 				<div className="mx-auto max-w-6xl">
 					<div className="mb-12">
-						<SectionLabel>Категории</SectionLabel>
+						<SectionLabel>Бърз достъп</SectionLabel>
 						<h2 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
-							Организирано като работен плот.
+							Бърз достъп до най-честите казуси.
 						</h2>
+						<p className="mt-5 max-w-2xl text-lg leading-8 text-[#6e6e73]">
+							Открийте бързи отговори в систематизирана база.
+						</p>
 					</div>
 
 					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-						{categories.map(([title, subtitle]) => (
-							<div key={title} className="rounded-3xl bg-white p-6 shadow-sm">
+						{categories.map(([title, subtitle, href]) => (
+							<Link key={title} href={href} className="group rounded-3xl bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
 								<h3 className="text-xl font-semibold">{title}</h3>
 								<p className="mt-2 text-[#6e6e73]">{subtitle}</p>
-							</div>
+								<span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#0071e3]">
+									Отвори <ArrowRight className="transition-transform group-hover:translate-x-1" size={15} />
+								</span>
+							</Link>
 						))}
 					</div>
 				</div>
