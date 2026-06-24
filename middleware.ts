@@ -16,6 +16,15 @@ function adminEmailAllowlist(): Set<string> | null {
 }
 
 export async function middleware(request: NextRequest) {
+  const isProfilePath = request.nextUrl.pathname.startsWith('/profile')
+  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
+
+  if (!isProfilePath && !isAdminPath) {
+    return NextResponse.next({
+      request,
+    })
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -47,9 +56,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const isProfilePath = request.nextUrl.pathname.startsWith('/profile')
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
 
   if (
     !user &&
