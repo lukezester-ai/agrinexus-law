@@ -161,6 +161,12 @@ const FAQS: FAQItem[] = [{
 }];
 const CHAT_TABS = ['Право', 'Поле', 'Финанси'];
 const SEARCH_CHIPS = ['Документи за био сертификат', 'Срокове директни плащания', 'Дневници при био стопанство'];
+
+const getAiQuestionHref = (question: string) => {
+  const trimmed = question.trim();
+  return trimmed ? `/document-review?question=${encodeURIComponent(trimmed)}` : '/document-review';
+};
+
 const FOOTER_LINKS: NavLink[] = [{
   label: 'Документи',
   href: '/documents'
@@ -751,10 +757,13 @@ const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px
       </div>
     </div>
   </nav>;
-const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
-  paddingTop: '140px',
-  paddingBottom: '100px'
-}}>
+const Hero = () => {
+  const [question, setQuestion] = React.useState('');
+
+  return <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
+    paddingTop: '140px',
+    paddingBottom: '100px'
+  }}>
     <div className="w-full max-w-[680px] mx-auto flex flex-col items-center">
       <span className="text-[12px] font-semibold text-[#0071E3] uppercase tracking-[0.08em] mb-4 block">
         AI асистент за фермери
@@ -795,10 +804,10 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       }}>
           <IconSearch size={20} color="#86868B" />
         </div>
-        <input type="text" placeholder="Напр. изисквания за директни плащания..." className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
+        <input type="text" value={question} onChange={e => setQuestion(e.currentTarget.value)} placeholder="Напр. изисквания за директни плащания..." className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
         height: '52px',
         paddingLeft: '48px',
-        paddingRight: '16px',
+        paddingRight: '112px',
         fontSize: '17px',
         outline: 'none'
       }} onFocus={e => {
@@ -806,6 +815,17 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       }} onBlur={e => {
         e.currentTarget.style.borderColor = '#D2D2D7';
       }} />
+        <a href={getAiQuestionHref(question)} className="agri-btn-primary" style={{
+        position: 'absolute',
+        right: '6px',
+        top: '6px',
+        height: '40px',
+        padding: '0 18px',
+        fontSize: '14px',
+        textDecoration: 'none'
+      }}>
+          Питай AI
+        </a>
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
@@ -821,6 +841,7 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       </div>
     </div>
   </section>;
+};
 const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" style={{
   height: '44px'
 }}>
@@ -1645,7 +1666,9 @@ const FAQ = () => {
 };
 const AIChatCTA = () => {
   const [activeTab, setActiveTab] = React.useState(0);
-  return <section className="bg-[#FFFFFF]" style={{
+  const [question, setQuestion] = React.useState('');
+
+  return <section id="chat" className="bg-[#FFFFFF]" style={{
     padding: '100px 48px'
   }}>
       <div className="max-w-[1100px] mx-auto flex flex-col lg:flex-row items-center gap-16">
@@ -1734,14 +1757,14 @@ const AIChatCTA = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <input type="text" placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
+              <input type="text" value={question} onChange={e => setQuestion(e.currentTarget.value)} placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
               height: '48px',
               padding: '0 16px',
               fontSize: '15px',
               outline: 'none',
               border: 'none'
             }} />
-              <a href="/document-review" className="agri-btn-primary" style={{
+              <a href={getAiQuestionHref(question)} className="agri-btn-primary" style={{
               height: '48px',
               fontSize: '15px',
               flexShrink: 0,

@@ -108,6 +108,12 @@ export default function DocumentReviewPage() {
 		}
 	}, []);
 
+	useEffect(() => {
+		const question = new URLSearchParams(window.location.search).get("question")?.trim();
+		if (!question) return;
+		setContext((current) => current.trim() ? current : question);
+	}, []);
+
 	const persistHistory = (items: ReviewHistoryItem[]) => {
 		setHistory(items);
 		localStorage.setItem(historyStorageKey, JSON.stringify(items));
@@ -299,7 +305,7 @@ export default function DocumentReviewPage() {
 						{reviewQuestions.map((question) => (
 							<Link
 								key={question}
-								href={`/?chatQ=${encodeURIComponent(question)}#chat`}
+								href={`/document-review?question=${encodeURIComponent(question)}`}
 								className="rounded-full border border-slate-200 bg-white/75 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-cyan-800 dark:border-slate-800 dark:bg-slate-950/45 dark:text-slate-200 dark:hover:border-cyan-700 dark:hover:text-cyan-200"
 							>
 								{question}
@@ -338,7 +344,7 @@ export default function DocumentReviewPage() {
 							<Copy size={16} /> {copied ? "Копирано" : "Копирай prompt"}
 						</button>
 						<Link
-							href={`/?chatQ=${encodeURIComponent(aiPrompt)}#chat`}
+							href={`/document-review?question=${encodeURIComponent(aiPrompt)}`}
 							className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-cyan-800 dark:bg-white dark:text-slate-950 dark:hover:bg-cyan-100"
 						>
 							Изпрати към AI асистента <ArrowRight size={16} />

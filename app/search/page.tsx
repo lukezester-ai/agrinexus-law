@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
-import { ExternalLink, Search } from "lucide-react";
+import { ArrowRight, ExternalLink, Search, Sparkles } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import type { KnowledgeDoc } from "@/lib/knowledge/dfz-knowledge";
 import { getKnowledgeSourceUrl } from "@/lib/knowledge/source-links";
@@ -387,10 +387,10 @@ export default function SearchPage() {
               Опитай с други ключови думи или питай Елена директно в чата.
             </p>
             <Link 
-              href="/"
-              className="brand-cta-bg inline-block mt-4 px-4 py-2 text-white rounded-lg text-sm font-medium shadow-sm hover:brightness-105 transition"
+              href={`/document-review?question=${encodeURIComponent(query)}`}
+              className="brand-cta-bg inline-flex items-center gap-2 mt-4 px-4 py-2 text-white rounded-full text-sm font-medium shadow-sm hover:brightness-105 transition"
             >
-              Питай Елена →
+              Питай AI <ArrowRight size={14} />
             </Link>
           </div>
         )}
@@ -521,11 +521,17 @@ export default function SearchPage() {
               </label>
             </div>
             {aiSummary && (
-              <div className="mb-5 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/90 dark:bg-sky-950/50 px-5 py-4 shadow-sm">
-                <p className="text-xs uppercase tracking-wide text-sky-800 dark:text-sky-300 mb-2 font-semibold">
-                  Кратък отговор (вътрешно AI, без външен модел)
+              <div className="mb-5 rounded-2xl border border-[#D2D2D7] bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#0071E3] dark:text-sky-300">
+                  <Sparkles size={14} /> Кратък отговор
                 </p>
-                <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">{aiSummary}</p>
+                <p className="text-sm text-[#1D1D1F] dark:text-slate-200 leading-relaxed whitespace-pre-line">{aiSummary}</p>
+                <Link
+                  href={`/document-review?question=${encodeURIComponent(query || aiSummary)}`}
+                  className="brand-cta-bg mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-105"
+                >
+                  Попитай AI за още по темата <ArrowRight size={14} />
+                </Link>
               </div>
             )}
             {!aiSummary && filteredResults.length > 0 ? (
@@ -582,7 +588,13 @@ export default function SearchPage() {
                         <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
                           Източник: {doc.source}
                         </p>
-                        <div className="mt-1 flex items-center gap-3">
+                        <div className="mt-3 flex flex-wrap items-center gap-3">
+                          <Link
+                            href={`/document-review?question=${encodeURIComponent(`Обясни ми допълнително темата: ${doc.title}. Търсенето ми беше: ${query}.`)}`}
+                            className="brand-cta-bg inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
+                          >
+                            Връзка с AI <ArrowRight size={12} />
+                          </Link>
                           {!isPublicDocumentId(doc.id) ? (
                             <Link href={`/doc/${doc.id}`} className="brand-link inline-flex items-center gap-1 text-xs">
                               Отвори документа
