@@ -33,6 +33,7 @@ Thumbs.db
 *.tar
 *.tar.gz
 *.tgz
+magicpath-project/
 
 # IDE / local tooling
 .vscode/
@@ -51,4 +52,3 @@ Thumbs.db
 **/.gradle/
 **/build/
 local.properties
-
