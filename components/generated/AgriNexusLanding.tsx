@@ -164,7 +164,7 @@ const SEARCH_CHIPS = ['Документи за био сертификат', 'С
 
 const getAiQuestionHref = (question: string) => {
   const trimmed = question.trim();
-  return trimmed ? `/document-review?question=${encodeURIComponent(trimmed)}` : '/document-review';
+  return trimmed ? `/?chatQ=${encodeURIComponent(trimmed)}#chat` : '/#chat';
 };
 
 const FOOTER_LINKS: NavLink[] = [{
@@ -1667,6 +1667,70 @@ const FAQ = () => {
 const AIChatCTA = () => {
   const [activeTab, setActiveTab] = React.useState(0);
   const [question, setQuestion] = React.useState('');
+  const [answer, setAnswer] = React.useState('');
+  const [isSending, setIsSending] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const characterIds = ['elena', 'boris', 'viktoria'] as const;
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const incomingQuestion = new URLSearchParams(window.location.search).get('chatQ')?.trim();
+    if (incomingQuestion) {
+      setQuestion(incomingQuestion);
+      window.setTimeout(() => document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    }
+  }, []);
+
+  const sendQuestion = async () => {
+    const trimmed = question.trim();
+    if (!trimmed || isSending) return;
+
+    setIsSending(true);
+    setError('');
+    setAnswer('');
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          characterId: characterIds[activeTab],
+          messages: [{ role: 'user', content: trimmed }],
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(typeof payload.error === 'string' ? payload.error : 'AI request failed.');
+      }
+
+      const contentType = response.headers.get('content-type') ?? '';
+      if (contentType.includes('application/json')) {
+        const payload = await response.json();
+        setAnswer(typeof payload.response === 'string' ? payload.response : 'Empty response.');
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        setAnswer(await response.text());
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let fullText = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+        setAnswer(fullText);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'AI request error.');
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return <section id="chat" className="bg-[#FFFFFF]" style={{
     padding: '100px 48px'
@@ -1746,17 +1810,30 @@ const AIChatCTA = () => {
             padding: '24px',
             marginBottom: '24px'
           }}>
-              <p style={{
+              {answer || error ? <div style={{
+              width: '100%',
+              maxHeight: '180px',
+              overflow: 'auto',
+              fontSize: '14px',
+              color: error ? '#B42318' : '#1D1D1F',
+              lineHeight: 1.55,
+              whiteSpace: 'pre-wrap'
+            }}>
+                {error || answer}
+              </div> : <p style={{
               fontSize: '15px',
               color: '#6E6E73',
               fontStyle: 'italic',
               textAlign: 'center'
             }}>
                 Задай казус: култура, регион, документ или срок.
-              </p>
+              </p>}
             </div>
 
-            <div className="flex items-center gap-3">
+            <form className="flex items-center gap-3" onSubmit={event => {
+              event.preventDefault();
+              void sendQuestion();
+            }}>
               <input type="text" value={question} onChange={e => setQuestion(e.currentTarget.value)} placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
               height: '48px',
               padding: '0 16px',
@@ -1764,15 +1841,16 @@ const AIChatCTA = () => {
               outline: 'none',
               border: 'none'
             }} />
-              <a href={getAiQuestionHref(question)} className="agri-btn-primary" style={{
+              <button type="submit" disabled={isSending || !question.trim()} className="agri-btn-primary" style={{
               height: '48px',
               fontSize: '15px',
               flexShrink: 0,
-              textDecoration: 'none'
+              opacity: isSending || !question.trim() ? 0.65 : 1,
+              cursor: isSending || !question.trim() ? 'not-allowed' : 'pointer'
             }}>
-                Изпрати →
-              </a>
-            </div>
+                {isSending ? '\u041f\u0440\u0430\u0449\u0430\u043c...' : '\u0418\u0437\u043f\u0440\u0430\u0442\u0438 \u2192'}
+              </button>
+            </form>
           </div>
         </div>
       </div>

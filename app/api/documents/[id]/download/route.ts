@@ -1,20 +1,25 @@
 import { getKnowledgeDocumentById } from "@/lib/knowledge/document-detail";
+import { getPublicDocumentById } from "@/lib/knowledge/public-documents-search";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_: Request, context: Params) {
   const { id } = await context.params;
-  const doc = getKnowledgeDocumentById(id);
+  const doc = getKnowledgeDocumentById(id) ?? (await getPublicDocumentById(id));
 
   if (!doc) {
     return Response.json({ error: "Документът не е намерен." }, { status: 404 });
+  }
+
+  if (doc.sourceUrl?.startsWith("http")) {
+    return Response.redirect(doc.sourceUrl, 302);
   }
 
   const body = [
     doc.title,
     `Категория: ${doc.category}`,
     `Тип: ${doc.type}`,
-    `Статус: актуален`,
+    "Статус: актуален",
     `Източник: ${doc.source}`,
     `Дата: ${doc.effectiveDate}`,
     "",
