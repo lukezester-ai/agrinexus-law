@@ -236,6 +236,612 @@ const MOBILE_BULLETS: MobileFeatureBullet[] = [{
   bold: 'Бърз достъп',
   muted: 'Документи, срокове и калкулатори'
 }];
+
+// --- Inline SVG Icons ---
+
+const IconSearch = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="9" cy="9" r="6" />
+    <line x1="13.5" y1="13.5" x2="18" y2="18" />
+  </svg>;
+const IconChevronRight = ({
+  size = 16,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <polyline points="5,2 11,8 5,14" />
+  </svg>;
+const IconPlus = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <line x1="10" y1="3" x2="10" y2="17" />
+    <line x1="3" y1="10" x2="17" y2="10" />
+  </svg>;
+const IconMinus = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <line x1="3" y1="10" x2="17" y2="10" />
+  </svg>;
+const IconArrowRight = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <line x1="3" y1="10" x2="17" y2="10" />
+    <polyline points="11,4 17,10 11,16" />
+  </svg>;
+const IconCalendar = ({
+  size = 28,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <rect x="2" y="4" width="18" height="16" rx="2.5" />
+    <line x1="7" y1="2" x2="7" y2="6" />
+    <line x1="15" y1="2" x2="15" y2="6" />
+    <line x1="2" y1="9" x2="20" y2="9" />
+    <line x1="6" y1="13" x2="9" y2="13" />
+    <line x1="13" y1="13" x2="16" y2="13" />
+  </svg>;
+const IconDocText = ({
+  size = 28,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M4 2 H14 L18 6 V20 Q18 21 17 21 H5 Q4 21 4 20 V3 Q4 2 5 2 Z" />
+    <polyline points="14,2 14,7 18,7" />
+    <line x1="7" y1="11" x2="15" y2="11" />
+    <line x1="7" y1="14" x2="15" y2="14" />
+    <line x1="7" y1="17" x2="12" y2="17" />
+  </svg>;
+const IconSparkles = ({
+  size = 28,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M11 2 L12.2 8.4 L18 11 L12.2 13.6 L11 20 L9.8 13.6 L4 11 L9.8 8.4 Z" />
+    <path d="M18 2 L18.7 4.3 L21 5 L18.7 5.7 L18 8 L17.3 5.7 L15 5 L17.3 4.3 Z" />
+    <path d="M4 15 L4.5 16.5 L6 17 L4.5 17.5 L4 19 L3.5 17.5 L2 17 L3.5 16.5 Z" />
+  </svg>;
+const IconBanknote = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <rect x="1" y="4" width="16" height="10" rx="1.5" />
+    <ellipse cx="9" cy="9" rx="2.5" ry="2.5" />
+    <line x1="3" y1="7" x2="3" y2="11" />
+    <line x1="15" y1="7" x2="15" y2="11" />
+  </svg>;
+const IconScales = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <line x1="9" y1="1" x2="9" y2="17" />
+    <line x1="3" y1="4" x2="15" y2="4" />
+    <line x1="3" y1="4" x2="1" y2="9" />
+    <line x1="15" y1="4" x2="17" y2="9" />
+    <path d="M1 9 Q2 12 3 9" />
+    <path d="M15 9 Q16 12 17 9" />
+    <line x1="6" y1="17" x2="12" y2="17" />
+  </svg>;
+const IconRosette = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="9" cy="9" r="7" />
+    <circle cx="9" cy="9" r="3" />
+    <line x1="9" y1="2" x2="9" y2="6" />
+    <line x1="9" y1="12" x2="9" y2="16" />
+    <line x1="2" y1="9" x2="6" y2="9" />
+    <line x1="12" y1="9" x2="16" y2="9" />
+  </svg>;
+const IconLeaf = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M3 15 C5 11 6 7 16 2 C16 2 16 12 9 14 C7 14.5 5 14 3 15 Z" />
+    <line x1="3" y1="15" x2="8" y2="10" />
+  </svg>;
+const IconShieldCheck = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M9 1 L16 4 L16 9 C16 13 12.5 16.5 9 17 C5.5 16.5 2 13 2 9 L2 4 Z" />
+    <polyline points="5.5,9 7.5,11 12.5,7" />
+  </svg>;
+const IconGlobe = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="9" cy="9" r="7" />
+    <ellipse cx="9" cy="9" rx="3" ry="7" />
+    <line x1="2" y1="9" x2="16" y2="9" />
+    <line x1="3" y1="5" x2="15" y2="5" />
+    <line x1="3" y1="13" x2="15" y2="13" />
+  </svg>;
+const IconDoc = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M3 1.5 H11 L14.5 5 V16 Q14.5 16.5 14 16.5 H4 Q3.5 16.5 3.5 16 V2 Q3.5 1.5 4 1.5 Z" />
+    <polyline points="11,1.5 11,5.5 14.5,5.5" />
+    <line x1="6" y1="9" x2="12" y2="9" />
+    <line x1="6" y1="12" x2="12" y2="12" />
+    <line x1="6" y1="15" x2="9" y2="15" />
+  </svg>;
+const IconCalculator = ({
+  size = 20,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <rect x="2" y="1" width="14" height="16" rx="2" />
+    <rect x="4.5" y="3.5" width="9" height="3" rx="0.5" />
+    <circle cx="5.5" cy="10" r="0.8" />
+    <circle cx="9" cy="10" r="0.8" />
+    <circle cx="12.5" cy="10" r="0.8" />
+    <circle cx="5.5" cy="13.5" r="0.8" />
+    <circle cx="9" cy="13.5" r="0.8" />
+    <circle cx="12.5" cy="13.5" r="0.8" />
+  </svg>;
+const IconCheckShield = ({
+  size = 24,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M11 2 L19 5.5 L19 11 C19 16 15.5 19.5 11 21 C6.5 19.5 3 16 3 11 L3 5.5 Z" />
+    <polyline points="7,11 9.5,13.5 15,8.5" />
+  </svg>;
+const IconLink = ({
+  size = 24,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M8 13 C6 15 6 18 8.5 19.5 C11 21 14 20 15.5 18 L17 16 C18.5 14 18 11 16 9.5" />
+    <path d="M14 9 C16 7 16 4 13.5 2.5 C11 1 8 2 6.5 4 L5 6 C3.5 8 4 11 6 12.5" />
+    <line x1="9" y1="13" x2="13" y2="9" />
+  </svg>;
+const IconLock = ({
+  size = 24,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <rect x="4" y="10" width="14" height="10" rx="2" />
+    <path d="M7 10 V7 A4 4 0 0 1 15 7 V10" />
+    <circle cx="11" cy="15" r="1.5" />
+  </svg>;
+const IconPersonCircle = ({
+  size = 16,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="8" cy="8" r="6.5" />
+    <circle cx="8" cy="6" r="2" />
+    <path d="M3 13.5 C3.5 11 5.5 9.5 8 9.5 C10.5 9.5 12.5 11 13 13.5" />
+  </svg>;
+const IconLeafSmall = ({
+  size = 16,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M2 13.5 C4 10 5 6.5 14 2 C14 2 14 11 7.5 12.5 C5.5 13 3.5 12.5 2 13.5 Z" />
+    <line x1="2" y1="13.5" x2="7" y2="9" />
+  </svg>;
+const IconChartBar = ({
+  size = 16,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <rect x="1.5" y="7" width="3" height="7" rx="0.5" />
+    <rect x="6.5" y="4" width="3" height="10" rx="0.5" />
+    <rect x="11.5" y="1.5" width="3" height="12.5" rx="0.5" />
+  </svg>;
+const IconMessage = ({
+  size = 28,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>;
+const IconMagnify = ({
+  size = 28,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" />
+    <line x1="16.5" y1="16.5" x2="22" y2="22" />
+  </svg>;
+const IconCheckCircle = ({
+  size = 28,
+  color = 'currentColor'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="7,12 10,15 17,9" />
+  </svg>;
+const IconCheckFilled = ({
+  size = 20,
+  color = '#0071E3'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="10" cy="10" r="9" />
+    <polyline points="6,10 9,13 14,7" />
+  </svg>;
+const IconXCircle = ({
+  size = 20,
+  color = '#D2D2D7'
+}: {
+  size?: number;
+  color?: string;
+}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
+    <circle cx="10" cy="10" r="9" />
+    <line x1="7" y1="7" x2="13" y2="13" />
+    <line x1="13" y1="7" x2="7" y2="13" />
+  </svg>;
+
+// Category icon map
+const CATEGORY_ICONS: Record<string, React.ReactElement> = {
+  'Субсидии': <IconBanknote size={20} color="currentColor" />,
+  'Закони': <IconScales size={20} color="currentColor" />,
+  'Сертификати': <IconRosette size={20} color="currentColor" />,
+  'Био производство': <IconLeaf size={20} color="currentColor" />,
+  'Растителна защита': <IconShieldCheck size={20} color="currentColor" />,
+  'ЕС регламенти': <IconGlobe size={20} color="currentColor" />,
+  'Образци': <IconDoc size={20} color="currentColor" />,
+  'Калкулатори': <IconCalculator size={20} color="currentColor" />
+};
+const PROFILE_ICONS: Record<string, React.ReactElement> = {
+  'Право': <IconPersonCircle size={16} color="#6E6E73" />,
+  'Поле': <IconLeafSmall size={16} color="#6E6E73" />,
+  'Финанси': <IconChartBar size={16} color="#6E6E73" />
+};
+
+// --- Global keyframe styles ---
+const GLOBAL_STYLES = `
+  @keyframes agri-ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes agri-live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .agri-ticker-track {
+    animation: agri-ticker-scroll 30s linear infinite;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+  }
+  .agri-live-dot {
+    animation: agri-live-pulse 1.5s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .agri-ticker-track {
+      animation: none;
+    }
+    .agri-live-dot {
+      animation: none;
+    }
+  }
+  .agri-nav-link {
+    font-size: 14px;
+    color: #6E6E73;
+    text-decoration: none;
+    transition: color 200ms ease-out;
+  }
+  .agri-nav-link:hover {
+    color: #1D1D1F;
+  }
+  .agri-nav-link:focus-visible {
+    outline: 2px solid #0071E3;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .agri-btn-primary {
+    background-color: #0071E3;
+    color: #ffffff;
+    font-size: 17px;
+    padding: 0 24px;
+    height: 48px;
+    border-radius: 980px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 150ms ease-out, transform 100ms ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .agri-btn-primary:hover {
+    background-color: #0077ED;
+  }
+  .agri-btn-primary:active {
+    transform: scale(0.98);
+  }
+  .agri-btn-primary:focus-visible {
+    outline: 2px solid #0071E3;
+    outline-offset: 2px;
+  }
+  .agri-btn-ghost {
+    background-color: transparent;
+    color: #1D1D1F;
+    font-size: 17px;
+    padding: 0 24px;
+    height: 48px;
+    border-radius: 980px;
+    border: 1px solid rgba(0,0,0,0.16);
+    cursor: pointer;
+    transition: background-color 150ms ease-out, transform 100ms ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .agri-btn-ghost:hover {
+    background-color: rgba(0,0,0,0.04);
+  }
+  .agri-btn-ghost:active {
+    transform: scale(0.98);
+  }
+  .agri-btn-ghost:focus-visible {
+    outline: 2px solid #0071E3;
+    outline-offset: 2px;
+  }
+  .agri-category-tile {
+    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+    border: 1px solid transparent;
+  }
+  .agri-category-tile:hover {
+    border-color: #0071E3;
+    box-shadow: 0 4px 16px rgba(0,113,227,0.08);
+  }
+  .agri-category-tile:focus-visible {
+    outline: 2px solid #0071E3;
+    outline-offset: 2px;
+  }
+  .agri-deadline-row {
+    transition: background-color 150ms ease-out;
+  }
+  .agri-deadline-row:hover {
+    background-color: #F5F5F7;
+  }
+  .agri-comparison-row {
+    transition: background-color 150ms ease-out;
+  }
+  .agri-comparison-row:hover {
+    background-color: #F5F5F7;
+  }
+  .agri-faq-row {
+    transition: background-color 150ms ease-out;
+    border-radius: 8px;
+  }
+  .agri-faq-row:hover {
+    background-color: #FAFAFA;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid #0071E3;
+    outline-offset: 2px;
+  }
+`;
+
+// --- Sub-components ---
+
+const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px-12 flex items-center justify-between" style={{
+  backgroundColor: 'rgba(255,255,255,0.85)',
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)',
+  borderBottom: '1px solid rgba(0,0,0,0.1)'
+}}>
+    <div className="w-full max-w-[1100px] mx-auto flex items-center justify-between">
+      <a href="#" className="text-[15px] font-semibold text-[#1D1D1F] tracking-tight" style={{
+      textDecoration: 'none'
+    }}>
+        AgriNexus
+      </a>
+      <div className="hidden md:flex items-center gap-8">
+        {NAV_LINKS.map(link => <a key={link.label} href={link.href} className="agri-nav-link">
+            {link.label}
+          </a>)}
+      </div>
+      <div className="flex items-center gap-5">
+        <a href="#" className="text-[14px] text-[#0071E3] hover:opacity-80 transition-opacity" style={{
+        textDecoration: 'none'
+      }}>
+          Вход
+        </a>
+        <button aria-label="Търсене" style={{
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+          <IconSearch size={20} color="#6E6E73" />
+        </button>
+      </div>
+    </div>
+  </nav>;
+const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
+  paddingTop: '140px',
+  paddingBottom: '100px'
+}}>
+    <div className="w-full max-w-[680px] mx-auto flex flex-col items-center">
+      <span className="text-[12px] font-semibold text-[#0071E3] uppercase tracking-[0.08em] mb-4 block">
+        AI асистент за фермери
+      </span>
+      <h1 className="font-bold text-[#1D1D1F]" style={{
+      fontSize: 'clamp(40px, 6vw, 64px)',
+      lineHeight: 1.05,
+      letterSpacing: '-0.025em',
+      marginBottom: '20px'
+    }}>
+        <span className="block">Отговори за</span>
+        <span className="block">вашето стопанство.</span>
+      </h1>
+      <p className="text-[#6E6E73]" style={{
+      fontSize: '17px',
+      lineHeight: 1.6,
+      maxWidth: '520px',
+      marginBottom: '48px'
+    }}>
+        Търсете субсидии, договори и срокове на едно място. Ясни отговори с точен източник.
+      </p>
+
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <button className="agri-btn-primary">Питай AI</button>
+        <button className="agri-btn-ghost">Провери срокове</button>
+      </div>
+
+      <div className="w-full max-w-[560px] relative mb-5">
+        <div className="flex items-center" style={{
+        position: 'absolute',
+        left: '16px',
+        top: '50%',
+        transform: 'translateY(-50%)'
+      }}>
+          <IconSearch size={20} color="#86868B" />
+        </div>
+        <input type="text" placeholder="Напр. изисквания за директни плащания..." className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
+        height: '52px',
+        paddingLeft: '48px',
+        paddingRight: '16px',
+        fontSize: '17px',
+        outline: 'none'
+      }} onFocus={e => {
+        e.currentTarget.style.borderColor = '#0071E3';
+      }} onBlur={e => {
+        e.currentTarget.style.borderColor = '#D2D2D7';
+      }} />
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        {SEARCH_CHIPS.map(chip => <button key={chip} className="bg-[#F5F5F7] text-[#6E6E73] rounded-full hover:bg-[#E8E8ED] transition-colors" style={{
+        fontSize: '14px',
+        padding: '8px 16px',
+        border: 'none',
+        cursor: 'pointer'
+      }}>
+            {chip}
+          </button>)}
+      </div>
+    </div>
+  </section>;
+const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" style={{
+  height: '44px'
+}}>
+    <div className="flex items-center h-full">
+      <div className="flex items-center gap-2 shrink-0 h-full" style={{
+      paddingLeft: '16px',
+      paddingRight: '20px',
+      borderRight: '1px solid rgba(255,255,255,0.1)'
+    }}>
+        <span className="agri-live-dot w-[7px] h-[7px] rounded-full bg-[#0071E3] block shrink-0" />
+        <span style={{
+        fontSize: '11px',
+        fontWeight: 600,
+        letterSpacing: '0.08em',
+        color: '#0071E3',
+        textTransform: 'uppercase'
+      }}>
+          LIVE
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-hidden h-full flex items-center" style={{
+      WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 94%, transparent 100%)',
+      maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 94%, transparent 100%)'
+    }}>
+        <div className="agri-ticker-track">
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => <span key={`ticker-${idx}`} className="inline-flex items-center" style={{
+          gap: '8px'
+        }}>
+              <span className="inline-block rounded-full shrink-0" style={{
+            width: '6px',
+            height: '6px',
+            backgroundColor: item.dotColor
+          }} />
+              <span style={{
+            fontSize: '13px',
+            fontWeight: 500,
+            color: '#FFFFFF',
+            letterSpacing: '0.01em'
+          }}>
+                {item.text}
+              </span>
+              <span style={{
+            color: '#555555',
+            fontSize: '13px',
+            fontWeight: 500,
+            margin: '0 20px'
+          }}>·</span>
+            </span>)}
+        </div>
+      </div>
+    </div>
+  </div>;
 const Features = () => {
   const featureIcons: React.ReactElement[] = [<IconCalendar key="calendar" size={28} color="#0071E3" />, <IconDocText key="doc" size={28} color="#FFFFFF" />, <IconSparkles key="sparkles" size={28} color="rgba(255,255,255,0.7)" />];
   return <section className="bg-[#F5F5F7]" style={{
@@ -289,7 +895,7 @@ const Features = () => {
           }}>
                 {feat.description}
               </p>
-              <a href={feat.href} style={{
+              <a href="#" style={{
             fontSize: '17px',
             fontWeight: 500,
             color: linkColor,
@@ -457,11 +1063,10 @@ const Categories = () => <section className="bg-[#F5F5F7]" style={{
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {CATEGORIES.map(cat => <a key={cat.name} href={cat.href} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left cursor-pointer" style={{
+        {CATEGORIES.map(cat => <button key={cat.name} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left cursor-pointer" style={{
         padding: '32px',
         textAlign: 'center',
-        background: '#FFFFFF',
-        textDecoration: 'none'
+        background: '#FFFFFF'
       }}>
             <div style={{
           marginBottom: '12px',
@@ -486,7 +1091,7 @@ const Categories = () => <section className="bg-[#F5F5F7]" style={{
           color: '#6E6E73',
           lineHeight: 1.5
         }}>{cat.subtitle}</p>
-          </a>)}
+          </button>)}
       </div>
     </div>
   </section>;
@@ -613,7 +1218,7 @@ const Deadlines = () => <section className="bg-[#FFFFFF]" style={{
         }}>
             Последни промени и срокове.
           </h2>
-          <a href="/srokove" style={{
+          <a href="#" style={{
           fontSize: '17px',
           color: '#0071E3',
           display: 'inline-flex',
@@ -1007,73 +1612,7 @@ const FAQ = () => {
 };
 const AIChatCTA = () => {
   const [activeTab, setActiveTab] = React.useState(0);
-  const [question, setQuestion] = React.useState('');
-  const [answer, setAnswer] = React.useState('');
-  const [isSending, setIsSending] = React.useState(false);
-  const [error, setError] = React.useState('');
-  const characterIds = ['elena', 'boris', 'viktoria'] as const;
-
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const incomingQuestion = new URLSearchParams(window.location.search).get('chatQ')?.trim();
-    if (incomingQuestion) {
-      setQuestion(incomingQuestion);
-      window.setTimeout(() => document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-    }
-  }, []);
-
-  const sendQuestion = async () => {
-    const trimmed = question.trim();
-    if (!trimmed || isSending) return;
-
-    setIsSending(true);
-    setError('');
-    setAnswer('');
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          characterId: characterIds[activeTab],
-          messages: [{ role: 'user', content: trimmed }],
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(typeof payload.error === 'string' ? payload.error : 'AI request failed.');
-      }
-
-      const contentType = response.headers.get('content-type') ?? '';
-      if (contentType.includes('application/json')) {
-        const payload = await response.json();
-        setAnswer(typeof payload.response === 'string' ? payload.response : 'Empty response.');
-        return;
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        setAnswer(await response.text());
-        return;
-      }
-
-      const decoder = new TextDecoder();
-      let fullText = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        fullText += decoder.decode(value, { stream: true });
-        setAnswer(fullText);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'AI request error.');
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  return <section id="chat" className="bg-[#FFFFFF]" style={{
+  return <section className="bg-[#FFFFFF]" style={{
     padding: '100px 48px'
   }}>
       <div className="max-w-[1100px] mx-auto flex flex-col lg:flex-row items-center gap-16">
@@ -1151,47 +1690,32 @@ const AIChatCTA = () => {
             padding: '24px',
             marginBottom: '24px'
           }}>
-              {answer || error ? <div style={{
-              width: '100%',
-              maxHeight: '180px',
-              overflow: 'auto',
-              fontSize: '14px',
-              color: error ? '#B42318' : '#1D1D1F',
-              lineHeight: 1.55,
-              whiteSpace: 'pre-wrap'
-            }}>
-                {error || answer}
-              </div> : <p style={{
+              <p style={{
               fontSize: '15px',
               color: '#6E6E73',
               fontStyle: 'italic',
               textAlign: 'center'
             }}>
                 Задай казус: култура, регион, документ или срок.
-              </p>}
+              </p>
             </div>
 
-            <form className="flex items-center gap-3" onSubmit={event => {
-              event.preventDefault();
-              void sendQuestion();
-            }}>
-              <input type="text" value={question} onChange={e => setQuestion(e.currentTarget.value)} placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
+            <div className="flex items-center gap-3">
+              <input type="text" placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
               height: '48px',
               padding: '0 16px',
               fontSize: '15px',
               outline: 'none',
               border: 'none'
             }} />
-              <button type="submit" disabled={isSending || !question.trim()} className="agri-btn-primary" style={{
+              <button className="agri-btn-primary" style={{
               height: '48px',
               fontSize: '15px',
-              flexShrink: 0,
-              opacity: isSending || !question.trim() ? 0.65 : 1,
-              cursor: isSending || !question.trim() ? 'not-allowed' : 'pointer'
+              flexShrink: 0
             }}>
-                {isSending ? '\u041f\u0440\u0430\u0449\u0430\u043c...' : '\u0418\u0437\u043f\u0440\u0430\u0442\u0438 \u2192'}
+                Изпрати →
               </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -1266,22 +1790,20 @@ const MobileAppCTA = () => <section className="bg-[#000000]" style={{
         </ul>
 
         <div className="flex flex-wrap gap-4">
-          <a href="/profile" className="agri-btn-primary" style={{
+          <button className="agri-btn-primary" style={{
           backgroundColor: '#FFFFFF',
           color: '#000000',
-          fontSize: '15px',
-          textDecoration: 'none'
+          fontSize: '15px'
         }}>
             Инсталирай App
-          </a>
-          <a href="/document-review" className="agri-btn-ghost" style={{
+          </button>
+          <button className="agri-btn-ghost" style={{
           color: '#FFFFFF',
           borderColor: 'rgba(255,255,255,0.3)',
-          fontSize: '15px',
-          textDecoration: 'none'
+          fontSize: '15px'
         }}>
             Виж демо →
-          </a>
+          </button>
         </div>
       </div>
 
@@ -1377,13 +1899,13 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
       color: '#6E6E73'
     }}>© 2025 AgriNexus.Law. Всички права запазени.</div>
       <div className="flex flex-wrap items-center justify-center gap-6">
-        {FOOTER_LINKS.map(link => <a key={link.label} href={link.href} style={{
+        {['Документи', 'Срокове', 'Калкулатори', 'Поверителност'].map(label => <a key={label} href="#" style={{
         fontSize: '13px',
         color: '#6E6E73',
         textDecoration: 'none',
         transition: 'color 200ms ease-out'
       }} className="hover:text-[#1D1D1F]">
-            {link.label}
+            {label}
           </a>)}
       </div>
       <div style={{
@@ -1416,5 +1938,3 @@ export const AgriNexusLanding = () => <div className="min-h-screen bg-[#FFFFFF] 
     </main>
     <Footer />
   </div>;
-
-
