@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 // --- Types ---
@@ -14,6 +15,7 @@ interface Feature {
   title: string;
   description: string;
   theme: 'light' | 'dark' | 'black';
+  href: string;
 }
 interface Category {
   name: string;
@@ -61,35 +63,38 @@ interface ProfileChip {
 // --- Mock Data ---
 const NAV_LINKS: NavLink[] = [{
   label: 'Документи',
-  href: '#docs'
+  href: '/documents'
 }, {
   label: 'AI преглед',
-  href: '#ai'
+  href: '/search'
 }, {
   label: 'Срокове',
-  href: '#deadlines'
+  href: '/srokove'
 }, {
   label: 'Калкулатори',
-  href: '#calc'
+  href: '/kalkulator'
 }, {
   label: 'Статистики',
-  href: '#stats'
+  href: '/statistiki'
 }];
 const FEATURES: Feature[] = [{
   label: 'СРОКОВЕ',
   title: 'Провери срокове',
   description: 'Интелигентно проследяване на крайни дати за кандидатстване по ДФЗ и активните кампании.',
-  theme: 'light'
+  theme: 'light',
+  href: '/srokove'
 }, {
   label: 'ДОКУМЕНТИ',
   title: 'Намери документ',
   description: 'Пълен архив от наредби, образци и заявления в PDF формат на едно място.',
-  theme: 'black'
+  theme: 'black',
+  href: '/documents'
 }, {
   label: 'AI ПРЕГЛЕД',
   title: 'AI преглед',
   description: 'Автоматичен анализ на вашите договори и писма за съответствие с актуалните изисквания.',
-  theme: 'dark'
+  theme: 'dark',
+  href: '/document-review'
 }];
 const CATEGORIES: Category[] = [{
   name: 'Субсидии',
@@ -696,31 +701,29 @@ const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px
   borderBottom: '1px solid rgba(0,0,0,0.1)'
 }}>
     <div className="w-full max-w-[1100px] mx-auto flex items-center justify-between">
-      <a href="#" className="text-[15px] font-semibold text-[#1D1D1F] tracking-tight" style={{
+      <Link href="/" className="text-[15px] font-semibold text-[#1D1D1F] tracking-tight" style={{
       textDecoration: 'none'
     }}>
         AgriNexus
-      </a>
+      </Link>
       <div className="hidden md:flex items-center gap-8">
-        {NAV_LINKS.map(link => <a key={link.label} href={link.href} className="agri-nav-link">
+        {NAV_LINKS.map(link => <Link key={link.label} href={link.href} className="agri-nav-link">
             {link.label}
-          </a>)}
+          </Link>)}
       </div>
       <div className="flex items-center gap-5">
-        <a href="#" className="text-[14px] text-[#0071E3] hover:opacity-80 transition-opacity" style={{
+        <Link href="/vhod" className="text-[14px] text-[#0071E3] hover:opacity-80 transition-opacity" style={{
         textDecoration: 'none'
       }}>
           Вход
-        </a>
-        <button aria-label="Търсене" style={{
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
+        </Link>
+        <Link href="/search" aria-label="Търсене" style={{
+        textDecoration: 'none',
         display: 'flex',
         alignItems: 'center'
       }}>
           <IconSearch size={20} color="#6E6E73" />
-        </button>
+        </Link>
       </div>
     </div>
   </nav>;
@@ -751,8 +754,8 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-        <button className="agri-btn-primary">Питай AI</button>
-        <button className="agri-btn-ghost">Провери срокове</button>
+        <Link href="/search" className="agri-btn-primary">Питай AI</Link>
+        <Link href="/srokove" className="agri-btn-ghost">Провери срокове</Link>
       </div>
 
       <div className="w-full max-w-[560px] relative mb-5">
@@ -778,14 +781,15 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
-        {SEARCH_CHIPS.map(chip => <button key={chip} className="bg-[#F5F5F7] text-[#6E6E73] rounded-full hover:bg-[#E8E8ED] transition-colors" style={{
+        {SEARCH_CHIPS.map(chip => <Link key={chip} href={`/search?q=${encodeURIComponent(chip)}`} className="bg-[#F5F5F7] text-[#6E6E73] rounded-full hover:bg-[#E8E8ED] transition-colors" style={{
         fontSize: '14px',
         padding: '8px 16px',
         border: 'none',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        textDecoration: 'none'
       }}>
             {chip}
-          </button>)}
+          </Link>)}
       </div>
     </div>
   </section>;
@@ -895,7 +899,7 @@ const Features = () => {
           }}>
                 {feat.description}
               </p>
-              <a href="#" style={{
+              <Link href={feat.href} style={{
             fontSize: '17px',
             fontWeight: 500,
             color: linkColor,
@@ -906,7 +910,7 @@ const Features = () => {
           }} className="hover:underline">
                 <span>Виж всички</span>
                 <IconChevronRight size={16} color={linkColor} />
-              </a>
+              </Link>
             </div>;
       })}
       </div>
@@ -1063,10 +1067,11 @@ const Categories = () => <section className="bg-[#F5F5F7]" style={{
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {CATEGORIES.map(cat => <button key={cat.name} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left cursor-pointer" style={{
+        {CATEGORIES.map(cat => <Link key={cat.name} href={`/search?q=${encodeURIComponent(cat.name)}`} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left" style={{
         padding: '32px',
         textAlign: 'center',
-        background: '#FFFFFF'
+        background: '#FFFFFF',
+        textDecoration: 'none'
       }}>
             <div style={{
           marginBottom: '12px',
@@ -1091,7 +1096,7 @@ const Categories = () => <section className="bg-[#F5F5F7]" style={{
           color: '#6E6E73',
           lineHeight: 1.5
         }}>{cat.subtitle}</p>
-          </button>)}
+          </Link>)}
       </div>
     </div>
   </section>;
@@ -1218,7 +1223,7 @@ const Deadlines = () => <section className="bg-[#FFFFFF]" style={{
         }}>
             Последни промени и срокове.
           </h2>
-          <a href="#" style={{
+          <Link href="/srokove" style={{
           fontSize: '17px',
           color: '#0071E3',
           display: 'inline-flex',
@@ -1229,7 +1234,7 @@ const Deadlines = () => <section className="bg-[#FFFFFF]" style={{
         }} className="hover:underline">
             <span>Виж всички</span>
             <IconChevronRight size={16} color="#0071E3" />
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -1899,14 +1904,14 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
       color: '#6E6E73'
     }}>© 2025 AgriNexus.Law. Всички права запазени.</div>
       <div className="flex flex-wrap items-center justify-center gap-6">
-        {['Документи', 'Срокове', 'Калкулатори', 'Поверителност'].map(label => <a key={label} href="#" style={{
+        {[{ label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
         fontSize: '13px',
         color: '#6E6E73',
         textDecoration: 'none',
         transition: 'color 200ms ease-out'
       }} className="hover:text-[#1D1D1F]">
-            {label}
-          </a>)}
+            {item.label}
+          </Link>)}
       </div>
       <div style={{
       fontSize: '13px',
