@@ -7,15 +7,17 @@
 ## Бърз старт
 
 1. Прочетете `DEPLOYMENT-GUIDE.md` за подробни инструкции
-2. Регистрирайте се в OpenAI, Supabase, Resend (всички с безплатен старт)
-3. Изпълнете `supabase-setup.sql` в Supabase SQL Editor
-4. По желание за Document Intelligence case memory изпълнете `supabase-document-reviews.sql`
-5. Копирайте `.env.example` → `.env.local` и попълнете ключовете (виж `DEPLOYMENT-GUIDE.md`)
-6. `npm install` и `npm run dev` (първо опитва **http://localhost:3002**; ако портът е зает, автоматично минава на 3020, 3010, … — гледай съобщението в терминала)
-7. Push в GitHub, deploy на Vercel
+2. **Production (Stripe + cron + SQL):** `docs/PRODUCTION-OPS.md`
+3. Регистрирайте се в OpenAI, Supabase, Resend (всички с безплатен старт)
+4. Изпълнете `supabase-setup.sql` в Supabase SQL Editor
+5. По желание за Document Intelligence case memory изпълнете `supabase-document-reviews.sql`
+6. Копирайте `.env.example` → `.env.local` и попълнете ключовете (виж `DEPLOYMENT-GUIDE.md`)
+7. `npm install` и `npm run dev` (първо опитва **http://localhost:3002**; ако портът е зает, автоматично минава на 3020, 3010, … — гледай съобщението в терминала)
+8. Push в GitHub, deploy на Vercel
 
 ## AI документация и оркестрация
 
+- **`docs/PRODUCTION-OPS.md`** — live Stripe, Vercel cron (AI Leader), Supabase миграции, RAG / document-review / admin cockpit
 - **`docs/AI-SYSTEM.md`** — основен LLM (OpenAI), защо, какво е live, какво следва (voice/vision/agents)
 - **`docs/AI-DOCUMENTATION.md`** — LLM, RAG, API, env, troubleshooting
 - **`docs/AI-LEADER-ARCHITECTURE.md`** — „AI лидер“: автоматизация между RAG, ДФЗ база, learned knowledge и Furrow (`lib/ai-leader/`)

@@ -18,6 +18,7 @@
     "check:rag:local": "node scripts/check-rag-local.mjs",
     "check:rag:prod": "node scripts/check-rag-index.mjs https://www.agrinexuslaw.com",
     "check:documents": "node scripts/check-documents.mjs",
+    "check:production": "npx tsx scripts/check-production-env.ts",
     "reindex": "node scripts/run-reindex.mjs",
     "reindex:direct": "npx tsx scripts/reindex-direct.ts",
     "reindex:static": "node scripts/run-reindex.mjs http://localhost:3002 static",

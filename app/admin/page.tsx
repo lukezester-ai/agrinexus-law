@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Upload, FileText, CircleCheck, AlertCircle, Archive, Loader2 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
+import { AiLeaderPanel } from "@/components/ai-leader-panel";
 
 export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -140,6 +141,8 @@ export default function AdminPage() {
             className="mt-2 w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition font-mono text-sm"
           />
         </div>
+
+        <AiLeaderPanel ingestToken={ingestToken} />
 
         <div className="glass-panel rounded-3xl overflow-hidden mb-8">
           <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">

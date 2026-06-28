@@ -63,11 +63,42 @@ flowchart LR
 2. Нови API маршрути, които трябва същия **чат** контекст: импортирайте `runChatKnowledgePipeline` от `@/lib/ai-leader` вместо да копирате логика.
 3. Нови **ingest/reindex** стъпки: разширете `lib/ai-leader/ingest-reindex-pipeline.ts` и тествайте през съществуващите API или скриптове в `scripts/`.
 
+## Пет AI агента — една система
+
+Оркестраторът (`runAgentOrchestrator`) пуска агентите в този ред. Всеки run записва метрики в `agent_runs` (виж `supabase-agent-runs.sql`) и чете предишни run-ове за адаптивни лимити.
+
+| ID | Име | Роля |
+|----|-----|------|
+| `guardian` | Пазител | Env, RAG, Supabase, billing health |
+| `archive` | Архивар | ДФЗ/МЗХ → архив → RAG → Meili |
+| `learner` | Учен | 👍 chat feedback → `knowledge_learned_items` |
+| `indexer` | Индексатор | Embeddings + Meili sync |
+| `analyst` | Аналитик | Engagement метрики и препоръки |
+
+**API:** `GET /api/agents/cron` (cron) · `POST /api/agents/run` (admin) · `GET /api/agents/run` (списък)
+
+**Admin UI:** `/admin` → „AI Leader — 5 агента“
+
+```mermaid
+flowchart LR
+  O[Orchestrator] --> G[guardian]
+  G --> A[archive]
+  A --> L[learner]
+  L --> I[indexer]
+  I --> N[analyst]
+  O --> S[(agent_runs)]
+```
+
+---
+
 ## Свързани файлове
 
 - `lib/ai-leader/chat-knowledge-pipeline.ts` — оркестрация за чат
 - `lib/ai-leader/admin-ingest-auth.ts` — админ токен за ingest / upload / reindex
 - `lib/ai-leader/ingest-reindex-pipeline.ts` — `runIngestOrchestration`, `runReindexOrchestration`
 - `lib/ai-leader/index.ts` — реекспорт
+- `lib/ai-leader/agents/` — registry, orchestrator, 5 agents
+- `app/api/agents/cron/route.ts` — планиран run
+- `app/api/agents/run/route.ts` — admin run
 - `lib/rag/hybrid-search.ts` — RRF + hybrid retrieval
 - `lib/rag/config.ts` — прагове, embedding модел, `RAG_ENABLED`

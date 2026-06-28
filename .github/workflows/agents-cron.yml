@@ -1,0 +1,50 @@
+# AI Leader — 5 агента (GET /api/agents/cron)
+# Резервен trigger ако Vercel Cron не е активен (Hobby / ръчно).
+#
+# GitHub → Settings → Secrets → Actions:
+#   AGENTS_CRON_URL  — напр. https://www.agrinexuslaw.com/api/agents/cron?skipHeavy=1
+#   CRON_SECRET      — същата стойност като CRON_SECRET във Vercel
+
+name: AI Leader agents (scheduled)
+
+on:
+  schedule:
+    - cron: "45 5 * * *"
+  workflow_dispatch:
+    inputs:
+      skipHeavy:
+        description: "1 = без archive+indexer (бърз цикъл)"
+        required: false
+        default: "1"
+
+jobs:
+  agents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ping agents cron
+        env:
+          AGENTS_CRON_URL: ${{ secrets.AGENTS_CRON_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SKIP_HEAVY: ${{ github.event.inputs.skipHeavy || '1' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AGENTS_CRON_URL:-}" ] || [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::Задай repository secrets AGENTS_CRON_URL и CRON_SECRET."
+            exit 1
+          fi
+          URL="${AGENTS_CRON_URL}"
+          if [ "$SKIP_HEAVY" = "1" ] && [[ "$URL" != *"skipHeavy="* ]]; then
+            if [[ "$URL" == *"?"* ]]; then URL="${URL}&skipHeavy=1"; else URL="${URL}?skipHeavy=1"; fi
+          fi
+          echo "Calling ${URL} …"
+          code=$(curl -sS -o /tmp/agents-body.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "User-Agent: GitHub-Actions-Agents/1.0" \
+            "$URL")
+          echo "HTTP ${code}"
+          cat /tmp/agents-body.json
+          if [ "$code" != "200" ]; then
+            echo "::error::Expected HTTP 200, got ${code}"
+            exit 1
+          fi
