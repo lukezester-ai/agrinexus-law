@@ -10,6 +10,7 @@ import { PwaRegister } from "@/components/pwa-register";
 import { SiteVisitTracker } from "@/components/site-visit-tracker";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
+import { cleanEnvValue } from "@/lib/supabase/env";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -30,7 +31,7 @@ const spaceGrotesk = Space_Grotesk({
 const themeInitScript = `(function(){try{var k='agrinexus-theme';var f='agrinexus-theme-user-set';var s=localStorage.getItem(k);var u=localStorage.getItem(f)==='1';if(u&&s==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`;
 
 const siteUrl =
-	process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.agrinexuslaw.com";
+	cleanEnvValue(process.env.NEXT_PUBLIC_SITE_URL) || "https://www.agrinexuslaw.com";
 const metadataBase = (() => {
 	try {
 		return new URL(siteUrl);

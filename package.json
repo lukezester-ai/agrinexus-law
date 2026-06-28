@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node scripts/dev-next.cjs",
     "dev:3020": "next dev -p 3020",
-    "build": "next build",
+    "build": "node scripts/verify-build-env.mjs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
