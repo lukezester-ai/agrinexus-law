@@ -76,6 +76,16 @@ export const chatFeedbackRateLimit = redis
     })
   : null;
 
+/** Document review — file upload + OpenAI analysis; stricter than chat. */
+export const documentReviewRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:document-review",
+    })
+  : null;
+
 export async function checkRateLimit(
   rateLimit: Ratelimit | null,
   identifier: string

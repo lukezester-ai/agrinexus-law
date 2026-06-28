@@ -16,6 +16,11 @@ type PublicRow = {
 	status: string | null;
 	source_url: string | null;
 	effective_date: string | null;
+	storage_path?: string | null;
+};
+
+export type PublicDocumentRecord = PublicRow & {
+	storage_path: string | null;
 };
 
 function rowToKnowledgeDoc(row: PublicRow): KnowledgeDoc {
@@ -103,6 +108,14 @@ export async function searchPublicDocuments(
 }
 
 export async function getPublicDocumentById(id: string): Promise<KnowledgeDoc | null> {
+	const row = await getPublicDocumentRecord(id);
+	if (!row) return null;
+	return rowToKnowledgeDoc(row);
+}
+
+export async function getPublicDocumentRecord(
+	id: string,
+): Promise<PublicDocumentRecord | null> {
 	const uuid = publicDocumentUuidFromId(id);
 	if (!uuid) return null;
 	const supabase = getSupabaseAdmin();
@@ -111,11 +124,11 @@ export async function getPublicDocumentById(id: string): Promise<KnowledgeDoc | 
 	const { data, error } = await supabase
 		.from("public_documents")
 		.select(
-			"id,title,institution,category,doc_type,status,source_url,effective_date",
+			"id,title,institution,category,doc_type,status,source_url,effective_date,storage_path",
 		)
 		.eq("id", uuid)
 		.maybeSingle();
 
 	if (error || !data) return null;
-	return rowToKnowledgeDoc(data as PublicRow);
+	return data as PublicDocumentRecord;
 }

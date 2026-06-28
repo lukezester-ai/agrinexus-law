@@ -19,6 +19,7 @@ const navHighlight =
 type NavLink = { href: string; label: string; highlight: boolean; external?: boolean };
 
 const NAV_LINKS: readonly NavLink[] = [
+	{ href: "/ceni", label: "Цени", highlight: true },
 	{ href: "/search", label: "Документи", highlight: false },
 	{ href: "/document-review", label: "AI преглед", highlight: true },
 	{ href: "/srokove", label: "Срокове", highlight: false },

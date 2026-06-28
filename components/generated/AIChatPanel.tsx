@@ -54,6 +54,7 @@ const renderText = (text: string) => {
 };
 
 export interface AIChatPanelProps {
+	id?: string;
 	prefill?: string;
 	quickChips?: string[];
 	placeholder?: string;
@@ -61,6 +62,7 @@ export interface AIChatPanelProps {
 }
 
 export const AIChatPanel: React.FC<AIChatPanelProps> = ({
+	id = "chat",
 	prefill,
 	quickChips = DEFAULT_QUICK_CHIPS,
 	placeholder = "Задай въпрос за срок...",
@@ -100,7 +102,11 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 		[activeTab],
 	);
 
-	const requestReply = async (history: ChatMessage[], userText: string) => {
+	const requestReply = async (
+		history: ChatMessage[],
+		userText: string,
+		onChunk: (partial: string) => void,
+	) => {
 		const characterId = TAB_TO_CHARACTER[activeTab];
 		const apiMessages = [...history, { role: "user" as const, text: userText }].map((m) => ({
 			role: m.role === "user" ? "user" : "assistant",
@@ -119,10 +125,17 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 
 		if (!response.ok) {
 			const errBody = await response.json().catch(() => null);
-			throw new Error(
-				(errBody as { error?: string } | null)?.error ??
-					`Грешка ${response.status} при заявката към AI.`,
-			);
+			const payload = errBody as {
+				error?: string;
+				upgradeUrl?: string;
+				code?: string;
+			} | null;
+			const base =
+				payload?.error ?? `Грешка ${response.status} при заявката към AI.`;
+			if (response.status === 402 && payload?.upgradeUrl) {
+				throw new Error(`${base} → ${payload.upgradeUrl}`);
+			}
+			throw new Error(base);
 		}
 
 		const contentType = response.headers.get("content-type") ?? "";
@@ -130,7 +143,9 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 		if (contentType.includes("application/json")) {
 			const data = (await response.json()) as { response?: string; error?: string };
 			if (data.error) throw new Error(data.error);
-			return data.response ?? "";
+			const text = data.response ?? "";
+			onChunk(text);
+			return text;
 		}
 
 		const reader = response.body?.getReader();
@@ -142,6 +157,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 			const { done, value } = await reader.read();
 			if (done) break;
 			text += decoder.decode(value, { stream: true });
+			onChunk(text);
 		}
 		return text;
 	};
@@ -168,7 +184,13 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 		]);
 
 		try {
-			const reply = await requestReply(messages, trimmed);
+			const reply = await requestReply(messages, trimmed, (partial) => {
+				setMessages((prev) =>
+					prev.map((m) =>
+						m.id === aiMsgId ? { ...m, text: partial || "…" } : m,
+					),
+				);
+			});
 			setMessages((prev) =>
 				prev.map((m) => (m.id === aiMsgId ? { ...m, text: reply || "Няма отговор." } : m)),
 			);
@@ -194,6 +216,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 
 	return (
 		<aside
+			id={id}
 			className={cn(
 				"sticky top-[120px] hidden w-[340px] shrink-0 flex-col self-start border-l border-[#1E1E1E] bg-[#111111] xl:flex",
 				className,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Leaf, Mail, Lock, Loader2 } from 'lucide-react'
@@ -14,7 +14,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<'sign-in' | 'sign-up'>('sign-in')
   const router = useRouter()
+  const [nextPath, setNextPath] = useState('/')
   const supabase = createClient()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const next = params.get('next')
+    if (next?.startsWith('/')) setNextPath(next)
+  }, [])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +35,7 @@ export default function LoginPage() {
           password,
         })
         if (error) throw error
-        router.push('/')
+        router.push(nextPath.startsWith('/') ? nextPath : '/')
         router.refresh()
       } else {
         const { error } = await supabase.auth.signUp({

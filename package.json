@@ -63,6 +63,7 @@
     "react-markdown": "^10.1.0",
     "recharts": "^2.15.1",
     "resend": "^4.0.1",
+    "stripe": "^22.3.0",
     "tailwind-merge": "^3.6.0",
     "tesseract.js": "^5.1.1",
     "typesense": "^2.1.0"

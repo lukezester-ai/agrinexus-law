@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, FileText, CircleCheck, AlertCircle } from "lucide-react";
+import { Upload, FileText, CircleCheck, AlertCircle, Archive, Loader2 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 
 export default function AdminPage() {
@@ -16,6 +16,50 @@ export default function AdminPage() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [ingestToken, setIngestToken] = useState("");
+
+  const [archiveRunning, setArchiveRunning] = useState(false);
+  const [archiveStatus, setArchiveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [archiveMessage, setArchiveMessage] = useState("");
+
+  const handleRunArchiveAgent = async () => {
+    if (!ingestToken.trim()) {
+      setArchiveStatus("error");
+      setArchiveMessage("Въведете INGEST_ADMIN_TOKEN.");
+      return;
+    }
+    setArchiveRunning(true);
+    setArchiveStatus("idle");
+    setArchiveMessage("");
+    try {
+      const res = await fetch("/api/ingest/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-ingest-token": ingestToken.trim(),
+        },
+        body: JSON.stringify({
+          archiveAgent: true,
+          limitPerSource: 8,
+          reindex: true,
+          reindexLimit: 35,
+          syncSearch: true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Archive agent failed");
+      const stored = data.totals?.stored ?? 0;
+      const fetched = data.totals?.fetched ?? 0;
+      setArchiveStatus("success");
+      setArchiveMessage(
+        `Document Archive Agent завърши: ${stored}/${fetched} записани. Reindex: ${data.reindex?.reason === "enabled" ? "да" : "не"}. Meili: ${data.searchSync?.synced ?? 0} docs.`,
+      );
+    } catch (err) {
+      setArchiveStatus("error");
+      setArchiveMessage(err instanceof Error ? err.message : "Грешка при archive agent.");
+    } finally {
+      setArchiveRunning(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -85,6 +129,54 @@ export default function AdminPage() {
         <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Админ · Качване и индексиране (RAG)</p>
       }
     >
+        <div className="glass-panel rounded-3xl overflow-hidden mb-8 p-8">
+          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Админ токен (INGEST_ADMIN_TOKEN) *</label>
+          <input
+            type="password"
+            autoComplete="off"
+            value={ingestToken}
+            onChange={(e) => setIngestToken(e.target.value)}
+            placeholder="Стойността от .env.local"
+            className="mt-2 w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition font-mono text-sm"
+          />
+        </div>
+
+        <div className="glass-panel rounded-3xl overflow-hidden mb-8">
+          <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
+            <h2 className="font-display text-2xl font-medium text-slate-950 dark:text-white flex items-center gap-3">
+              <Archive className="text-emerald-600" /> Document Archive Agent
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm leading-relaxed">
+              Автоматично изтегляне от ДФЗ/МЗХ sitemap → архив → RAG reindex → Meili sync.
+              Същият pipeline като cron <code className="text-xs bg-slate-200/80 dark:bg-slate-800 px-1 rounded">/api/ingest/cron</code>.
+            </p>
+          </div>
+          <div className="p-8 space-y-4">
+            {archiveStatus === "success" && (
+              <div className="p-4 bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 rounded-2xl flex items-center gap-3 text-sm border border-teal-200 dark:border-teal-800/50">
+                <CircleCheck size={18} /> {archiveMessage}
+              </div>
+            )}
+            {archiveStatus === "error" && (
+              <div className="p-4 bg-rose-50 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300 rounded-2xl flex items-center gap-3 text-sm border border-rose-200 dark:border-rose-800/50">
+                <AlertCircle size={18} /> {archiveMessage}
+              </div>
+            )}
+            <button
+              type="button"
+              disabled={archiveRunning || !ingestToken.trim()}
+              onClick={() => void handleRunArchiveAgent()}
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {archiveRunning ? (
+                <><Loader2 size={18} className="animate-spin" /> Archive Agent работи…</>
+              ) : (
+                <><Archive size={18} /> Пусни Archive Agent (ingest + reindex)</>
+              )}
+            </button>
+          </div>
+        </div>
+
         <div className="glass-panel rounded-3xl overflow-hidden">
           <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
             <h1 className="font-display text-3xl font-medium text-slate-950 dark:text-white flex items-center gap-3">
@@ -97,21 +189,6 @@ export default function AdminPage() {
           </div>
 
           <form onSubmit={handleUpload} className="p-8 grid gap-8">
-            <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Админ токен за индексиране *</label>
-              <input
-                type="password"
-                autoComplete="off"
-                value={ingestToken}
-                onChange={(e) => setIngestToken(e.target.value)}
-                placeholder="Стойността на INGEST_ADMIN_TOKEN от .env.local"
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition font-mono text-sm"
-              />
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Токенът стои само в текущата форма и не се запазва в браузъра след презареждане.
-              </p>
-            </div>
-
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Заглавие на документа *</label>

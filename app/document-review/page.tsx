@@ -1,5 +1,5 @@
-import { AIDocumentReview } from "@/components/generated/AIDocumentReview";
+import { DocumentReviewPanel } from "@/components/document-review-panel";
 
 export default function DocumentReviewPage() {
-	return <AIDocumentReview />;
+	return <DocumentReviewPanel />;
 }

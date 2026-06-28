@@ -10,7 +10,7 @@ import {
   getRelatedDocuments,
   summarizeDocumentInFiveSentences,
 } from "@/lib/knowledge/document-detail";
-import { getPublicDocumentById, isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
+import { getPublicDocumentById, getPublicDocumentRecord, isPublicDocumentId } from "@/lib/knowledge/public-documents-search";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -33,6 +33,8 @@ export default async function DocumentPage({ params }: Params) {
   const versions = isPublicDocumentId(id) ? [] : getDocumentVersionHistory(doc);
   const related = isPublicDocumentId(id) ? [] : getRelatedDocuments(doc);
   const sourceUrl = getKnowledgeSourceUrl(doc);
+  const publicRecord = isPublicDocumentId(id) ? await getPublicDocumentRecord(id) : null;
+  const hasStoredFile = Boolean(publicRecord?.storage_path);
 
   return (
     <SitePageShell
@@ -66,26 +68,30 @@ export default async function DocumentPage({ params }: Params) {
           <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">{summary}</p>
           {isPublicDocumentId(id) ? (
             <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-              Това е индексиран държавен документ от ingest pipeline. Пълният текст е в RAG чата; отвори оригинала за PDF/HTML.
+              {hasStoredFile
+                ? "Индексиран държавен документ с копие в архива — изтеглете PDF или отворете оригинала."
+                : "Индексиран държавен документ от ingest pipeline. Отворете оригинала за пълния текст."}
             </p>
           ) : null}
           <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href={sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-            >
-              <ExternalLink size={16} />
-              Официален източник
-            </a>
-            {!isPublicDocumentId(id) ? (
+            {sourceUrl ? (
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+              >
+                <ExternalLink size={16} />
+                Официален източник
+              </a>
+            ) : null}
+            {hasStoredFile || !isPublicDocumentId(id) ? (
               <a
                 href={`/api/documents/${doc.id}/download`}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800 dark:border-slate-600 dark:text-slate-100"
               >
                 <Download size={16} />
-                Изтегли резюме (.txt)
+                {hasStoredFile ? "Изтегли от архива" : "Изтегли резюме (.txt)"}
               </a>
             ) : null}
           </div>

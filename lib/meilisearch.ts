@@ -62,6 +62,16 @@ async function ensureSeed(): Promise<void> {
   seeded = true;
 }
 
+/** Upsert knowledge docs (static KB, public archive, learned) into Meili index. */
+export async function upsertKnowledgeDocsToMeili(docs: KnowledgeDoc[]): Promise<void> {
+  const client = getClient();
+  if (!client || docs.length === 0) return;
+
+  await ensureIndex();
+  const index = client.index<KnowledgeIndexDoc>(indexName);
+  await index.addDocuments(docs.map(toIndexDoc));
+}
+
 export async function searchWithMeili(query: string, category?: string): Promise<KnowledgeDoc[]> {
   const client = getClient();
   if (!client) return [];

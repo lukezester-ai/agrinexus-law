@@ -2,6 +2,9 @@
 
 export const FARM_PROFILE_STORAGE_KEY = "farm_profile";
 
+/** Legacy key от /moya-ferma — мигрира се еднократно към farm_profile. */
+const LEGACY_MOYA_FERMA_KEY = "agrinexus_farm_profile";
+
 export interface FarmProfileSnapshot {
 	farm_type: string;
 	region: string;
@@ -22,7 +25,7 @@ function emptySnapshot(): FarmProfileSnapshot {
 	};
 }
 
-/** Чете профил от localStorage; при липса опитва еднократна миграция от sessionStorage. */
+/** Чете профил от localStorage; мигрира legacy ключове. */
 export function loadFarmProfile(): FarmProfileSnapshot | null {
 	if (typeof window === "undefined") return null;
 	try {
@@ -30,6 +33,25 @@ export function loadFarmProfile(): FarmProfileSnapshot | null {
 		if (ls) {
 			const parsed = JSON.parse(ls) as FarmProfileSnapshot;
 			return { ...emptySnapshot(), ...parsed };
+		}
+		const legacyMoya = localStorage.getItem(LEGACY_MOYA_FERMA_KEY);
+		if (legacyMoya) {
+			const legacy = JSON.parse(legacyMoya) as {
+				region?: string;
+				crops?: string;
+				isBio?: boolean;
+			};
+			const migrated: FarmProfileSnapshot = {
+				...emptySnapshot(),
+				region: legacy.region?.trim() ?? "",
+				crops: legacy.crops
+					? legacy.crops.split(",").map((c) => c.trim()).filter(Boolean)
+					: [],
+				is_organic: Boolean(legacy.isBio),
+			};
+			persistFarmProfile(migrated);
+			localStorage.removeItem(LEGACY_MOYA_FERMA_KEY);
+			return migrated;
 		}
 		const legacy = sessionStorage.getItem(FARM_PROFILE_STORAGE_KEY);
 		if (legacy) {

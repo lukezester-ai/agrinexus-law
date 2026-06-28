@@ -1,9 +1,9 @@
 import { isIngestAdminAuthorized } from "@/lib/ai-leader/admin-ingest-auth";
 import {
-	parseReindexTarget,
-	runReindexOrchestration,
-} from "@/lib/ai-leader/ingest-reindex-pipeline";
-import { runDocumentIngest } from "@/lib/ingest/run";
+	DOCUMENT_ARCHIVE_AGENT_ID,
+	parseDocumentArchiveAgentFromUrl,
+	runDocumentArchiveAgent,
+} from "@/lib/ai-leader/document-archive-agent";
 
 export const dynamic = "force-dynamic";
 /** Ingest + RAG reindex може да е дълъг; Vercel Pro+ ползва по-висок лимит от Hobby. */
@@ -22,19 +22,18 @@ function isCronAuthorized(req: Request): boolean {
 }
 
 /**
- * Планирано теглене на документи (ДФЗ/МЗХ sitemap + опционално EUR-Lex от env).
+ * Document Archive Agent — планирано теглене и попълване на архива.
  *
- * Авторизация (който и да е достатъчен):
- * - `Authorization: Bearer $CRON_SECRET` (напр. Vercel Cron)
- * - `x-ingest-cron-token: $INGEST_CRON_TOKEN` — само ако си задал ОТДЕЛЕН INGEST_CRON_TOKEN на сървъра
- * - `x-ingest-token` / Bearer — същото като INGEST_ADMIN_TOKEN (най-просто за GitHub Actions)
+ * Авторизация: CRON_SECRET, INGEST_CRON_TOKEN или INGEST_ADMIN_TOKEN.
+ * Виж docs/INGEST-GITHUB-ACTIONS.md и `.github/workflows/ingest-cron.yml`.
  *
- * Външен ping: виж `docs/INGEST-GITHUB-ACTIONS.md` и `.github/workflows/ingest-cron.yml`.
- *
- * RAG след сваляне:
- * - `?reindex=1` (или `true`) — chunk + embed за индексирани публични документи
- * - `?reindex=0` — изключва дори ако е зададено `INGEST_CRON_AUTO_REINDEX=1`
- * - без `reindex` в URL: ако `INGEST_CRON_AUTO_REINDEX=1`, пуска същия reindex по подразбиране
+ * Query:
+ * - limit — файлове на източник (default 8)
+ * - reindex=1|0 — RAG chunk+embed (default: INGEST_CRON_AUTO_REINDEX=1)
+ * - reindexLimit, reindexTarget=public_doc_content
+ * - syncSearch=1|0 — Meili upsert (default on)
+ * - webTopic=... — опционален web ingest
+ * - source=dfz|mzh — само един sitemap източник
  */
 export async function GET(req: Request) {
 	if (!isCronAuthorized(req)) {
@@ -42,63 +41,23 @@ export async function GET(req: Request) {
 	}
 
 	const url = new URL(req.url);
-	const limitPerSource = Math.min(Math.max(Number(url.searchParams.get("limit") || 8), 1), 40);
-	const reindexParam = url.searchParams.get("reindex")?.trim().toLowerCase() ?? "";
-	const explicitOff = reindexParam === "0" || reindexParam === "false";
-	const explicitOn = reindexParam === "1" || reindexParam === "true";
-	const autoReindex = process.env.INGEST_CRON_AUTO_REINDEX?.trim() === "1";
-	const doReindex = !explicitOff && (explicitOn || (reindexParam === "" && autoReindex));
-	const reindexReason: "query" | "env" | "skipped" = explicitOff
-		? "skipped"
-		: explicitOn
-			? "query"
-			: autoReindex
-				? "env"
-				: "skipped";
-
-	const defaultReindexLimit = Math.min(
-		Math.max(Number.parseInt(process.env.INGEST_CRON_REINDEX_LIMIT || "35", 10), 1),
-		200,
-	);
+	const options = parseDocumentArchiveAgentFromUrl(url);
 
 	try {
-		const results = await runDocumentIngest({ limitPerSource });
-		let reindex: { target: string; results: unknown; reason: typeof reindexReason } | null = null;
-		if (doReindex) {
-			const raw = url.searchParams.get("reindexTarget")?.trim();
-			const whitelist = ["public_documents", "public_doc_content", "learned", "static"] as const;
-			type W = (typeof whitelist)[number];
-			const safeTarget: W = whitelist.includes(raw as W) ? (raw as W) : "public_doc_content";
-			const target = parseReindexTarget(safeTarget);
-			const contentLimit = Math.min(
-				Math.max(
-					Number(url.searchParams.get("reindexLimit") || String(defaultReindexLimit)),
-					1,
-				),
-				200,
-			);
-			const out = await runReindexOrchestration(target, {
-				limit: target === "public_doc_content" ? contentLimit : undefined,
-			});
-			reindex = { ...out, reason: reindexReason };
-		}
+		const result = await runDocumentArchiveAgent(options);
 		return Response.json({
-			ok: true,
-			mode: "documents" as const,
-			limitPerSource,
-			results,
-			reindex,
-			...(!doReindex
+			...result,
+			mode: DOCUMENT_ARCHIVE_AGENT_ID,
+			...(!options.reindex
 				? {
-						reindexHint: explicitOff
-							? "reindex=0/false — пропуснато."
-							: "За chunk+embed: добави ?reindex=1 или задай INGEST_CRON_AUTO_REINDEX=1 в средата.",
+						reindexHint:
+							"RAG reindex пропуснат. За автоматично: INGEST_CRON_AUTO_REINDEX=1 или ?reindex=1",
 					}
 				: {}),
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		console.error("[ingest/cron]", error);
-		return Response.json({ ok: false, error: message }, { status: 500 });
+		return Response.json({ ok: false, error: message, agent: DOCUMENT_ARCHIVE_AGENT_ID }, { status: 500 });
 	}
 }

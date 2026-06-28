@@ -1,9 +1,14 @@
 "use client";
 
 import * as React from 'react';
+import { Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { AIChatPanel } from '@/components/generated/AIChatPanel';
+import { LandingLiveStats } from '@/components/landing-live-stats';
+import { LandingSocialProof } from '@/components/landing-social-proof';
 
 // --- Types ---
 interface NavLink {
@@ -37,12 +42,6 @@ interface TickerItem {
 interface HowItWorksStep {
   title: string;
   description: string;
-}
-interface TestimonialCard {
-  quote: string;
-  initials: string;
-  name: string;
-  role: string;
 }
 interface ComparisonRow {
   feature: string;
@@ -148,7 +147,7 @@ const FAQS: FAQItem[] = [{
   answer: 'Сроковете се извличат автоматично от официалния календар на ДФЗ и оперативните програми. При промяна в крайните дати получавате незабавно известие.'
 }, {
   question: 'Колко струва използването на платформата?',
-  answer: 'AgriNexus предлага безплатен базов достъп до търсачката и документите. Пълният AI анализ и персонализираните консултации са част от нашите абонаментни планове за фермери.'
+  answer: 'Търсенето и сроковете са безплатни. Платените планове са в EUR (€) с 7 дни безплатен trial. Вижте /ceni.'
 }];
 const CHAT_TABS = ['Право', 'Поле', 'Финанси'];
 const SEARCH_CHIPS = ['Документи за био сертификат', 'Срокове директни плащания', 'Дневници при био стопанство'];
@@ -188,22 +187,6 @@ const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [{
   title: 'Получи отговор',
   description: 'Получавате ясен отговор с директен линк към нормативния акт.'
 }];
-const TESTIMONIALS: TestimonialCard[] = [{
-  quote: 'Намерих всички документи за биосертификат за 5 минути. Преди прекарвах часове в сайтове на ДФЗ.',
-  initials: 'ГД',
-  name: 'Георги Димитров',
-  role: 'Зърнопроизводство, Плевен'
-}, {
-  quote: 'Асистентът ми обясни точно кои са сроковете за директни плащания — с линк към наредбата. Страхотно.',
-  initials: 'ПМ',
-  name: 'Петя Маринова',
-  role: 'Биологично стопанство, Стара Загора'
-}, {
-  quote: 'Провери договора ми и откри клауза, която нямаше да забележа. Спести ми сериозни проблеми.',
-  initials: 'СК',
-  name: 'Стоян Колев',
-  role: 'Животновъдство, Добрич'
-}];
 const COMPARISON_ROWS: ComparisonRow[] = [{
   feature: 'Намиране на информация',
   agri: 'check',
@@ -232,11 +215,11 @@ const COMPARISON_ROWS: ComparisonRow[] = [{
   manualText: '30–60 минути'
 }];
 const MOBILE_BULLETS: MobileFeatureBullet[] = [{
-  bold: 'Офлайн достъп',
-  muted: 'Работи и без интернет на полето'
+  bold: 'PWA приложение',
+  muted: 'Инсталирай на телефона за бърз достъп'
 }, {
-  bold: 'Известия',
-  muted: 'Автоматично при нови срокове'
+  bold: 'Live данни',
+  muted: 'Срокове и архив от официални източници'
 }, {
   bold: 'Бърз достъп',
   muted: 'Документи, срокове и калкулатори'
@@ -727,7 +710,16 @@ const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px
       </div>
     </div>
   </nav>;
-const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
+const Hero = () => {
+  const router = useRouter();
+  const [query, setQuery] = React.useState('');
+
+  const goSearch = () => {
+    const q = query.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+  };
+
+  return <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
   paddingTop: '140px',
   paddingBottom: '100px'
 }}>
@@ -767,7 +759,12 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       }}>
           <IconSearch size={20} color="#86868B" />
         </div>
-        <input type="text" placeholder="Напр. изисквания за директни плащания..." className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
+        <input type="text" placeholder="Напр. изисквания за директни плащания..." value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          goSearch();
+        }
+      }} className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
         height: '52px',
         paddingLeft: '48px',
         paddingRight: '16px',
@@ -793,6 +790,14 @@ const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col i
       </div>
     </div>
   </section>;
+};
+
+const LandingChatSidebar = () => {
+  const searchParams = useSearchParams();
+  const chatQ = searchParams.get('chatQ') ?? undefined;
+  return <AIChatPanel prefill={chatQ} />;
+};
+
 const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" style={{
   height: '44px'
 }}>
@@ -991,47 +996,6 @@ const HowItWorks = () => {
       </div>
     </section>;
 };
-const Stats = () => <section className="bg-[#FFFFFF]" style={{
-  paddingTop: '0',
-  paddingBottom: '100px',
-  paddingLeft: '48px',
-  paddingRight: '48px'
-}}>
-    <div className="max-w-[1100px] mx-auto">
-      <div className="flex flex-col md:flex-row items-stretch" style={{
-      borderTop: '1px solid #D2D2D7'
-    }}>
-        {[{
-        number: '59',
-        label: 'Чат записа'
-      }, {
-        number: '51 / 51',
-        label: 'RAG индекс'
-      }, {
-        number: '8,342',
-        label: 'Посетители'
-      }].map((stat, idx) => <div key={stat.label} className="flex flex-col items-center justify-center text-center flex-1 py-12" style={{
-        borderLeft: idx > 0 ? '1px solid #D2D2D7' : 'none'
-      }}>
-            <span style={{
-          fontSize: '56px',
-          fontWeight: 700,
-          color: '#1D1D1F',
-          lineHeight: 1,
-          marginBottom: '8px',
-          display: 'block'
-        }}>
-              {stat.number}
-            </span>
-            <span style={{
-          fontSize: '15px',
-          color: '#6E6E73',
-          lineHeight: 1.6
-        }}>{stat.label}</span>
-          </div>)}
-      </div>
-    </div>
-  </section>;
 const Categories = () => <section className="bg-[#F5F5F7]" style={{
   padding: '100px 48px'
 }}>
@@ -1097,101 +1061,6 @@ const Categories = () => <section className="bg-[#F5F5F7]" style={{
           lineHeight: 1.5
         }}>{cat.subtitle}</p>
           </Link>)}
-      </div>
-    </div>
-  </section>;
-const Testimonials = () => <section className="bg-[#F5F5F7]" style={{
-  paddingTop: '0',
-  paddingBottom: '100px',
-  paddingLeft: '48px',
-  paddingRight: '48px'
-}}>
-    <div className="max-w-[1100px] mx-auto">
-      <div className="text-center" style={{
-      marginBottom: '48px'
-    }}>
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#0071E3',
-        marginBottom: '16px',
-        display: 'block'
-      }}>
-          ФЕРМЕРИ СПОДЕЛЯТ
-        </span>
-        <h2 style={{
-        fontSize: 'clamp(32px, 4.5vw, 56px)',
-        fontWeight: 700,
-        color: '#1D1D1F',
-        lineHeight: 1.05,
-        letterSpacing: '-0.025em'
-      }}>
-          Реални резултати.
-        </h2>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{
-      alignItems: 'stretch'
-    }}>
-        {TESTIMONIALS.map(card => <div key={card.name} className="bg-[#FFFFFF] rounded-[18px] flex flex-col" style={{
-        padding: '36px',
-        boxShadow: '0 2px 16px rgba(0,0,0,0.06)'
-      }}>
-            <div style={{
-          fontSize: '48px',
-          fontWeight: 700,
-          color: '#D2D2D7',
-          lineHeight: 1,
-          marginBottom: '16px'
-        }} aria-hidden="true">
-              &ldquo;
-            </div>
-            <p style={{
-          fontSize: '17px',
-          color: '#1D1D1F',
-          lineHeight: 1.6,
-          marginBottom: '32px',
-          flex: 1
-        }}>
-              {card.quote}
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-[#1D1D1F] flex items-center justify-center shrink-0" style={{
-            width: '40px',
-            height: '40px'
-          }}>
-                <span style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              color: '#FFFFFF'
-            }}>{card.initials}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div style={{
-              fontSize: '15px',
-              fontWeight: 700,
-              color: '#1D1D1F',
-              lineHeight: 1.3
-            }}>{card.name}</div>
-                <div style={{
-              fontSize: '13px',
-              color: '#6E6E73',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-                  {card.role}
-                </div>
-              </div>
-              <div className="flex items-center gap-0.5 shrink-0">
-                {[1, 2, 3, 4, 5].map(star => <svg key={star} width="13" height="13" viewBox="0 0 13 13" fill="#0071E3" aria-hidden="true">
-                    <polygon points="6.5,1 8.2,4.9 12.5,5.3 9.4,8 10.4,12.3 6.5,10 2.6,12.3 3.6,8 0.5,5.3 4.8,4.9" />
-                  </svg>)}
-              </div>
-            </div>
-          </div>)}
       </div>
     </div>
   </section>;
@@ -1616,7 +1485,17 @@ const FAQ = () => {
     </section>;
 };
 const AIChatCTA = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = React.useState(0);
+  const [draft, setDraft] = React.useState('');
+  const tabQueries = ['Какви документи трябват за БИСС?', 'Срокове за заявления ДФЗ 2026', 'Ориентировъчни субсидии за декар'];
+
+  const submitQuestion = () => {
+    const q = draft.trim();
+    if (!q) return;
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
+
   return <section className="bg-[#FFFFFF]" style={{
     padding: '100px 48px'
   }}>
@@ -1691,29 +1570,42 @@ const AIChatCTA = () => {
                 </button>)}
             </div>
 
-            <div className="flex-1 bg-[#F5F5F7] rounded-xl flex items-center justify-center" style={{
+            <div className="flex-1 bg-[#F5F5F7] rounded-xl flex flex-col justify-center" style={{
             padding: '24px',
-            marginBottom: '24px'
+            marginBottom: '24px',
+            minHeight: '120px'
           }}>
               <p style={{
               fontSize: '15px',
               color: '#6E6E73',
-              fontStyle: 'italic',
-              textAlign: 'center'
+              textAlign: 'center',
+              marginBottom: '12px'
             }}>
-                Задай казус: култура, регион, документ или срок.
+                {tabQueries[activeTab]}
               </p>
+              <Link href={`/search?q=${encodeURIComponent(tabQueries[activeTab])}`} className="agri-btn-primary text-center" style={{
+              display: 'block',
+              fontSize: '14px',
+              padding: '10px 16px'
+            }}>
+                Търси в базата →
+              </Link>
             </div>
 
             <div className="flex items-center gap-3">
-              <input type="text" placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
+              <input type="text" value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              submitQuestion();
+            }
+          }} placeholder="Напишете въпрос..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
               height: '48px',
               padding: '0 16px',
               fontSize: '15px',
               outline: 'none',
               border: 'none'
             }} />
-              <button className="agri-btn-primary" style={{
+              <button type="button" onClick={submitQuestion} className="agri-btn-primary" style={{
               height: '48px',
               fontSize: '15px',
               flexShrink: 0
@@ -1726,7 +1618,13 @@ const AIChatCTA = () => {
       </div>
     </section>;
 };
-const MobileAppCTA = () => <section className="bg-[#000000]" style={{
+const MobileAppCTA = () => {
+  const openInstallHelp = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('agrinexus:open-help'));
+    }
+  };
+  return <section className="bg-[#000000]" style={{
   padding: '100px 48px'
 }}>
     <div className="max-w-[1100px] mx-auto flex flex-col lg:flex-row items-center gap-16">
@@ -1758,7 +1656,7 @@ const MobileAppCTA = () => <section className="bg-[#000000]" style={{
         color: '#EBEBF0',
         marginBottom: '48px'
       }}>
-          Инсталирай като app. Работи офлайн.
+          Инсталирай като PWA от браузъра (Chrome / Edge → „Инсталирай приложението“).
         </p>
 
         <ul style={{
@@ -1795,20 +1693,24 @@ const MobileAppCTA = () => <section className="bg-[#000000]" style={{
         </ul>
 
         <div className="flex flex-wrap gap-4">
-          <button className="agri-btn-primary" style={{
+          <button type="button" onClick={openInstallHelp} className="agri-btn-primary" style={{
           backgroundColor: '#FFFFFF',
           color: '#000000',
           fontSize: '15px'
         }}>
-            Инсталирай App
+            Как да инсталирам
           </button>
-          <button className="agri-btn-ghost" style={{
+          <Link href="/document-review" className="agri-btn-ghost inline-flex items-center" style={{
           color: '#FFFFFF',
           borderColor: 'rgba(255,255,255,0.3)',
-          fontSize: '15px'
+          fontSize: '15px',
+          textDecoration: 'none',
+          padding: '12px 24px',
+          borderRadius: '980px',
+          border: '1px solid rgba(255,255,255,0.3)'
         }}>
-            Виж демо →
-          </button>
+            AI преглед на документ →
+          </Link>
         </div>
       </div>
 
@@ -1894,6 +1796,8 @@ const MobileAppCTA = () => <section className="bg-[#000000]" style={{
       </div>
     </div>
   </section>;
+};
+
 const Footer = () => <footer className="bg-[#F5F5F7]" style={{
   borderTop: '1px solid #D2D2D7',
   padding: '32px 48px'
@@ -1904,7 +1808,7 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
       color: '#6E6E73'
     }}>© 2025 AgriNexus.Law. Всички права запазени.</div>
       <div className="flex flex-wrap items-center justify-center gap-6">
-        {[{ label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
+        {[{ label: 'Цени', href: '/ceni' }, { label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'AI преглед', href: '/document-review' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
         fontSize: '13px',
         color: '#6E6E73',
         textDecoration: 'none',
@@ -1913,10 +1817,6 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
             {item.label}
           </Link>)}
       </div>
-      <div style={{
-      fontSize: '13px',
-      color: '#6E6E73'
-    }}>Посетители: 8 342</div>
     </div>
   </footer>;
 
@@ -1926,20 +1826,27 @@ export const AgriNexusLanding = () => <div className="min-h-screen bg-[#FFFFFF] 
 }}>
     <style>{GLOBAL_STYLES}</style>
     <Navbar />
-    <main>
-      <Hero />
-      <LiveTicker />
-      <Features />
-      <HowItWorks />
-      <Stats />
-      <Categories />
-      <Testimonials />
-      <Deadlines />
-      <ComparisonTable />
-      <Trust />
-      <FAQ />
-      <AIChatCTA />
-      <MobileAppCTA />
-    </main>
-    <Footer />
+    <div className="flex">
+      <div className="min-w-0 flex-1">
+        <main>
+          <Hero />
+          <LiveTicker />
+          <Features />
+          <HowItWorks />
+          <LandingLiveStats />
+          <Categories />
+          <LandingSocialProof />
+          <Deadlines />
+          <ComparisonTable />
+          <Trust />
+          <FAQ />
+          <AIChatCTA />
+          <MobileAppCTA />
+        </main>
+        <Footer />
+      </div>
+      <Suspense fallback={null}>
+        <LandingChatSidebar />
+      </Suspense>
+    </div>
   </div>;

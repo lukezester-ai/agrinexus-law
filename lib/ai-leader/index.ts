@@ -16,3 +16,11 @@ export {
   type ReindexTarget,
   type ReindexOrchestrationOptions,
 } from "@/lib/ai-leader/ingest-reindex-pipeline";
+
+export {
+  DOCUMENT_ARCHIVE_AGENT_ID,
+  runDocumentArchiveAgent,
+  parseDocumentArchiveAgentFromUrl,
+  type DocumentArchiveAgentOptions,
+  type DocumentArchiveAgentResult,
+} from "@/lib/ai-leader/document-archive-agent";

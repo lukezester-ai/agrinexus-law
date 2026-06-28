@@ -5,6 +5,13 @@ import { tryInternalCharacterReply } from "@/lib/chat-internal";
 import { farmProfileToPromptText } from "@/lib/farm-profile-server";
 import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
 import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
+import { getSessionUser } from "@/lib/billing/auth";
+import {
+	assertChatAllowed,
+	buildBillingContext,
+	recordChatUsage,
+	upgradeMessageForChat,
+} from "@/lib/billing/entitlements";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { normalizeChatMessages } from "@/lib/normalize-chat-messages";
 import { formatTaxonomyForRag } from "@/lib/knowledge/document-taxonomy";
@@ -20,6 +27,27 @@ export async function POST(req: Request) {
 		if (!rateLimitResult.success) {
 			return Response.json({ error: "Твърде много заявки. Изчакай малко и опитай пак." }, { status: 429 });
 		}
+
+		const sessionUser = await getSessionUser();
+		const billingCtx = await buildBillingContext(
+			sessionUser?.id,
+			sessionUser?.email,
+			ip,
+		);
+		const chatUsage = await assertChatAllowed(billingCtx);
+		if (!chatUsage.allowed) {
+			return Response.json(
+				{
+					error: upgradeMessageForChat(billingCtx),
+					code: "PLAN_LIMIT",
+					plan: billingCtx.planId,
+					usage: chatUsage,
+					upgradeUrl: "/ceni",
+				},
+				{ status: 402 },
+			);
+		}
+		await recordChatUsage(billingCtx);
 
 		let body: unknown;
 		try {
