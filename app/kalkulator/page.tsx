@@ -8,7 +8,7 @@ import {
 	Wheat, Tractor, Apple, Grape, Milk, ChevronRight, ChevronLeft, Map, Sprout
 } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { createClient } from "@/lib/supabase/client";
+import { createOptionalClient } from "@/lib/supabase/client";
 import {
 	estimateSubsidy,
 	formatShareSnippet,
@@ -41,7 +41,7 @@ export default function KalkulatorPage() {
 	const [hasAccess, setHasAccess] = useState(false);
 	const [leadEmail, setLeadEmail] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const supabase = useMemo(() => createClient(), []);
+	const supabase = useMemo(() => createOptionalClient(), []);
 
 	useEffect(() => {
 		const p = loadFarmProfile();
@@ -50,6 +50,7 @@ export default function KalkulatorPage() {
 		}
 		if (p?.is_organic) setOrganicEco(true);
 		
+		if (!supabase) return;
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			if (session?.user) setHasAccess(true);
 		});
@@ -60,7 +61,9 @@ export default function KalkulatorPage() {
 		if (!leadEmail) return;
 		setIsSubmitting(true);
 		try {
-			await supabase.from("leads").insert([{ email: leadEmail }]);
+			if (supabase) {
+				await supabase.from("leads").insert([{ email: leadEmail }]);
+			}
 		} catch (err) {
 			console.error("Error saving lead", err);
 		} finally {

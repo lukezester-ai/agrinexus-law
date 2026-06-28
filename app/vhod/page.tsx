@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Leaf, Mail, Lock, Loader2 } from 'lucide-react'
 import { SitePageShell } from '@/components/site-page-shell'
-import { createClient } from '@/lib/supabase/client'
+import { createOptionalClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [view, setView] = useState<'sign-in' | 'sign-up'>('sign-in')
   const router = useRouter()
   const [nextPath, setNextPath] = useState('/')
-  const supabase = createClient()
+  const supabase = useMemo(() => createOptionalClient(), [])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -27,6 +27,12 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+
+    if (!supabase) {
+      setError('Входът не е конфигуриран (липсват Supabase настройки). Свържете NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY във Vercel.')
+      setIsLoading(false)
+      return
+    }
 
     try {
       if (view === 'sign-in') {
