@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from 'react';
-import { Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { AIChatPanel } from '@/components/generated/AIChatPanel';
+import { LandingChatProvider, useLandingChat } from '@/components/landing-chat-drawer';
 import { LandingLiveStats } from '@/components/landing-live-stats';
 import { LandingSocialProof } from '@/components/landing-social-proof';
 
@@ -712,6 +711,7 @@ const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px
   </nav>;
 const Hero = () => {
   const router = useRouter();
+  const { openChat } = useLandingChat();
   const [query, setQuery] = React.useState('');
 
   const goSearch = () => {
@@ -746,7 +746,7 @@ const Hero = () => {
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-        <Link href="/search" className="agri-btn-primary">Питай AI</Link>
+        <button type="button" onClick={() => openChat()} className="agri-btn-primary">Питай AI</button>
         <Link href="/srokove" className="agri-btn-ghost">Провери срокове</Link>
       </div>
 
@@ -790,12 +790,6 @@ const Hero = () => {
       </div>
     </div>
   </section>;
-};
-
-const LandingChatSidebar = () => {
-  const searchParams = useSearchParams();
-  const chatQ = searchParams.get('chatQ') ?? undefined;
-  return <AIChatPanel prefill={chatQ} />;
 };
 
 const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" style={{
@@ -1485,7 +1479,7 @@ const FAQ = () => {
     </section>;
 };
 const AIChatCTA = () => {
-  const router = useRouter();
+  const { openChat } = useLandingChat();
   const [activeTab, setActiveTab] = React.useState(0);
   const [draft, setDraft] = React.useState('');
   const tabQueries = ['Какви документи трябват за БИСС?', 'Срокове за заявления ДФЗ 2026', 'Ориентировъчни субсидии за декар'];
@@ -1493,7 +1487,7 @@ const AIChatCTA = () => {
   const submitQuestion = () => {
     const q = draft.trim();
     if (!q) return;
-    router.push(`/search?q=${encodeURIComponent(q)}`);
+    openChat(q);
   };
 
   return <section className="bg-[#FFFFFF]" style={{
@@ -1583,13 +1577,18 @@ const AIChatCTA = () => {
             }}>
                 {tabQueries[activeTab]}
               </p>
-              <Link href={`/search?q=${encodeURIComponent(tabQueries[activeTab])}`} className="agri-btn-primary text-center" style={{
+              <button
+                type="button"
+                onClick={() => openChat(tabQueries[activeTab])}
+                className="agri-btn-primary text-center"
+                style={{
               display: 'block',
               fontSize: '14px',
-              padding: '10px 16px'
+              padding: '10px 16px',
+              width: '100%'
             }}>
-                Търси в базата →
-              </Link>
+                Питай AI →
+              </button>
             </div>
 
             <div className="flex items-center gap-3">
@@ -1821,32 +1820,31 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
   </footer>;
 
 // --- Main Export ---
-export const AgriNexusLanding = () => <div className="min-h-screen bg-[#FFFFFF] text-[#1D1D1F]" style={{
+const AgriNexusLandingInner = () => <div className="min-h-screen bg-[#FFFFFF] text-[#1D1D1F]" style={{
   fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif"
 }}>
     <style>{GLOBAL_STYLES}</style>
     <Navbar />
-    <div className="flex">
-      <div className="min-w-0 flex-1">
-        <main>
-          <Hero />
-          <LiveTicker />
-          <Features />
-          <HowItWorks />
-          <LandingLiveStats />
-          <Categories />
-          <LandingSocialProof />
-          <Deadlines />
-          <ComparisonTable />
-          <Trust />
-          <FAQ />
-          <AIChatCTA />
-          <MobileAppCTA />
-        </main>
-        <Footer />
-      </div>
-      <Suspense fallback={null}>
-        <LandingChatSidebar />
-      </Suspense>
-    </div>
+    <main>
+      <Hero />
+      <LiveTicker />
+      <Features />
+      <HowItWorks />
+      <LandingLiveStats />
+      <Categories />
+      <LandingSocialProof />
+      <Deadlines />
+      <ComparisonTable />
+      <Trust />
+      <FAQ />
+      <AIChatCTA />
+      <MobileAppCTA />
+    </main>
+    <Footer />
   </div>;
+
+export const AgriNexusLanding = () => (
+  <LandingChatProvider>
+    <AgriNexusLandingInner />
+  </LandingChatProvider>
+);

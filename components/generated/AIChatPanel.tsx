@@ -59,6 +59,9 @@ export interface AIChatPanelProps {
 	quickChips?: string[];
 	placeholder?: string;
 	className?: string;
+	/** sidebar = legacy dock; overlay = drawer / modal panel */
+	variant?: "sidebar" | "overlay";
+	onClose?: () => void;
 }
 
 export const AIChatPanel: React.FC<AIChatPanelProps> = ({
@@ -67,6 +70,8 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 	quickChips = DEFAULT_QUICK_CHIPS,
 	placeholder = "Задай въпрос за срок...",
 	className,
+	variant = "sidebar",
+	onClose,
 }) => {
 	const [activeTab, setActiveTab] = React.useState<ChatTab>("Право");
 	const [messagesByTab, setMessagesByTab] = React.useState<Record<ChatTab, ChatMessage[]>>(() => ({
@@ -218,18 +223,34 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 		<aside
 			id={id}
 			className={cn(
-				"sticky top-[120px] hidden w-[340px] shrink-0 flex-col self-start border-l border-[#1E1E1E] bg-[#111111] xl:flex",
+				variant === "overlay"
+					? "flex h-full w-full flex-col bg-[#111111]"
+					: "sticky top-[120px] hidden w-[340px] shrink-0 flex-col self-start border-l border-[#1E1E1E] bg-[#111111] xl:flex",
 				className,
 			)}
-			style={{ height: "calc(100vh - 120px)" }}
+			style={variant === "overlay" ? undefined : { height: "calc(100vh - 120px)" }}
 		>
 			<div className="shrink-0 px-5 pt-5 pb-0">
-				<p
-					className="mb-4 text-[12px] font-semibold tracking-[0.08em] text-[#888888] uppercase"
-					style={{ fontFamily: "Inter, sans-serif" }}
-				>
-					Асистент
-				</p>
+				<div className="mb-4 flex items-center justify-between gap-3">
+					<p
+						id={variant === "overlay" ? "landing-chat-title" : undefined}
+						className="text-[12px] font-semibold tracking-[0.08em] text-[#888888] uppercase"
+						style={{ fontFamily: "Inter, sans-serif" }}
+					>
+						Асистент
+					</p>
+					{onClose ? (
+						<button
+							type="button"
+							onClick={onClose}
+							className="rounded-lg px-2 py-1 text-[#888888] transition-colors hover:bg-[#1E1E1E] hover:text-white"
+							aria-label="Затвори чата"
+							style={{ fontFamily: "Inter, sans-serif", fontSize: "18px", lineHeight: 1 }}
+						>
+							×
+						</button>
+					) : null}
+				</div>
 				<div className="flex items-end gap-0 border-b border-[#1E1E1E]">
 					{CHAT_TABS.map((tab) => (
 						<button
