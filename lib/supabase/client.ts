@@ -1,25 +1,21 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { getSupabasePublicEnv, isSupabasePublicEnvConfigured } from '@/lib/supabase/env'
 
 export function isSupabaseBrowserConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
-  )
+  return isSupabasePublicEnvConfigured()
 }
 
 export function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
-  if (!url || !anonKey) {
+  const env = getSupabasePublicEnv()
+  if (!env) {
     throw new Error('Supabase browser client is not configured.')
   }
-  return createBrowserClient(
-    url,
-    anonKey
-  )
+  return createBrowserClient(env.url, env.anonKey)
 }
 
 export function createOptionalClient(): SupabaseClient | null {
-  return isSupabaseBrowserConfigured() ? createClient() : null
+  const env = getSupabasePublicEnv()
+  if (!env) return null
+  return createBrowserClient(env.url, env.anonKey)
 }

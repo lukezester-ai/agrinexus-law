@@ -8,7 +8,7 @@ const SESSION_HIDE_KEY = "agrinexus-pwa-onboarding-session-hide";
 const OPEN_HELP_EVENT = "agrinexus:open-help";
 
 export function PwaOnboarding() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
 
   const content = useMemo(() => {
