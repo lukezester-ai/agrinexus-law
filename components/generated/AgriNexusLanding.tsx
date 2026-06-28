@@ -1,1945 +1,279 @@
 "use client";
 
-import * as React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, Search, Calendar, FileText, Sparkles, Check, ArrowRight, X } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
-
-// --- Types ---
-interface NavLink {
-  label: string;
-  href: string;
-}
-interface Feature {
-  label: string;
-  title: string;
-  description: string;
-  theme: 'light' | 'dark' | 'black';
-  href: string;
-}
-interface Category {
-  name: string;
-  subtitle: string;
-}
-interface DeadlineItem {
-  type: 'СРОК' | 'ПРАВИЛА' | 'ДОКУМЕНТИ';
-  title: string;
-  subtitle: string;
-}
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-interface TickerItem {
-  dotColor: string;
-  text: string;
-}
-interface HowItWorksStep {
-  title: string;
-  description: string;
-}
-interface TestimonialCard {
-  quote: string;
-  initials: string;
-  name: string;
-  role: string;
-}
-interface ComparisonRow {
-  feature: string;
-  agri: 'check' | 'text';
-  agriText?: string;
-  manual: 'x' | 'text';
-  manualText?: string;
-}
-interface MobileFeatureBullet {
-  bold: string;
-  muted: string;
-}
-interface ProfileChip {
-  label: string;
-  expert: string;
-}
-
-// --- Mock Data ---
-const NAV_LINKS: NavLink[] = [{
-  label: 'Документи',
-  href: '/documents'
-}, {
-  label: 'AI преглед',
-  href: '/search'
-}, {
-  label: 'Срокове',
-  href: '/srokove'
-}, {
-  label: 'Калкулатори',
-  href: '/kalkulator'
-}, {
-  label: 'Статистики',
-  href: '/statistiki'
-}];
-const FEATURES: Feature[] = [{
-  label: 'СРОКОВЕ',
-  title: 'Провери срокове',
-  description: 'Интелигентно проследяване на крайни дати за кандидатстване по ДФЗ и активните кампании.',
-  theme: 'light',
-  href: '/srokove'
-}, {
-  label: 'ДОКУМЕНТИ',
-  title: 'Намери документ',
-  description: 'Пълен архив от наредби, образци и заявления в PDF формат на едно място.',
-  theme: 'black',
-  href: '/documents'
-}, {
-  label: 'AI ПРЕГЛЕД',
-  title: 'AI преглед',
-  description: 'Автоматичен анализ на вашите договори и писма за съответствие с актуалните изисквания.',
-  theme: 'dark',
-  href: '/document-review'
-}];
-const CATEGORIES: Category[] = [{
-  name: 'Субсидии',
-  subtitle: 'Директни плащания'
-}, {
-  name: 'Закони',
-  subtitle: 'Наредби и укази'
-}, {
-  name: 'Сертификати',
-  subtitle: 'Био и качество'
-}, {
-  name: 'Био производство',
-  subtitle: 'Еко стандарти'
-}, {
-  name: 'Растителна защита',
-  subtitle: 'Дневници и препарати'
-}, {
-  name: 'ЕС регламенти',
-  subtitle: 'Общи политики'
-}, {
-  name: 'Образци',
-  subtitle: 'Заявления и бланки'
-}, {
-  name: 'Калкулатори',
-  subtitle: 'Бюджет и ДДС'
-}];
-const DEADLINES: DeadlineItem[] = [{
-  type: 'СРОК',
-  title: 'Директни плащания и корекции по заявления',
-  subtitle: 'ДФЗ · проследяване на активните прозорци'
-}, {
-  type: 'ПРАВИЛА',
-  title: 'Нови изисквания за пасища и ливади 2025',
-  subtitle: 'Актуализирани разпоредби на Министерството'
-}, {
-  type: 'ДОКУМЕНТИ',
-  title: 'Подаване на дневници за растителна защита',
-  subtitle: 'Електронен регистър към БАБХ'
-}];
-const FAQS: FAQItem[] = [{
-  question: 'Как работи AI асистентът с официалните документи?',
-  answer: 'Нашият AI е обучен директно върху базата данни на ДФЗ и Министерството на земеделието. Той индексира всяка нова наредба в реално време (RAG технология), което му позволява да отговаря с цитати и препратки към конкретни членове и алинеи.'
-}, {
-  question: 'Мога ли да кача собствените си документи за проверка?',
-  answer: 'Да, можете да качите вашите заявления в PDF формат. Системата ще ги сравни с актуалните изисквания за съответната кампания и ще ви сигнализира за пропуски или грешки.'
-}, {
-  question: 'Данните ми защитени ли са?',
-  answer: 'Всички качени данни са криптирани и се използват единствено за вашия анализ. AgriNexus не споделя информация с трети страни или държавни институции без вашето изрично съгласие.'
-}, {
-  question: 'Как се актуализират сроковете?',
-  answer: 'Сроковете се извличат автоматично от официалния календар на ДФЗ и оперативните програми. При промяна в крайните дати получавате незабавно известие.'
-}, {
-  question: 'Колко струва използването на платформата?',
-  answer: 'AgriNexus предлага безплатен базов достъп до търсачката и документите. Пълният AI анализ и персонализираните консултации са част от нашите абонаментни планове за фермери.'
-}];
-const CHAT_TABS = ['Право', 'Поле', 'Финанси'];
-const SEARCH_CHIPS = ['Документи за био сертификат', 'Срокове директни плащания', 'Дневници при био стопанство'];
-const PROFILE_CHIPS: ProfileChip[] = [{
-  label: 'Право',
-  expert: 'Елена'
-}, {
-  label: 'Поле',
-  expert: 'Борис'
-}, {
-  label: 'Финанси',
-  expert: 'Виктория'
-}];
-const TICKER_ITEMS: TickerItem[] = [{
-  dotColor: '#FF3B30',
-  text: 'АКТИВНО · Директни плащания — краен срок 15 юни 2025'
-}, {
-  dotColor: '#FF9F0A',
-  text: 'ПРЕДСТОИ · Еко-схеми — прием от 1 юли 2025'
-}, {
-  dotColor: '#FF3B30',
-  text: 'АКТИВНО · Авансови плащания — документи до 30 май 2025'
-}, {
-  dotColor: '#30D158',
-  text: 'ОТВОРЕНО · Биологично производство — регистрация'
-}, {
-  dotColor: '#FF3B30',
-  text: 'АКТИВНО · ПРСР Мярка 11 — краен срок 20 юни'
-}];
-const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [{
-  title: 'Задай въпрос',
-  description: 'Напишете въпроса си на разговорен български — за субсидии, срокове или документи.'
-}, {
-  title: 'AI търси в наредбите',
-  description: 'Системата претърсва официалните наредби на ДФЗ и Министерството.'
-}, {
-  title: 'Получи отговор',
-  description: 'Получавате ясен отговор с директен линк към нормативния акт.'
-}];
-const TESTIMONIALS: TestimonialCard[] = [{
-  quote: 'Намерих всички документи за биосертификат за 5 минути. Преди прекарвах часове в сайтове на ДФЗ.',
-  initials: 'ГД',
-  name: 'Георги Димитров',
-  role: 'Зърнопроизводство, Плевен'
-}, {
-  quote: 'Асистентът ми обясни точно кои са сроковете за директни плащания — с линк към наредбата. Страхотно.',
-  initials: 'ПМ',
-  name: 'Петя Маринова',
-  role: 'Биологично стопанство, Стара Загора'
-}, {
-  quote: 'Провери договора ми и откри клауза, която нямаше да забележа. Спести ми сериозни проблеми.',
-  initials: 'СК',
-  name: 'Стоян Колев',
-  role: 'Животновъдство, Добрич'
-}];
-const COMPARISON_ROWS: ComparisonRow[] = [{
-  feature: 'Намиране на информация',
-  agri: 'check',
-  manual: 'x'
-}, {
-  feature: 'Точен източник и цитат',
-  agri: 'check',
-  manual: 'x'
-}, {
-  feature: 'Следваща стъпка',
-  agri: 'check',
-  manual: 'x'
-}, {
-  feature: 'AI преглед на договор',
-  agri: 'check',
-  manual: 'x'
-}, {
-  feature: 'Актуални срокове',
-  agri: 'check',
-  manual: 'x'
-}, {
-  feature: 'Необходимо време',
-  agri: 'text',
-  agriText: '< 1 минута',
-  manual: 'text',
-  manualText: '30–60 минути'
-}];
-const MOBILE_BULLETS: MobileFeatureBullet[] = [{
-  bold: 'Офлайн достъп',
-  muted: 'Работи и без интернет на полето'
-}, {
-  bold: 'Известия',
-  muted: 'Автоматично при нови срокове'
-}, {
-  bold: 'Бърз достъп',
-  muted: 'Документи, срокове и калкулатори'
-}];
-
-// --- Inline SVG Icons ---
-
-const IconSearch = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="9" cy="9" r="6" />
-    <line x1="13.5" y1="13.5" x2="18" y2="18" />
-  </svg>;
-const IconChevronRight = ({
-  size = 16,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <polyline points="5,2 11,8 5,14" />
-  </svg>;
-const IconPlus = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <line x1="10" y1="3" x2="10" y2="17" />
-    <line x1="3" y1="10" x2="17" y2="10" />
-  </svg>;
-const IconMinus = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <line x1="3" y1="10" x2="17" y2="10" />
-  </svg>;
-const IconArrowRight = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <line x1="3" y1="10" x2="17" y2="10" />
-    <polyline points="11,4 17,10 11,16" />
-  </svg>;
-const IconCalendar = ({
-  size = 28,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <rect x="2" y="4" width="18" height="16" rx="2.5" />
-    <line x1="7" y1="2" x2="7" y2="6" />
-    <line x1="15" y1="2" x2="15" y2="6" />
-    <line x1="2" y1="9" x2="20" y2="9" />
-    <line x1="6" y1="13" x2="9" y2="13" />
-    <line x1="13" y1="13" x2="16" y2="13" />
-  </svg>;
-const IconDocText = ({
-  size = 28,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M4 2 H14 L18 6 V20 Q18 21 17 21 H5 Q4 21 4 20 V3 Q4 2 5 2 Z" />
-    <polyline points="14,2 14,7 18,7" />
-    <line x1="7" y1="11" x2="15" y2="11" />
-    <line x1="7" y1="14" x2="15" y2="14" />
-    <line x1="7" y1="17" x2="12" y2="17" />
-  </svg>;
-const IconSparkles = ({
-  size = 28,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M11 2 L12.2 8.4 L18 11 L12.2 13.6 L11 20 L9.8 13.6 L4 11 L9.8 8.4 Z" />
-    <path d="M18 2 L18.7 4.3 L21 5 L18.7 5.7 L18 8 L17.3 5.7 L15 5 L17.3 4.3 Z" />
-    <path d="M4 15 L4.5 16.5 L6 17 L4.5 17.5 L4 19 L3.5 17.5 L2 17 L3.5 16.5 Z" />
-  </svg>;
-const IconBanknote = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <rect x="1" y="4" width="16" height="10" rx="1.5" />
-    <ellipse cx="9" cy="9" rx="2.5" ry="2.5" />
-    <line x1="3" y1="7" x2="3" y2="11" />
-    <line x1="15" y1="7" x2="15" y2="11" />
-  </svg>;
-const IconScales = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <line x1="9" y1="1" x2="9" y2="17" />
-    <line x1="3" y1="4" x2="15" y2="4" />
-    <line x1="3" y1="4" x2="1" y2="9" />
-    <line x1="15" y1="4" x2="17" y2="9" />
-    <path d="M1 9 Q2 12 3 9" />
-    <path d="M15 9 Q16 12 17 9" />
-    <line x1="6" y1="17" x2="12" y2="17" />
-  </svg>;
-const IconRosette = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="9" cy="9" r="7" />
-    <circle cx="9" cy="9" r="3" />
-    <line x1="9" y1="2" x2="9" y2="6" />
-    <line x1="9" y1="12" x2="9" y2="16" />
-    <line x1="2" y1="9" x2="6" y2="9" />
-    <line x1="12" y1="9" x2="16" y2="9" />
-  </svg>;
-const IconLeaf = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M3 15 C5 11 6 7 16 2 C16 2 16 12 9 14 C7 14.5 5 14 3 15 Z" />
-    <line x1="3" y1="15" x2="8" y2="10" />
-  </svg>;
-const IconShieldCheck = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M9 1 L16 4 L16 9 C16 13 12.5 16.5 9 17 C5.5 16.5 2 13 2 9 L2 4 Z" />
-    <polyline points="5.5,9 7.5,11 12.5,7" />
-  </svg>;
-const IconGlobe = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="9" cy="9" r="7" />
-    <ellipse cx="9" cy="9" rx="3" ry="7" />
-    <line x1="2" y1="9" x2="16" y2="9" />
-    <line x1="3" y1="5" x2="15" y2="5" />
-    <line x1="3" y1="13" x2="15" y2="13" />
-  </svg>;
-const IconDoc = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M3 1.5 H11 L14.5 5 V16 Q14.5 16.5 14 16.5 H4 Q3.5 16.5 3.5 16 V2 Q3.5 1.5 4 1.5 Z" />
-    <polyline points="11,1.5 11,5.5 14.5,5.5" />
-    <line x1="6" y1="9" x2="12" y2="9" />
-    <line x1="6" y1="12" x2="12" y2="12" />
-    <line x1="6" y1="15" x2="9" y2="15" />
-  </svg>;
-const IconCalculator = ({
-  size = 20,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <rect x="2" y="1" width="14" height="16" rx="2" />
-    <rect x="4.5" y="3.5" width="9" height="3" rx="0.5" />
-    <circle cx="5.5" cy="10" r="0.8" />
-    <circle cx="9" cy="10" r="0.8" />
-    <circle cx="12.5" cy="10" r="0.8" />
-    <circle cx="5.5" cy="13.5" r="0.8" />
-    <circle cx="9" cy="13.5" r="0.8" />
-    <circle cx="12.5" cy="13.5" r="0.8" />
-  </svg>;
-const IconCheckShield = ({
-  size = 24,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M11 2 L19 5.5 L19 11 C19 16 15.5 19.5 11 21 C6.5 19.5 3 16 3 11 L3 5.5 Z" />
-    <polyline points="7,11 9.5,13.5 15,8.5" />
-  </svg>;
-const IconLink = ({
-  size = 24,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M8 13 C6 15 6 18 8.5 19.5 C11 21 14 20 15.5 18 L17 16 C18.5 14 18 11 16 9.5" />
-    <path d="M14 9 C16 7 16 4 13.5 2.5 C11 1 8 2 6.5 4 L5 6 C3.5 8 4 11 6 12.5" />
-    <line x1="9" y1="13" x2="13" y2="9" />
-  </svg>;
-const IconLock = ({
-  size = 24,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 22 22" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <rect x="4" y="10" width="14" height="10" rx="2" />
-    <path d="M7 10 V7 A4 4 0 0 1 15 7 V10" />
-    <circle cx="11" cy="15" r="1.5" />
-  </svg>;
-const IconPersonCircle = ({
-  size = 16,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="8" cy="8" r="6.5" />
-    <circle cx="8" cy="6" r="2" />
-    <path d="M3 13.5 C3.5 11 5.5 9.5 8 9.5 C10.5 9.5 12.5 11 13 13.5" />
-  </svg>;
-const IconLeafSmall = ({
-  size = 16,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M2 13.5 C4 10 5 6.5 14 2 C14 2 14 11 7.5 12.5 C5.5 13 3.5 12.5 2 13.5 Z" />
-    <line x1="2" y1="13.5" x2="7" y2="9" />
-  </svg>;
-const IconChartBar = ({
-  size = 16,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <rect x="1.5" y="7" width="3" height="7" rx="0.5" />
-    <rect x="6.5" y="4" width="3" height="10" rx="0.5" />
-    <rect x="11.5" y="1.5" width="3" height="12.5" rx="0.5" />
-  </svg>;
-const IconMessage = ({
-  size = 28,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>;
-const IconMagnify = ({
-  size = 28,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="11" cy="11" r="7" />
-    <line x1="16.5" y1="16.5" x2="22" y2="22" />
-  </svg>;
-const IconCheckCircle = ({
-  size = 28,
-  color = 'currentColor'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="7,12 10,15 17,9" />
-  </svg>;
-const IconCheckFilled = ({
-  size = 20,
-  color = '#0071E3'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="10" cy="10" r="9" />
-    <polyline points="6,10 9,13 14,7" />
-  </svg>;
-const IconXCircle = ({
-  size = 20,
-  color = '#D2D2D7'
-}: {
-  size?: number;
-  color?: string;
-}) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
-    <circle cx="10" cy="10" r="9" />
-    <line x1="7" y1="7" x2="13" y2="13" />
-    <line x1="13" y1="7" x2="7" y2="13" />
-  </svg>;
-
-// Category icon map
-const CATEGORY_ICONS: Record<string, React.ReactElement> = {
-  'Субсидии': <IconBanknote size={20} color="currentColor" />,
-  'Закони': <IconScales size={20} color="currentColor" />,
-  'Сертификати': <IconRosette size={20} color="currentColor" />,
-  'Био производство': <IconLeaf size={20} color="currentColor" />,
-  'Растителна защита': <IconShieldCheck size={20} color="currentColor" />,
-  'ЕС регламенти': <IconGlobe size={20} color="currentColor" />,
-  'Образци': <IconDoc size={20} color="currentColor" />,
-  'Калкулатори': <IconCalculator size={20} color="currentColor" />
-};
-const PROFILE_ICONS: Record<string, React.ReactElement> = {
-  'Право': <IconPersonCircle size={16} color="#6E6E73" />,
-  'Поле': <IconLeafSmall size={16} color="#6E6E73" />,
-  'Финанси': <IconChartBar size={16} color="#6E6E73" />
-};
-
-// --- Global keyframe styles ---
-const GLOBAL_STYLES = `
-  @keyframes agri-ticker-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  @keyframes agri-live-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  .agri-ticker-track {
-    animation: agri-ticker-scroll 30s linear infinite;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-  }
-  .agri-live-dot {
-    animation: agri-live-pulse 1.5s ease-in-out infinite;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .agri-ticker-track {
-      animation: none;
-    }
-    .agri-live-dot {
-      animation: none;
-    }
-  }
-  .agri-nav-link {
-    font-size: 14px;
-    color: #6E6E73;
-    text-decoration: none;
-    transition: color 200ms ease-out;
-  }
-  .agri-nav-link:hover {
-    color: #1D1D1F;
-  }
-  .agri-nav-link:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-  .agri-btn-primary {
-    background-color: #0071E3;
-    color: #ffffff;
-    font-size: 17px;
-    padding: 0 24px;
-    height: 48px;
-    border-radius: 980px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 150ms ease-out, transform 100ms ease-out;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .agri-btn-primary:hover {
-    background-color: #0077ED;
-  }
-  .agri-btn-primary:active {
-    transform: scale(0.98);
-  }
-  .agri-btn-primary:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-  }
-  .agri-btn-ghost {
-    background-color: transparent;
-    color: #1D1D1F;
-    font-size: 17px;
-    padding: 0 24px;
-    height: 48px;
-    border-radius: 980px;
-    border: 1px solid rgba(0,0,0,0.16);
-    cursor: pointer;
-    transition: background-color 150ms ease-out, transform 100ms ease-out;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .agri-btn-ghost:hover {
-    background-color: rgba(0,0,0,0.04);
-  }
-  .agri-btn-ghost:active {
-    transform: scale(0.98);
-  }
-  .agri-btn-ghost:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-  }
-  .agri-category-tile {
-    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
-    border: 1px solid transparent;
-  }
-  .agri-category-tile:hover {
-    border-color: #0071E3;
-    box-shadow: 0 4px 16px rgba(0,113,227,0.08);
-  }
-  .agri-category-tile:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-  }
-  .agri-deadline-row {
-    transition: background-color 150ms ease-out;
-  }
-  .agri-deadline-row:hover {
-    background-color: #F5F5F7;
-  }
-  .agri-comparison-row {
-    transition: background-color 150ms ease-out;
-  }
-  .agri-comparison-row:hover {
-    background-color: #F5F5F7;
-  }
-  .agri-faq-row {
-    transition: background-color 150ms ease-out;
-    border-radius: 8px;
-  }
-  .agri-faq-row:hover {
-    background-color: #FAFAFA;
-  }
-  button:focus-visible,
-  a:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-  }
-`;
+import { cn } from '../../lib/utils';
 
 // --- Sub-components ---
 
-const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px-12 flex items-center justify-between" style={{
-  backgroundColor: 'rgba(255,255,255,0.85)',
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
-  borderBottom: '1px solid rgba(0,0,0,0.1)'
-}}>
-    <div className="w-full max-w-[1100px] mx-auto flex items-center justify-between">
-      <Link href="/" className="text-[15px] font-semibold text-[#1D1D1F] tracking-tight" style={{
-      textDecoration: 'none'
-    }}>
-        AgriNexus
-      </Link>
-      <div className="hidden md:flex items-center gap-8">
-        {NAV_LINKS.map(link => <Link key={link.label} href={link.href} className="agri-nav-link">
-            {link.label}
-          </Link>)}
+const NavBar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  return <nav className="fixed top-0 left-0 right-0 z-50 glass h-16 flex items-center justify-between px-6">
+      <div className="flex items-center gap-2">
+        <span className="text-white font-bold text-[15px] tracking-tight font-body">AgriNexus</span>
       </div>
-      <div className="flex items-center gap-5">
-        <Link href="/vhod" className="text-[14px] text-[#0071E3] hover:opacity-80 transition-opacity" style={{
-        textDecoration: 'none'
-      }}>
-          Вход
-        </Link>
-        <Link href="/search" aria-label="Търсене" style={{
-        textDecoration: 'none',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
-          <IconSearch size={20} color="#6E6E73" />
-        </Link>
+      <button onClick={() => setIsOpen(!isOpen)} className="text-white p-2 focus:outline-none" aria-label="Toggle menu">
+        
+        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6 stroke-[1.5px]" />}
+      </button>
+
+      <AnimatePresence>
+        {isOpen && <motion.div initial={{
+        opacity: 0,
+        y: -20
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} exit={{
+        opacity: 0,
+        y: -20
+      }} className="absolute top-16 left-0 right-0 bg-[#0A0A0A] border-b border-[#222222] p-6 flex flex-col gap-4">
+          
+            <Link href="/" className="text-white font-medium text-lg" onClick={() => setIsOpen(false)}>Начало</Link>
+            <Link href="/statistiki" className="text-[#888888] font-medium text-lg" onClick={() => setIsOpen(false)}>Статистика</Link>
+            <Link href="/srokove" className="text-[#888888] font-medium text-lg" onClick={() => setIsOpen(false)}>Срокове</Link>
+            <Link href="/documents" className="text-[#888888] font-medium text-lg" onClick={() => setIsOpen(false)}>Документи</Link>
+            <Link href="/document-review" className="text-[#888888] font-medium text-lg" onClick={() => setIsOpen(false)}>AI Анализ</Link>
+          </motion.div>}
+      </AnimatePresence>
+    </nav>;
+};
+
+const AuroraBackground = ({
+  children
+}: {
+  children: React.ReactNode;
+}) => {
+  return <div className="relative overflow-hidden bg-[#0A0A0A] min-h-[90vh] flex flex-col items-center justify-center pt-16">
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-purple-600/30 aurora-blob animate-aurora" style={{
+      animationDuration: '12s'
+    }} />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/20 aurora-blob animate-aurora" style={{
+      animationDuration: '16s'
+    }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-600/10 aurora-blob animate-aurora" style={{
+      animationDuration: '10s'
+    }} />
+      
+      <div className="relative z-10 w-full px-6">
+        {children}
       </div>
+    </div>;
+};
+
+const Ticker = () => {
+  const items = [{
+    text: "Краен срок за субсидии: 15 Април",
+    color: "bg-red-500"
+  }, {
+    text: "Нови насоки за еко-схеми",
+    color: "bg-amber-500"
+  }, {
+    text: "Прием на документи отворен",
+    color: "bg-green-500"
+  }, {
+    text: "Актуализация на Държавен фонд Земеделие",
+    color: "bg-blue-500"
+  }];
+
+  return <div className="bg-black py-2.5 overflow-hidden border-y border-[#111111]">
+      <motion.div animate={{
+      x: [0, -1000]
+    }} transition={{
+      repeat: Infinity,
+      duration: 25,
+      ease: "linear"
+    }} className="flex whitespace-nowrap gap-12">
+        
+        {[...items, ...items].map((item, idx) => <div key={idx} className="flex items-center gap-3">
+            <div className={cn("w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]", item.color)} />
+            <span className="text-white text-[11px] font-medium tracking-wide uppercase font-body">{item.text}</span>
+          </div>)}
+      </motion.div>
+    </div>;
+};
+
+const FeatureCard = ({
+  icon: Icon,
+  title,
+  body,
+  href
+}: {
+  icon: any;
+  title: string;
+  body: string;
+  href: string;
+}) => {
+  return <Link href={href} className="bg-[#181818] rounded-[16px] border border-[#1E1E1E] p-6 flex flex-col gap-4 block hover:border-[#3B82F6]/40 transition-colors">
+      <div className="w-10 h-10 flex items-center justify-center bg-[#1e1e1e] rounded-xl">
+        <Icon className="w-6 h-6 text-[#3B82F6] stroke-[1.5px]" />
+      </div>
+      <div className="space-y-1">
+        <h3 className="text-[22px] text-white font-heading italic leading-tight">{title}</h3>
+        <p className="text-[14px] text-[#888888] font-body leading-relaxed">{body}</p>
+      </div>
+      <div className="flex items-center gap-1.5 text-[#3B82F6] text-[14px] font-medium mt-1">
+        Виж <ArrowRight className="w-4 h-4" />
+      </div>
+    </Link>;
+};
+
+const TrustItem = ({
+  text
+}: {
+  text: string;
+}) => <div className="flex items-center gap-3">
+    <div className="w-5 h-5 rounded-full bg-[#1A1A1A]/5 flex items-center justify-center flex-shrink-0">
+      <Check className="w-3.5 h-3.5 text-[#1A1A1A]" />
     </div>
-  </nav>;
-const Hero = () => <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
-  paddingTop: '140px',
-  paddingBottom: '100px'
-}}>
-    <div className="w-full max-w-[680px] mx-auto flex flex-col items-center">
-      <span className="text-[12px] font-semibold text-[#0071E3] uppercase tracking-[0.08em] mb-4 block">
-        AI асистент за фермери
-      </span>
-      <h1 className="font-bold text-[#1D1D1F]" style={{
-      fontSize: 'clamp(40px, 6vw, 64px)',
-      lineHeight: 1.05,
-      letterSpacing: '-0.025em',
-      marginBottom: '20px'
-    }}>
-        <span className="block">Отговори за</span>
-        <span className="block">вашето стопанство.</span>
-      </h1>
-      <p className="text-[#6E6E73]" style={{
-      fontSize: '17px',
-      lineHeight: 1.6,
-      maxWidth: '520px',
-      marginBottom: '48px'
-    }}>
-        Търсете субсидии, договори и срокове на едно място. Ясни отговори с точен източник.
-      </p>
-
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-        <Link href="/search" className="agri-btn-primary">Питай AI</Link>
-        <Link href="/srokove" className="agri-btn-ghost">Провери срокове</Link>
-      </div>
-
-      <div className="w-full max-w-[560px] relative mb-5">
-        <div className="flex items-center" style={{
-        position: 'absolute',
-        left: '16px',
-        top: '50%',
-        transform: 'translateY(-50%)'
-      }}>
-          <IconSearch size={20} color="#86868B" />
-        </div>
-        <input type="text" placeholder="Напр. изисквания за директни плащания..." className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
-        height: '52px',
-        paddingLeft: '48px',
-        paddingRight: '16px',
-        fontSize: '17px',
-        outline: 'none'
-      }} onFocus={e => {
-        e.currentTarget.style.borderColor = '#0071E3';
-      }} onBlur={e => {
-        e.currentTarget.style.borderColor = '#D2D2D7';
-      }} />
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-2">
-        {SEARCH_CHIPS.map(chip => <Link key={chip} href={`/search?q=${encodeURIComponent(chip)}`} className="bg-[#F5F5F7] text-[#6E6E73] rounded-full hover:bg-[#E8E8ED] transition-colors" style={{
-        fontSize: '14px',
-        padding: '8px 16px',
-        border: 'none',
-        cursor: 'pointer',
-        textDecoration: 'none'
-      }}>
-            {chip}
-          </Link>)}
-      </div>
-    </div>
-  </section>;
-const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" style={{
-  height: '44px'
-}}>
-    <div className="flex items-center h-full">
-      <div className="flex items-center gap-2 shrink-0 h-full" style={{
-      paddingLeft: '16px',
-      paddingRight: '20px',
-      borderRight: '1px solid rgba(255,255,255,0.1)'
-    }}>
-        <span className="agri-live-dot w-[7px] h-[7px] rounded-full bg-[#0071E3] block shrink-0" />
-        <span style={{
-        fontSize: '11px',
-        fontWeight: 600,
-        letterSpacing: '0.08em',
-        color: '#0071E3',
-        textTransform: 'uppercase'
-      }}>
-          LIVE
-        </span>
-      </div>
-
-      <div className="flex-1 overflow-hidden h-full flex items-center" style={{
-      WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 94%, transparent 100%)',
-      maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 94%, transparent 100%)'
-    }}>
-        <div className="agri-ticker-track">
-          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => <span key={`ticker-${idx}`} className="inline-flex items-center" style={{
-          gap: '8px'
-        }}>
-              <span className="inline-block rounded-full shrink-0" style={{
-            width: '6px',
-            height: '6px',
-            backgroundColor: item.dotColor
-          }} />
-              <span style={{
-            fontSize: '13px',
-            fontWeight: 500,
-            color: '#FFFFFF',
-            letterSpacing: '0.01em'
-          }}>
-                {item.text}
-              </span>
-              <span style={{
-            color: '#555555',
-            fontSize: '13px',
-            fontWeight: 500,
-            margin: '0 20px'
-          }}>·</span>
-            </span>)}
-        </div>
-      </div>
-    </div>
+    <span className="text-[14px] text-[#444444] font-body">{text}</span>
   </div>;
-const Features = () => {
-  const featureIcons: React.ReactElement[] = [<IconCalendar key="calendar" size={28} color="#0071E3" />, <IconDocText key="doc" size={28} color="#FFFFFF" />, <IconSparkles key="sparkles" size={28} color="rgba(255,255,255,0.7)" />];
-  return <section className="bg-[#F5F5F7]" style={{
-    padding: '100px 48px'
-  }}>
-      <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-        {FEATURES.map((feat, idx) => {
-        const bg = feat.theme === 'light' ? '#FFFFFF' : feat.theme === 'black' ? '#000000' : '#1D1D1F';
-        const textColor = feat.theme === 'light' ? '#1D1D1F' : '#FFFFFF';
-        const labelColor = feat.theme === 'light' ? '#0071E3' : 'rgba(255,255,255,0.5)';
-        const descColor = feat.theme === 'light' ? '#6E6E73' : 'rgba(255,255,255,0.5)';
-        const linkColor = feat.theme === 'light' ? '#0071E3' : '#0071E3';
-        return <div key={feat.label} className="rounded-[18px] flex flex-col items-center text-center" style={{
-          backgroundColor: bg,
-          padding: '80px 40px'
-        }}>
-              <div style={{
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-                {featureIcons[idx]}
-              </div>
-              <span style={{
-            fontSize: '12px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontWeight: 600,
-            color: labelColor,
-            marginBottom: '16px',
-            display: 'block'
-          }}>
-                {feat.label}
-              </span>
-              <h3 style={{
-            fontSize: '32px',
-            fontWeight: 700,
-            color: textColor,
-            lineHeight: 1.05,
-            letterSpacing: '-0.025em',
-            marginBottom: '16px'
-          }}>
-                {feat.title}
-              </h3>
-              <p style={{
-            fontSize: '17px',
-            lineHeight: 1.6,
-            color: descColor,
-            marginBottom: '32px'
-          }}>
-                {feat.description}
-              </p>
-              <Link href={feat.href} style={{
-            fontSize: '17px',
-            fontWeight: 500,
-            color: linkColor,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            textDecoration: 'none'
-          }} className="hover:underline">
-                <span>Виж всички</span>
-                <IconChevronRight size={16} color={linkColor} />
-              </Link>
-            </div>;
-      })}
-      </div>
-    </section>;
-};
-const HowItWorks = () => {
-  const stepIcons = [<IconMessage key="msg" size={28} color="#1D1D1F" />, <IconMagnify key="mag" size={28} color="#1D1D1F" />, <IconCheckCircle key="chk" size={28} color="#1D1D1F" />];
-  return <section className="bg-[#FFFFFF]" style={{
-    padding: '100px 48px'
-  }}>
-      <div className="max-w-[1100px] mx-auto text-center">
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#0071E3',
-        marginBottom: '16px',
-        display: 'block'
-      }}>
-          КАК РАБОТИ
-        </span>
-        <h2 style={{
-        fontSize: 'clamp(36px, 4.5vw, 56px)',
-        fontWeight: 700,
-        color: '#1D1D1F',
-        lineHeight: 1.05,
-        letterSpacing: '-0.025em',
-        marginBottom: '20px'
-      }}>
-          Три стъпки до отговора.
-        </h2>
-        <p style={{
-        fontSize: '17px',
-        lineHeight: 1.6,
-        color: '#6E6E73',
-        marginBottom: '48px'
-      }}>
-          Без PDF-та, без търсене по сайтове.
-        </p>
 
-        <div className="flex flex-col md:flex-row items-center justify-center">
-          {HOW_IT_WORKS_STEPS.map((step, idx) => <div key={step.title} className="flex flex-col md:flex-row items-center flex-1">
-              <div className="flex flex-col items-center text-center px-8 flex-1">
-                <div className="rounded-2xl bg-[#F5F5F7] flex items-center justify-center" style={{
-              width: '64px',
-              height: '64px',
-              marginBottom: '20px'
-            }}>
-                  {stepIcons[idx]}
-                </div>
-                <h3 style={{
-              fontSize: '19px',
-              fontWeight: 700,
-              color: '#1D1D1F',
-              marginBottom: '12px'
-            }}>
-                  {step.title}
-                </h3>
-                <p style={{
-              fontSize: '15px',
-              lineHeight: 1.6,
-              color: '#6E6E73',
-              maxWidth: '200px'
-            }}>
-                  {step.description}
-                </p>
+// --- Main Page ---
+
+export const AgriNexusLanding = () => {
+  const suggestions = ["Субсидии 2025", "Еко-схеми", "Бизнес план"];
+  return <main className="bg-[#0A0A0A] text-white min-h-screen selection:bg-primary/30">
+      <NavBar />
+      
+      {/* Hero Section */}
+      <AuroraBackground>
+        <div className="flex flex-col items-center text-center space-y-6 pt-8">
+          <motion.span initial={{
+          opacity: 0,
+          y: 10
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} className="text-[11px] text-[#888888] font-body font-bold uppercase tracking-[0.1em]">
+            
+            AI АСИСТЕНТ
+          </motion.span>
+          
+          <motion.h1 initial={{
+          opacity: 0,
+          y: 15
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.1
+        }} className="text-[48px] font-heading italic leading-[1.0] text-white max-w-[300px] mx-auto tracking-[-0.02em]">
+            
+            Отговори за вашето стопанство.
+          </motion.h1>
+          
+          <motion.p initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.2
+        }} className="text-[16px] text-[#888888] font-body leading-normal px-4">
+            
+            Търсете субсидии, документи и срокове на едно място.
+          </motion.p>
+          
+          <motion.div initial={{
+          opacity: 0,
+          scale: 0.95
+        }} animate={{
+          opacity: 1,
+          scale: 1
+        }} transition={{
+          delay: 0.3
+        }} className="w-full flex flex-col gap-4 pt-4">
+            
+            <Link href="/search" className="relative group block">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <Search className="w-5 h-5 text-[#3B82F6]" />
               </div>
-              {idx < HOW_IT_WORKS_STEPS.length - 1 && <div className="hidden md:flex items-center shrink-0" style={{
-            width: '60px'
-          }}>
-                  <svg width="60" height="2" viewBox="0 0 60 2" fill="none" aria-hidden="true">
-                    <line x1="0" y1="1" x2="60" y2="1" stroke="#D2D2D7" strokeWidth="1" strokeDasharray="4 4" />
-                  </svg>
-                </div>}
-            </div>)}
+              <div className="w-full h-[52px] bg-[#181818] border border-[#222222] rounded-xl pl-12 pr-4 flex items-center text-[15px] text-[#888888]">
+                Какви документи ми трябват за...
+              </div>
+            </Link>
+            
+            <Link href="/search" className="w-full h-[54px] bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl font-medium text-[17px] flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
+              Питай AI <ArrowRight className="w-5 h-5" />
+            </Link>
+            
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
+              {suggestions.map(text => <Link key={text} href={`/search?q=${encodeURIComponent(text)}`} className="px-4 py-1.5 bg-[#181818] border border-[#1E1E1E] rounded-full text-[13px] text-[#888888] hover:text-white transition-colors">
+                
+                  {text}
+                </Link>)}
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </section>;
-};
-const Stats = () => <section className="bg-[#FFFFFF]" style={{
-  paddingTop: '0',
-  paddingBottom: '100px',
-  paddingLeft: '48px',
-  paddingRight: '48px'
-}}>
-    <div className="max-w-[1100px] mx-auto">
-      <div className="flex flex-col md:flex-row items-stretch" style={{
-      borderTop: '1px solid #D2D2D7'
-    }}>
-        {[{
-        number: '59',
-        label: 'Чат записа'
-      }, {
-        number: '51 / 51',
-        label: 'RAG индекс'
-      }, {
-        number: '8,342',
-        label: 'Посетители'
-      }].map((stat, idx) => <div key={stat.label} className="flex flex-col items-center justify-center text-center flex-1 py-12" style={{
-        borderLeft: idx > 0 ? '1px solid #D2D2D7' : 'none'
-      }}>
-            <span style={{
-          fontSize: '56px',
-          fontWeight: 700,
-          color: '#1D1D1F',
-          lineHeight: 1,
-          marginBottom: '8px',
-          display: 'block'
-        }}>
-              {stat.number}
-            </span>
-            <span style={{
-          fontSize: '15px',
-          color: '#6E6E73',
-          lineHeight: 1.6
-        }}>{stat.label}</span>
-          </div>)}
-      </div>
-    </div>
-  </section>;
-const Categories = () => <section className="bg-[#F5F5F7]" style={{
-  padding: '100px 48px'
-}}>
-    <div className="max-w-[1100px] mx-auto text-center">
-      <span style={{
-      fontSize: '12px',
-      textTransform: 'uppercase',
-      letterSpacing: '0.08em',
-      fontWeight: 600,
-      color: '#0071E3',
-      marginBottom: '16px',
-      display: 'block'
-    }}>
-        КАТЕГОРИИ
-      </span>
-      <h2 style={{
-      fontSize: 'clamp(32px, 4vw, 48px)',
-      fontWeight: 700,
-      color: '#1D1D1F',
-      lineHeight: 1.05,
-      letterSpacing: '-0.025em',
-      marginBottom: '20px'
-    }}>
-        Бърз достъп до най-честите казуси.
-      </h2>
-      <p style={{
-      fontSize: '17px',
-      lineHeight: 1.6,
-      color: '#6E6E73',
-      marginBottom: '48px'
-    }}>
-        Открийте бързи отговори в нашата систематизирана база.
-      </p>
+      </AuroraBackground>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {CATEGORIES.map(cat => <Link key={cat.name} href={`/search?q=${encodeURIComponent(cat.name)}`} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left" style={{
-        padding: '32px',
-        textAlign: 'center',
-        background: '#FFFFFF',
-        textDecoration: 'none'
-      }}>
-            <div style={{
-          marginBottom: '12px',
-          color: '#6E6E73',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-              {CATEGORY_ICONS[cat.name]}
-            </div>
-            <h4 style={{
-          fontSize: '17px',
-          fontWeight: 700,
-          color: '#1D1D1F',
-          marginBottom: '6px',
-          display: 'block'
-        }}>
-              {cat.name}
-            </h4>
-            <p style={{
-          fontSize: '14px',
-          color: '#6E6E73',
-          lineHeight: 1.5
-        }}>{cat.subtitle}</p>
-          </Link>)}
-      </div>
-    </div>
-  </section>;
-const Testimonials = () => <section className="bg-[#F5F5F7]" style={{
-  paddingTop: '0',
-  paddingBottom: '100px',
-  paddingLeft: '48px',
-  paddingRight: '48px'
-}}>
-    <div className="max-w-[1100px] mx-auto">
-      <div className="text-center" style={{
-      marginBottom: '48px'
-    }}>
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#0071E3',
-        marginBottom: '16px',
-        display: 'block'
-      }}>
-          ФЕРМЕРИ СПОДЕЛЯТ
-        </span>
-        <h2 style={{
-        fontSize: 'clamp(32px, 4.5vw, 56px)',
-        fontWeight: 700,
-        color: '#1D1D1F',
-        lineHeight: 1.05,
-        letterSpacing: '-0.025em'
-      }}>
-          Реални резултати.
-        </h2>
-      </div>
+      {/* Ticker */}
+      <Ticker />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{
-      alignItems: 'stretch'
-    }}>
-        {TESTIMONIALS.map(card => <div key={card.name} className="bg-[#FFFFFF] rounded-[18px] flex flex-col" style={{
-        padding: '36px',
-        boxShadow: '0 2px 16px rgba(0,0,0,0.06)'
-      }}>
-            <div style={{
-          fontSize: '48px',
-          fontWeight: 700,
-          color: '#D2D2D7',
-          lineHeight: 1,
-          marginBottom: '16px'
-        }} aria-hidden="true">
-              &ldquo;
-            </div>
-            <p style={{
-          fontSize: '17px',
-          color: '#1D1D1F',
-          lineHeight: 1.6,
-          marginBottom: '32px',
-          flex: 1
-        }}>
-              {card.quote}
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-[#1D1D1F] flex items-center justify-center shrink-0" style={{
-            width: '40px',
-            height: '40px'
-          }}>
-                <span style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              color: '#FFFFFF'
-            }}>{card.initials}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div style={{
-              fontSize: '15px',
-              fontWeight: 700,
-              color: '#1D1D1F',
-              lineHeight: 1.3
-            }}>{card.name}</div>
-                <div style={{
-              fontSize: '13px',
-              color: '#6E6E73',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-                  {card.role}
-                </div>
-              </div>
-              <div className="flex items-center gap-0.5 shrink-0">
-                {[1, 2, 3, 4, 5].map(star => <svg key={star} width="13" height="13" viewBox="0 0 13 13" fill="#0071E3" aria-hidden="true">
-                    <polygon points="6.5,1 8.2,4.9 12.5,5.3 9.4,8 10.4,12.3 6.5,10 2.6,12.3 3.6,8 0.5,5.3 4.8,4.9" />
-                  </svg>)}
-              </div>
-            </div>
-          </div>)}
-      </div>
-    </div>
-  </section>;
-const Deadlines = () => <section className="bg-[#FFFFFF]" style={{
-  padding: '100px 48px'
-}}>
-    <div className="max-w-[1100px] mx-auto">
-      <div style={{
-      marginBottom: '48px'
-    }}>
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#0071E3',
-        marginBottom: '16px',
-        display: 'block'
-      }}>
-          ОПЕРАТИВЕН ФОКУС
-        </span>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h2 style={{
-          fontSize: 'clamp(32px, 4vw, 48px)',
-          fontWeight: 700,
-          color: '#1D1D1F',
-          lineHeight: 1.05,
-          letterSpacing: '-0.025em'
-        }}>
-            Последни промени и срокове.
-          </h2>
-          <Link href="/srokove" style={{
-          fontSize: '17px',
-          color: '#0071E3',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          textDecoration: 'none',
-          whiteSpace: 'nowrap'
-        }} className="hover:underline">
-            <span>Виж всички</span>
-            <IconChevronRight size={16} color="#0071E3" />
+      {/* Feature Grid */}
+      <section className="px-6 py-16 flex flex-col gap-4">
+        <FeatureCard icon={Calendar} title="Провери срокове" body="Никога не изпускайте важна дата за кандидатстване. Персонализирани известия за вашето стопанство." href="/srokove" />
+        
+        <FeatureCard icon={FileText} title="Намери документ" body="Пълен достъп до бланки, наредби и закони, преведени на достъпен език от нашия AI." href="/documents" />
+        
+        <FeatureCard icon={Sparkles} title="AI преглед" body="Качете документ и получете незабавен анализ за съответствие с най-новите изисквания." href="/document-review" />
+        
+      </section>
+
+      {/* Trust Section */}
+      <section className="px-6 pb-12">
+        <div className="bg-[#FDF4EE] rounded-3xl p-8 flex flex-col gap-6">
+          <div className="space-y-4">
+            <span className="text-[11px] text-[#1A1A1A]/60 font-body font-bold uppercase tracking-[0.1em]">ИЗТОЧНИЦИ</span>
+            <h2 className="text-[28px] text-[#1A1A1A] font-heading italic leading-tight">Всеки отговор — проверим.</h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            <TrustItem text="Директни връзки към ДФЗ" />
+            <TrustItem text="Наредби от МЗМ" />
+            <TrustItem text="Европейски директиви" />
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Teaser */}
+      <section className="px-6 py-12 flex flex-col items-center gap-6 border-t border-[#111111]">
+        <div className="flex items-center gap-2">
+          <div className="px-5 py-2 bg-[#181818] border border-[#222222] rounded-full text-[13px] font-medium text-white/70">€0 Старт</div>
+          <div className="px-5 py-2 bg-[#3B82F6] rounded-full text-[13px] font-bold text-white shadow-lg shadow-blue-500/20">€19 Про</div>
+          <div className="px-5 py-2 bg-[#181818] border border-[#222222] rounded-full text-[13px] font-medium text-white/70">€39 Бизнес</div>
+        </div>
+        <p className="text-[14px] text-[#555555] text-center max-w-[200px]">Цени, създадени за малки и големи стопанства.</p>
+      </section>
+
+      {/* Final CTA */}
+      <section className="relative px-6 py-24 overflow-hidden border-t border-[#111111]">
+        <div className="absolute inset-0 bg-[#0A0A0A]">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/10 blur-[120px]" />
+        </div>
+        <div className="relative z-10 flex flex-col items-center text-center gap-8">
+          <h2 className="text-[36px] font-heading italic leading-tight max-w-[280px]">Започни с AgriNexus.</h2>
+          <Link href="/register" className="w-full h-[54px] bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl font-medium text-[17px] flex items-center justify-center gap-2 transition-colors shadow-xl shadow-blue-500/10">
+            Регистрирай се <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
-      </div>
+      </section>
 
-      <div className="flex flex-col">
-        {DEADLINES.map(item => <div key={item.title} className="agri-deadline-row flex flex-col md:flex-row md:items-center group cursor-pointer rounded-xl" style={{
-        padding: '24px 16px',
-        borderBottom: '1px solid #D2D2D7',
-        margin: '0 -16px'
-      }}>
-            <div style={{
-          marginBottom: '12px',
-          width: '140px',
-          flexShrink: 0
-        }} className="md:mb-0">
-              <span style={{
-            backgroundColor: '#F5F5F7',
-            color: '#6E6E73',
-            fontSize: '11px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            display: 'inline-block'
-          }}>
-                {item.type}
-              </span>
-            </div>
-            <div style={{
-          flex: 1
-        }}>
-              <h4 style={{
-            fontSize: '17px',
-            fontWeight: 700,
-            color: '#1D1D1F',
-            marginBottom: '4px'
-          }}>
-                {item.title}
-              </h4>
-              <p style={{
-            fontSize: '15px',
-            color: '#6E6E73',
-            lineHeight: 1.5
-          }}>{item.subtitle}</p>
-            </div>
-            <div className="hidden md:flex transition-colors" style={{
-          marginLeft: '16px',
-          color: '#D2D2D7'
-        }}>
-              <IconArrowRight size={20} color="#D2D2D7" />
-            </div>
-          </div>)}
-      </div>
-    </div>
-  </section>;
-const ComparisonTable = () => <section className="bg-[#FFFFFF]" style={{
-  paddingTop: '0',
-  paddingBottom: '100px',
-  paddingLeft: '48px',
-  paddingRight: '48px'
-}}>
-    <div className="max-w-[900px] mx-auto">
-      <div className="text-center" style={{
-      marginBottom: '48px'
-    }}>
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#0071E3',
-        marginBottom: '16px',
-        display: 'block'
-      }}>
-          СРАВНЕНИЕ
-        </span>
-        <h2 style={{
-        fontSize: 'clamp(28px, 3.5vw, 48px)',
-        fontWeight: 700,
-        color: '#1D1D1F',
-        lineHeight: 1.05,
-        letterSpacing: '-0.025em'
-      }}>
-          AgriNexus срещу самостоятелно търсене.
-        </h2>
-      </div>
-
-      <div style={{
-      borderRadius: '18px',
-      border: '1px solid #D2D2D7',
-      overflow: 'hidden'
-    }}>
-        {/* Header */}
-        <div className="grid grid-cols-3">
-          <div style={{
-          backgroundColor: '#F5F5F7',
-          padding: '20px 32px',
-          borderBottom: '1px solid #D2D2D7'
-        }} />
-          <div style={{
-          backgroundColor: '#FFFFFF',
-          padding: '20px 32px',
-          borderBottom: '2px solid #0071E3',
-          borderLeft: '1px solid #D2D2D7',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '4px'
-        }}>
-            <div className="flex items-center gap-2">
-              <span style={{
-              fontSize: '15px',
-              fontWeight: 700,
-              color: '#1D1D1F'
-            }}>AgriNexus Law</span>
-              <span style={{
-              backgroundColor: '#0071E3',
-              color: '#FFFFFF',
-              fontSize: '10px',
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '980px',
-              letterSpacing: '0.05em'
-            }}>
-                AI
-              </span>
-            </div>
-          </div>
-          <div style={{
-          backgroundColor: '#F5F5F7',
-          padding: '20px 32px',
-          borderBottom: '1px solid #D2D2D7',
-          borderLeft: '1px solid #D2D2D7',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-            <span style={{
-            fontSize: '15px',
-            fontWeight: 600,
-            color: '#6E6E73'
-          }}>Самостоятелно</span>
+      {/* Footer */}
+      <footer className="bg-[#080F0B] px-6 pt-16 pb-12 flex flex-col items-center gap-12">
+        <div className="flex flex-col items-center gap-6">
+          <span className="text-white font-bold text-[18px] font-body tracking-tight">AgriNexus</span>
+          <div className="flex flex-col items-center gap-4">
+            <Link href="/documents" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Документи</Link>
+            <Link href="/privacy" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Поверителност</Link>
+            <Link href="/kalkulator" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Калкулатори</Link>
+            <Link href="/document-review" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">AI Преглед</Link>
           </div>
         </div>
-
-        {/* Rows */}
-        {COMPARISON_ROWS.map((row, idx) => <div key={row.feature} className="agri-comparison-row grid grid-cols-3" style={{
-        borderBottom: idx < COMPARISON_ROWS.length - 1 ? '1px solid #F0F0F0' : 'none'
-      }}>
-            <div style={{
-          padding: '22px 32px',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-              <span style={{
-            fontSize: '15px',
-            color: '#1D1D1F',
-            textAlign: 'left'
-          }}>{row.feature}</span>
-            </div>
-            <div style={{
-          padding: '22px 32px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderLeft: '1px solid #F0F0F0'
-        }}>
-              {row.agri === 'check' ? <IconCheckFilled size={20} color="#0071E3" /> : <span style={{
-            fontSize: '15px',
-            fontWeight: 700,
-            color: '#1D1D1F'
-          }}>{row.agriText}</span>}
-            </div>
-            <div style={{
-          padding: '22px 32px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderLeft: '1px solid #F0F0F0'
-        }}>
-              {row.manual === 'x' ? <IconXCircle size={20} color="#D2D2D7" /> : <span style={{
-            fontSize: '15px',
-            color: '#6E6E73'
-          }}>{row.manualText}</span>}
-            </div>
-          </div>)}
-      </div>
-    </div>
-  </section>;
-const Trust = () => <section className="bg-[#000000]" style={{
-  padding: '100px 48px',
-  textAlign: 'center'
-}}>
-    <div className="max-w-[1100px] mx-auto">
-      <span style={{
-      fontSize: '12px',
-      textTransform: 'uppercase',
-      letterSpacing: '0.08em',
-      fontWeight: 600,
-      color: '#6E6E73',
-      marginBottom: '16px',
-      display: 'block'
-    }}>
-        ИЗТОЧНИЦИ И ДОСТОВЕРНОСТ
-      </span>
-      <h2 style={{
-      fontSize: 'clamp(32px, 4.5vw, 56px)',
-      fontWeight: 700,
-      color: '#FFFFFF',
-      lineHeight: 1.05,
-      letterSpacing: '-0.025em',
-      marginBottom: '20px'
-    }}>
-        Всеки отговор — проверим.
-      </h2>
-      <p style={{
-      fontSize: '17px',
-      lineHeight: 1.6,
-      color: '#EBEBF0',
-      maxWidth: '560px',
-      margin: '0 auto 48px'
-    }}>
-        Всички данни стъпват върху официалните наредби на ДФЗ и Министерството на земеделието.
-      </p>
-
-      <div style={{
-      display: 'inline-block',
-      marginBottom: '48px'
-    }}>
-        <span style={{
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        border: '1px solid rgba(255,255,255,0.2)',
-        color: '#FFFFFF',
-        fontSize: '12px',
-        padding: '6px 16px',
-        borderRadius: '980px',
-        display: 'inline-block'
-      }}>
-          SSL Protected
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3" style={{
-      borderTop: '1px solid rgba(255,255,255,0.1)',
-      paddingTop: '48px',
-      gap: '0'
-    }}>
-        {[{
-        icon: <IconCheckShield size={24} color="#86868B" />,
-        title: 'Официални данни',
-        body: 'Директна връзка с API на ДФЗ, МЗ и БАБХ. Актуализации на всеки 30 минути за максимална прецизност.'
-      }, {
-        icon: <IconLink size={24} color="#86868B" />,
-        title: 'Проверима логика',
-        body: 'Нашият AI не просто отговаря, той посочва източника. Всеки отговор съдържа линк към официалния нормативен акт.'
-      }, {
-        icon: <IconLock size={24} color="#86868B" />,
-        title: 'Защита на данните',
-        body: 'Криптиране на банково ниво и пълно съответствие с GDPR. Без споделяне с трети страни.'
-      }].map((item, idx) => <div key={item.title} className="flex flex-col items-center" style={{
-        padding: '0 32px',
-        borderLeft: idx > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none'
-      }}>
-            <div style={{
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-              {item.icon}
-            </div>
-            <h4 style={{
-          fontSize: '19px',
-          fontWeight: 700,
-          color: '#FFFFFF',
-          marginBottom: '12px'
-        }}>
-              {item.title}
-            </h4>
-            <p style={{
-          fontSize: '15px',
-          color: '#EBEBF0',
-          lineHeight: 1.6
-        }}>{item.body}</p>
-          </div>)}
-      </div>
-    </div>
-  </section>;
-const FAQ = () => {
-  const [openIndex, setOpenIndex] = React.useState<number | null>(0);
-  return <section className="bg-[#F5F5F7]" style={{
-    padding: '100px 48px'
-  }}>
-      <div className="max-w-[800px] mx-auto">
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#0071E3',
-        marginBottom: '16px',
-        display: 'block',
-        textAlign: 'center'
-      }}>
-          ВЪПРОСИ И ОТГОВОРИ
-        </span>
-        <h2 style={{
-        fontSize: 'clamp(32px, 4vw, 48px)',
-        fontWeight: 700,
-        color: '#1D1D1F',
-        textAlign: 'center',
-        lineHeight: 1.05,
-        letterSpacing: '-0.025em',
-        marginBottom: '48px'
-      }}>
-          Често задавани въпроси.
-        </h2>
-
-        <div className="bg-[#FFFFFF] rounded-[18px]" style={{
-        padding: '8px 32px'
-      }}>
-          {FAQS.map((faq, idx) => <div key={faq.question} className={cn('agri-faq-row', idx !== FAQS.length - 1 && 'border-b border-[#D2D2D7]')} style={{
-          padding: '24px 8px'
-        }}>
-              <button onClick={() => setOpenIndex(openIndex === idx ? null : idx)} className="w-full flex items-center justify-between text-left" style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0
-          }}>
-                <span style={{
-              fontSize: '17px',
-              fontWeight: 700,
-              color: '#1D1D1F',
-              paddingRight: '32px',
-              lineHeight: 1.4
-            }}>
-                  {faq.question}
-                </span>
-                <span style={{
-              color: '#6E6E73',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-                  {openIndex === idx ? <IconMinus size={20} /> : <IconPlus size={20} />}
-                </span>
-              </button>
-              <AnimatePresence>
-                {openIndex === idx && <motion.div initial={{
-              height: 0,
-              opacity: 0
-            }} animate={{
-              height: 'auto',
-              opacity: 1
-            }} exit={{
-              height: 0,
-              opacity: 0
-            }} transition={{
-              duration: 0.3,
-              ease: 'easeOut'
-            }} style={{
-              overflow: 'hidden'
-            }}>
-                    <p style={{
-                paddingTop: '16px',
-                fontSize: '17px',
-                color: '#6E6E73',
-                lineHeight: 1.6
-              }}>
-                      {faq.answer}
-                    </p>
-                  </motion.div>}
-              </AnimatePresence>
-            </div>)}
-        </div>
-      </div>
-    </section>;
+        <p className="text-[13px] text-[#333333] font-body">© 2025 AgriNexus.Law</p>
+      </footer>
+    </main>;
 };
-const AIChatCTA = () => {
-  const [activeTab, setActiveTab] = React.useState(0);
-  return <section className="bg-[#FFFFFF]" style={{
-    padding: '100px 48px'
-  }}>
-      <div className="max-w-[1100px] mx-auto flex flex-col lg:flex-row items-center gap-16">
-        <div className="w-full lg:w-[45%]">
-          <span style={{
-          fontSize: '12px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-          fontWeight: 600,
-          color: '#0071E3',
-          marginBottom: '16px',
-          display: 'block'
-        }}>
-            AI АСИСТЕНТ
-          </span>
-          <h2 style={{
-          fontSize: 'clamp(32px, 4vw, 48px)',
-          fontWeight: 700,
-          color: '#1D1D1F',
-          lineHeight: 1.05,
-          letterSpacing: '-0.025em',
-          marginBottom: '20px'
-        }}>
-            Задай въпрос към специалист.
-          </h2>
-          <p style={{
-          fontSize: '17px',
-          color: '#6E6E73',
-          lineHeight: 1.6,
-          marginBottom: '48px'
-        }}>
-            Нашият AI не е просто чат-бот. Това е екип от дигитални експерти, специализирани в различни аспекти на земеделието.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {PROFILE_CHIPS.map(chip => <div key={chip.expert} className="bg-[#F5F5F7] rounded-full flex items-center gap-2" style={{
-            fontSize: '14px',
-            color: '#1D1D1F',
-            padding: '10px 16px',
-            fontWeight: 500
-          }}>
-                {PROFILE_ICONS[chip.label]}
-                <span>
-                  {chip.label} · {chip.expert}
-                </span>
-              </div>)}
-          </div>
-        </div>
-
-        <div className="w-full lg:w-[55%]">
-          <div className="bg-white rounded-[18px] flex flex-col" style={{
-          border: '1px solid #D2D2D7',
-          padding: '40px',
-          height: '400px'
-        }}>
-            <div className="flex gap-8" style={{
-            borderBottom: '1px solid #D2D2D7',
-            marginBottom: '24px'
-          }}>
-              {CHAT_TABS.map((tab, idx) => <button key={tab} onClick={() => setActiveTab(idx)} style={{
-              paddingBottom: '12px',
-              fontSize: '15px',
-              fontWeight: 500,
-              color: activeTab === idx ? '#1D1D1F' : '#6E6E73',
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === idx ? '2px solid #0071E3' : '2px solid transparent',
-              cursor: 'pointer',
-              transition: 'color 150ms ease-out'
-            }}>
-                  {tab}
-                </button>)}
-            </div>
-
-            <div className="flex-1 bg-[#F5F5F7] rounded-xl flex items-center justify-center" style={{
-            padding: '24px',
-            marginBottom: '24px'
-          }}>
-              <p style={{
-              fontSize: '15px',
-              color: '#6E6E73',
-              fontStyle: 'italic',
-              textAlign: 'center'
-            }}>
-                Задай казус: култура, регион, документ или срок.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input type="text" placeholder="Напишете съобщение..." className="flex-1 bg-[#F5F5F7] rounded-xl text-[#1D1D1F]" style={{
-              height: '48px',
-              padding: '0 16px',
-              fontSize: '15px',
-              outline: 'none',
-              border: 'none'
-            }} />
-              <button className="agri-btn-primary" style={{
-              height: '48px',
-              fontSize: '15px',
-              flexShrink: 0
-            }}>
-                Изпрати →
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>;
-};
-const MobileAppCTA = () => <section className="bg-[#000000]" style={{
-  padding: '100px 48px'
-}}>
-    <div className="max-w-[1100px] mx-auto flex flex-col lg:flex-row items-center gap-16">
-      <div className="w-full lg:w-1/2">
-        <span style={{
-        fontSize: '12px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontWeight: 600,
-        color: '#6E6E73',
-        marginBottom: '16px',
-        display: 'block'
-      }}>
-          МОБИЛНО ПРИЛОЖЕНИЕ
-        </span>
-        <h2 style={{
-        fontSize: 'clamp(36px, 4.5vw, 56px)',
-        fontWeight: 700,
-        color: '#FFFFFF',
-        lineHeight: 1.05,
-        letterSpacing: '-0.025em',
-        marginBottom: '20px'
-      }}>
-          AgriNexus в джоба ти.
-        </h2>
-        <p style={{
-        fontSize: '17px',
-        lineHeight: 1.6,
-        color: '#EBEBF0',
-        marginBottom: '48px'
-      }}>
-          Инсталирай като app. Работи офлайн.
-        </p>
-
-        <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        margin: '0 0 48px 0',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
-      }}>
-          {MOBILE_BULLETS.map(bullet => <li key={bullet.bold} className="flex items-start gap-3">
-              <div className="rounded-full flex items-center justify-center shrink-0" style={{
-            width: '20px',
-            height: '20px',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            marginTop: '2px'
-          }}>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <polyline points="2,5 4,7 8,3" />
-                </svg>
-              </div>
-              <div>
-                <span style={{
-              fontSize: '15px',
-              fontWeight: 700,
-              color: '#FFFFFF'
-            }}>{bullet.bold}</span>
-                <span style={{
-              fontSize: '15px',
-              color: '#EBEBF0'
-            }}> — {bullet.muted}</span>
-              </div>
-            </li>)}
-        </ul>
-
-        <div className="flex flex-wrap gap-4">
-          <button className="agri-btn-primary" style={{
-          backgroundColor: '#FFFFFF',
-          color: '#000000',
-          fontSize: '15px'
-        }}>
-            Инсталирай App
-          </button>
-          <button className="agri-btn-ghost" style={{
-          color: '#FFFFFF',
-          borderColor: 'rgba(255,255,255,0.3)',
-          fontSize: '15px'
-        }}>
-            Виж демо →
-          </button>
-        </div>
-      </div>
-
-      <div className="w-full lg:w-1/2 flex items-center justify-center">
-        <div style={{
-        width: '260px',
-        height: '480px',
-        borderRadius: '40px',
-        border: '2.5px solid #333333',
-        backgroundColor: '#111111',
-        boxShadow: '0 40px 80px rgba(255,255,255,0.04)',
-        padding: '12px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
-          <div style={{
-          width: '80px',
-          height: '20px',
-          backgroundColor: '#000000',
-          borderRadius: '10px',
-          marginBottom: '12px',
-          flexShrink: 0
-        }} />
-          <div style={{
-          flex: 1,
-          width: '100%',
-          backgroundColor: '#1C1C1E',
-          borderRadius: '32px',
-          padding: '16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px'
-        }}>
-            <div style={{
-            textAlign: 'center',
-            marginBottom: '4px'
-          }}>
-              <span style={{
-              fontSize: '12px',
-              color: '#FFFFFF',
-              fontWeight: 600
-            }}>AgriNexus</span>
-            </div>
-            <div style={{
-            backgroundColor: '#2C2C2E',
-            borderRadius: '10px',
-            height: '34px'
-          }} />
-            <div style={{
-            backgroundColor: '#2C2C2E',
-            borderRadius: '10px',
-            height: '60px'
-          }} />
-            <div style={{
-            backgroundColor: '#2C2C2E',
-            borderRadius: '10px',
-            height: '60px'
-          }} />
-            <div style={{
-            backgroundColor: '#2C2C2E',
-            borderRadius: '10px',
-            height: '44px'
-          }} />
-            <div style={{
-            flex: 1
-          }} />
-            <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '12px',
-            paddingBottom: '4px'
-          }}>
-              {[true, false, false, false].map((active, i) => <div key={i} style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '3px',
-              backgroundColor: active ? '#FFFFFF' : '#444444'
-            }} />)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>;
-const Footer = () => <footer className="bg-[#F5F5F7]" style={{
-  borderTop: '1px solid #D2D2D7',
-  padding: '32px 48px'
-}}>
-    <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-      <div style={{
-      fontSize: '13px',
-      color: '#6E6E73'
-    }}>© 2025 AgriNexus.Law. Всички права запазени.</div>
-      <div className="flex flex-wrap items-center justify-center gap-6">
-        {[{ label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
-        fontSize: '13px',
-        color: '#6E6E73',
-        textDecoration: 'none',
-        transition: 'color 200ms ease-out'
-      }} className="hover:text-[#1D1D1F]">
-            {item.label}
-          </Link>)}
-      </div>
-      <div style={{
-      fontSize: '13px',
-      color: '#6E6E73'
-    }}>Посетители: 8 342</div>
-    </div>
-  </footer>;
-
-// --- Main Export ---
-export const AgriNexusLanding = () => <div className="min-h-screen bg-[#FFFFFF] text-[#1D1D1F]" style={{
-  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif"
-}}>
-    <style>{GLOBAL_STYLES}</style>
-    <Navbar />
-    <main>
-      <Hero />
-      <LiveTicker />
-      <Features />
-      <HowItWorks />
-      <Stats />
-      <Categories />
-      <Testimonials />
-      <Deadlines />
-      <ComparisonTable />
-      <Trust />
-      <FAQ />
-      <AIChatCTA />
-      <MobileAppCTA />
-    </main>
-    <Footer />
-  </div>;
