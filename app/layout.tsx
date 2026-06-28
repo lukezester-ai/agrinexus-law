@@ -1,16 +1,7 @@
 import type { Metadata } from "next";
-import { AnalyticsLoader } from "@/components/analytics-loader";
-import { CommandPalette } from "@/components/command-palette";
-import { ConditionalLayout } from "@/components/conditional-layout";
-import { CookieConsentBanner } from "@/components/cookie-consent-banner";
-import { MobileActionDock } from "@/components/mobile-action-dock";
-import { PwaHelpButton } from "@/components/pwa-help-button";
-import { PwaOnboarding } from "@/components/pwa-onboarding";
-import { PwaRegister } from "@/components/pwa-register";
-import { SiteVisitTracker } from "@/components/site-visit-tracker";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ClientChromeLoader } from "@/components/client-chrome-loader";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
-import { cleanEnvValue } from "@/lib/supabase/env";
+import { resolveSupabasePublicUrl } from "@/lib/supabase/env";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -31,7 +22,8 @@ const spaceGrotesk = Space_Grotesk({
 const themeInitScript = `(function(){try{var k='agrinexus-theme';var f='agrinexus-theme-user-set';var s=localStorage.getItem(k);var u=localStorage.getItem(f)==='1';if(u&&s==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`;
 
 const siteUrl =
-	cleanEnvValue(process.env.NEXT_PUBLIC_SITE_URL) || "https://www.agrinexuslaw.com";
+	resolveSupabasePublicUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
+	"https://www.agrinexuslaw.com";
 const metadataBase = (() => {
 	try {
 		return new URL(siteUrl);
@@ -160,17 +152,7 @@ export default function RootLayout({
 				className={`${inter.variable} ${spaceGrotesk.variable} agri-mobile-safe agri-body-surface min-h-screen bg-[var(--agri-bg-ultra)] text-slate-900 antialiased dark:bg-[#030712] dark:text-slate-100 font-sans font-normal`}
 			>
 				{children}
-				<ConditionalLayout>
-					<CommandPalette />
-					<MobileActionDock />
-					<PwaRegister />
-					<PwaHelpButton />
-					<PwaOnboarding />
-					<ThemeToggle />
-					<CookieConsentBanner />
-					<AnalyticsLoader />
-					<SiteVisitTracker />
-				</ConditionalLayout>
+				<ClientChromeLoader />
 			</body>
 		</html>
 	);
