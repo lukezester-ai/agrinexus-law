@@ -1,0 +1,33 @@
+{
+	"Nav": {
+		"platform": "Platform",
+		"market": "Market",
+		"agents": "Agents",
+		"academy": "Academy",
+		"community": "Community",
+		"dokumenti": "Documents",
+		"statistiki": "Statistics",
+		"sponsors": "Sponsors",
+		"joinFree": "Join free"
+	},
+	"Home": {
+		"heroLine1": "Your farm's",
+		"heroEm": "operating system",
+		"heroLine2": "for the 21st century.",
+		"subtitle": "Satellites, sensors, market data, and AI agents — working together to secure your harvest, reduce costs, and open new markets.",
+		"badgeFree": "Free to use",
+		"badgeFunded": "EU funded",
+		"ctaStart": "Start free",
+		"ctaDemo": "Watch demo",
+		"trustStrong": "7 200+",
+		"trustRest": "farmers already onboard"
+	},
+	"Metadata": {
+		"titleDefault": "AgriNexus — Sense, Think, Act",
+		"titleTemplate": "%s — AgriNexus",
+		"description": "The operating system for your farm. Satellites, AI agents, market data.",
+		"keywords": "agritech, farming, AI, satellites, Bulgaria",
+		"ogTitle": "AgriNexus — Sense, Think, Act",
+		"ogDescription": "The operating system for your farm."
+	}
+}
