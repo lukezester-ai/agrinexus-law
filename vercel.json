@@ -2,11 +2,5 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"framework": "nextjs",
 	"buildCommand": "cd apps/web && npm run build",
-	"installCommand": "cd apps/web && npm install",
-	"crons": [
-		{
-			"path": "/api/cron/briefing",
-			"schedule": "42 4 * * 1"
-		}
-	]
+	"installCommand": "cd apps/web && npm install"
 }
