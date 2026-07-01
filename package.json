@@ -25,6 +25,9 @@
 		"@vercel/node": "^5.5.28",
 		"dotenv": "^17.4.2",
 		"marked": "^18.0.4",
+		"next": "15.5.7",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
 		"yahoo-finance2": "^3.14.1"
 	},
 	"devDependencies": {
