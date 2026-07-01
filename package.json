@@ -1,8 +1,10 @@
 {
 	"name": "furrow-markets-site",
 	"private": true,
+	"workspaces": ["apps/web"],
 	"type": "module",
 	"scripts": {
+		"build": "npm run build -w apps/web",
 		"dev": "node --import tsx scripts/dev-server.mjs",
 		"dev:web": "npm --prefix apps/web run dev",
 		"dev:mobile": "npm --prefix apps/mobile run start",
