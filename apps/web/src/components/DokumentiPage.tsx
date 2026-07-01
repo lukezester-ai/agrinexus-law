@@ -293,7 +293,7 @@ export function DokumentiPage() {
 					<div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
 						<FileText className="mx-auto mb-2 opacity-50" size={32} aria-hidden />
 						<p>Няма налични документи в архива.</p>
-						<p className="mt-1 text-xs">Натисни "AI Agent: Обнови" за да изтеглиш документи.</p>
+						<p className="mt-1 text-xs">Натисни „AI Agent: Обнови“ за да изтеглиш документи.</p>
 					</div>
 				) : (
 					<ul className="divide-y divide-slate-200 dark:divide-slate-700">
