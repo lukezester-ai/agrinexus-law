@@ -364,7 +364,7 @@ export function CropStatisticsView() {
 										))}
 									</Pie>
 									<Tooltip
-										formatter={(val: number) => [`${val}%`, "Дял"]}
+										formatter={(val: unknown) => [`${val}%`, "Дял"]}
 										contentStyle={{ borderRadius: 8, background: "rgba(15,23,42,0.92)", color: "#fff", border: "none" }}
 										itemStyle={{ color: "#fff" }}
 									/>
