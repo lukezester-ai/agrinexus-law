@@ -1,7 +1,1 @@
-const config = {
-	plugins: {
-		"@tailwindcss/postcss": {},
-	},
-};
-
-export default config;
+// This file has been cleared because Vite uses @tailwindcss/vite plugin.
