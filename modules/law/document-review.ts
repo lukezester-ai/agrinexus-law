@@ -5,7 +5,7 @@ import { extractDocxText } from "@/lib/rag/content/docx-parser";
 import { extractPdfText } from "@/lib/rag/content/pdf-parser";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-4o";
 const MAX_ANALYSIS_CHARS = 28000;
 
 export type ReviewMode = "subsidy" | "contract" | "lease" | "notice";

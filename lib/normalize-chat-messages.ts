@@ -1,10 +1,20 @@
 /** Нормализира история user/assistant за LLM чат API (OpenAI през AI SDK). */
+export class ImageContentError extends Error {
+	constructor() {
+		super("Снимки и изображения не се поддържат от текущия AI модел. Смени OPENAI_MODEL на gpt-4o в .env, за да активираш vision.");
+		this.name = "ImageContentError";
+	}
+}
+
 export function normalizeChatMessages(
-	messages: Array<{ role: string; content: string }>,
+	messages: Array<{ role: string; content: string | unknown[] }>,
 ): Array<{ role: "user" | "assistant"; content: string }> {
 	const trimmed: Array<{ role: "user" | "assistant"; content: string }> = [];
 	for (const m of messages) {
-		if (!m?.role || typeof m.content !== "string") continue;
+		if (!m?.role) continue;
+		if (typeof m.content !== "string") {
+			throw new ImageContentError();
+		}
 		const role =
 			m.role === "assistant" ? ("assistant" as const) : m.role === "user" ? ("user" as const) : null;
 		if (!role) continue;

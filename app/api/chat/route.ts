@@ -13,11 +13,11 @@ import {
 	upgradeMessageForChat,
 } from "@/lib/billing/entitlements";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { normalizeChatMessages } from "@/lib/normalize-chat-messages";
+import { normalizeChatMessages, ImageContentError } from "@/lib/normalize-chat-messages";
 import { formatTaxonomyForRag } from "@/lib/knowledge/document-taxonomy";
 import { runChatKnowledgePipeline } from "@/lib/ai-leader/chat-knowledge-pipeline";
 
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-4o";
 
 export async function POST(req: Request) {
 	try {
@@ -80,7 +80,8 @@ export async function POST(req: Request) {
 					m != null &&
 					typeof m === "object" &&
 					typeof (m as { role?: unknown }).role === "string" &&
-					typeof (m as { content?: unknown }).content === "string",
+					(typeof (m as { content?: unknown }).content === "string" ||
+						Array.isArray((m as { content?: unknown }).content)),
 			),
 		);
 		if (normalized.length === 0) {
@@ -211,6 +212,9 @@ export async function POST(req: Request) {
 	} catch (error) {
 		console.error("Chat API error:", error);
 		const msg = error instanceof Error ? error.message : String(error);
+		if (error instanceof ImageContentError) {
+			return Response.json({ error: msg }, { status: 400 });
+		}
 		const hint =
 			msg.includes("model") || msg.includes("404")
 				? " Проверете OPENAI_MODEL в `.env.local` (напр. gpt-4o-mini)."
