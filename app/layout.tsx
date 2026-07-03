@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ClientChromeLoader } from "@/components/client-chrome-loader";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
 import { resolveSupabasePublicUrl } from "@/lib/supabase/env";
@@ -97,6 +97,12 @@ export const metadata: Metadata = {
 };
 
 const jsonLdGraph = buildAgriNexusLawJsonLd(siteUrl);
+
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1,
+	maximumScale: 5,
+};
 
 export default function RootLayout({
 	children,
