@@ -41,6 +41,9 @@ magicpath-project-*/
 .idea/
 .vercel/
 
+# Vercel rootDirectory junction (apps/web -> .)
+apps/web
+
 # Python (FastAPI services)
 **/.venv/
 **/__pycache__/
@@ -53,3 +56,5 @@ magicpath-project-*/
 **/.gradle/
 **/build/
 local.properties
+.vercel
+.env*
