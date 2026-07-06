@@ -109,6 +109,7 @@ export function DocumentReviewPanel() {
 	const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 	const [chatInput, setChatInput] = useState("");
 	const [chatLoading, setChatLoading] = useState(false);
+	const [chatExpanded, setChatExpanded] = useState(true);
 
 	const onPickFile = (f: File | null) => {
 		if (!f) return;
@@ -176,6 +177,7 @@ export function DocumentReviewPanel() {
 					content: `Анализът на „${data.fileName}" е готов (${reviewModeLabels[data.mode]}). Задай уточняващ въпрос — отговарям като Елена, на база текста на документа.`,
 				},
 			]);
+			setChatExpanded(true);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Неуспешен анализ.");
 		} finally {
@@ -392,6 +394,15 @@ export function DocumentReviewPanel() {
 									)}
 								</div>
 								<div className="border-t border-zinc-800 bg-zinc-900/50 p-4">
+									{!chatExpanded && (
+										<button
+											type="button"
+											onClick={() => setChatExpanded(true)}
+											className="mr-4 text-sm text-blue-400 hover:text-blue-300"
+										>
+											+ Чат
+										</button>
+									)}
 									<button
 										type="button"
 										onClick={() => {
@@ -406,12 +417,20 @@ export function DocumentReviewPanel() {
 								</div>
 							</div>
 
-							<div className="flex flex-[4.5] flex-col gap-6">
+								<div className={cn("flex flex-[4.5] flex-col gap-6", !chatExpanded && "hidden")}>
 								<div className="flex h-[420px] flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-[#111111] shadow-2xl">
-									<div className="border-b border-zinc-800 bg-zinc-900/50 px-6 py-4">
+									<div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/50 px-6 py-4">
 										<h3 className="text-sm font-bold uppercase tracking-widest">
 											Уточняващи въпроси · Елена
 										</h3>
+										<button
+											type="button"
+											onClick={() => setChatExpanded(false)}
+											className="rounded-lg px-2 py-1 text-sm text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-white"
+											aria-label="Затвори чата"
+										>
+											×
+										</button>
 									</div>
 									<div className="flex flex-grow flex-col gap-4 overflow-y-auto p-4">
 										{chatMessages.map((msg, i) => (
