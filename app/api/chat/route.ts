@@ -227,6 +227,6 @@ export async function POST(req: Request) {
 				: msg.includes("429")
 					? " Прекалено много заявки към AI."
 				: "";
-		return Response.json({ error: `Възникна грешка при AI заявката.${hint}`, detail: msg.slice(0, 200) }, { status: 502 });
+		return Response.json({ error: `Възникна грешка при AI заявката.${hint}` }, { status: 502 });
 	}
 }

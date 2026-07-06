@@ -51,8 +51,12 @@ export async function incrementChatUsage(identifier: string): Promise<void> {
 	const redis = getUpstashRedis();
 	if (!redis) return;
 	const key = `billing:chat:${identifier}:${dayKey()}`;
-	await redis.incr(key);
-	await redis.expire(key, 60 * 60 * 48);
+	try {
+		await redis.incr(key);
+		await redis.expire(key, 60 * 60 * 48);
+	} catch (err) {
+		console.error("[usage] incr failed (non‑critical):", err instanceof Error ? err.message : String(err));
+	}
 }
 
 export async function checkDocumentReviewUsage(
@@ -91,6 +95,10 @@ export async function incrementDocumentReviewUsage(userId: string): Promise<void
 	const redis = getUpstashRedis();
 	if (!redis) return;
 	const key = `billing:review:${userId}:${monthKey()}`;
-	await redis.incr(key);
-	await redis.expire(key, 60 * 60 * 24 * 45);
+	try {
+		await redis.incr(key);
+		await redis.expire(key, 60 * 60 * 24 * 45);
+	} catch (err) {
+		console.error("[usage] incr failed (non‑critical):", err instanceof Error ? err.message : String(err));
+	}
 }
