@@ -210,8 +210,10 @@ export async function POST(req: Request) {
 			});
 		}
 	} catch (error) {
-		console.error("Chat API error:", error);
 		const msg = error instanceof Error ? error.message : String(error);
+		const stack = error instanceof Error ? error.stack : "";
+		console.error("Chat API error:", msg);
+		if (stack) console.error("Stack:", stack);
 		if (error instanceof ImageContentError) {
 			return Response.json({ error: msg }, { status: 400 });
 		}
@@ -220,7 +222,11 @@ export async function POST(req: Request) {
 				? " Проверете OPENAI_MODEL в `.env.local` (напр. gpt-4o-mini)."
 				: msg.includes("401") || msg.toLowerCase().includes("authentication")
 					? " Проверете дали OPENAI_API_KEY е валиден (не примерен) и рестартирайте `npm run dev`."
+				: msg.includes("401")
+					? " Невалиден API ключ."
+				: msg.includes("429")
+					? " Прекалено много заявки към AI."
 				: "";
-		return Response.json({ error: `Възникна грешка при AI заявката.${hint}` }, { status: 502 });
+		return Response.json({ error: `Възникна грешка при AI заявката.${hint}`, detail: msg.slice(0, 200) }, { status: 502 });
 	}
 }
