@@ -243,11 +243,11 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 						<button
 							type="button"
 							onClick={onClose}
-							className="rounded-lg px-2 py-1 text-[#888888] transition-colors hover:bg-[#1E1E1E] hover:text-white"
+							className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
 							aria-label="Затвори чата"
-							style={{ fontFamily: "Inter, sans-serif", fontSize: "18px", lineHeight: 1 }}
+							style={{ fontFamily: "Inter, sans-serif" }}
 						>
-							×
+							× Затвори
 						</button>
 					) : null}
 				</div>

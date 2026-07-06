@@ -64,7 +64,7 @@ export function SiteVisitTracker() {
 		};
 	}, []);
 
-	if (hidePublicCounter || stats === null) {
+	if (hidePublicCounter || stats === null || stats.totalVisits < 1) {
 		return null;
 	}
 

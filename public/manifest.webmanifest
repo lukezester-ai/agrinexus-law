@@ -1,0 +1,27 @@
+{
+  "name": "AgriNexus.Law — AI за фермери",
+  "short_name": "AgriNexus",
+  "description": "Платформа за търсене в агро документи, срокове, субсидии и нормативни изисквания за българския земеделски сектор.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#030712",
+  "theme_color": "#0d9488",
+  "lang": "bg-BG",
+  "icons": [
+    {
+      "src": "/icon-192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["agriculture", "business", "productivity"],
+  "screenshots": []
+}

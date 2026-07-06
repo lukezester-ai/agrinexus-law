@@ -15,16 +15,26 @@ export function isSiteVisitCounterConfigured(): boolean {
 export async function getSiteVisitTotal(): Promise<number> {
 	const r = getUpstashRedis();
 	if (!r) return 0;
-	const raw = await r.get(VISIT_TOTAL_KEY);
-	if (raw === null || raw === undefined) return 0;
-	return typeof raw === "number" ? raw : Number(raw);
+	try {
+		const raw = await r.get(VISIT_TOTAL_KEY);
+		if (raw === null || raw === undefined) return 0;
+		return typeof raw === "number" ? raw : Number(raw);
+	} catch (e) {
+		console.error("[site-visit-counter] Redis get failed:", e);
+		return 0;
+	}
 }
 
 export async function getUniqueVisitorTotal(): Promise<number> {
 	const r = getUpstashRedis();
 	if (!r) return 0;
-	const raw = await r.scard(UNIQUE_VISITORS_KEY);
-	return typeof raw === "number" ? raw : Number(raw ?? 0);
+	try {
+		const raw = await r.scard(UNIQUE_VISITORS_KEY);
+		return typeof raw === "number" ? raw : Number(raw ?? 0);
+	} catch (e) {
+		console.error("[site-visit-counter] Redis scard failed:", e);
+		return 0;
+	}
 }
 
 export async function getSiteVisitStats(): Promise<SiteVisitStats> {
@@ -40,13 +50,19 @@ export async function incrementSiteVisitTotal(visitorId?: string): Promise<SiteV
 	const r = getUpstashRedis();
 	if (!r) return null;
 
-	const totalVisits = await r.incr(VISIT_TOTAL_KEY);
-	if (visitorId) {
-		await r.sadd(UNIQUE_VISITORS_KEY, visitorId);
-	}
+	try {
+		const totalVisits = await r.incr(VISIT_TOTAL_KEY);
 
-	return {
-		totalVisits: typeof totalVisits === "number" ? totalVisits : Number(totalVisits),
-		uniqueVisitors: await getUniqueVisitorTotal(),
-	};
+		if (visitorId) {
+			await r.sadd(UNIQUE_VISITORS_KEY, visitorId);
+		}
+
+		return {
+			totalVisits: typeof totalVisits === "number" ? totalVisits : Number(totalVisits),
+			uniqueVisitors: await getUniqueVisitorTotal(),
+		};
+	} catch (e) {
+		console.error("[site-visit-counter] Redis incr failed:", e);
+		return null;
+	}
 }
