@@ -6,8 +6,12 @@ const ALLOW_EXTERNAL_LINKS = process.env.INGEST_ALLOW_EXTERNAL_LINKS === "1";
 
 function normalizeTitleFromUrl(fileUrl: string): string {
   const segs = fileUrl.split("/").filter(Boolean);
-  const last = segs.pop() || "document";
-  return decodeURIComponent(last).replace(FILE_EXT_PATTERN, "").replace(/[-_]+/g, " ").trim();
+  const rawLast = (segs[segs.length - 1] || "").split("?")[0];
+  const rawSecondLast = segs.length >= 2 ? (segs[segs.length - 2] || "").split("?")[0] : "";
+  const isUuid = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}/i.test(rawLast);
+  const candidate = isUuid ? rawSecondLast : rawLast;
+  const t = decodeURIComponent(candidate).replace(FILE_EXT_PATTERN, "").replace(/[-_+]+/g, " ").trim();
+  return t.length > 90 ? t.slice(0, 90) : t;
 }
 
 function toAbsoluteUrl(href: string, base: string): string | null {

@@ -3,6 +3,7 @@ import {
   discoverFromRss,
   discoverFromSitemap,
   discoverFromSitemapPages,
+  discoverFromUrlList,
   extractPdfLinksFromHtml,
 } from "@/lib/ingest/feed-discovery";
 import { downloadAndPersistPublicDoc } from "@/lib/ingest/download-and-persist-public-doc";
@@ -17,6 +18,7 @@ async function discoverFilesForSource(source: IngestSource, limit: number) {
   if (mode === "sitemap") return discoverFromSitemap(source.indexUrl, limit);
   if (mode === "sitemap-html") return discoverFromSitemapPages(source.indexUrl, limit);
   if (mode === "rss") return discoverFromRss(source.indexUrl, limit);
+  if (mode === "direct-urls") return discoverFromUrlList(source.seedUrls || []);
   return discoverFilesFromIndex(source, limit);
 }
 

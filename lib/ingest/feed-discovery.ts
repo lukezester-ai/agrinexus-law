@@ -15,8 +15,13 @@ function allowExternalLinks(): boolean {
 
 function normalizeTitleFromUrl(fileUrl: string): string {
   const segs = fileUrl.split("/").filter(Boolean);
-  const last = segs.pop() || "document";
-  return decodeURIComponent(last).replace(FILE_EXT_PATTERN, "").replace(/[-_]+/g, " ").trim();
+  const rawLast = (segs[segs.length - 1] || "").split("?")[0];
+  const rawSecondLast = segs.length >= 2 ? (segs[segs.length - 2] || "").split("?")[0] : "";
+  // Ако последният сегмент е UUID (hex с тирета), ползваме предпоследния
+  const isUuid = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}/i.test(rawLast);
+  const candidate = isUuid ? rawSecondLast : rawLast;
+  const t = decodeURIComponent(candidate).replace(FILE_EXT_PATTERN, "").replace(/[-_+]+/g, " ").trim();
+  return t.length > 90 ? t.slice(0, 90) : t;
 }
 
 function titleFromHtml(html: string, fallback: string): string {
@@ -51,6 +56,24 @@ function isHttpDocUrl(u: string, feedOrigin: string): boolean {
   if (!FILE_EXT_PATTERN.test(parsed.href)) return false;
   if (!allowExternalLinks() && !sameOrigin(u, feedOrigin)) return false;
   return true;
+}
+
+/**
+ * За direct-urls режим: връща предварително зададен списък с URLs.
+ */
+export function discoverFromUrlList(
+  urls: string[],
+): { fileUrl: string; title: string }[] {
+  const seen = new Set<string>();
+  const result: { fileUrl: string; title: string }[] = [];
+  for (const url of urls) {
+    const key = url.includes("/documents/") ? url.split("?")[0].replace(/\/[^/]+$/, "") : url.split("?")[0];
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const t = normalizeTitleFromUrl(url);
+    result.push({ fileUrl: url, title: t || "Документ" });
+  }
+  return result;
 }
 
 /** Приема HTML страници (не само файлове) — пропуска медийни/ресурсни URL. */
