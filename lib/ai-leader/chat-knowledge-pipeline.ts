@@ -1,7 +1,11 @@
 /**
  * AI „лидер“ за чат: единна последователност между звената за знание
- * (RAG → статична ДФЗ база → learned от Supabase → Furrow snapshot),
+ * (MCP → RAG → статична ДФЗ база → learned от Supabase → Furrow snapshot),
  * за да не се дублира логиката в API route-ове и да е ясна автоматизацията.
+ *
+ * При `MCP_ENABLED=1` (локално/самостоятелен хост) използва MCP сървъра
+ * като първи източник. На Vercel(child_process не е наличен) пада към
+ * директни извиквания (getRagContext).
  */
 
 import { getKnowledgeContext } from "@/lib/knowledge/dfz-knowledge";
@@ -9,23 +13,20 @@ import { getLearnedKnowledgeContext } from "@/lib/knowledge/learned-knowledge";
 import { getFurrowMarketsData } from "@/lib/knowledge/furrow-markets";
 import { getRagContext } from "@/lib/rag/hybrid-search";
 import { isRagEnabled } from "@/lib/rag/config";
+import { getMcpRagContext } from "@/lib/mcp-client";
 
-export type ChatRetrievalMode = "rag_hybrid" | "bm25" | "none";
+export type ChatRetrievalMode = "rag_hybrid" | "bm25" | "mcp" | "none";
 
 export interface ChatKnowledgePipelineResult {
-  /** Обединен контекст за system prompt (празни части са премахнати). */
   combinedKnowledgeContext: string;
   retrievalMode: ChatRetrievalMode;
   retrievedCount: number;
 }
 
-/**
- * Събира контекста за чат по фиксиран ред на приоритет за retrieval:
- * 1) RAG (hybrid vector + lexical), при грешка/празно →
- * 2) lexical върху статичната ДФЗ база (`getKnowledgeContext`),
- * 3) learned таблица (async),
- * 4) локален Furrow JSON snapshot.
- */
+const mcpEnabled = (): boolean =>
+  process.env.MCP_ENABLED === "1" &&
+  !process.env.VERCEL;
+
 export async function runChatKnowledgePipeline(
   userQuery: string,
 ): Promise<ChatKnowledgePipelineResult> {
@@ -33,7 +34,20 @@ export async function runChatKnowledgePipeline(
   let retrievalMode: ChatRetrievalMode = "none";
   let retrievedCount = 0;
 
-  if (isRagEnabled()) {
+  if (mcpEnabled()) {
+    try {
+      const mcp = await getMcpRagContext(userQuery);
+      if (mcp.context) {
+        knowledgeContext = mcp.context;
+        retrievedCount = mcp.items;
+        retrievalMode = "mcp";
+      }
+    } catch (mcpErr) {
+      console.error("MCP retrieval failed, falling back to RAG:", mcpErr);
+    }
+  }
+
+  if (!knowledgeContext && isRagEnabled()) {
     try {
       const rag = await getRagContext(userQuery);
       knowledgeContext = rag.context;
