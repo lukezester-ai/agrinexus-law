@@ -7,11 +7,13 @@ import {
   internalKnowledgeSearch,
 } from "@/lib/knowledge/internal-ai-search";
 import { KNOWLEDGE_EXTENDED } from "@/lib/knowledge/dfz-knowledge-extended";
+import { EURLEX_KNOWLEDGE } from "@/lib/knowledge/eurlex-knowledge";
 import type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 
 export type { KnowledgeDoc } from "@/lib/knowledge/knowledge-types";
 
 export const KNOWLEDGE_BASE: KnowledgeDoc[] = [
+  ...EURLEX_KNOWLEDGE,
   {
     id: "biss-2025",
     title: "Базово подпомагане на устойчиво доходно земеделие (БИСС)",

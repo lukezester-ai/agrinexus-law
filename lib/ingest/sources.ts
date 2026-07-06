@@ -58,32 +58,45 @@ const CORE_SITEMAP_SOURCES: IngestSource[] = [
   },
 ];
 
+function getEurLexRegulations(): { celex: string; title: string }[] {
+  return [
+    { celex: "32021R2115", title: "Стратегически планове по ОСП 2023-2027" },
+    { celex: "32021R2116", title: "Финансиране, управление и мониторинг на ОСП" },
+    { celex: "32021R2117", title: "Изменение на регламенти за ОСП" },
+    { celex: "32021R2118", title: "Преходни правила за ОСП" },
+    { celex: "32018R0848", title: "Биологично производство" },
+    { celex: "32013R1308", title: "Обща организация на пазарите (ООП)" },
+    { celex: "32013R1307", title: "Директни плащания (2014-2020)" },
+    { celex: "32013R1306", title: "Финансиране на ОСП (2014-2020)" },
+    { celex: "32013R1305", title: "Развитие на селските райони" },
+    { celex: "32016R0429", title: "Здраве на животните (Animal Health Law)" },
+    { celex: "32017R0625", title: "Официален контрол в хранителната верига" },
+    { celex: "32009R1107", title: "Продукти за растителна защита (ПРЗ)" },
+    { celex: "32005R0396", title: "Максимално допустими нива на остатъци от пестициди" },
+    { celex: "32012R1151", title: "Схеми за качество (ЗНП, ЗГУ, ХГ)" },
+    { celex: "32002R0178", title: "Общо законодателство в областта на храните" },
+    { celex: "32011R1169", title: "Предоставяне на информация за храните" },
+    { celex: "32020R2220", title: "Преходни правила за ОСП 2021-2022" },
+    { celex: "32014R0514", title: "Общи разпоредби за ЕФГЗ и ЕЗФРСР" },
+  ];
+}
+
+function buildEurLexUrl(celex: string): string {
+  return `https://eur-lex.europa.eu/legal-content/BG/TXT/?uri=CELEX:${celex}`;
+}
+
 export function getIngestSources(): IngestSource[] {
   const list: IngestSource[] = [...CORE_SITEMAP_SOURCES];
 
-  const eurSitemap = process.env.EUR_LEX_SITEMAP_URL?.trim();
-  if (eurSitemap) {
-    list.push({
-      name: "eur-lex-sitemap",
-      indexUrl: eurSitemap,
-      institution: "EUR-Lex",
-      category: "ЕС регламенти",
-      docType: "regulation",
-      discoverMode: "sitemap",
-    });
-  }
-
-  const eurRss = process.env.EUR_LEX_RSS_URL?.trim();
-  if (eurRss) {
-    list.push({
-      name: "eur-lex-rss",
-      indexUrl: eurRss,
-      institution: "EUR-Lex",
-      category: "ЕС регламенти",
-      docType: "regulation",
-      discoverMode: "rss",
-    });
-  }
+  list.push({
+    name: "eurlex",
+    indexUrl: "https://eur-lex.europa.eu/",
+    institution: "EUR-Lex",
+    category: "ЕС регламенти",
+    docType: "regulation",
+    discoverMode: "direct-urls",
+    seedUrls: getEurLexRegulations().map((r) => buildEurLexUrl(r.celex)),
+  });
 
   return list;
 }

@@ -1,6 +1,4 @@
 {
-  "rootDirectory": ".",
-  "framework": "nextjs",
   "crons": [
     {
       "path": "/api/agents/cron?skipHeavy=1",
