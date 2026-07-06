@@ -14,7 +14,7 @@ const CORE_SITEMAP_SOURCES: IngestSource[] = [
     institution: "ДФЗ",
     category: "Субсидии",
     docType: "scheme",
-    discoverMode: "sitemap",
+    discoverMode: "sitemap-html",
   },
   {
     name: "mzh",
@@ -22,7 +22,7 @@ const CORE_SITEMAP_SOURCES: IngestSource[] = [
     institution: "МЗХ",
     category: "Нормативни актове",
     docType: "regulation",
-    discoverMode: "sitemap",
+    discoverMode: "sitemap-html",
   },
 ];
 

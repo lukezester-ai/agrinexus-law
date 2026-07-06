@@ -1,4 +1,4 @@
-export type IngestDiscoverMode = "html" | "sitemap" | "rss";
+export type IngestDiscoverMode = "html" | "sitemap" | "sitemap-html" | "rss";
 
 export type IngestSource = {
   name: string;

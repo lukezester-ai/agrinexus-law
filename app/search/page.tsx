@@ -50,6 +50,21 @@ function askAiHref(question: string) {
   return trimmed ? `/?chatQ=${encodeURIComponent(trimmed)}#chat` : "/#chat";
 }
 
+async function findRelatedDoc(docId: string): Promise<string | null> {
+  try {
+    const res = await fetch("/api/documents/related", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: docId }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.related?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function buildDocQuestion(query: string, doc: KnowledgeDoc) {
   return [
     `Обслужи ме по този документ: ${doc.title}.`,
@@ -78,6 +93,17 @@ export default function SearchPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "cancelled">("all");
   const [sortBy, setSortBy] = useState<"relevance" | "date_desc" | "date_asc">("relevance");
   const searchAbortRef = useRef<AbortController | null>(null);
+
+  const handleAiLink = useCallback((docId: string, fallbackQuestion: string) => {
+    void (async () => {
+      const relatedId = await findRelatedDoc(docId);
+      if (relatedId) {
+        window.location.href = `/doc/${relatedId}`;
+      } else {
+        window.location.href = askAiHref(fallbackQuestion);
+      }
+    })();
+  }, []);
 
   const handleSearch = useCallback(async (searchQuery?: string) => {
     const q = (searchQuery ?? query).trim();
@@ -317,9 +343,9 @@ export default function SearchPage() {
                       >
                         {isOpen ? "Скрий детайла" : "Виж детайла"}
                       </button>
-                      <Link href={askAiHref(docQuestion)} className="brand-cta-bg inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
+                      <button type="button" onClick={() => handleAiLink(doc.id, docQuestion)} className="brand-cta-bg inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
                         Връзка с AI <ArrowRight size={12} />
-                      </Link>
+                      </button>
                       <a href={`/api/documents/${encodeURIComponent(doc.id)}/download`} className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
                         Изтегли <Download size={12} />
                       </a>

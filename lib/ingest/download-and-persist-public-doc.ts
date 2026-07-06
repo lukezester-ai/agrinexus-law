@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
+const FILE_EXT_PATTERN = /\.(pdf|doc|docx|xls|xlsx)(\?|#|$)/i;
 const DOWNLOAD_TIMEOUT_MS = Math.max(
   3000,
   Number.parseInt(process.env.INGEST_DOWNLOAD_TIMEOUT_MS || "15000", 10),
@@ -12,6 +13,12 @@ const MAX_FILE_BYTES = Math.max(
 
 function safeSlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function titleFromHtml(html: string, fallback: string): string {
+  const m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  if (m) return m[1].replace(/[-–|].*$/, "").trim();
+  return fallback;
 }
 
 function detectEffectiveDateFromTitle(title: string): string | null {
@@ -53,6 +60,23 @@ async function readBodyWithLimit(resp: Response, maxBytes: number): Promise<Uint
   return out;
 }
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
+    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
+    .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export type PublicDocPersistMeta = {
   sourceKey: string;
   institution: string;
@@ -62,6 +86,7 @@ export type PublicDocPersistMeta = {
 
 /**
  * Изтегля файл по HTTP и го записва в agro-docs + public_documents (като съществуващия ingest).
+ * Ако URL-ът е HTML страница, записва inline текста вместо storage.
  */
 export async function downloadAndPersistPublicDoc(
   fileUrl: string,
@@ -79,21 +104,34 @@ export async function downloadAndPersistPublicDoc(
     headers: { "User-Agent": "AgriNexusBot/1.0 (+document-sync)" },
   }).finally(() => clearTimeout(timer));
   if (!resp.ok) throw new Error(`download failed (${resp.status})`);
-  const bytes = await readBodyWithLimit(resp, MAX_FILE_BYTES);
-  const hash = createHash("sha256").update(bytes).digest("hex");
-  const ext = fileUrl.split(".").pop()?.split("?")[0]?.toLowerCase() || "bin";
-  const year = new Date().getFullYear();
-  const storagePath = `${safeSlug(meta.sourceKey)}/${year}/${hash}.${ext}`;
 
-  const upload = await supabase.storage
-    .from("agro-docs")
-    .upload(storagePath, bytes, {
-      upsert: false,
-      contentType: resp.headers.get("content-type") || undefined,
-    });
+  const contentType = resp.headers.get("content-type") || "";
+  const isBinary = FILE_EXT_PATTERN.test(fileUrl) || /pdf|officedocument|word|spreadsheet/i.test(contentType);
 
-  if (upload.error && !/already exists/i.test(upload.error.message)) {
-    throw new Error(upload.error.message);
+  let hash: string;
+  let storagePath: string;
+
+  if (isBinary) {
+    const bytes = await readBodyWithLimit(resp, MAX_FILE_BYTES);
+    hash = createHash("sha256").update(bytes).digest("hex");
+    const ext = fileUrl.split(".").pop()?.split("?")[0]?.toLowerCase() || "bin";
+    const year = new Date().getFullYear();
+    storagePath = `${safeSlug(meta.sourceKey)}/${year}/${hash}.${ext}`;
+
+    const upload = await supabase.storage
+      .from("agro-docs")
+      .upload(storagePath, bytes, {
+        upsert: false,
+        contentType: resp.headers.get("content-type") || undefined,
+      });
+    if (upload.error && !/already exists/i.test(upload.error.message)) {
+      throw new Error(upload.error.message);
+    }
+  } else {
+    const html = await resp.text();
+    const text = stripHtml(html).slice(0, 50000);
+    hash = createHash("sha256").update(fileUrl + text.slice(0, 1000)).digest("hex");
+    storagePath = `inline:${fileUrl}`;
   }
 
   const upsert = await supabase.from("public_documents").upsert(
