@@ -2,11 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { Package, Plus, Save, Trash2, Edit, Loader2 } from "lucide-react";
+import { Package, Plus, Save, Trash2, Edit, Loader2, ArrowUpDown, ArrowDown, ArrowUp, X } from "lucide-react";
 
 type InventoryItem = {
   id: string; name: string; sku: string; category: string;
   unitOfMeasure: string; currentStock: number; minStock: number | null;
+};
+
+type Movement = {
+  id: string; item_id: string; item_name: string; type: string;
+  quantity: number; unitCost: number | null; totalCost: number | null;
+  movement_date: string; description: string | null;
 };
 
 const CATEGORIES = ["Торове", "Химикали", "Семена", "Гориво", "Резервни части", "Други"];
@@ -18,6 +24,12 @@ export default function SkladPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<InventoryItem | null>(null);
   const [form, setForm] = useState({ name: "", sku: "", category: "Други", unitOfMeasure: "бр", currentStock: 0, minStock: 0 });
+
+  const [movItem, setMovItem] = useState<InventoryItem | null>(null);
+  const [movements, setMovements] = useState<Movement[]>([]);
+  const [loadingMovs, setLoadingMovs] = useState(false);
+  const [showMovForm, setShowMovForm] = useState(false);
+  const [movForm, setMovForm] = useState({ type: "in", quantity: 0, unitCost: "", totalCost: "", description: "" });
 
   const load = async () => {
     setLoading(true);
@@ -46,10 +58,41 @@ export default function SkladPage() {
     await load();
   };
 
+  const openMovements = async (item: InventoryItem) => {
+    setMovItem(item);
+    setLoadingMovs(true);
+    try {
+      const r = await fetch("/api/farm/inventory/movements");
+      const d = await r.json();
+      setMovements(Array.isArray(d) ? d.filter((m: Movement) => m.item_id === item.id) : []);
+    } finally { setLoadingMovs(false); }
+  };
+
+  const addMovement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!movItem) return;
+    setSaving(true);
+    try {
+      const qty = Number(movForm.quantity);
+      await fetch("/api/farm/inventory/movements", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          itemId: movItem.id, type: movForm.type, quantity: qty,
+          unitCost: movForm.unitCost || null, totalCost: movForm.totalCost || null,
+          description: movForm.description || null,
+        }),
+      });
+      await openMovements(movItem);
+      await load();
+      setShowMovForm(false);
+      setMovForm({ type: "in", quantity: 0, unitCost: "", totalCost: "", description: "" });
+    } finally { setSaving(false); }
+  };
+
   const lowStock = items.filter((i) => i.minStock && i.currentStock <= i.minStock);
 
   return (
-    <SitePageShell maxWidth="4xl" subheader={
+    <SitePageShell maxWidth="5xl" subheader={
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold">Склад</p>
         <button onClick={() => { setShowForm(!showForm); setEditing(null); setForm({ name: "", sku: "", category: "Други", unitOfMeasure: "бр", currentStock: 0, minStock: 0 }); }}
@@ -130,9 +173,10 @@ export default function SkladPage() {
                       <td className={`p-3 text-right font-bold ${isLow ? "text-amber-600" : ""}`}>{Number(i.currentStock).toFixed(3)}</td>
                       <td className="p-3 text-right text-slate-500">{i.minStock !== null ? Number(i.minStock).toFixed(3) : "—"}</td>
                       <td className="p-3">
-                        <div className="flex justify-end gap-2">
-                          <button onClick={() => { setForm({ name: i.name, sku: i.sku, category: i.category || "Други", unitOfMeasure: i.unitOfMeasure, currentStock: Number(i.currentStock), minStock: i.minStock !== null ? Number(i.minStock) : 0 }); setEditing(i); setShowForm(true); }} className="text-teal-600 hover:text-teal-800"><Edit size={16} /></button>
-                          <button onClick={() => handleDelete(i.id)} className="text-red-500 hover:text-red-700"><Trash2 size={16} /></button>
+                        <div className="flex justify-end gap-1">
+                          <button onClick={() => openMovements(i)} className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30" title="Движения"><ArrowUpDown size={16} /></button>
+                          <button onClick={() => { setForm({ name: i.name, sku: i.sku, category: i.category || "Други", unitOfMeasure: i.unitOfMeasure, currentStock: Number(i.currentStock), minStock: i.minStock !== null ? Number(i.minStock) : 0 }); setEditing(i); setShowForm(true); }} className="rounded-lg p-1.5 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950/30"><Edit size={16} /></button>
+                          <button onClick={() => handleDelete(i.id)} className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 size={16} /></button>
                         </div>
                       </td>
                     </tr>
@@ -143,6 +187,89 @@ export default function SkladPage() {
           </div>
         )}
       </div>
+
+      {movItem && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-12 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-lg font-bold"><ArrowUpDown className="text-amber-600" size={20} /> Движения — {movItem.name}</h2>
+              <div className="flex gap-2">
+                <button onClick={() => { setShowMovForm(!showMovForm); setMovForm({ type: "in", quantity: 0, unitCost: "", totalCost: "", description: "" }); }}
+                  className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-amber-700">
+                  <Plus size={14} /> Движение
+                </button>
+                <button onClick={() => setMovItem(null)} className="rounded-xl p-2 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={20} /></button>
+              </div>
+            </div>
+            <p className="mb-4 text-sm text-slate-500">Наличност: <strong className="text-slate-800 dark:text-white">{Number(movItem.currentStock).toFixed(3)}</strong> {movItem.unitOfMeasure}</p>
+
+            {showMovForm && (
+              <form onSubmit={addMovement} className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600">Тип</label>
+                  <select value={movForm.type} onChange={(e) => setMovForm({ ...movForm, type: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white">
+                    <option value="in">Приход</option><option value="out">Разход</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600">Количество</label>
+                  <input type="number" step="0.001" value={movForm.quantity || ""} onChange={(e) => setMovForm({ ...movForm, quantity: Number(e.target.value) })} required
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600">Ед. цена (лв)</label>
+                  <input type="number" step="0.01" value={movForm.unitCost} onChange={(e) => setMovForm({ ...movForm, unitCost: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600">Обща цена (лв)</label>
+                  <input type="number" step="0.01" value={movForm.totalCost} onChange={(e) => setMovForm({ ...movForm, totalCost: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-xs font-bold text-slate-600">Описание</label>
+                  <input value={movForm.description} onChange={(e) => setMovForm({ ...movForm, description: e.target.value })} placeholder="Закупка / Продажба / Производство"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="flex items-end sm:col-span-2">
+                  <button type="submit" disabled={saving} className="flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-50">
+                    {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Осчетови
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {loadingMovs ? (
+              <div className="flex justify-center py-4"><Loader2 size={20} className="animate-spin text-slate-400" /></div>
+            ) : movements.length === 0 ? (
+              <p className="py-4 text-center text-sm text-slate-500">Няма движения.</p>
+            ) : (
+              <div className="max-h-80 space-y-2 overflow-y-auto">
+                {movements.map((m) => (
+                  <div key={m.id} className="flex items-start justify-between rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${m.type === "in" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300" : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"}`}>
+                          {m.type === "in" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          {m.type === "in" ? "Приход" : "Разход"}
+                        </span>
+                        <span className="text-xs text-slate-500">{new Date(m.movement_date).toLocaleDateString("bg-BG")}</span>
+                        <span className="text-xs font-bold">{Number(m.quantity).toFixed(3)}</span>
+                      </div>
+                      {m.description && <p className="mt-1 text-sm text-slate-600">{m.description}</p>}
+                      <div className="mt-1 flex gap-4 text-xs text-slate-500">
+                        {m.unitCost !== null && <span>Ед. цена: {Number(m.unitCost).toFixed(2)} лв</span>}
+                        {m.totalCost !== null && <span>Общо: {Number(m.totalCost).toFixed(2)} лв</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </SitePageShell>
   );
 }
