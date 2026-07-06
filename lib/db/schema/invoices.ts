@@ -1,0 +1,44 @@
+import { pgTable, text, uuid, timestamp, numeric, jsonb } from 'drizzle-orm/pg-core';
+import { tenants } from './tenants';
+
+export const invoices = pgTable('invoices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  invoiceNumber: text('invoice_number').notNull(),
+  type: text('type').notNull().default('sales'),
+  clientName: text('client_name'),
+  clientEik: text('client_eik'),
+  clientVatNumber: text('client_vat_number'),
+  clientAddress: text('client_address'),
+  issueDate: timestamp('issue_date').notNull().defaultNow(),
+  dueDate: timestamp('due_date'),
+  status: text('status').notNull().default('draft'),
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull().default('0'),
+  vatRate: numeric('vat_rate', { precision: 5, scale: 2 }).notNull().default('20'),
+  vatAmount: numeric('vat_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  items: jsonb('items'),
+  notes: text('notes'),
+  vatPosted: text('vat_posted').notNull().default('false'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const purchaseInvoices = pgTable('purchase_invoices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  invoiceNumber: text('invoice_number'),
+  supplierName: text('supplier_name').notNull(),
+  supplierEik: text('supplier_eik'),
+  supplierVatNumber: text('supplier_vat_number'),
+  issueDate: timestamp('issue_date').notNull().defaultNow(),
+  dueDate: timestamp('due_date'),
+  status: text('status').notNull().default('draft'),
+  netAmount: numeric('net_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  vatAmount: numeric('vat_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  items: jsonb('items'),
+  vatPosted: text('vat_posted').notNull().default('false'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});

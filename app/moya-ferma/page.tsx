@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Save, MapPin, Wheat, Sprout, CircleCheck } from "lucide-react";
+import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, ArrowRight } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import {
 	loadFarmProfile,
@@ -16,6 +16,16 @@ const REGIONS = [
 	"Пазарджик", "Перник", "Плевен", "Пловдив", "Разград", "Русе",
 	"Силистра", "Сливен", "Смолян", "София", "Стара Загора", "Търговище",
 	"Хасково", "Шумен", "Ямбол",
+];
+
+const MODULES = [
+	{ href: "/moya-ferma/polita", label: "Парцели", desc: "Карта на полетата и физически блокове", icon: Map, color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/50" },
+	{ href: "/moya-ferma/sklad", label: "Склад", desc: "Наличности и материални запаси", icon: Package, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/50" },
+	{ href: "/moya-ferma/schetovodstvo", label: "Счетоводство", desc: "Журнал, фактури, баланс и ДДС", icon: Landmark, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/50" },
+	{ href: "/moya-ferma/mashini", label: "Машини", desc: "Трактори, комбайни, сеялки и поддръжка", icon: Tractor, color: "text-sky-600", bg: "bg-sky-100 dark:bg-sky-900/50" },
+	{ href: "/moya-ferma/rekolta", label: "Реколта", desc: "Добиви, площи и качествени показатели", icon: Combine, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
+	{ href: "/moya-ferma/seitbooborot", label: "Сеитбооборот", desc: "Планиране и съвместимост на култури", icon: Repeat2, color: "text-violet-600", bg: "bg-violet-100 dark:bg-violet-900/50" },
+	{ href: "/moya-ferma/himizacia", label: "Химизация", desc: "БАБХ дневник на продуктите за РЗ", icon: FlaskConical, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
 ];
 
 export default function MoyaFermaPage() {
@@ -57,43 +67,56 @@ export default function MoyaFermaPage() {
 
 	return (
 		<SitePageShell
-			maxWidth="2xl"
+			maxWidth="4xl"
 			subheader={
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Моята ферма</p>
-					<Link href="/profile" className="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
-						Пълен профил →
-					</Link>
 				</div>
 			}
 		>
-			<div className="glass-panel overflow-hidden rounded-3xl">
-				<div className="border-b border-white/10 bg-teal-50/50 p-8 dark:bg-teal-950/20">
-					<h1 className="font-display flex items-center gap-3 text-3xl font-medium text-slate-950 dark:text-white">
-						<Sprout className="text-teal-600 dark:text-teal-400" /> Моята ферма
-					</h1>
-					<p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-						Данните се споделят с AI чата и калкулатора (единен профил в браузъра).
+			<div className="grid gap-4 sm:grid-cols-2">
+				{MODULES.map((m) => (
+					<Link key={m.href} href={m.href}
+						className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-700"
+					>
+						<div className="flex items-start justify-between">
+							<div className={`rounded-xl ${m.bg} p-3`}>
+								<m.icon size={24} className={m.color} />
+							</div>
+							<ArrowRight size={18} className="mt-2 text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-500 dark:text-slate-600" />
+						</div>
+						<h3 className="mt-3 font-bold text-slate-900 dark:text-white">{m.label}</h3>
+						<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{m.desc}</p>
+					</Link>
+				))}
+			</div>
+
+			<div className="mt-6 glass-panel overflow-hidden rounded-3xl">
+				<div className="border-b border-white/10 bg-teal-50/50 p-6 dark:bg-teal-950/20">
+					<h2 className="font-display flex items-center gap-3 text-xl font-medium text-slate-950 dark:text-white">
+						<Sprout className="text-teal-600 dark:text-teal-400" /> Моят профил
+					</h2>
+					<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+						Тези данни се споделят с AI чата за персонализирани отговори.
 					</p>
 				</div>
 
-				<form onSubmit={handleSave} className="grid gap-6 p-6">
-					<div className="space-y-3">
+				<form onSubmit={handleSave} className="grid gap-5 p-6">
+					<div className="space-y-2">
 						<label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-							<Wheat size={18} className="text-emerald-600" /> Отглеждани култури
+							<Wheat size={16} className="text-emerald-600" /> Отглеждани култури
 						</label>
 						<input
 							value={profile.cropsText}
 							onChange={(e) => setProfile({ ...profile, cropsText: e.target.value })}
-							placeholder="Напр. Пшеница, Слънчоглед, Царевица..."
+							placeholder="Пшеница, Слънчоглед, Царевица..."
 							className="w-full rounded-lg border border-slate-300 bg-transparent px-4 py-3 outline-none transition focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white"
 						/>
-						<p className="text-xs text-slate-500">Разделени със запетая.</p>
 					</div>
 
-					<div className="space-y-3">
+					<div className="space-y-2">
 						<label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-							<MapPin size={18} className="text-teal-600" /> Регион / Област
+							<MapPin size={16} className="text-teal-600" /> Регион
 						</label>
 						<select
 							value={profile.region}
@@ -102,9 +125,7 @@ export default function MoyaFermaPage() {
 						>
 							<option value="">Избери област</option>
 							{REGIONS.map((r) => (
-								<option key={r} value={r}>
-									{r}
-								</option>
+								<option key={r} value={r}>{r}</option>
 							))}
 						</select>
 					</div>
@@ -116,17 +137,12 @@ export default function MoyaFermaPage() {
 							onChange={(e) => setProfile({ ...profile, is_organic: e.target.checked })}
 							className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
 						/>
-						<div>
-							<span className="block text-sm font-bold text-slate-900 dark:text-white">
-								Биологично производство
-							</span>
-							<span className="text-xs text-slate-500">Отбелязва се в AI персонализацията.</span>
-						</div>
+						<span className="text-sm font-bold text-slate-900 dark:text-white">Биологично производство</span>
 					</label>
 
 					{saved && (
 						<div className="flex items-center gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm font-bold text-teal-800 dark:border-teal-800/50 dark:bg-teal-900/30 dark:text-teal-300">
-							<CircleCheck size={18} /> Профилът е запазен — чатът го използва веднага.
+							<CircleCheck size={18} /> Запазено — AI чатът го използва веднага.
 						</div>
 					)}
 

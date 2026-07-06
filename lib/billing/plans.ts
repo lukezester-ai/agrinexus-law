@@ -22,6 +22,7 @@ export type PlanDefinition = {
 	chatDailyLimitAnonymous: number;
 	documentReviewMonthly: number | null;
 	prioritySupport: boolean;
+	erpModules: string[];
 };
 
 export const PLANS: Record<PlanId, PlanDefinition> = {
@@ -41,40 +42,51 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
 		chatDailyLimitAnonymous: 5,
 		documentReviewMonthly: 0,
 		prioritySupport: false,
+		erpModules: [],
 	},
 	pro: {
 		id: "pro",
 		name: "Про",
 		tagline: "За активен фермер",
-		priceMonthlyEur: 19.9,
-		priceYearlyEur: 199,
+		priceMonthlyEur: 14.9,
+		priceYearlyEur: 149,
 		features: [
-			"7 дни безплатен пробен период",
 			"Неограничен AI чат с RAG",
 			"10 AI прегледа на документи / месец",
-			"Изтегляне от държавния архив",
+			"Управление на парцели (GIS)",
+			"Склад и материални запаси",
+			"Дневник на химизацията (БАБХ)",
+			"Счетоводство и журнал",
+			"Фактури продажби и покупки",
+			"ДДС дневници за НАП",
+			"Финансови отчети (баланс/П&Л)",
 		],
 		chatDailyLimit: null,
 		chatDailyLimitAnonymous: 0,
-		documentReviewMonthly: 10,
+		documentReviewMonthly: 5,
 		prioritySupport: false,
+		erpModules: ["fields", "inventory", "chemical", "accounting", "invoices", "vat"],
 	},
 	stopyanstvo: {
 		id: "stopyanstvo",
 		name: "Стопанство",
 		tagline: "За по-големи стопанства и екипи",
-		priceMonthlyEur: 49,
-		priceYearlyEur: 490,
+		priceMonthlyEur: 34.9,
+		priceYearlyEur: 349,
 		features: [
-			"7 дни безплатен пробен период",
 			"Всичко от Про",
 			"Неограничени AI прегледи на договори",
+			"Данъчни декларации (Обр. 1/6, ДДС, VIES)",
+			"ТРЗ и заплати",
+			"Open Banking (PSD2)",
+			"Неограничени потребители",
 			"Приоритет и поддръжка по имейл",
 		],
 		chatDailyLimit: null,
 		chatDailyLimitAnonymous: 0,
 		documentReviewMonthly: null,
 		prioritySupport: true,
+		erpModules: ["fields", "inventory", "chemical", "accounting", "invoices", "vat", "payroll", "banking", "hr"],
 	},
 };
 

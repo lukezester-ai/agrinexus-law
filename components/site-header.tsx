@@ -26,8 +26,14 @@ const NAV_LINKS: readonly NavLink[] = [
 	{ href: "/kalkulator", label: "Калкулатори", highlight: false },
 	{ href: "/statistiki", label: "Статистики", highlight: false },
 	{ href: "/moya-ferma", label: "Моята ферма", highlight: false },
-	{ href: "https://www.terraiq.me", label: "TerraIQ", highlight: true, external: true },
-	{ href: "https://www.fieldlot.io", label: "FIELDLOT", highlight: false, external: true },
+	{ href: "/moya-ferma/polita", label: "Парцели", highlight: false },
+	{ href: "/moya-ferma/sklad", label: "Склад", highlight: false },
+	{ href: "/moya-ferma/schetovodstvo", label: "Счетоводство", highlight: false },
+	{ href: "/moya-ferma/mashini", label: "Машини", highlight: false },
+	{ href: "/moya-ferma/rekolta", label: "Реколта", highlight: false },
+	{ href: "/moya-ferma/seitbooborot", label: "Сеитбооборот", highlight: false },
+	{ href: "/moya-ferma/himizacia", label: "Химизация", highlight: false },
+	{ href: "https://www.officiabg.com/bg", label: "Officia", highlight: true, external: true },
 	{ href: "/admin", label: "Качи PDF", highlight: false },
 ];
 
