@@ -37,7 +37,8 @@ export default function MashiniPage() {
   const load = async () => {
     setLoading(true);
     const res = await fetch("/api/farm/machines");
-    setMachines(await res.json());
+    const d = await res.json();
+    setMachines(Array.isArray(d) ? d : []);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);

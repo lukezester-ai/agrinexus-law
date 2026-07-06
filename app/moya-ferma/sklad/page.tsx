@@ -21,7 +21,7 @@ export default function SkladPage() {
 
   const load = async () => {
     setLoading(true);
-    try { const r = await fetch("/api/farm/inventory"); setItems(await r.json()); }
+    try { const r = await fetch("/api/farm/inventory"); const d = await r.json(); setItems(Array.isArray(d) ? d : []); }
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
