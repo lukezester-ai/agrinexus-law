@@ -254,7 +254,7 @@ export default function HimizaciaPage() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-3">
-        <button className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800">
+        <button onClick={() => window.open('/api/farm/chemicals/export', '_blank')} className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800">
           <FileText size={16} /> Експорт за БАБХ (PDF)
         </button>
       </div>
