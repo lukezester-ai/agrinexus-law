@@ -152,7 +152,7 @@ export default function HimizaciaPage() {
                 {fields.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
             </div>
-            <div className="space-y-1">
+              <div className="space-y-1">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Продукт</label>
               <div className="flex gap-2">
                 <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} required
@@ -160,7 +160,12 @@ export default function HimizaciaPage() {
                   <option value="">Избери продукт</option>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
-                {products.length === 0 && <span className="text-xs text-amber-600">Няма продукти — добавете първо</span>}
+                {products.length === 0 ? (
+                  <button type="button" onClick={() => { setShowForm(false); setShowProductForm(true); }}
+                    className="shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    + Продукт
+                  </button>
+                ) : null}
               </div>
             </div>
             <div className="space-y-1">
