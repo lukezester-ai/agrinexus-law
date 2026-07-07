@@ -18,3 +18,4 @@ export * from './hr';
 export * from './fixed_assets';
 export * from './product_codes';
 export * from './notifications';
+export * from './documents';
