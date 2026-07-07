@@ -5,11 +5,11 @@ import { resolveTenantId } from "@/lib/db/tenant-context";
 import { NapSoapClient } from "@/lib/accounting/nap-client";
 import { eq } from "drizzle-orm";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: napUuid } = await params;
     const tenantId = await resolveTenantId();
     const { db } = getDb();
-    const napUuid = params.id;
 
     const [tenant] = await db
       .select()
