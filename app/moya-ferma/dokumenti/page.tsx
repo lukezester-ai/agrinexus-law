@@ -249,7 +249,7 @@ export default function DokumentiPage() {
         <div className="rounded-3xl border border-slate-200 p-12 text-center text-sm text-slate-500 dark:border-slate-700">
           <FolderOpen size={48} className="mx-auto mb-3 text-slate-300" />
           <p className="font-bold">Няма документи</p>
-          <p className="mt-1">Качете първия документ с бутона "Качи документ"</p>
+          <p className="mt-1">Качете първия документ с бутона &bdquo;Качи документ&rdquo;</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -286,6 +286,7 @@ function DocCard({ doc, onDelete, onTogglePin }: { doc: Document; onDelete: (id:
       </div>
 
       {isImage ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
         <img src={doc.fileUrl} alt={doc.name} className="mb-3 h-32 w-full rounded-xl object-cover" />
       ) : isPdf ? (
         <div className="mb-3 flex h-32 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
