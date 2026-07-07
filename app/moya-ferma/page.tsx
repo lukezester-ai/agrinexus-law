@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, ArrowRight } from "lucide-react";
+import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import {
 	loadFarmProfile,
@@ -26,6 +26,7 @@ const MODULES = [
 	{ href: "/moya-ferma/rekolta", label: "Реколта", desc: "Добиви, площи и качествени показатели", icon: Combine, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
 	{ href: "/moya-ferma/seitbooborot", label: "Сеитбооборот", desc: "Планиране и съвместимост на култури", icon: Repeat2, color: "text-violet-600", bg: "bg-violet-100 dark:bg-violet-900/50" },
 	{ href: "/moya-ferma/himizacia", label: "Химизация", desc: "БАБХ дневник на продуктите за РЗ", icon: FlaskConical, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
+	{ href: "/moya-ferma/kalendar", label: "Календар", desc: "График на събития, напомняния и задачи", icon: RefreshCw, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
 ];
 
 export default function MoyaFermaPage() {

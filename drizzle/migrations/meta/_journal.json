@@ -15,6 +15,13 @@
       "when": 1783364082182,
       "tag": "0001_empty_micromax",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783450000000,
+      "tag": "0002_calm_reminders",
+      "breakpoints": true
     }
   ]
 }
