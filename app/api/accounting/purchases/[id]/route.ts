@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: any) {
       if (items.length > 0) {
         await updateInventoryFromInvoice({
           tenantId, type: "purchase", items,
-          date: new Date(), invoiceNumber: existing.invoiceNumber,
+          date: new Date(), invoiceNumber: existing.invoiceNumber ?? '',
         }).catch(() => {});
       }
     }
@@ -47,7 +47,6 @@ export async function PUT(req: NextRequest, { params }: any) {
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {

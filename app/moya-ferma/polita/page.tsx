@@ -61,7 +61,7 @@ export default function PolitaPage() {
       for (const f of fields) {
         if (f.geometry?.coordinates) {
           try {
-            const layer = L.geoJSON(f.geometry, {
+          const layer = L.geoJSON(f.geometry as any, {
               style: { color: "#059669", weight: 2, fillOpacity: 0.15 },
             }).bindPopup(`<b>${f.name}</b><br/>${f.areaDecares.toFixed(1)} дка${f.crop ? `<br/>${f.crop}` : ""}`);
             layer.addTo(map);
@@ -103,7 +103,7 @@ export default function PolitaPage() {
       const allBounds: any[] = [];
       for (const f of importPreview) {
         try {
-          const layer = L.geoJSON(f.geometry, {
+            const layer = L.geoJSON(f.geometry as any, {
             style: { color: "#059669", weight: 2, fillOpacity: 0.15 },
           });
           layer.addTo(map);

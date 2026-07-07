@@ -49,7 +49,6 @@ export async function PUT(req: NextRequest, { params }: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-}
 
 export async function DELETE(req: NextRequest, { params }: any) {
   try {
