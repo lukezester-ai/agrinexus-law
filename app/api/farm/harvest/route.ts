@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { harvestRecords } from '@/lib/db/schema/harvest';
 import { resolveTenantId } from '@/lib/db/tenant-context';
+import { fields } from '@/lib/db/schema/fields';
+import { createInventoryFromHarvest } from '@/lib/farm/harvest-to-inventory';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
@@ -24,6 +26,24 @@ export async function POST(req: NextRequest) {
       moisture: body.moisture ? String(body.moisture) : null, quality: body.quality || null,
       inventoryItemId: body.inventoryItemId || null, notes: body.notes || null,
     }).returning();
-    return NextResponse.json(result, { status: 201 });
+
+    let fieldName: string | null = null;
+    if (body.fieldId) {
+      const [field] = await db.select({ name: fields.name }).from(fields).where(eq(fields.id, body.fieldId)).limit(1);
+      if (field) fieldName = field.name;
+    }
+
+    const invItemId = await createInventoryFromHarvest({
+      tenantId,
+      cropId: body.cropId || null,
+      yieldAmount: Number(body.yieldAmount),
+      yieldUnit: body.yieldUnit || 'kg',
+      fieldName,
+      date: body.date ? new Date(body.date) : new Date(),
+    });
+
+    await db.update(harvestRecords).set({ inventoryItemId: invItemId }).where(eq(harvestRecords.id, result.id));
+
+    return NextResponse.json({ ...result, inventoryItemId: invItemId }, { status: 201 });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
