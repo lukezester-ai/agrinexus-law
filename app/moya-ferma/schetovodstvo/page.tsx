@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { Landmark, Plus, FileText, Calculator, BarChart3, ArrowUpRight, ArrowDownRight, Bot } from "lucide-react";
+import { Landmark, Plus, FileText, Calculator, BarChart3, ArrowUpRight, ArrowDownRight, Bot, Users } from "lucide-react";
 
 type JournalEntry = {
   id: string;
@@ -83,6 +83,17 @@ export default function SchetovodstvoPage() {
             <div>
               <h3 className="font-bold text-slate-900 dark:text-white">Фактури</h3>
               <p className="text-xs text-slate-500">Продажби и покупки</p>
+            </div>
+          </div>
+        </a>
+        <a href="/moya-ferma/schetovodstvo/klienti" className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-700">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-indigo-100 p-3 dark:bg-indigo-900/50">
+              <Users size={24} className="text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-white">Клиенти и доставчици</h3>
+              <p className="text-xs text-slate-500">Контрагенти, ЕИК, ДДС</p>
             </div>
           </div>
         </a>
