@@ -2,29 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { MapPin, Plus, Edit, Trash2, Save, Upload, Loader2, Map, Download } from "lucide-react";
+import { MapPin, Plus, Edit, Trash2, Save, Upload, Loader2, Map as MapIcon, Download } from "lucide-react";
 
 type Field = {
-  id: string;
-  name: string;
-  areaDecares: number;
-  cadastralId: string;
-  physicalBlockId: string;
-  crop: string;
-  cropVariety: string;
-  soilType: string;
-  ownershipType: string;
-  ownerName: string;
-  geometry: any;
-  centroid: { lat: number; lng: number } | null;
-  notes: string;
+  id: string; name: string; areaDecares: number; cadastralId: string;
+  physicalBlockId: string; crop: string; cropVariety: string; soilType: string;
+  ownershipType: string; ownerName: string; geometry: any; centroid: { lat: number; lng: number } | null; notes: string;
 };
 
-type GeoFeature = {
-  type: "Feature";
-  properties: Record<string, any>;
-  geometry: { type: string; coordinates: any };
-};
+type GeoFeature = { type: "Feature"; properties: Record<string, any>; geometry: { type: string; coordinates: any } };
 
 function emptyField(): Field {
   return { id: "", name: "", areaDecares: 0, cadastralId: "", physicalBlockId: "", crop: "", cropVariety: "", soilType: "", ownershipType: "own", ownerName: "", geometry: null, centroid: null, notes: "" };
@@ -41,7 +27,10 @@ export default function PolitaPage() {
   const [importPreview, setImportPreview] = useState<GeoFeature[] | null>(null);
   const [importMsg, setImportMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const previewMapRef = useRef<HTMLDivElement>(null);
+  const leafletInstance = useRef<any>(null);
+  const previewLeafletInstance = useRef<any>(null);
 
   const load = async () => {
     setLoading(true);
@@ -52,6 +41,86 @@ export default function PolitaPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !mapRef.current) return;
+    let cancelled = false;
+
+    (async () => {
+      const L = await import("leaflet");
+      await import("leaflet/dist/leaflet.css");
+      if (cancelled || !mapRef.current) return;
+
+      if (leafletInstance.current) leafletInstance.current.remove();
+      const map = L.map(mapRef.current).setView([42.7, 25.5], 7);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap", maxZoom: 19,
+      }).addTo(map);
+      leafletInstance.current = map;
+
+      for (const f of fields) {
+        if (f.geometry?.coordinates) {
+          try {
+            const layer = L.geoJSON(f.geometry, {
+              style: { color: "#059669", weight: 2, fillOpacity: 0.15 },
+            }).bindPopup(`<b>${f.name}</b><br/>${f.areaDecares.toFixed(1)} дка${f.crop ? `<br/>${f.crop}` : ""}`);
+            layer.addTo(map);
+          } catch {}
+        } else if (f.centroid) {
+          L.circleMarker([f.centroid.lat, f.centroid.lng], {
+            radius: 8, color: "#059669", fillColor: "#059669", fillOpacity: 0.5,
+          }).bindPopup(`<b>${f.name}</b><br/>${f.areaDecares.toFixed(1)} дка`).addTo(map);
+        }
+      }
+
+      if (fields.length > 0) {
+        const allBounds: any[] = [];
+        fields.forEach(f => {
+          if (f.centroid) allBounds.push([f.centroid.lat, f.centroid.lng]);
+        });
+        if (allBounds.length > 0) map.fitBounds(allBounds, { padding: [30, 30] });
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [fields]);
+
+  useEffect(() => {
+    if (!importPreview || importPreview.length === 0 || !previewMapRef.current) return;
+    let cancelled = false;
+
+    (async () => {
+      const L = await import("leaflet");
+      if (cancelled || !previewMapRef.current) return;
+
+      if (previewLeafletInstance.current) previewLeafletInstance.current.remove();
+      const map = L.map(previewMapRef.current).setView([42.7, 25.5], 7);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap", maxZoom: 19,
+      }).addTo(map);
+      previewLeafletInstance.current = map;
+
+      const allBounds: any[] = [];
+      for (const f of importPreview) {
+        try {
+          const layer = L.geoJSON(f.geometry, {
+            style: { color: "#059669", weight: 2, fillOpacity: 0.15 },
+          });
+          layer.addTo(map);
+          const bounds = layer.getBounds();
+          allBounds.push(bounds.getCenter());
+        } catch {}
+      }
+
+      if (allBounds.length > 0) {
+        map.fitBounds(allBounds, { padding: [30, 30] });
+      } else {
+        map.setView([42.7, 25.5], 7);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [importPreview]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +158,6 @@ export default function PolitaPage() {
     if (!file) return;
     setImportMsg("Разчитане на файла...");
     setImporting(true);
-
     try {
       const shpModule = await import("shpjs");
       const shpFn = shpModule.default || shpModule;
@@ -126,55 +194,8 @@ export default function PolitaPage() {
     } finally { setImporting(false); }
   };
 
-  useEffect(() => {
-    if (!importPreview || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = canvas.offsetWidth * 2;
-    canvas.height = 300 * 2;
-    ctx.scale(2, 2);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const allCoords: number[][] = [];
-    for (const f of importPreview) {
-      const coords = f.geometry?.coordinates?.[0];
-      if (coords) allCoords.push(...coords.map((c: number[]) => [c[0], c[1]]));
-    }
-
-    if (allCoords.length === 0) return;
-    const lngs = allCoords.map((c: any) => c[0]);
-    const lats = allCoords.map((c: any) => c[1]);
-    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-    const rangeLng = maxLng - minLng || 1, rangeLat = maxLat - minLat || 1;
-    const pad = 20;
-    const w = canvas.width / 2 - pad * 2;
-    const h = 300 - pad * 2;
-    const scale = Math.min(w / rangeLng, h / rangeLat);
-
-    ctx.strokeStyle = "#059669";
-    ctx.fillStyle = "rgba(5, 150, 105, 0.15)";
-    ctx.lineWidth = 2;
-
-    for (const f of importPreview) {
-      const ring = f.geometry?.coordinates?.[0];
-      if (!ring || ring.length < 3) continue;
-      ctx.beginPath();
-      for (let i = 0; i < ring.length; i++) {
-        const x = pad + (ring[i][0] - minLng) * scale;
-        const y = pad + h - (ring[i][1] - minLat) * scale;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-  }, [importPreview]);
-
   return (
-    <SitePageShell maxWidth="5xl" subheader={
+    <SitePageShell maxWidth="6xl" subheader={
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Парцели и полета</p>
         <button onClick={() => { setShowForm(!showForm); setForm(emptyField()); setEditing(null); }}
@@ -245,19 +266,20 @@ export default function PolitaPage() {
         </form>
       )}
 
-      <div className="glass-panel overflow-hidden rounded-3xl">
-        <div className="border-b border-white/10 bg-teal-50/50 p-6 dark:bg-teal-950/20">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-display flex items-center gap-3 text-2xl font-medium text-slate-950 dark:text-white">
-                <Map className="text-teal-600 dark:text-teal-400" /> Карта на полетата
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">Управление на земеделски парцели и физически блокове</p>
-            </div>
-          </div>
+      <div className="glass-panel mb-6 overflow-hidden rounded-3xl">
+        <div className="border-b border-white/10 bg-teal-50/50 p-5 dark:bg-teal-950/20">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+            <MapIcon size={18} className="text-emerald-600" /> Интерактивна карта
+          </h2>
         </div>
+        <div ref={mapRef} className="h-[400px] w-full" />
+        <div className="border-t border-slate-200 p-3 text-xs text-slate-500 dark:border-slate-700">
+          {fields.length} парцела показани на картата
+        </div>
+      </div>
 
-        <div className="border-b border-slate-200 p-6 dark:border-slate-700">
+      <div className="glass-panel overflow-hidden rounded-3xl">
+        <div className="border-b border-slate-200 p-5 dark:border-slate-700">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
             <Upload size={16} /> Импорт на парцели от Shapefile (.zip)
           </h3>
@@ -273,7 +295,7 @@ export default function PolitaPage() {
 
           {importPreview && importPreview.length > 0 && (
             <div className="mt-4">
-              <canvas ref={canvasRef} className="w-full rounded-xl border border-slate-200 dark:border-slate-700" style={{ height: 300 }} />
+              <div ref={previewMapRef} className="h-[300px] w-full rounded-xl border border-slate-200 dark:border-slate-700" />
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-500 sm:grid-cols-4">
                 {importPreview.slice(0, 8).map((f, i) => {
                   const name = f.properties?.NAME || f.properties?.name || f.properties?.ИМЕ || `Парцел ${i + 1}`;
