@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { inventoryItems } from '@/lib/db/schema/inventory';
+import { productCodes } from '@/lib/db/schema/product_codes';
 import { resolveTenantId } from '@/lib/db/tenant-context';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 
 export async function GET() {
   try {
     const tenantId = await resolveTenantId();
     const { db } = getDb();
     const result = await db.select().from(inventoryItems).where(eq(inventoryItems.tenantId, tenantId)).orderBy(desc(inventoryItems.createdAt));
-    return NextResponse.json(result.map((i: any) => ({ ...i, currentStock: Number(i.currentStock), minStock: i.minStock ? Number(i.minStock) : null })));
+    const items = result.map((i: any) => ({ ...i, currentStock: Number(i.currentStock), minStock: i.minStock ? Number(i.minStock) : null }));
+    const codes = await db.select({ itemId: productCodes.itemId, code: productCodes.code }).from(productCodes)
+      .where(and(eq(productCodes.tenantId, tenantId), eq(productCodes.isPrimary, 'true')));
+    const codeMap = new Map(codes.map((c: any) => [c.itemId, c.code]));
+    return NextResponse.json(items.map((i: any) => ({ ...i, barcode: codeMap.get(i.id) || null })));
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
 

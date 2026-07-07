@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Leaf, Search, User as UserIcon, LogOut } from "lucide-react";
+import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { navBarReveal } from "@/lib/motion-variants";
 
@@ -123,6 +124,7 @@ export function SiteHeader() {
 						<Search size={16} aria-hidden className="opacity-90" />
 						<span className="sr-only sm:not-sr-only">Търси</span>
 					</Button>
+					<NotificationBell />
 					{user ? (
 						<Button
 							type="button"

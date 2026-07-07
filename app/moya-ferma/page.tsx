@@ -81,12 +81,12 @@ export default function MoyaFermaPage() {
 	};
 
 	const KPI_CARDS = [
-		{ key: "fields", label: "Парцели", value: kpi ? `${kpi.fields.total} бр. / ${kpi.fields.area} дка` : "-", icon: MapPin, color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/50" },
-		{ key: "inventory", label: "Склад", value: kpi ? `${kpi.inventory.totalItems} артикула${kpi.inventory.lowStock > 0 ? `, ${kpi.inventory.lowStock} под мин.` : ""}` : "-", icon: Package, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/50" },
-		{ key: "employees", label: "Служители", value: kpi ? `${kpi.employees.active} активни` : "-", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
-		{ key: "harvest", label: "Реколта (т.), тазгодишна", value: kpi ? `${(Number(kpi.harvest.currentYear) / 1000).toFixed(2)} т` : "-", icon: Combine, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
-		{ key: "machines", label: "Машини", value: kpi ? `${kpi.machines.total} активни` : "-", icon: Tractor, color: "text-sky-600", bg: "bg-sky-100 dark:bg-sky-900/50" },
-		{ key: "invoices", label: "Фактури (чакащи)", value: kpi ? `${kpi.invoices.pending} неизплатени` : "-", icon: Receipt, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/50" },
+		{ key: "fields", label: "Парцели", value: kpi?.fields ? `${kpi.fields.total} бр. / ${kpi.fields.area} дка` : "-", icon: MapPin, color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/50" },
+		{ key: "inventory", label: "Склад", value: kpi?.inventory ? `${kpi.inventory.totalItems} артикула${kpi.inventory.lowStock > 0 ? `, ${kpi.inventory.lowStock} под мин.` : ""}` : "-", icon: Package, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/50" },
+		{ key: "employees", label: "Служители", value: kpi?.employees ? `${kpi.employees.active} активни` : "-", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
+		{ key: "harvest", label: "Реколта (т.), тазгодишна", value: kpi?.harvest ? `${(Number(kpi.harvest.currentYear) / 1000).toFixed(2)} т` : "-", icon: Combine, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
+		{ key: "machines", label: "Машини", value: kpi?.machines ? `${kpi.machines.total} активни` : "-", icon: Tractor, color: "text-sky-600", bg: "bg-sky-100 dark:bg-sky-900/50" },
+		{ key: "invoices", label: "Фактури (чакащи)", value: kpi?.invoices ? `${kpi.invoices.pending} неизплатени` : "-", icon: Receipt, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/50" },
 	];
 
 	return (
