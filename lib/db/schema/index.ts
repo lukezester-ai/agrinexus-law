@@ -15,3 +15,4 @@ export * from './crop_rotation';
 export * from './reminders';
 export * from './banking';
 export * from './hr';
+export * from './fixed_assets';
