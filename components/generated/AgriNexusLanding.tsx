@@ -995,7 +995,7 @@ const HowItWorks = () => {
     </section>;
 };
 const FARM_MODULES = [
-  { label: 'Парцели', href: '/moya-ferma/pole', desc: 'Карта и регистър на полетата с площи, култури и геолокация' },
+  { label: 'Парцели', href: '/moya-ferma/polita', desc: 'Карта и регистър на полетата с площи, култури и геолокация' },
   { label: 'Склад', href: '/moya-ferma/sklad', desc: 'Наличие на торове, препарати, резервни части и консумативи' },
   { label: 'Счетоводство', href: '/moya-ferma/schetovodstvo', desc: 'Приходи/разходи, ДДС, банкови сметки и НАП XML експорт' },
   { label: 'Машини', href: '/moya-ferma/mashini', desc: 'Технически прегледи, застраховки, гориво и сервиз' },
