@@ -14,6 +14,8 @@
     "lint": "eslint .",
     "lint:ci": "eslint . --max-warnings 0",
     "test": "npm run typecheck && npm run lint:ci && node scripts/verify-no-cloudflare.mjs && npm run build && node scripts/smoke-next.mjs",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "check:rag": "node scripts/check-rag-index.mjs",
     "check:rag:local": "node scripts/check-rag-local.mjs",
     "check:rag:prod": "node scripts/check-rag-index.mjs https://www.agrinexuslaw.com",
@@ -45,6 +47,7 @@
     "@capacitor/cli": "^8.3.3",
     "@capacitor/core": "^8.3.3",
     "@capacitor/ios": "^8.3.3",
+    "@capacitor/push-notifications": "^8.1.1",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -85,6 +88,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/geojson": "^7946.0.16",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^22",
@@ -94,8 +99,10 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.17.0",
     "eslint-config-next": "15.5.15",
+    "jsdom": "^29.1.1",
     "postcss": "8.5.10",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
   }
 }

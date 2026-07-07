@@ -20,6 +20,11 @@ export const invoices = pgTable('invoices', {
   items: jsonb('items'),
   notes: text('notes'),
   vatPosted: text('vat_posted').notNull().default('false'),
+  napUuid: text('nap_uuid'),
+  napStatus: text('nap_status').notNull().default('not_submitted'),
+  napSubmittedAt: timestamp('nap_submitted_at'),
+  napResponse: jsonb('nap_response'),
+  napError: text('nap_error'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -39,6 +44,11 @@ export const purchaseInvoices = pgTable('purchase_invoices', {
   totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull().default('0'),
   items: jsonb('items'),
   vatPosted: text('vat_posted').notNull().default('false'),
+  napUuid: text('nap_uuid'),
+  napStatus: text('nap_status').notNull().default('not_submitted'),
+  napSubmittedAt: timestamp('nap_submitted_at'),
+  napResponse: jsonb('nap_response'),
+  napError: text('nap_error'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

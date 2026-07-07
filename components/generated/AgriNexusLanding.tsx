@@ -61,6 +61,9 @@ interface ProfileChip {
 
 // --- Mock Data ---
 const NAV_LINKS: NavLink[] = [{
+  label: 'Моята ферма',
+  href: '/moya-ferma'
+}, {
   label: 'Документи',
   href: '/documents'
 }, {
@@ -582,12 +585,12 @@ const GLOBAL_STYLES = `
     transition: color 200ms ease-out;
   }
   .agri-nav-link:hover {
-    color: #1D1D1F;
+    opacity: 0.7;
   }
-  .agri-nav-link:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-    border-radius: 4px;
+  .farm-module-card:hover {
+    background-color: #E8F5E9 !important;
+    transform: translateY(-2px);
+    border-color: #5f8f72 !important;
   }
   .agri-btn-primary {
     background-color: #0071E3;
@@ -991,6 +994,95 @@ const HowItWorks = () => {
       </div>
     </section>;
 };
+const FARM_MODULES = [
+  { label: 'Парцели', href: '/moya-ferma/pole', desc: 'Карта и регистър на полетата с площи, култури и геолокация' },
+  { label: 'Склад', href: '/moya-ferma/sklad', desc: 'Наличие на торове, препарати, резервни части и консумативи' },
+  { label: 'Счетоводство', href: '/moya-ferma/schetovodstvo', desc: 'Приходи/разходи, ДДС, банкови сметки и НАП XML експорт' },
+  { label: 'Машини', href: '/moya-ferma/mashini', desc: 'Технически прегледи, застраховки, гориво и сервиз' },
+  { label: 'Реколта', href: '/moya-ferma/rekolta', desc: 'Добиви по парцели, култури и години' },
+  { label: 'Сеитбооборот', href: '/moya-ferma/seitbooborot', desc: 'План за ротация на културите и предшественици' },
+  { label: 'Химизация', href: '/moya-ferma/himizacia', desc: 'БАБХ дневник за РЗ с PDF експорт и препарати' },
+  { label: 'Календар', href: '/moya-ferma/kalendar', desc: 'Напомняния за срокове, прегледи и кампании' },
+  { label: 'Банки', href: '/moya-ferma/banki', desc: 'Банкови сметки, транзакции и CSV импорт от банка' },
+  { label: 'ЧР', href: '/moya-ferma/choveшки-ресурси', desc: 'Трудови договори, присъствие, отпуски и заплати' },
+  { label: 'ДМА', href: '/moya-ferma/dma', desc: 'Дълготрайни активи с амортизация и график' },
+];
+const FarmDashboard = () => <section className="bg-[#FFFFFF]" style={{
+padding: '100px 48px'
+}}>
+    <div className="max-w-[1100px] mx-auto">
+      <span style={{
+      fontSize: '12px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.08em',
+      fontWeight: 600,
+      color: '#0071E3',
+      marginBottom: '16px',
+      display: 'block',
+      textAlign: 'center'
+    }}>
+        УПРАВЛЕНИЕ НА ФЕРМАТА
+      </span>
+      <h2 style={{
+      fontSize: 'clamp(36px, 4.5vw, 56px)',
+      fontWeight: 700,
+      color: '#1D1D1F',
+      textAlign: 'center',
+      lineHeight: 1.05,
+      letterSpacing: '-0.025em',
+      marginBottom: '16px'
+    }}>
+        Всичко за твоето стопанство
+      </h2>
+      <p style={{
+      fontSize: '17px',
+      lineHeight: 1.6,
+      color: '#6E6E73',
+      textAlign: 'center',
+      maxWidth: '600px',
+      margin: '0 auto 56px'
+    }}>
+        От проследяване на парцелите до НАП декларации — 11 модула в едно табло.
+      </p>
+      <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+      gap: '16px'
+    }}>
+        {FARM_MODULES.map(mod => <a key={mod.href} href={mod.href} className="farm-module-card" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '24px',
+        borderRadius: '16px',
+        backgroundColor: '#F5F5F7',
+        textDecoration: 'none',
+        transition: 'background-color 0.2s, transform 0.2s',
+        border: '1px solid transparent'
+      }}>
+            <span style={{
+          fontSize: '15px',
+          fontWeight: 700,
+          color: '#1D1D1F',
+          marginBottom: '6px'
+        }}>{mod.label}</span>
+            <span style={{
+          fontSize: '13px',
+          lineHeight: 1.5,
+          color: '#6E6E73'
+        }}>{mod.desc}</span>
+          </a>)}
+      </div>
+      <div style={{ textAlign: 'center', marginTop: '40px' }}>
+        <a href="/moya-ferma" className="agri-btn-primary" style={{
+        display: 'inline-flex',
+        fontSize: '15px'
+      }}>
+            Към Моята ферма →
+          </a>
+      </div>
+    </div>
+  </section>;
+
 const Categories = () => <section className="bg-[#F5F5F7]" style={{
   padding: '100px 48px'
 }}>
@@ -1831,6 +1923,7 @@ const AgriNexusLandingInner = () => <div className="min-h-screen bg-[#FFFFFF] te
       <LiveTicker />
       <Features />
       <HowItWorks />
+      <FarmDashboard />
       <LandingLiveStats />
       <Categories />
       <LandingSocialProof />

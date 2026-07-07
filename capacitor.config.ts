@@ -2,11 +2,10 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.agrinexus.law",
-  appName: "AgriNexus.Law",
+  appName: "AgriNexus",
   webDir: "public/capacitor",
   server: {
-    // Store builds load the live secure deployment.
-    url: "https://agrinexuslaw.com",
+    url: "https://www.agrinexuslaw.com",
     cleartext: false,
   },
   plugins: {
@@ -14,6 +13,9 @@ const config: CapacitorConfig = {
       launchShowDuration: 1200,
       backgroundColor: "#fafaf9",
       showSpinner: false,
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
     },
   },
 };

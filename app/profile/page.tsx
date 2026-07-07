@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Save, Check, FolderOpen } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import { loadFarmProfile, persistFarmProfile } from "@/lib/farm-profile";
+import TwoFactorSetup from "@/components/two-factor-setup";
 
 const REGIONS = [
   "Благоевград", "Бургас", "Варна", "Велико Търново", "Видин", "Враца",
@@ -190,6 +191,8 @@ export default function ProfilePage() {
             <FolderOpen size={16} aria-hidden />
             Мои документи (PDF и др.)
           </Link>
+
+          <TwoFactorSetup />
         </div>
 
         <Link

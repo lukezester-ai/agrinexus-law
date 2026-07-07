@@ -41,7 +41,13 @@ export default function LoginPage() {
           password,
         })
         if (error) throw error
-        router.push(nextPath.startsWith('/') ? nextPath : '/')
+
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        if (aal?.nextLevel === 'aal2') {
+          router.push('/vhod/verify-2fa')
+        } else {
+          router.push(nextPath.startsWith('/') ? nextPath : '/')
+        }
         router.refresh()
       } else {
         const { error, data } = await supabase.auth.signUp({
