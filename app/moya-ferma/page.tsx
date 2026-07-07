@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight } from "lucide-react";
+import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight, Users } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import {
 	loadFarmProfile,
@@ -28,6 +28,7 @@ const MODULES = [
 	{ href: "/moya-ferma/himizacia", label: "Химизация", desc: "БАБХ дневник на продуктите за РЗ", icon: FlaskConical, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
 	{ href: "/moya-ferma/kalendar", label: "Календар", desc: "График на събития, напомняния и задачи", icon: RefreshCw, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
 	{ href: "/moya-ferma/banki", label: "Банки", desc: "Банкови сметки, транзакции и импорт", icon: Landmark, color: "text-indigo-600", bg: "bg-indigo-100 dark:bg-indigo-900/50" },
+	{ href: "/moya-ferma/choveшки-ресурси", label: "Човешки ресурси", desc: "Служители, присъствие, отпуски и ведомости", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
 ];
 
 export default function MoyaFermaPage() {
