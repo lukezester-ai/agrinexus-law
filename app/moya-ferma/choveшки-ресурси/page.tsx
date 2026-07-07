@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { Users, CalendarCheck, FileSpreadsheet, Plus, Loader2, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Users, CalendarCheck, FileSpreadsheet, Plus, Loader2, CheckCircle, XCircle, Trash2, Download } from "lucide-react";
 
 type Employee = {
   id: string; firstName: string; lastName: string; email: string | null; phone: string | null;
@@ -184,16 +184,48 @@ export default function HrPage() {
     return map[c || ""] || c || "—";
   };
 
+  const exportCsv = (data: any[], columns: { key: string; label: string }[], filename: string) => {
+    const header = columns.map(c => `"${c.label}"`).join(',');
+    const rows = data.map(row =>
+      columns.map(c => {
+        const val = c.key.split('.').reduce((o, k) => o?.[k], row);
+        return `"${String(val ?? '').replace(/"/g, '""')}"`;
+      }).join(',')
+    );
+    const csv = '\ufeff' + [header, ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
   return (
     <SitePageShell maxWidth="7xl" subheader={
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold">Човешки ресурси</p>
         <div className="flex gap-2 flex-wrap">
           {tab === "employees" && (
-            <button onClick={() => setShowEmpForm(!showEmpForm)}
-              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
-              <Plus size={16} /> Добави служител
-            </button>
+            <>
+              <button onClick={() => setShowEmpForm(!showEmpForm)}
+                className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
+                <Plus size={16} /> Добави служител
+              </button>
+              <button onClick={() => exportCsv(employees, [
+                { key: 'firstName', label: 'Име' },
+                { key: 'lastName', label: 'Фамилия' },
+                { key: 'email', label: 'Имейл' },
+                { key: 'phone', label: 'Телефон' },
+                { key: 'position', label: 'Длъжност' },
+                { key: 'department', label: 'Отдел' },
+                { key: 'salary', label: 'Заплата' },
+                { key: 'contractType', label: 'Договор' },
+                { key: 'startDate', label: 'Начална дата' },
+                { key: 'endDate', label: 'Крайна дата' },
+                { key: 'isActive', label: 'Активен' },
+              ], 'employees.csv')} className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300">
+                <Download size={16} /> CSV
+              </button>
+            </>
           )}
           {tab === "attendance" && (
             <button onClick={() => setShowAttForm(!showAttForm)}

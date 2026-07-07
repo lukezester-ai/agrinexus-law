@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { Landmark, Plus, Save, Trash2, Search, X, FileText, Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { Landmark, Plus, Save, Trash2, Search, X, FileText, Loader2, TrendingUp, TrendingDown, Download } from "lucide-react";
 
 type VatEntry = {
   id: string; type: "sales" | "purchase"; periodYear: number; periodMonth: number;
@@ -65,6 +65,21 @@ export default function DanaciPage() {
            (e.invoiceNumber || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const exportCsv = (data: any[], columns: { key: string; label: string }[], filename: string) => {
+    const header = columns.map(c => `"${c.label}"`).join(',');
+    const rows = data.map(row =>
+      columns.map(c => {
+        const val = c.key.split('.').reduce((o, k) => o?.[k], row);
+        return `"${String(val ?? '').replace(/"/g, '""')}"`;
+      }).join(',')
+    );
+    const csv = '\ufeff' + [header, ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
   const totalNet = filtered.reduce((s, e) => s + e.netAmount, 0);
   const totalVat = filtered.reduce((s, e) => s + e.vatAmount, 0);
   const totalAmt = filtered.reduce((s, e) => s + e.totalAmount, 0);
@@ -73,9 +88,24 @@ export default function DanaciPage() {
     <SitePageShell maxWidth="5xl" subheader={
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Данъци и ДДС</p>
-        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
-          <Plus size={16} /> Нов запис
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => exportCsv(filtered, [
+            { key: 'entryDate', label: 'Дата' },
+            { key: 'invoiceNumber', label: 'Фактура' },
+            { key: 'counterpartyName', label: 'Контрагент' },
+            { key: 'counterpartyVat', label: 'ДДС номер' },
+            { key: 'netAmount', label: 'Дан. основа' },
+            { key: 'vatAmount', label: 'ДДС' },
+            { key: 'totalAmount', label: 'Общо' },
+            { key: 'vatRate', label: 'Ставка' },
+            { key: 'isIntraCommunity', label: 'ВО' },
+          ], 'danaci.csv')} className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300">
+            <Download size={16} /> CSV
+          </button>
+          <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
+            <Plus size={16} /> Нов запис
+          </button>
+        </div>
       </div>
     }>
       <div className="mb-4 flex flex-wrap items-center gap-3">

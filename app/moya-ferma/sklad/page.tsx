@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { Package, Plus, Save, Trash2, Edit, Loader2, ArrowUpDown, ArrowDown, ArrowUp, X } from "lucide-react";
+import { Package, Plus, Save, Trash2, Edit, Loader2, ArrowUpDown, ArrowDown, ArrowUp, X, Search, Download } from "lucide-react";
 
 type InventoryItem = {
   id: string; name: string; sku: string; category: string;
-  unitOfMeasure: string; currentStock: number; minStock: number | null;
+  unitOfMeasure: string; currentStock: number; minStock: number | null; barcode: string | null;
 };
 
 type Movement = {
@@ -23,7 +23,8 @@ export default function SkladPage() {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<InventoryItem | null>(null);
-  const [form, setForm] = useState({ name: "", sku: "", category: "Други", unitOfMeasure: "бр", currentStock: 0, minStock: 0 });
+  const [form, setForm] = useState({ name: "", sku: "", category: "Други", unitOfMeasure: "бр", currentStock: 0, minStock: 0, barcode: "" });
+  const [search, setSearch] = useState("");
 
   const [movItem, setMovItem] = useState<InventoryItem | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -46,7 +47,11 @@ export default function SkladPage() {
       if (editing) {
         await fetch("/api/farm/inventory", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...payload }) });
       } else {
-        await fetch("/api/farm/inventory", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const r = await fetch("/api/farm/inventory", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const created = await r.json();
+        if (form.barcode) {
+          await fetch("/api/farm/inventory/codes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ itemId: created.id, code: form.barcode, codeType: "ean", isPrimary: "true" }) });
+        }
       }
       await load();
       setShowForm(false); setEditing(null);
@@ -90,14 +95,41 @@ export default function SkladPage() {
   };
 
   const lowStock = items.filter((i) => i.minStock && i.currentStock <= i.minStock);
+  const q = search.toLowerCase();
+  const filteredItems = search ? items.filter((i) => i.name.toLowerCase().includes(q) || (i.barcode && i.barcode.toLowerCase().includes(q))) : items;
+
+  const exportCsv = (data: any[], columns: { key: string; label: string }[], filename: string) => {
+    const header = columns.map(c => `"${c.label}"`).join(',');
+    const rows = data.map(row =>
+      columns.map(c => {
+        const val = c.key.split('.').reduce((o, k) => o?.[k], row);
+        return `"${String(val ?? '').replace(/"/g, '""')}"`;
+      }).join(',')
+    );
+    const csv = '\ufeff' + [header, ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   return (
     <SitePageShell maxWidth="5xl" subheader={
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold">Склад</p>
-        <button onClick={() => { setShowForm(!showForm); setEditing(null); setForm({ name: "", sku: "", category: "Други", unitOfMeasure: "бр", currentStock: 0, minStock: 0 }); }}
+        <button onClick={() => { setShowForm(!showForm); setEditing(null); setForm({ name: "", sku: "", category: "Други", unitOfMeasure: "бр", currentStock: 0, minStock: 0, barcode: "" }); }}
           className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
           <Plus size={16} /> Нов артикул
+        </button>
+        <button onClick={() => exportCsv(items, [
+          { key: 'name', label: 'Име' },
+          { key: 'category', label: 'Категория' },
+          { key: 'unitOfMeasure', label: 'Мярка' },
+          { key: 'currentStock', label: 'Наличност' },
+          { key: 'minStock', label: 'Мин. запас' },
+          { key: 'sku', label: 'Код' },
+        ], 'sklad.csv')} className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300">
+          <Download size={16} /> CSV
         </button>
       </div>
     }>
@@ -106,6 +138,14 @@ export default function SkladPage() {
           <strong>{lowStock.length} артикула</strong> са под минималната наличност
         </div>
       )}
+
+      <div className="mb-4 flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Търси по име или баркод…"
+            className="w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+        </div>
+      </div>
 
       <div className="glass-panel overflow-hidden rounded-3xl">
         <div className="border-b border-white/10 bg-teal-50/50 p-6 dark:bg-teal-950/20">
@@ -134,6 +174,11 @@ export default function SkladPage() {
               </select>
             </div>
             <div className="space-y-1">
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Баркод (EAN)</label>
+              <input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} placeholder="..."
+                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
+            </div>
+            <div className="space-y-1">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Наличност</label>
               <input type="number" step="0.001" value={form.currentStock || ""} onChange={(e) => setForm({ ...form, currentStock: Number(e.target.value) })}
                 className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
@@ -160,14 +205,15 @@ export default function SkladPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs font-bold uppercase text-slate-500 dark:bg-slate-900/50">
-                <tr><th className="p-3">Артикул</th><th className="p-3">Категория</th><th className="p-3">Мярка</th><th className="p-3 text-right">Наличност</th><th className="p-3 text-right">Мин.</th><th className="p-3"></th></tr>
+                <tr><th className="p-3">Артикул</th><th className="p-3">Код</th><th className="p-3">Категория</th><th className="p-3">Мярка</th><th className="p-3 text-right">Наличност</th><th className="p-3 text-right">Мин.</th><th className="p-3"></th></tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {items.map((i) => {
+                {filteredItems.map((i) => {
                   const isLow = i.minStock !== null && i.currentStock <= i.minStock;
                   return (
                     <tr key={i.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${isLow ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}>
                       <td className="p-3 font-medium">{i.name}</td>
+                      <td className="p-3 font-mono text-xs text-slate-500">{i.barcode || "—"}</td>
                       <td className="p-3 text-slate-600">{i.category || "—"}</td>
                       <td className="p-3 text-slate-600">{i.unitOfMeasure}</td>
                       <td className={`p-3 text-right font-bold ${isLow ? "text-amber-600" : ""}`}>{Number(i.currentStock).toFixed(3)}</td>
@@ -175,7 +221,7 @@ export default function SkladPage() {
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
                           <button onClick={() => openMovements(i)} className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30" title="Движения"><ArrowUpDown size={16} /></button>
-                          <button onClick={() => { setForm({ name: i.name, sku: i.sku, category: i.category || "Други", unitOfMeasure: i.unitOfMeasure, currentStock: Number(i.currentStock), minStock: i.minStock !== null ? Number(i.minStock) : 0 }); setEditing(i); setShowForm(true); }} className="rounded-lg p-1.5 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950/30"><Edit size={16} /></button>
+                          <button onClick={() => { setForm({ name: i.name, sku: i.sku, category: i.category || "Други", unitOfMeasure: i.unitOfMeasure, currentStock: Number(i.currentStock), minStock: i.minStock !== null ? Number(i.minStock) : 0, barcode: i.barcode || "" }); setEditing(i); setShowForm(true); }} className="rounded-lg p-1.5 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950/30"><Edit size={16} /></button>
                           <button onClick={() => handleDelete(i.id)} className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 size={16} /></button>
                         </div>
                       </td>
