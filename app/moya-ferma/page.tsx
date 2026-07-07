@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight, Users } from "lucide-react";
+import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight, Users, Bell, Receipt } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import {
 	loadFarmProfile,
@@ -51,6 +51,17 @@ export default function MoyaFermaPage() {
 		}
 	}, []);
 
+	const [kpi, setKpi] = useState<any>(null);
+	const [kpiLoading, setKpiLoading] = useState(true);
+
+	useEffect(() => {
+		fetch('/api/farm/dashboard')
+			.then(r => r.json())
+			.then(d => setKpi(d))
+			.catch(() => {})
+			.finally(() => setKpiLoading(false));
+	}, []);
+
 	const handleSave = (e: React.FormEvent) => {
 		e.preventDefault();
 		const snapshot: FarmProfileSnapshot = {
@@ -69,6 +80,15 @@ export default function MoyaFermaPage() {
 		setTimeout(() => setSaved(false), 3000);
 	};
 
+	const KPI_CARDS = [
+		{ key: "fields", label: "Парцели", value: kpi ? `${kpi.fields.total} бр. / ${kpi.fields.area} дка` : "-", icon: MapPin, color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/50" },
+		{ key: "inventory", label: "Склад", value: kpi ? `${kpi.inventory.totalItems} артикула${kpi.inventory.lowStock > 0 ? `, ${kpi.inventory.lowStock} под мин.` : ""}` : "-", icon: Package, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/50" },
+		{ key: "employees", label: "Служители", value: kpi ? `${kpi.employees.active} активни` : "-", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
+		{ key: "harvest", label: "Реколта (т.), тазгодишна", value: kpi ? `${(Number(kpi.harvest.currentYear) / 1000).toFixed(2)} т` : "-", icon: Combine, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/50" },
+		{ key: "machines", label: "Машини", value: kpi ? `${kpi.machines.total} активни` : "-", icon: Tractor, color: "text-sky-600", bg: "bg-sky-100 dark:bg-sky-900/50" },
+		{ key: "invoices", label: "Фактури (чакащи)", value: kpi ? `${kpi.invoices.pending} неизплатени` : "-", icon: Receipt, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/50" },
+	];
+
 	return (
 		<SitePageShell
 			maxWidth="4xl"
@@ -78,24 +98,7 @@ export default function MoyaFermaPage() {
 				</div>
 			}
 		>
-			<div className="grid gap-4 sm:grid-cols-2">
-				{MODULES.map((m) => (
-					<Link key={m.href} href={m.href}
-						className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-700"
-					>
-						<div className="flex items-start justify-between">
-							<div className={`rounded-xl ${m.bg} p-3`}>
-								<m.icon size={24} className={m.color} />
-							</div>
-							<ArrowRight size={18} className="mt-2 text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-500 dark:text-slate-600" />
-						</div>
-						<h3 className="mt-3 font-bold text-slate-900 dark:text-white">{m.label}</h3>
-						<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{m.desc}</p>
-					</Link>
-				))}
-			</div>
-
-			<div className="mt-6 glass-panel overflow-hidden rounded-3xl">
+			<div className="glass-panel overflow-hidden rounded-3xl">
 				<div className="border-b border-white/10 bg-teal-50/50 p-6 dark:bg-teal-950/20">
 					<h2 className="font-display flex items-center gap-3 text-xl font-medium text-slate-950 dark:text-white">
 						<Sprout className="text-teal-600 dark:text-teal-400" /> Моят профил
@@ -157,6 +160,69 @@ export default function MoyaFermaPage() {
 						<Save size={18} /> Запази профила
 					</button>
 				</form>
+			</div>
+
+			<div className="mt-6">
+				<h3 className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-300">Преглед на фермата</h3>
+				{kpiLoading ? (
+					<div className="grid gap-4 sm:grid-cols-3">
+						{[1,2,3,4,5,6].map(i => (
+							<div key={i} className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+								<div className="h-10 w-10 rounded-xl bg-slate-200 dark:bg-slate-700" />
+								<div className="mt-3 h-6 w-20 rounded bg-slate-200 dark:bg-slate-700" />
+								<div className="mt-2 h-3 w-28 rounded bg-slate-200 dark:bg-slate-700" />
+							</div>
+						))}
+					</div>
+				) : (
+					<div className="grid gap-4 sm:grid-cols-3">
+						{KPI_CARDS.map(c => (
+							<div key={c.key} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+								<div className="flex items-start justify-between">
+									<div className={`rounded-xl ${c.bg} p-3`}>
+										<c.icon size={24} className={c.color} />
+									</div>
+								</div>
+								<p className="mt-2 text-lg font-bold text-slate-900 dark:text-white">{c.value}</p>
+								<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{c.label}</p>
+							</div>
+						))}
+						{kpi?.upcoming && kpi.upcoming.length > 0 && (
+							<div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+								<div className="flex items-start justify-between">
+									<div className="rounded-xl bg-rose-100 p-3 dark:bg-rose-900/50">
+										<Bell size={24} className="text-rose-600" />
+									</div>
+								</div>
+								<div className="mt-2 space-y-1">
+									{kpi.upcoming.slice(0, 3).map((e: any) => (
+										<p key={e.id} className="text-sm font-medium text-slate-900 dark:text-white">
+											{e.title}
+										</p>
+									))}
+								</div>
+								<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Предстоящи събития</p>
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+
+			<div className="mt-6 grid gap-4 sm:grid-cols-2">
+				{MODULES.map((m) => (
+					<Link key={m.href} href={m.href}
+						className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-700"
+					>
+						<div className="flex items-start justify-between">
+							<div className={`rounded-xl ${m.bg} p-3`}>
+								<m.icon size={24} className={m.color} />
+							</div>
+							<ArrowRight size={18} className="mt-2 text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-500 dark:text-slate-600" />
+						</div>
+						<h3 className="mt-3 font-bold text-slate-900 dark:text-white">{m.label}</h3>
+						<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{m.desc}</p>
+					</Link>
+				))}
 			</div>
 		</SitePageShell>
 	);
