@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { LandingChatProvider, useLandingChat } from '@/components/landing-chat-drawer';
 import { LandingLiveStats } from '@/components/landing-live-stats';
 import { LandingSocialProof } from '@/components/landing-social-proof';
+import { PricingPlans } from '@/components/pricing-plans';
 
 // --- Types ---
 interface NavLink {
@@ -1835,6 +1836,17 @@ const AgriNexusLandingInner = () => <div className="min-h-screen bg-[#FFFFFF] te
       <LandingSocialProof />
       <Deadlines />
       <ComparisonTable />
+      <section className="bg-[#FFFFFF]" style={{ padding: '100px 48px' }}>
+        <div className="max-w-[1100px] mx-auto">
+          <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, color: '#0071E3', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
+            ЦЕНИ И ПЛАНОВЕ
+          </span>
+          <h2 style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 700, color: '#1D1D1F', textAlign: 'center', lineHeight: 1.05, letterSpacing: '-0.025em', marginBottom: '48px' }}>
+            Избери своя план
+          </h2>
+          <PricingPlans />
+        </div>
+      </section>
       <Trust />
       <FAQ />
       <AIChatCTA />

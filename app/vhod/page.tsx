@@ -44,7 +44,7 @@ export default function LoginPage() {
         router.push(nextPath.startsWith('/') ? nextPath : '/')
         router.refresh()
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { error, data } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
           password,
           options: {
@@ -52,6 +52,11 @@ export default function LoginPage() {
           },
         })
         if (error) throw error
+        fetch('/api/email/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        }).catch(() => {})
         setView('sign-in')
         setError('Успешна регистрация! Моля, влезте в профила си (или потвърдете имейла си, ако се изисква).')
       }
