@@ -1006,6 +1006,7 @@ const FARM_MODULES = [
   { label: 'Банки', href: '/moya-ferma/banki', desc: 'Банкови сметки, транзакции и CSV импорт от банка' },
   { label: 'ЧР', href: '/moya-ferma/choveшки-ресурси', desc: 'Трудови договори, присъствие, отпуски и заплати' },
   { label: 'ДМА', href: '/moya-ferma/dma', desc: 'Дълготрайни активи с амортизация и график' },
+  { label: 'Архив', href: '/moya-ferma/dokumenti', desc: 'Хранилище за договори, ДФЗ писма, протоколи и фактури' },
 ];
 const FarmDashboard = () => <section className="bg-[#FFFFFF]" style={{
 padding: '100px 48px'
@@ -1042,7 +1043,7 @@ padding: '100px 48px'
       maxWidth: '600px',
       margin: '0 auto 56px'
     }}>
-        От проследяване на парцелите до НАП декларации — 11 модула в едно табло.
+        От проследяване на парцелите до НАП декларации — 12 модула в едно табло.
       </p>
       <div style={{
       display: 'grid',
