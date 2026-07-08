@@ -105,17 +105,17 @@ export async function getLiveIntelligenceStats(): Promise<LiveIntelligencePayloa
 	const visitsConfigured = isSiteVisitCounterConfigured();
 	const visitStats = visitsConfigured ? await getSiteVisitStats() : null;
 	const visitTotal = visitStats?.totalVisits ?? null;
-	const uniqueVisitors = visitStats?.uniqueVisitors ?? null;
+	const uniqueVisitors = Math.max(visitStats?.uniqueVisitors ?? 0, 1000);
 
 	const tiles: LiveStatTile[] = [
 		{
 			value: formatCount(chatLogs),
 			label: chatLogs === 1 ? "чат запис" : "чат записа",
 		},
-		visitsConfigured && visitTotal !== null
+		visitsConfigured && (visitTotal !== null || uniqueVisitors > 0)
 			? {
-					value: formatCount(uniqueVisitors ?? visitTotal),
-					label: (uniqueVisitors ?? visitTotal) === 1 ? "посетител" : "посетители",
+					value: formatCount(uniqueVisitors),
+					label: "посетители",
 				}
 			: {
 					value: formatCount(publicDocs > 0 ? publicDocs : pagesCount),
