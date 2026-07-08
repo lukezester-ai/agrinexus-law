@@ -12,6 +12,6 @@ export const SiteFooter: React.FC = () => {
           <Link href="/document-review" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">AI Преглед</Link>
         </div>
       </div>
-      <p className="text-[13px] text-[#333333] font-body">© 2025 AgriNexus.Law</p>
+      <p className="text-[13px] text-[#333333] font-body">© 2025 AgriNexus.Law — собственост на AgriNexus Ltd (info@agrinexus.eu)</p>
     </footer>;
 };

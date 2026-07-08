@@ -4,19 +4,30 @@
       <stop offset="0%" stop-color="#0d9488"/>
       <stop offset="100%" stop-color="#4f46e5"/>
     </linearGradient>
-    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#bbf7d0"/>
-      <stop offset="100%" stop-color="#dcfce7"/>
+    <linearGradient id="scales" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="100%" stop-color="#fde68a"/>
     </linearGradient>
   </defs>
   <rect x="12" y="12" width="232" height="232" rx="56" fill="url(#bg)"/>
-  <path
-    d="M179 69c-35 2-58 12-76 30-25 25-32 63-13 88 21 27 60 23 85-2 19-19 28-43 30-76 0-8-1-22-4-40-7 0-14 0-22 0z"
-    fill="url(#leaf)"/>
-  <path
-    d="M85 173c25-20 48-48 71-84"
-    fill="none"
-    stroke="#0f766e"
-    stroke-width="10"
-    stroke-linecap="round"/>
+  <g fill="none" stroke="url(#scales)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Central pillar -->
+    <line x1="128" y1="40" x2="128" y2="200"/>
+    <!-- Pivot top -->
+    <circle cx="128" cy="40" r="10"/>
+    <!-- Cross beam -->
+    <line x1="48" y1="68" x2="208" y2="68"/>
+    <!-- Beam pivot circle -->
+    <circle cx="128" cy="68" r="6"/>
+    <!-- Left chain -->
+    <line x1="60" y1="76" x2="60" y2="130"/>
+    <!-- Right chain -->
+    <line x1="196" y1="76" x2="196" y2="130"/>
+    <!-- Left pan -->
+    <path d="M36 130 Q60 150 84 130"/>
+    <!-- Right pan -->
+    <path d="M172 130 Q196 150 220 130"/>
+    <!-- Base -->
+    <path d="M80 200 L128 228 L176 200"/>
+  </g>
 </svg>

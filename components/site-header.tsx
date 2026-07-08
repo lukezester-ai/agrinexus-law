@@ -6,7 +6,7 @@ import { createOptionalClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Leaf, Search, User as UserIcon, LogOut } from "lucide-react";
+import { Scale, Search, User as UserIcon, LogOut } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { navBarReveal } from "@/lib/motion-variants";
@@ -78,7 +78,7 @@ export function SiteHeader() {
 				>
 					<span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#1D1D1F] text-white shadow-md ring-2 ring-white/40 transition duration-500 group-hover:scale-[1.05] group-hover:shadow-lg group-hover:shadow-[#0071E3]/25 group-hover:ring-[#D2D2D7] dark:bg-white dark:text-slate-950 dark:ring-white/20 dark:group-hover:shadow-cyan-400/30 sm:h-10 sm:w-10">
 						<span className="absolute inset-0 bg-gradient-to-tr from-white/25 to-transparent opacity-70" aria-hidden />
-						<Leaf size={21} className="relative drop-shadow-sm" />
+						<Scale size={20} className="relative drop-shadow-sm" />
 					</span>
 					<span className="min-w-0 leading-tight">
 						<span className="block text-xs font-medium tracking-[0.06em] text-slate-950 sm:text-sm sm:tracking-[0.1em] dark:text-white">

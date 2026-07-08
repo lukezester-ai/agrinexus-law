@@ -1898,7 +1898,7 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
       <div style={{
       fontSize: '13px',
       color: '#6E6E73'
-    }}>© 2025 AgriNexus.Law. Всички права запазени.</div>
+    }}>© 2025 AgriNexus.Law — собственост на AgriNexus Ltd (info@agrinexus.eu). Всички права запазени.</div>
       <div className="flex flex-wrap items-center justify-center gap-6">
         {[{ label: 'Цени', href: '/ceni' }, { label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'AI преглед', href: '/document-review' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
         fontSize: '13px',
