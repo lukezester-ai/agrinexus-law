@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight, Users, Bell, Receipt, FileText as FileTextIcon } from "lucide-react";
+import { Save, MapPin, Wheat, Sprout, CircleCheck, Map, Package, Landmark, FlaskConical, Tractor, Combine, Repeat2, RefreshCw, ArrowRight, Users, Bell, Receipt, FileText as FileTextIcon, TrendingUp } from "lucide-react";
 import { SitePageShell } from "@/components/site-page-shell";
 import {
 	loadFarmProfile,
@@ -31,6 +31,7 @@ const MODULES = [
 	{ href: "/moya-ferma/dma", label: "ДМА", desc: "Дълготрайни материални активи и амортизация", icon: Package, color: "text-stone-600", bg: "bg-stone-100 dark:bg-stone-900/50" },
 	{ href: "/moya-ferma/choveшки-ресурси", label: "Човешки ресурси", desc: "Служители, присъствие, отпуски и ведомости", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50" },
 	{ href: "/moya-ferma/dokumenti", label: "Документи", desc: "Хранилище за договори, ДФЗ, протоколи и файлове", icon: FileTextIcon, color: "text-teal-600", bg: "bg-teal-100 dark:bg-teal-900/50" },
+	{ href: "/moya-ferma/subsidii", label: "Субсидии", desc: "ДФЗ схеми и заявления за субсидиране", icon: TrendingUp, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/50" },
 ];
 
 export default function MoyaFermaPage() {
