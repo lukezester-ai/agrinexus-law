@@ -1119,7 +1119,7 @@ const Categories = () => <section className="bg-[#F5F5F7]" style={{
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {CATEGORIES.map(cat => <Link key={cat.name} href={`/search?q=${encodeURIComponent(cat.name)}`} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left" style={{
+        {CATEGORIES.map(cat => <Link key={cat.name} href={cat.name === "Образци" ? "/образци" : `/search?q=${encodeURIComponent(cat.name)}`} className="agri-category-tile bg-[#FFFFFF] rounded-[18px] flex flex-col items-center text-left" style={{
         padding: '32px',
         textAlign: 'center',
         background: '#FFFFFF',
