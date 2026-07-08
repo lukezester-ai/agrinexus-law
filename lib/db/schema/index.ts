@@ -20,3 +20,4 @@ export * from './product_codes';
 export * from './notifications';
 export * from './documents';
 export * from './subsidies';
+export * from './contracts';
