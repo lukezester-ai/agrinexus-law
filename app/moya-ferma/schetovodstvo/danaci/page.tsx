@@ -150,12 +150,15 @@ export default function DanaciPage() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <button onClick={downloadXml} className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-700">
           <Download size={16} /> Експорт XML за НАП
         </button>
         <span className="self-center text-xs text-slate-400">
           Период: {summary.period}
+        </span>
+        <span className="ml-auto text-[11px] text-slate-400 italic">
+          Използвате вашите собствени данни за вход в НАП e-Faktura
         </span>
       </div>
 
