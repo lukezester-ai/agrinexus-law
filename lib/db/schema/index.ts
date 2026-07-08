@@ -21,3 +21,4 @@ export * from './notifications';
 export * from './documents';
 export * from './subsidies';
 export * from './contracts';
+export * from './insurance';
