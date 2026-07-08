@@ -161,7 +161,7 @@ function TemplatesTab() {
     await load();
   };
 
-  const useDefault = (type: string) => {
+  const applyDefault = (type: string) => {
     setForm({ ...form, type, content: DEFAULT_TEMPLATES[type] || "", name: CONTRACT_TYPES[type] || type });
   };
 
@@ -182,7 +182,7 @@ function TemplatesTab() {
         <div className="mb-3 flex flex-wrap gap-2">
           <span className="text-xs text-slate-500">Бързо създаване:</span>
           {Object.entries(DEFAULT_TEMPLATES).map(([k]) => (
-            <button key={k} type="button" onClick={() => useDefault(k)}
+            <button key={k} type="button" onClick={() => applyDefault(k)}
               className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300">{[k]}</button>
           ))}
         </div>

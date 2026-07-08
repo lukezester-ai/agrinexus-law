@@ -95,9 +95,11 @@ export default function HrPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([loadEmployees(), loadAttendance(), loadLeave(), loadBatches()]).finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { if (tab === "attendance") loadAttendance(); }, [tab, attFilterEmp, attFilterMonth]);
+  useEffect(() => { if (tab === "attendance") loadAttendance(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, attFilterEmp, attFilterMonth]);
 
   const handleAddEmployee = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);

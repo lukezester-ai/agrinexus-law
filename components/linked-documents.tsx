@@ -31,7 +31,8 @@ export default function LinkedDocuments({ module, entityId }: { module: string; 
     setDocs(Array.isArray(d) ? d : []);
     setLoading(false);
   };
-  useEffect(() => { load(); }, [entityId]);
+  useEffect(() => { load(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entityId]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
