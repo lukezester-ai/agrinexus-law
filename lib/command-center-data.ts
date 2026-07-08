@@ -1,6 +1,8 @@
 /**
- * Ориентировъчни срокове и правила за „Твоите срокове“.
- * Реална продукция: синхронизация с официални обявления на ДФЗ / ИСУН.
+ * Реални срокове за Кампания 2026 — директни плащания, екосхеми, данъци.
+ * Източници: dfz.bg, mzh.government.bg, наредби №3/2023 и №4/2023.
+ *
+ * Актуализирано: юли 2026 г.
  */
 
 import type { FarmerLocalProfile } from "./farmer-profile-storage";
@@ -13,6 +15,7 @@ export type CommandDeadline = {
 	scheme: LocalizedLine;
 	action: LocalizedLine;
 	sourceNote: LocalizedLine;
+	/** Ако deadline-ът вече е минал, пак се показва с етикет "Изтекъл" */
 };
 
 export type CommandMissingDoc = {
@@ -21,70 +24,102 @@ export type CommandMissingDoc = {
 	hint: LocalizedLine;
 };
 
-/** Кампания 2026 — датите са ориентир (не правно обвързващи). */
+/** Кампания 2026 — реални дати според официални обявления на ДФЗ и МЗХ. */
 export const COMMAND_DEADLINES: CommandDeadline[] = [
 	{
-		id: "campaign-window-mar",
-		dateISO: "2026-03-01",
+		id: "campaign-start",
+		dateISO: "2026-03-20",
 		scheme: {
-			bg: "Отваряне на прозорец за електронни заявления (ИСУН) — типично около началото на март",
-			en: "E-application window opens (ISUN) — often around early March",
+			bg: "Старт на Кампания 2026 — директни плащания (ИСУН/СЕУ)",
+			en: "Campaign 2026 launch — direct payments (ISUN/SEU)",
 		},
 		action: {
-			bg: "Провери актуалната заповед за кампанията: кога точно стартира приемът, кои мерки са активни и какви приложения се изискват.",
-			en: "Check the campaign order: exact opening dates, active measures, and required annexes.",
+			bg: "Подай заявление в СЕУ или в Общинска служба по земеделие. От тази година НЕ се изисква КЕП — подписваш на място в ОСЗ.",
+			en: "Submit via SEU or local agriculture office. No qualified electronic signature (QES) required for 2026.",
 		},
 		sourceNote: {
-			bg: "Датата е ориентир; реалният старт идва от заповед на министъра и обявление на ДФЗ.",
-			en: "Indicative date; the real start follows the ministerial order and DAFS notices.",
+			bg: "Стартът е потвърден от МЗХ на 20.03.2026. Виж Заповед на министъра и Наредба №3/2023.",
+			en: "Launch confirmed by MAF on 20 Mar 2026. See Minister's Order and Ordinance 3/2023.",
 		},
 	},
 	{
-		id: "unified-may15",
-		dateISO: "2026-05-15",
+		id: "unified-deadline",
+		dateISO: "2026-06-19",
 		scheme: {
-			bg: "Единно заявление — директни плащания и мерки (ИСУН)",
-			en: "Single application — direct payments and measures (ISUN)",
+			bg: "Краен срок за подаване на заявления без санкции (удължен)",
+			en: "Final deadline — no penalty (extended)",
 		},
 		action: {
-			bg: "Подай или актуализирай заявлението до тази дата (без намаление за закъснение).",
-			en: "Submit or update your application by this date (standard window).",
+			bg: "Краен срок за подаване/редакция на заявление по директни плащания. Първоначалният срок 15 май беше удължен до 19 юни.",
+			en: "Final date to submit/edit direct payment applications. Originally 15 May, extended to 19 Jun.",
 		},
 		sourceNote: {
-			bg: "Провери актуалната заповед и приложенията на www.dfz.bg за текущата кампания.",
-			en: "Verify the current DAFS order and annexes on the official portal for the active campaign.",
+			bg: "Съгласно обявление на ДФЗ от юни 2026. След тази дата — санкция 1%/ден до 9 юни (вече изтекъл).",
+			en: "Per DAFS announcement June 2026. After this date: 1%/day penalty until 9 Jun (already passed).",
 		},
 	},
 	{
-		id: "late-jun9",
-		dateISO: "2026-06-09",
+		id: "eco-forms-jul",
+		dateISO: "2026-07-31",
 		scheme: {
-			bg: "Късно подаване с намаление",
-			en: "Late submission with reduction",
+			bg: "Краен срок за подаване на еко формуляри в СЕУ (Еко-ЗВПП, Еко-ПЗП, овощарство)",
+			en: "Deadline for eco-scheme forms in SEU (Eco-ZVPP, Eco-PZP, orchards)",
 		},
 		action: {
-			bg: "Последен ден за подаване с намаление на плащанията (ориентир).",
-			en: "Last day for late filing with payment reduction (indicative).",
+			bg: "Подай План за управление на хранителните вещества (Еко-ЗВПП), План за паша (Еко-ПЗП) или декларация за плододаване (овощарство) в СЕУ. Приложи диплома на агроном/ветеринар.",
+			en: "Submit Nutrient Management Plan (Eco-ZVPP), Grazing Plan (Eco-PZP), or fruiting declaration via SEU. Attach specialist diploma.",
 		},
 		sourceNote: {
-			bg: "Сроковете се променят по заповед — не разчитай само на този екран.",
-			en: "Deadlines change by order — do not rely on this screen alone.",
+			bg: "Съгласно Наредба №3/2023 и насоки на ДФЗ от 01.07.2026. Подава се само по електронен път, без КЕП.",
+			en: "Per Ordinance 3/2023 and DAFS guidelines from 1 Jul 2026. Online only, no QES needed.",
+		},
+	},
+	{
+		id: "reg-check-sep",
+		dateISO: "2026-09-30",
+		scheme: {
+			bg: "Проверка на регистрацията на стопаните — двуетапен контрол",
+			en: "Farmer registration check — two-stage control",
+		},
+		action: {
+			bg: "От тази година допустимостта се проверява двуетапно. Увери се, че регистрацията ти като земеделски стопанин е актуална към 30 септември.",
+			en: "Starting this year, eligibility undergoes two-stage checks. Ensure your farmer registration is valid as of 30 Sep.",
+		},
+		sourceNote: {
+			bg: "Промяна от Кампания 2026 — виж Наръчника за директни плащания 2026 (МЗХ, 25.03.2026).",
+			en: "Change as of Campaign 2026 — see Direct Payments Handbook 2026 (MAF, 25 Mar 2026).",
+		},
+	},
+	{
+		id: "tax-jun30",
+		dateISO: "2026-06-30",
+		scheme: {
+			bg: "Краен срок за данъчни декларации — ЕТ и земеделски стопани (НАП)",
+			en: "Tax return deadline — sole traders and farmers (NRA)",
+		},
+		action: {
+			bg: "Подай годишната данъчна декларация за доходите в НАП. Земеделските стопани, избрали този ред на облагане, подават до 30 юни.",
+			en: "File annual income tax return with NRA. Farmers using this taxation regime file by 30 Jun.",
+		},
+		sourceNote: {
+			bg: "Виж ЗДДФЛ и указания на НАП за 2026.",
+			en: "See Personal Income Tax Act and NRA guidelines for 2026.",
 		},
 	},
 	{
 		id: "advance-oct",
 		dateISO: "2026-10-01",
 		scheme: {
-			bg: "Есенни авансови плащания (ако са обявени)",
-			en: "Autumn advance payments (if announced)",
+			bg: "Есенни авансови плащания — очакван старт",
+			en: "Autumn advance payments — expected start",
 		},
 		action: {
-			bg: "Следи обявление за аванс — подготви липсващите документи предварително.",
-			en: "Watch for the advance notice — prepare missing documents early.",
+			bg: "Следи Индикативния график на ДФЗ за Кампания 2025/2026. Авансите обикновено започват от октомври.",
+			en: "Watch the DAFS Indicative Schedule for Campaign 2025/2026. Advances typically start in October.",
 		},
 		sourceNote: {
-			bg: "ДФЗ публикува графика на авансовете по кампания.",
-			en: "DAFS publishes the advance schedule per campaign.",
+			bg: "Индикативният график за Кампания 2025 важи до 30.06.2026. Актуален график за Кампания 2026 се очаква от МЗХ.",
+			en: "Indicative Schedule for Campaign 2025 valid until 30 Jun 2026. 2026 schedule pending from MAF.",
 		},
 	},
 ];
