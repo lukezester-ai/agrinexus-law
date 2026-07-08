@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { SitePageShell } from "@/components/site-page-shell"
 import { Plus, Search, X, Save, Trash2, Edit, Loader2, Building2, Users } from "lucide-react"
+import LinkedDocuments from "@/components/linked-documents"
 
 type Counterparty = {
   id: string
@@ -215,6 +216,7 @@ export default function KlientiPage() {
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} {editing ? "Запази" : "Създай"}
             </button>
           </div>
+          {editing && <div className="mt-4"><LinkedDocuments module="counterparties" entityId={editing.id} /></div>}
         </form>
       )}
 

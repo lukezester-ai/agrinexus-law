@@ -3,16 +3,24 @@ import { getDb } from '@/lib/db/db';
 import { documents } from '@/lib/db/schema/documents';
 import { resolveTenantId } from '@/lib/db/tenant-context';
 import { getSupabaseAdmin } from '@/lib/supabase';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const tenantId = await resolveTenantId();
+    const { searchParams } = new URL(req.url);
+    const linkedModule = searchParams.get('module');
+    const linkedEntityId = searchParams.get('entity_id');
+
     const { db } = getDb();
+    const conditions = [eq(documents.tenantId, tenantId)];
+    if (linkedModule) conditions.push(eq(documents.linkedModule, linkedModule));
+    if (linkedEntityId) conditions.push(eq(documents.linkedEntityId, linkedEntityId));
+
     const result = await db
       .select()
       .from(documents)
-      .where(eq(documents.tenantId, tenantId))
+      .where(and(...conditions))
       .orderBy(desc(documents.isPinned), desc(documents.createdAt));
     return NextResponse.json(result);
   } catch (err: any) {

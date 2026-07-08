@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { SitePageShell } from "@/components/site-page-shell";
+import { SitePageShell } from "@/components/site-page-shell"
+import LinkedDocuments from "@/components/linked-documents";
 import { MapPin, Plus, Edit, Trash2, Save, Upload, Loader2, Map as MapIcon, Download } from "lucide-react";
 
 type Field = {
@@ -263,6 +264,7 @@ export default function PolitaPage() {
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="rounded-xl px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100">Отказ</button>
           </div>
+          {editing && <div className="mt-4"><LinkedDocuments module="fields" entityId={editing.id} /></div>}
         </form>
       )}
 

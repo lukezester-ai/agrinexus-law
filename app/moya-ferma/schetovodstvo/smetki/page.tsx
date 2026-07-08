@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
 import { FileText, Plus, Save, Trash2, Edit, Search, X, Loader2, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import LinkedDocuments from "@/components/linked-documents";
 
 type InvoiceItem = { id: string; name: string; quantity: number; unitPrice: number; vatRate: number };
 
@@ -238,6 +239,7 @@ export default function SmetkiPage() {
               </button>
             </div>
           </div>
+          {editing && <div className="mt-4"><LinkedDocuments module="invoices" entityId={editing.id} /></div>}
         </form>
       )}
 
