@@ -88,48 +88,48 @@ export default function LoginPage() {
     <SitePageShell maxWidth="xl">
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-400 mb-6 border border-teal-200 dark:border-teal-800">
+          <div className="text-center mb-10 relative">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-white mb-6 shadow-lg shadow-emerald-500/25 animate-float">
               <Leaf size={32} />
             </div>
-            <h1 className="text-3xl font-medium tracking-tight text-slate-900 dark:text-white mb-3">
-              {view === 'sign-in' ? 'Добре дошли отново' : 'Създайте профил'}
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600 mb-3">
+              {view === 'sign-in' ? 'Добре дошли в AgriNexus' : 'Създайте агро профил'}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-slate-600 dark:text-slate-300 font-medium text-base leading-relaxed">
               {view === 'sign-in' 
-                ? 'Влезте, за да получите достъп до вашите данни и персонализирани изчисления.' 
-                : 'Присъединете се към бъдещето на земеделието с AgriNexus.'}
+                ? 'Влезте, за да получите достъп до вашите данни, стопанство и AI асистент.' 
+                : 'Присъединете се към бъдещето на интелигентното земеделие с AgriNexus.'}
             </p>
           </div>
 
-          <div className="surface-card p-6 sm:p-8 rounded-3xl border shadow-xl shadow-teal-900/5">
-            <form onSubmit={handleAuth} className="space-y-5">
+          <div className="glass-panel-pro p-8 sm:p-10 rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.2),0_10px_30px_-10px_rgba(217,70,239,0.15)] backdrop-blur-2xl transition-all">
+            <form onSubmit={handleAuth} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                   Имейл адрес
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Mail size={18} />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-600 dark:text-emerald-400">
+                    <Mail size={20} />
                   </div>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium"
                     placeholder="vasil@ferma.bg"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                   Парола
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Lock size={18} />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-600 dark:text-emerald-400">
+                    <Lock size={20} />
                   </div>
                   <input
                     type="password"
@@ -137,14 +137,14 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium"
                     placeholder="••••••••"
                   />
                 </div>
               </div>
 
               {error && (
-                <div className={`p-3 rounded-xl text-sm ${error.includes('Успешна') ? 'bg-teal-50 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800' : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800'}`}>
+                <div className={`p-4 rounded-2xl text-sm font-medium ${error.includes('Успешна') ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800' : 'bg-red-50 text-red-900 dark:bg-red-950/60 dark:text-red-200 border border-red-300 dark:border-red-800'}`}>
                   {error}
                 </div>
               )}
@@ -152,28 +152,28 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-all focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
+                className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 hover:opacity-95 text-white rounded-2xl font-extrabold text-base transition-all shadow-lg shadow-emerald-600/25 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none"
               >
                 {isLoading ? (
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={20} className="animate-spin" />
                 ) : (
                   <>
-                    {view === 'sign-in' ? 'Влез в профила' : 'Регистрация'}
-                    <ArrowRight size={18} />
+                    <span>{view === 'sign-in' ? 'Влез в профила' : 'Създай профил'}</span>
+                    <ArrowRight size={20} />
                   </>
                 )}
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {view === 'sign-in' ? 'Нямате профил?' : 'Вече имате профил?'}
+            <div className="mt-8 pt-6 border-t border-slate-200/60 dark:border-slate-800/80 text-center">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                {view === 'sign-in' ? 'Нямате профил в AgriNexus?' : 'Вече имате агро профил?'}
                 <button
                   type="button"
                   onClick={() => setView(view === 'sign-in' ? 'sign-up' : 'sign-in')}
-                  className="ml-2 font-medium text-teal-600 dark:text-teal-400 hover:underline focus:outline-none"
+                  className="ml-2 font-extrabold text-emerald-600 dark:text-emerald-400 hover:underline focus:outline-none transition-colors"
                 >
-                  {view === 'sign-in' ? 'Създайте тук' : 'Влезте тук'}
+                  {view === 'sign-in' ? 'Регистрирайте се тук' : 'Влезте от тук'}
                 </button>
               </p>
             </div>

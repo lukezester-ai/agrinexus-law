@@ -240,65 +240,76 @@ export default function ObrazciPage() {
 	};
 
 	return (
-		<SitePageShell maxWidth="4xl" subheader={<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Образци и бланки</p>}>
-			<div className="mb-6 text-center">
-				<FileText size={34} className="mx-auto mb-3 text-emerald-600" />
-				<h1 className="font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Образци на документи</h1>
-				<p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-					Изтеглете и попълнете някой от долните шаблони — договори, дневници и протоколи за земеделското стопанство.
+		<SitePageShell maxWidth="4xl" subheader={<p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Образци и бланки на договори</p>}>
+			<div className="mb-10 text-center">
+				<div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-white shadow-lg shadow-emerald-500/25 animate-float">
+					<FileText size={36} />
+				</div>
+				<h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
+					Образци на документи и договори
+				</h1>
+				<p className="mx-auto mt-2.5 max-w-2xl text-sm sm:text-base font-medium leading-relaxed text-slate-600 dark:text-slate-300">
+					Изтеглете, копирайте и попълнете готови типови шаблони — договори за аренда, наем на техника и дневници за земеделското стопанство.
 				</p>
 			</div>
 
-			<div className="space-y-4">
+			<div className="space-y-6">
 				{TEMPLATES.map((tpl) => {
 					const isOpen = openId === tpl.id;
 					return (
-						<div key={tpl.id} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-							<div className="flex items-start justify-between gap-4">
+						<div key={tpl.id} className="card-hover-pro glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-6 sm:p-8 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] transition-all duration-300 hover:border-emerald-400/60 backdrop-blur-2xl">
+							<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
 								<div className="min-w-0 flex-1">
-									<h3 className="font-bold text-slate-900 dark:text-white">{tpl.title}</h3>
-									<p className="mt-1 text-sm text-slate-500">{tpl.desc}</p>
+									<div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-3">
+										<span>Готов шаблон за ползване</span>
+									</div>
+									<h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">{tpl.title}</h3>
+									<p className="mt-1.5 text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-400">{tpl.desc}</p>
 								</div>
-								<div className="flex shrink-0 gap-2">
+								<div className="flex flex-wrap items-center gap-2.5 shrink-0">
 									<button
 										onClick={() => downloadTxt(tpl.content, `${tpl.id}.txt`)}
-										className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+										className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-extrabold text-white hover:brightness-110 shadow-md shadow-emerald-500/20 transition-all active:scale-95"
 									>
-										<Download size={14} /> Изтегли
+										<Download size={15} /> Изтегли
 									</button>
 									<button
 										onClick={() => handleCopy(tpl.id, tpl.content)}
-										className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+										className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300/90 bg-slate-50/80 px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:text-emerald-400 transition-all shadow-sm active:scale-95"
 									>
-										{copiedId === tpl.id ? <Check size={14} /> : <Copy size={14} />}
-										{copiedId === tpl.id ? "Копиран" : "Копирай"}
+										{copiedId === tpl.id ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+										{copiedId === tpl.id ? "Копиран!" : "Копирай"}
 									</button>
 									<button
 										onClick={() => window.print()}
-										className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+										className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300/90 bg-slate-50/80 px-3.5 py-2.5 text-xs font-extrabold text-slate-800 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:text-emerald-400 transition-all shadow-sm"
+										title="Разпечатай"
 									>
-										<Printer size={14} />
+										<Printer size={15} />
 									</button>
 									<button
 										onClick={() => setOpenId(isOpen ? null : tpl.id)}
-										className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+										className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300/90 bg-slate-50/80 px-3.5 py-2.5 text-xs font-extrabold text-slate-800 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:text-emerald-400 transition-all shadow-sm"
+										title={isOpen ? "Скрий текста" : "Покажи текста"}
 									>
-										{isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+										{isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
 									</button>
 								</div>
 							</div>
 							{isOpen && (
-								<pre className="mt-4 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 font-mono text-xs leading-relaxed text-slate-700 dark:bg-slate-950 dark:text-slate-300">
-									{tpl.content}
-								</pre>
+								<div className="mt-6 pt-6 border-t border-slate-200/80 dark:border-slate-800 animate-fadeIn">
+									<pre className="whitespace-pre-wrap rounded-2xl border border-slate-200/90 bg-slate-50/90 p-5 font-mono text-xs sm:text-sm leading-relaxed text-slate-800 dark:border-slate-800 dark:bg-slate-950/90 dark:text-slate-300 overflow-x-auto shadow-inner">
+										{tpl.content}
+									</pre>
+								</div>
 							)}
 						</div>
 					);
 				})}
 			</div>
 
-			<p className="mt-8 text-center text-xs text-slate-400">
-				Шаблоните са примерни и не представляват правен съвет. Консултирайте се с юрист преди подписване.
+			<p className="mt-10 text-center text-xs font-semibold text-slate-400 dark:text-slate-500 leading-relaxed">
+				⚠️ Шаблоните са примерни и не представляват индивидуален правен съвет. Консултирайте се с юрист или агроконсултант преди подписване и регистрация.
 			</p>
 		</SitePageShell>
 	);

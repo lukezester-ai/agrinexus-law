@@ -153,90 +153,95 @@ export default function DocumentsPage() {
 				</div>
 			}
 		>
-			<div className="mb-8 text-center">
-				<div className="mb-3 text-4xl" aria-hidden>
+			<div className="mb-10 text-center">
+				<div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-4xl shadow-lg shadow-emerald-500/25 animate-float" aria-hidden>
 					📂
 				</div>
-				<h1 className="font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white">
+				<h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
 					Архив и лични файлове
 				</h1>
-				<p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-					<strong className="text-slate-900 dark:text-white">Държавен архив</strong> — документи от ДФЗ, МЗХ и ingest pipeline (Supabase).
-					<strong className="text-slate-900 dark:text-white"> Лични файлове</strong> — само в този браузър (IndexedDB).
+				<p className="mx-auto mt-2.5 max-w-xl text-sm sm:text-base font-medium leading-relaxed text-slate-600 dark:text-slate-300">
+					<strong className="text-slate-900 dark:text-white font-bold">Държавен архив</strong> — документи от ДФЗ, МЗХ и нормативни актове.
+					<strong className="text-slate-900 dark:text-white font-bold"> Лични файлове</strong> — криптирани и достъпни само в твоя браузър (IndexedDB).
 				</p>
 			</div>
 
-			<section className="surface-card mb-8 space-y-4 p-6">
-				<div className="flex flex-wrap items-center justify-between gap-2">
-					<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
-						<Archive size={20} className="text-teal-600" aria-hidden />
-						Държавен архив
+			<section className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-6 sm:p-10 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl mb-10 space-y-6">
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<h2 className="flex items-center gap-3 text-xl font-extrabold text-slate-900 dark:text-white">
+						<div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-emerald-600 dark:text-emerald-400">
+							<Archive size={22} aria-hidden />
+						</div>
+						<span>Държавен нормативен архив</span>
 					</h2>
 					<button
 						type="button"
 						onClick={() => void refreshArchive()}
 						disabled={loadingArchive}
-						className="text-xs font-semibold text-emerald-700 hover:underline disabled:opacity-50 dark:text-emerald-300"
+						className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-extrabold text-emerald-700 hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50 dark:text-emerald-300 shadow-sm"
 					>
-						Обнови
+						Обнови списъка
 					</button>
 				</div>
-				<p className="text-xs text-slate-500 dark:text-slate-400">
-					Попълва се автоматично от Document Archive Agent (cron ingest от dfz.bg, mzh.government.bg).
+				<p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+					💡 Попълва се автоматично от Document Archive Agent (справки в реално време от dfz.bg и mzh.government.bg).
 				</p>
 
 				{archiveError && (
-					<div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+					<div className="rounded-2xl border border-amber-300/80 bg-amber-50/90 px-4 py-3 text-sm font-semibold text-amber-900 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-200 shadow-sm">
 						{archiveError}
 					</div>
 				)}
 
 				{loadingArchive ? (
-					<p className="py-6 text-center text-sm text-slate-500">Зареждане на архива…</p>
+					<p className="py-10 text-center text-sm font-bold text-slate-500 animate-pulse">Зареждане на държавния архив…</p>
 				) : archiveItems.length === 0 ? (
-					<div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-						<FileText className="mx-auto mb-2 opacity-50" size={32} aria-hidden />
-						<p>Архивът е празен или Supabase не е конфигуриран.</p>
-						<p className="mt-1 text-xs">Админ: пусни ingest cron или POST /api/ingest/run с archiveAgent.</p>
+					<div className="py-12 text-center text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+						<FileText className="mx-auto mb-3 opacity-40 text-emerald-600" size={40} aria-hidden />
+						<p className="font-bold text-slate-700 dark:text-slate-300">Архивът е празен или Supabase все още не е синхронизиран.</p>
+						<p className="mt-1 text-xs">Админ: стартирай ingest cron или POST /api/ingest/run с archiveAgent.</p>
 					</div>
 				) : (
-					<ul className="divide-y divide-slate-200 dark:divide-slate-700">
+					<ul className="divide-y divide-slate-200/80 dark:divide-slate-800">
 						{archiveItems.map((item) => (
-							<li key={item.id} className="flex flex-wrap items-center gap-3 justify-between py-3">
+							<li key={item.id} className="flex flex-wrap items-center gap-4 justify-between py-4 hover:bg-slate-50/60 dark:hover:bg-slate-900/40 px-3 rounded-2xl transition-colors">
 								<div className="min-w-0 flex-1">
 									<Link
 										href={`/doc/${PUBLIC_DOC_ID_PREFIX}${item.id}`}
-										className="block truncate text-sm font-medium text-teal-800 hover:underline dark:text-teal-300"
+										className="block truncate text-base font-bold text-slate-900 hover:text-emerald-600 dark:text-white dark:hover:text-emerald-400 transition-colors"
 										title={item.title}
 									>
 										{item.title}
 									</Link>
-									<p className="text-xs text-slate-500 dark:text-slate-400">
-										{item.institution} · {item.category} ·{" "}
-										{DOC_TYPE_LABELS[item.doc_type] ?? item.doc_type}
+									<p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
+										<span className="text-emerald-600 dark:text-emerald-400 font-bold">{item.institution}</span>
+										<span>·</span>
+										<span>{item.category}</span>
+										<span>·</span>
+										<span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5">{DOC_TYPE_LABELS[item.doc_type] ?? item.doc_type}</span>
 										{item.effective_date
-											? ` · ${item.effective_date.slice(0, 10)}`
+											? ` · в сила от ${item.effective_date.slice(0, 10)}`
 											: ""}
 									</p>
 								</div>
-								<div className="flex shrink-0 items-center gap-2">
+								<div className="flex shrink-0 items-center gap-2.5">
 									{item.source_url?.startsWith("http") ? (
 										<a
 											href={item.source_url}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
-											title="Оригинал"
+											className="rounded-xl border border-slate-200/90 bg-white p-2.5 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:text-emerald-400 transition-all shadow-sm"
+											title="Отвори оригинал в нов прозорец"
 										>
-											<ExternalLink size={16} aria-hidden />
+											<ExternalLink size={18} aria-hidden />
 										</a>
 									) : null}
 									<a
 										href={`/api/documents/${PUBLIC_DOC_ID_PREFIX}${item.id}/download`}
-										className="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
-										title="Отвори / изтегли"
+										className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-emerald-700 hover:bg-emerald-600 hover:text-white dark:text-emerald-300 transition-all shadow-sm"
+										title="Изтегли или прегледай"
 									>
-										<Download size={16} aria-hidden />
+										<Download size={18} aria-hidden />
 									</a>
 								</div>
 							</li>
@@ -245,8 +250,13 @@ export default function DocumentsPage() {
 				)}
 			</section>
 
-			<section className="surface-card space-y-4 p-6">
-				<h2 className="text-lg font-semibold text-slate-900 dark:text-white">Мои файлове (локално)</h2>
+			<section className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-6 sm:p-10 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl space-y-6">
+				<h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
+					<div className="rounded-xl bg-teal-500/10 border border-teal-500/20 p-2.5 text-teal-600 dark:text-teal-400">
+						<FileText size={22} aria-hidden />
+					</div>
+					<span>Мои файлове и документи (Локално хранилище)</span>
+				</h2>
 				<input
 					ref={inputRef}
 					type="file"
@@ -260,58 +270,61 @@ export default function DocumentsPage() {
 					type="button"
 					disabled={busy}
 					onClick={() => inputRef.current?.click()}
-					className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 px-4 py-4 text-sm font-medium text-slate-700 transition hover:border-emerald-600 hover:bg-teal-50/50 disabled:opacity-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-teal-950/30"
+					className="card-hover-pro flex flex-col w-full items-center justify-center gap-3 rounded-[24px] border-2 border-dashed border-emerald-500/50 bg-emerald-500/5 dark:bg-emerald-950/20 px-6 py-10 text-base font-extrabold text-slate-800 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-500/10 disabled:opacity-50 dark:text-slate-100 cursor-pointer shadow-sm"
 				>
-					<Upload size={18} aria-hidden />
-					{busy ? "Обработка…" : "Избери файлове за добавяне"}
+					<div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 animate-bounce">
+						<Upload size={26} aria-hidden />
+					</div>
+					<span className="text-lg">{busy ? "Обработка и криптиране…" : "Качи или прикачи файлове тук"}</span>
+					<span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Кликни за избор от компютъра или телефона</span>
 				</button>
 
-				<p className="text-center text-xs text-slate-500 dark:text-slate-400">
-					До {MAX_FARMER_DOC_BYTES / (1024 * 1024)} MB · PDF, изображения, Word/Excel, TXT · без качване на сървъра
+				<p className="text-center text-xs font-semibold text-slate-400 dark:text-slate-500">
+					До {MAX_FARMER_DOC_BYTES / (1024 * 1024)} MB на файл · Поддържани: PDF, Изображения, Word/Excel, TXT · Съхраняват се сигурно без качване на външни сървъри
 				</p>
 
 				{error && (
-					<div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">
+					<div className="rounded-2xl border border-rose-300/80 bg-rose-50/90 px-4 py-3 text-sm font-semibold text-rose-800 dark:border-rose-900/80 dark:bg-rose-950/60 dark:text-rose-200 shadow-sm">
 						{error}
 					</div>
 				)}
 
 				{loadingLocal ? (
-					<p className="py-6 text-center text-sm text-slate-500">Зареждане…</p>
+					<p className="py-8 text-center text-sm font-bold text-slate-500 animate-pulse">Зареждане на личните файлове…</p>
 				) : localItems.length === 0 ? (
-					<div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-						<p>Няма локално записани файлове.</p>
+					<div className="py-10 text-center text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+						<p className="font-bold text-slate-700 dark:text-slate-300">Няма локално добавени файлове или договори.</p>
 					</div>
 				) : (
-					<ul className="divide-y divide-slate-200 dark:divide-slate-700">
+					<ul className="divide-y divide-slate-200/80 dark:divide-slate-800">
 						{localItems.map((meta) => (
-							<li key={meta.id} className="flex flex-wrap items-center gap-3 justify-between py-3">
+							<li key={meta.id} className="flex flex-wrap items-center gap-4 justify-between py-4 hover:bg-slate-50/60 dark:hover:bg-slate-900/40 px-3 rounded-2xl transition-colors">
 								<div className="min-w-0 flex-1">
-									<p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100" title={meta.name}>
+									<p className="truncate text-base font-bold text-slate-900 dark:text-slate-100" title={meta.name}>
 										{meta.name}
 									</p>
-									<p className="text-xs text-slate-500 dark:text-slate-400">
-										{formatDocSize(meta.size)} · {new Date(meta.createdAt).toLocaleString("bg-BG")}
+									<p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+										{formatDocSize(meta.size)} · добавен на {new Date(meta.createdAt).toLocaleString("bg-BG")}
 									</p>
 								</div>
-								<div className="flex shrink-0 items-center gap-2">
+								<div className="flex shrink-0 items-center gap-2.5">
 									<button
 										type="button"
 										disabled={busy}
 										onClick={() => void onDownload(meta)}
-										className="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
-										title="Изтегли"
+										className="rounded-xl border border-slate-200/90 bg-white p-2.5 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:text-emerald-400 transition-all shadow-sm"
+										title="Изтегли файл"
 									>
-										<Download size={16} aria-hidden />
+										<Download size={18} aria-hidden />
 									</button>
 									<button
 										type="button"
 										disabled={busy}
 										onClick={() => void onDelete(meta)}
-										className="rounded-lg border border-slate-200 p-2 text-red-700 hover:bg-red-50 dark:border-slate-600 dark:text-red-300 dark:hover:bg-red-950/40"
-										title="Изтрий"
+										className="rounded-xl border border-rose-200/90 bg-rose-50/50 p-2.5 text-rose-700 hover:bg-rose-600 hover:text-white dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-700 transition-all shadow-sm"
+										title="Изтрий от локалното хранилище"
 									>
-										<Trash2 size={16} aria-hidden />
+										<Trash2 size={18} aria-hidden />
 									</button>
 								</div>
 							</li>

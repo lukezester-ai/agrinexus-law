@@ -179,35 +179,39 @@ export default function SearchPage() {
       maxWidth="5xl"
       subheader={<p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Търсене в документи и схеми</p>}
     >
-      <div className="mb-8 text-center">
-        <Search className="mx-auto mb-3 text-emerald-600" size={34} aria-hidden />
-        <h1 className="font-display text-2xl font-medium tracking-tight text-slate-950 dark:text-white">Намери документ и продължи с AI обслужване</h1>
-        <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          Търсенето събира вътрешната база, индексираните публични документи и RAG контекст. Всеки резултат има директно теглене, източник и връзка към AI асистент.
+      <div className="mb-10 text-center relative">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-white shadow-lg shadow-emerald-500/25 mb-4 animate-float">
+          <Search size={30} />
+        </div>
+        <h1 className="font-extrabold text-3xl sm:text-4xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600 mb-3">
+          Намери документ и продължи с AI обслужване
+        </h1>
+        <p className="mx-auto max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+          Търсенето обединява вътрешната ни правна база, индексираните наредби на ДФЗ/МЗ и RAG контекст. Всеки резултат предлага <span className="font-semibold text-slate-900 dark:text-white">директно теглене, източник и мигновен AI анализ</span>.
         </p>
       </div>
 
       {searchError && (
-        <div className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-100">
+        <div className="mb-6 rounded-2xl border border-red-300/80 bg-red-50/90 px-5 py-4 text-sm font-medium text-red-900 shadow-md backdrop-blur-md dark:border-red-900/60 dark:bg-red-950/60 dark:text-red-100">
           {searchError}
         </div>
       )}
 
-      <div className="brand-soft-surface mb-6 rounded-2xl p-6 shadow-soft">
+      <div className="glass-panel-pro mb-8 rounded-[28px] p-6 sm:p-8 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.2),0_10px_30px_-10px_rgba(217,70,239,0.15)] border border-slate-200/90 dark:border-slate-700/80 transition-all">
         <form onSubmit={(event) => { event.preventDefault(); void handleSearch(); }}>
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden />
+              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 dark:text-emerald-400" aria-hidden />
               <input
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Например: биологично производство, директни плащания, срокове 2026"
-                className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-950/80 dark:text-slate-100"
+                placeholder="Например: биологично производство, директни плащания 2025, БИСС..."
+                className="w-full rounded-2xl border border-slate-200/80 bg-white/90 py-3.5 pl-12 pr-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100 dark:focus:border-emerald-400 transition-all"
               />
             </div>
-            <button type="submit" className="brand-cta-bg rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-105">
-              Търси
+            <button type="submit" className="bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 hover:opacity-95 rounded-2xl px-8 py-3.5 text-base font-bold text-white shadow-md shadow-emerald-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              Търси в базата
             </button>
           </div>
 

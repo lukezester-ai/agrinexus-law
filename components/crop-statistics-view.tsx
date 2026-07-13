@@ -315,61 +315,60 @@ export function CropStatisticsView() {
 	}, [cropKey, lang, profile.label]);
 
 	return (
-		<div className="space-y-6">
-			<div className="flex flex-wrap items-start justify-between gap-3">
-				<div className="flex items-start gap-3 min-w-0">
-					<div className="w-11 h-11 rounded-xl bg-teal-100 dark:bg-teal-950/60 flex items-center justify-center text-teal-800 dark:text-teal-300 shrink-0 border border-teal-200 dark:border-teal-800">
-						{isLoadingData ? <Loader2 className="animate-spin" size={22} /> : <BarChart3 size={22} />}
+		<div className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-6 sm:p-10 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-xl space-y-8">
+			<div className="flex flex-wrap items-start justify-between gap-5">
+				<div className="flex items-start gap-4 min-w-0">
+					<div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-emerald-500/25 animate-float">
+						{isLoadingData ? <Loader2 className="animate-spin" size={30} /> : <BarChart3 size={30} />}
 					</div>
 					<div>
-						<h1 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-50">
+						<h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
 							{tr.title}
 						</h1>
-						<p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed max-w-3xl">
+						<p className="text-sm font-medium text-slate-600 dark:text-slate-300 mt-2 leading-relaxed max-w-3xl">
 							{tr.subtitle}
 						</p>
 					</div>
 				</div>
-				<div className="flex items-center gap-2 shrink-0">
-					<div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden mr-2">
-						<button onClick={() => setYearsCount(5)} className={`px-3 py-1.5 text-xs font-medium transition ${yearsCount === 5 ? "bg-slate-800 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+				<div className="flex flex-wrap items-center gap-3 shrink-0">
+					<div className="flex rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-1 shadow-inner">
+						<button onClick={() => setYearsCount(5)} className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all ${yearsCount === 5 ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}>
 							{tr.period5}
 						</button>
-						<button onClick={() => setYearsCount(10)} className={`px-3 py-1.5 text-xs font-medium transition ${yearsCount === 10 ? "bg-slate-800 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+						<button onClick={() => setYearsCount(10)} className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all ${yearsCount === 10 ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}>
 							{tr.period10}
 						</button>
 					</div>
-					<div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
-						<button onClick={() => setLang("bg")} className={`px-3 py-1.5 text-xs font-medium transition ${lang === "bg" ? "bg-emerald-600 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>BG</button>
-						<button onClick={() => setLang("en")} className={`px-3 py-1.5 text-xs font-medium transition ${lang === "en" ? "bg-emerald-600 text-white" : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>EN</button>
+					<div className="flex rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-1 shadow-inner">
+						<button onClick={() => setLang("bg")} className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all ${lang === "bg" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}>BG</button>
+						<button onClick={() => setLang("en")} className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all ${lang === "en" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}>EN</button>
 					</div>
 				</div>
 			</div>
 
-			<div>
-				<div className="flex flex-wrap gap-2">
+			<div className="space-y-3">
+				<label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+					{tr.pickCrop}
+				</label>
+				<div className="flex flex-wrap gap-2.5">
 					{profiles.map(c => (
 						<button
 							key={c.key}
 							type="button"
 							onClick={() => setCropKey(c.key)}
-							className={`px-3 py-2 rounded-lg text-sm border transition ${
+							className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-all duration-200 ${
 								cropKey === c.key
-									? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50 shadow-sm"
-									: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+									? "border-emerald-500 bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 text-white shadow-md shadow-emerald-600/20 scale-105"
+									: "border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:border-emerald-400 hover:bg-white"
 							}`}
-							style={
-								cropKey === c.key
-									? { boxShadow: `0 0 0 1px ${c.chartColor}44` }
-									: undefined
-							}>
+						>
 							{pickL(c.label, lang)}
 						</button>
 					))}
 				</div>
 			</div>
 
-			<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-gradient-to-br from-teal-50/90 to-white dark:from-teal-950/30 dark:to-slate-900/90 p-4 sm:p-5">
+			<div className="rounded-[24px] border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-6 shadow-sm">
 				<div className="w-full h-[300px] sm:h-[360px]">
 					<ResponsiveContainer width="100%" height="100%">
 						<ComposedChart data={rows} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>

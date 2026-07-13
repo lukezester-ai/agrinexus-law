@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { navBarReveal } from "@/lib/motion-variants";
 
 const navClass =
-	"relative shrink-0 whitespace-nowrap rounded-xl px-2.5 py-2 text-sm font-normal text-slate-600 transition-all duration-300 after:absolute after:inset-x-2 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-[#0071E3] after:transition-transform after:duration-300 hover:text-slate-950 hover:after:scale-x-100 dark:text-slate-400 dark:hover:text-white";
+	"relative shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-300 after:absolute after:inset-x-2 after:bottom-1 after:h-0.5 after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-emerald-500 after:to-fuchsia-500 after:transition-transform after:duration-300 hover:text-emerald-600 hover:bg-emerald-500/10 hover:after:scale-x-100 dark:text-slate-300 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/15";
 
 const navHighlight =
-	"font-medium text-[#0071E3] transition-colors duration-300 hover:text-[#005BB5] dark:text-sky-300 dark:hover:text-sky-200";
+	"font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-fuchsia-600 transition-all duration-300 hover:opacity-80 dark:from-emerald-400 dark:to-fuchsia-400";
 
 type NavLink = { href: string; label: string; highlight: boolean; external?: boolean };
 
@@ -58,28 +58,27 @@ export function SiteHeader() {
 	};
 
 	return (
-		<header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 sm:px-5 sm:pt-4">
+		<header className="pointer-events-none fixed inset-x-0 top-2.5 z-50 flex justify-center px-3 sm:px-6">
 			<motion.div
-				className="pointer-events-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-2 rounded-2xl border border-white/40 bg-white/78 px-3 py-2 shadow-[0_8px_32px_-18px_rgba(0,0,0,0.22)] backdrop-blur-[20px] transition-all duration-500 ease-out hover:border-[#D2D2D7] hover:shadow-[0_16px_42px_-18px_rgba(0,0,0,0.22)] dark:border-white/12 dark:bg-slate-950/45 dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.5)] dark:hover:border-cyan-500/20 dark:hover:shadow-[0_20px_56px_-12px_rgba(34,211,238,0.12)] sm:gap-3 sm:rounded-[1.35rem] sm:px-4 sm:py-2.5 md:px-5"
+				className="pointer-events-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-2 rounded-2xl border border-emerald-500/30 bg-white/85 px-4 py-2.5 shadow-[0_12px_36px_-12px_rgba(16,185,129,0.25),0_4px_16px_-6px_rgba(217,70,239,0.15)] backdrop-blur-xl transition-all duration-500 ease-out hover:border-emerald-500/50 hover:shadow-[0_18px_48px_-12px_rgba(16,185,129,0.35),0_8px_24px_-6px_rgba(217,70,239,0.22)] dark:border-emerald-500/25 dark:bg-slate-950/75 dark:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.3)] dark:hover:border-fuchsia-500/30 dark:hover:shadow-[0_20px_56px_-12px_rgba(217,70,239,0.25)] sm:gap-3 sm:rounded-2xl"
 				variants={navBarReveal(reducedMotion)}
 				initial="hidden"
 				animate="visible"
 			>
 				<Link
 					href="/"
-					className="group flex min-w-0 shrink-0 items-center gap-2 sm:gap-3"
+					className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
 					aria-label="AgriNexus.Law"
 				>
-					<span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#1D1D1F] text-white shadow-md ring-2 ring-white/40 transition duration-500 group-hover:scale-[1.05] group-hover:shadow-lg group-hover:shadow-[#0071E3]/25 group-hover:ring-[#D2D2D7] dark:bg-white dark:text-slate-950 dark:ring-white/20 dark:group-hover:shadow-cyan-400/30 sm:h-10 sm:w-10">
-						<span className="absolute inset-0 bg-gradient-to-tr from-white/25 to-transparent opacity-70" aria-hidden />
+					<span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-white shadow-md shadow-emerald-500/25 transition-transform duration-300 group-hover:scale-105 sm:h-10 sm:w-10">
 						<Scale size={20} className="relative drop-shadow-sm" />
 					</span>
 					<span className="min-w-0 leading-tight">
-						<span className="block text-xs font-medium tracking-[0.06em] text-slate-950 sm:text-sm sm:tracking-[0.1em] dark:text-white">
+						<span className="block text-xs font-extrabold tracking-tight text-slate-900 sm:text-sm dark:text-white">
 							AGRINEXUS
 						</span>
-						<span className="hidden text-[10px] font-normal uppercase tracking-[0.12em] text-[#0071E3] sm:block sm:text-[11px] sm:tracking-[0.18em] dark:text-sky-300">
-							Law Intelligence
+						<span className="hidden text-[10px] font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-fuchsia-600 sm:block mt-0.5">
+							Law & Farm AI
 						</span>
 					</span>
 				</Link>
@@ -109,10 +108,9 @@ export function SiteHeader() {
 				<div className="flex shrink-0 items-center gap-2">
 					<Button
 						type="button"
-						variant="brand"
 						size="sm"
 						onClick={() => router.push("/search")}
-						className="shrink-0 gap-2 sm:px-4"
+						className="shrink-0 gap-2 sm:px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-full shadow-md shadow-emerald-600/25 transition-all hover:scale-105"
 						aria-label="Отвори търсене в документи"
 					>
 						<Search size={16} aria-hidden className="opacity-90" />
@@ -125,11 +123,11 @@ export function SiteHeader() {
 							variant="outline"
 							size="sm"
 							onClick={handleLogout}
-							className="shrink-0 gap-2"
+							className="shrink-0 gap-2 rounded-full border-slate-300 dark:border-slate-700 hover:border-fuchsia-500 hover:text-fuchsia-600 transition-colors"
 							aria-label="Изход"
 						>
 							<LogOut size={16} aria-hidden />
-							<span className="hidden md:inline">Изход</span>
+							<span className="hidden md:inline font-semibold">Изход</span>
 						</Button>
 					) : (
 						<Button
@@ -137,7 +135,7 @@ export function SiteHeader() {
 							variant="outline"
 							size="sm"
 							onClick={() => router.push("/vhod")}
-							className="shrink-0 gap-2 text-[#0071E3] dark:text-sky-300 border-[#D2D2D7] dark:border-slate-700"
+							className="shrink-0 gap-2 rounded-full border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40 transition-all font-semibold"
 							aria-label="Вход"
 						>
 							<UserIcon size={16} aria-hidden />

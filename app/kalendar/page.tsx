@@ -67,37 +67,37 @@ export default function KalendarPage() {
 				</div>
 			}
 		>
-			<div className="surface-card p-5 sm:p-8">
-				<div className="flex items-start gap-4 mb-8">
-					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-teal-200 bg-teal-100 text-teal-800 dark:border-teal-800 dark:bg-teal-950/60 dark:text-teal-300">
-						<CalendarDays size={24} aria-hidden />
+			<div className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-6 sm:p-10 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-xl">
+				<div className="flex flex-col sm:flex-row items-start gap-5 mb-10">
+					<div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-white shadow-lg shadow-emerald-500/25 animate-float">
+						<CalendarDays size={30} aria-hidden />
 					</div>
 					<div>
-						<h1 className="font-display mb-1 text-2xl font-medium tracking-tight text-slate-950 dark:text-white">
+						<h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600 mb-2">
 							Какво правим месец по месец
 						</h1>
-						<p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+						<p className="text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">
 							Ориентир за България по месеци — комбинирай с местен агроном, метеорологична прогноза и официални указания на ДФЗ и
 							БАБХ. Задачите са обобщени по типични полски операции; реалният ход зависи от сорт, район и година. По-долу са отделени
-							ключови дати към кампанията по директни плащания (ориентир — провери текущата заповед).
+							ключови дати към кампанията по директни плащания.
 						</p>
 					</div>
 				</div>
 
-				<div className="mb-8">
-					<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
+				<div className="mb-8 space-y-3">
+					<label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
 						Избери основна култура
 					</label>
-					<div className="flex flex-wrap gap-2">
+					<div className="flex flex-wrap gap-2.5">
 						{CROP_ORDER.map((k) => (
 							<button
 								key={k}
 								type="button"
 								onClick={() => setCrop(k)}
-								className={`px-3 py-2 rounded-lg text-sm border transition ${
+								className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-all duration-200 ${
 									crop === k
-										? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
-										: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+										? "border-emerald-500 bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 text-white shadow-md shadow-emerald-600/20 scale-105"
+										: "border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:border-emerald-400 hover:bg-white"
 								}`}>
 								{CROP_LABELS[k]}
 							</button>
@@ -105,20 +105,20 @@ export default function KalendarPage() {
 					</div>
 				</div>
 
-				<div className="mb-8">
-					<label className="block text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">
+				<div className="mb-10 space-y-3">
+					<label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
 						Избери сезон
 					</label>
-					<div className="flex flex-wrap gap-2">
+					<div className="flex flex-wrap gap-2.5">
 						{(["all", "winter", "spring", "summer", "autumn"] as const).map((key) => (
 							<button
 								key={key}
 								type="button"
 								onClick={() => setSeasonFilter(key)}
-								className={`px-3 py-2 rounded-lg text-sm border transition ${
+								className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all duration-200 ${
 									seasonFilter === key
-										? "border-emerald-600 bg-teal-50 dark:bg-teal-950/40 text-slate-900 dark:text-slate-50"
-										: "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+										? "border-emerald-500 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shadow-sm"
+										: "border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:border-emerald-400 hover:bg-white"
 								}`}>
 								{seasonLabelBg(key)}
 							</button>
@@ -126,24 +126,26 @@ export default function KalendarPage() {
 					</div>
 				</div>
 
-				<div className="rounded-2xl border border-teal-200/80 dark:border-teal-800/50 bg-teal-50/70 dark:bg-teal-950/25 p-4 sm:p-5 mb-8">
-					<p className="text-xs font-semibold uppercase tracking-wide text-teal-900 dark:text-teal-300 mb-3">
-						ДФЗ — ключови дати (ориентир кампания)
+				<div className="rounded-[24px] border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20 p-6 mb-10 shadow-sm backdrop-blur-md">
+					<p className="text-xs font-extrabold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
+						<span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+						<span>ДФЗ — ключови дати (ориентир кампания 2026)</span>
 					</p>
-					<ul className="space-y-2 text-sm text-slate-800 dark:text-slate-200">
+					<div className="grid gap-3 sm:grid-cols-2">
 						{DFZ_FIXED_DEADLINES.map((d, i) => (
-							<li key={i}>
-								<strong>
+							<div key={i} className="flex items-start gap-3 bg-white/80 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
+								<span className="shrink-0 rounded-lg bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
 									{d.day} {MONTH_NAMES_BG[d.month - 1]}
-								</strong>
-								{" — "}
-								{d.title}
-							</li>
+								</span>
+								<span className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">
+									{d.title}
+								</span>
+							</div>
 						))}
-					</ul>
+					</div>
 				</div>
 
-				<div className="grid gap-4 sm:grid-cols-2">
+				<div className="grid gap-5 sm:grid-cols-2">
 					{monthsToRender.map((m) => {
 						const monthName = MONTH_NAMES_BG[m - 1];
 						const tasks = tasksByMonth[m];
@@ -151,25 +153,27 @@ export default function KalendarPage() {
 						return (
 							<div
 								key={m}
-								className="bg-white dark:bg-slate-900/95 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
-								<h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-2 flex items-center gap-2">
-									<span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm">
-										{m}
-									</span>
-									{monthName}
-								</h2>
-								<ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1.5 list-disc pl-5">
-									{tasks.map((t, i) => (
-										<li key={i}>{t}</li>
-									))}
-								</ul>
+								className="card-hover-pro group rounded-[24px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/90 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 flex flex-col justify-between">
+								<div>
+									<h2 className="font-extrabold text-lg text-slate-900 dark:text-white mb-4 flex items-center gap-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+										<span className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
+											{m}
+										</span>
+										<span>{monthName}</span>
+									</h2>
+									<ul className="text-sm font-medium text-slate-600 dark:text-slate-300 space-y-2.5 list-disc pl-5 leading-relaxed">
+										{tasks.map((t, i) => (
+											<li key={i}>{t}</li>
+										))}
+									</ul>
+								</div>
 							</div>
 						);
 					})}
 				</div>
 
-				<p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-500">
-					За снимки на писма от ДФЗ или БАБХ и обяснение — ползвай чата с Елена (скоро и качване на снимка като отделна функция).
+				<p className="mt-10 text-center text-xs font-semibold text-slate-400 dark:text-slate-500">
+					За снимки на писма от ДФЗ или БАБХ и обяснение — ползвай чата с Елена за мигновен анализ на всеки документ.
 				</p>
 			</div>
 		</SitePageShell>

@@ -558,161 +558,175 @@ const GLOBAL_STYLES = `
     100% { transform: translateX(-50%); }
   }
   @keyframes agri-live-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(1.3); }
   }
   .agri-ticker-track {
-    animation: agri-ticker-scroll 30s linear infinite;
+    animation: agri-ticker-scroll 35s linear infinite;
     white-space: nowrap;
     display: flex;
     align-items: center;
   }
   .agri-live-dot {
-    animation: agri-live-pulse 1.5s ease-in-out infinite;
+    animation: agri-live-pulse 1.8s ease-in-out infinite;
   }
   @media (prefers-reduced-motion: reduce) {
-    .agri-ticker-track {
-      animation: none;
-    }
-    .agri-live-dot {
+    .agri-ticker-track, .agri-live-dot {
       animation: none;
     }
   }
   .agri-nav-link {
     font-size: 14px;
-    color: #6E6E73;
+    font-weight: 500;
+    color: #475569;
     text-decoration: none;
-    transition: color 200ms ease-out;
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 6px 12px;
+    border-radius: 9999px;
   }
   .agri-nav-link:hover {
-    opacity: 0.7;
+    color: #0f766e;
+    background-color: rgba(16, 185, 129, 0.08);
+  }
+  .farm-module-card {
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
   }
   .farm-module-card:hover {
-    background-color: #E8F5E9 !important;
-    transform: translateY(-2px);
-    border-color: #5f8f72 !important;
+    background: linear-gradient(135deg, rgba(236, 253, 245, 0.95), rgba(253, 244, 255, 0.95)) !important;
+    transform: translateY(-5px) scale(1.015);
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.18), 0 0 20px -5px rgba(217, 70, 239, 0.1);
   }
   .agri-btn-primary {
-    background-color: #0071E3;
+    background: linear-gradient(135deg, #0f766e 0%, #10b981 60%, #d946ef 100%);
     color: #ffffff;
-    font-size: 17px;
-    padding: 0 24px;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0 26px;
     height: 48px;
-    border-radius: 980px;
+    border-radius: 9999px;
     border: none;
     cursor: pointer;
-    transition: background-color 150ms ease-out, transform 100ms ease-out;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.35), 0 0 15px -3px rgba(217, 70, 239, 0.25);
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
   }
   .agri-btn-primary:hover {
-    background-color: #0077ED;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 32px -5px rgba(16, 185, 129, 0.45), 0 0 25px -2px rgba(217, 70, 239, 0.35);
+    filter: brightness(1.08);
   }
   .agri-btn-primary:active {
     transform: scale(0.98);
   }
-  .agri-btn-primary:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
-  }
   .agri-btn-ghost {
-    background-color: transparent;
-    color: #1D1D1F;
-    font-size: 17px;
-    padding: 0 24px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0 26px;
     height: 48px;
-    border-radius: 980px;
-    border: 1px solid rgba(0,0,0,0.16);
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.15);
     cursor: pointer;
-    transition: background-color 150ms ease-out, transform 100ms ease-out;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    backdrop-filter: blur(12px);
   }
   .agri-btn-ghost:hover {
-    background-color: rgba(0,0,0,0.04);
-  }
-  .agri-btn-ghost:active {
-    transform: scale(0.98);
-  }
-  .agri-btn-ghost:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
+    background: rgba(248, 250, 252, 1);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #0f766e;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -8px rgba(16, 185, 129, 0.15);
   }
   .agri-category-tile {
-    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
-    border: 1px solid transparent;
+    transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
   }
   .agri-category-tile:hover {
-    border-color: #0071E3;
-    box-shadow: 0 4px 16px rgba(0,113,227,0.08);
-  }
-  .agri-category-tile:focus-visible {
-    outline: 2px solid #0071E3;
-    outline-offset: 2px;
+    transform: translateY(-4px);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 18px 36px -12px rgba(16, 185, 129, 0.16), 0 0 24px -6px rgba(217, 70, 239, 0.1);
   }
   .agri-deadline-row {
-    transition: background-color 150ms ease-out;
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .agri-deadline-row:hover {
-    background-color: #F5F5F7;
+    background: linear-gradient(90deg, rgba(236, 253, 245, 0.6), rgba(253, 244, 255, 0.6));
+    transform: translateX(6px);
   }
   .agri-comparison-row {
     transition: background-color 150ms ease-out;
   }
   .agri-comparison-row:hover {
-    background-color: #F5F5F7;
+    background-color: rgba(241, 245, 249, 0.7);
   }
   .agri-faq-row {
-    transition: background-color 150ms ease-out;
-    border-radius: 8px;
+    transition: all 200ms ease-out;
+    border-radius: 12px;
   }
   .agri-faq-row:hover {
-    background-color: #FAFAFA;
+    background-color: rgba(248, 250, 252, 0.85);
   }
   button:focus-visible,
-  a:focus-visible {
-    outline: 2px solid #0071E3;
+  a:focus-visible,
+  input:focus-visible {
+    outline: 2px solid #10b981;
     outline-offset: 2px;
   }
 `;
 
 // --- Sub-components ---
 
-const Navbar = () => <nav className="fixed top-0 left-0 right-0 z-50 h-[44px] px-12 flex items-center justify-between" style={{
-  backgroundColor: 'rgba(255,255,255,0.85)',
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
-  borderBottom: '1px solid rgba(0,0,0,0.1)'
-}}>
-    <div className="w-full max-w-[1100px] mx-auto flex items-center justify-between">
-      <Link href="/" className="text-[15px] font-semibold text-[#1D1D1F] tracking-tight" style={{
-      textDecoration: 'none'
-    }}>
-        AgriNexus
+const Navbar = () => (
+  <header className="fixed top-3 left-0 right-0 z-50 px-3 sm:px-6 flex justify-center pointer-events-none">
+    <nav className="framer-pill-dock pointer-events-auto w-full max-w-6xl rounded-2xl px-4 py-2.5 flex items-center justify-between transition-all duration-300">
+      <Link href="/" className="flex items-center gap-2.5 group" style={{ textDecoration: 'none' }}>
+        <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
+          <IconLeaf size={18} color="#FFFFFF" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[15px] font-bold tracking-tight text-slate-900 leading-none">
+            AgriNexus
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-fuchsia-600 mt-0.5">
+            Law & Farm AI
+          </span>
+        </div>
       </Link>
-      <div className="hidden md:flex items-center gap-8">
-        {NAV_LINKS.map(link => <Link key={link.label} href={link.href} className="agri-nav-link">
+
+      <div className="hidden lg:flex items-center gap-1">
+        {NAV_LINKS.map(link => (
+          <Link key={link.label} href={link.href} className="agri-nav-link">
             {link.label}
-          </Link>)}
+          </Link>
+        ))}
       </div>
-      <div className="flex items-center gap-5">
-        <Link href="/vhod" className="text-[14px] text-[#0071E3] hover:opacity-80 transition-opacity" style={{
-        textDecoration: 'none'
-      }}>
+
+      <div className="flex items-center gap-2.5">
+        <Link href="/vhod" className="text-xs font-semibold text-slate-600 hover:text-emerald-600 px-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors" style={{ textDecoration: 'none' }}>
           Вход
         </Link>
-        <Link href="/search" aria-label="Търсене" style={{
-        textDecoration: 'none',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
-          <IconSearch size={20} color="#6E6E73" />
+        <Link href="/document-review" className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-fuchsia-600 shadow-sm hover:opacity-95 transition-opacity" style={{ textDecoration: 'none' }}>
+          <span>AI преглед</span>
+          <IconSparkles size={14} color="#FFFFFF" />
+        </Link>
+        <Link href="/search" aria-label="Търсене" className="h-9 w-9 rounded-full bg-slate-100/80 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors" style={{ textDecoration: 'none' }}>
+          <IconSearch size={18} color="currentColor" />
         </Link>
       </div>
-    </div>
-  </nav>;
+    </nav>
+  </header>
+);
 const Hero = () => {
   const router = useRouter();
   const { openChat } = useLandingChat();
@@ -723,77 +737,121 @@ const Hero = () => {
     router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
   };
 
-  return <section className="bg-[#FFFFFF] min-h-screen flex flex-col items-center justify-center px-12 text-center" style={{
-  paddingTop: '140px',
-  paddingBottom: '100px'
-}}>
-    <div className="w-full max-w-[680px] mx-auto flex flex-col items-center">
-      <span className="text-[12px] font-semibold text-[#0071E3] uppercase tracking-[0.08em] mb-4 block">
-        AI асистент за фермери
-      </span>
-      <h1 className="font-bold text-[#1D1D1F]" style={{
-      fontSize: 'clamp(40px, 6vw, 64px)',
-      lineHeight: 1.05,
-      letterSpacing: '-0.025em',
-      marginBottom: '20px'
-    }}>
-        <span className="block">Отговори за</span>
-        <span className="block">вашето стопанство.</span>
-      </h1>
-      <p className="text-[#6E6E73]" style={{
-      fontSize: '17px',
-      lineHeight: 1.6,
-      maxWidth: '520px',
-      marginBottom: '48px'
-    }}>
-        Търсете субсидии, договори и срокове на едно място. Ясни отговори с точен източник.
-      </p>
-
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-        <button type="button" onClick={() => openChat()} className="agri-btn-primary">Питай AI</button>
-        <Link href="/srokove" className="agri-btn-ghost">Провери срокове</Link>
+  return (
+    <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-4 sm:px-8 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/80" style={{ paddingTop: '130px', paddingBottom: '90px' }}>
+      {/* Ambient Fuchsia & Emerald Glow Blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="animate-emerald-glow absolute top-[15%] left-[10%] w-[420px] h-[420px] rounded-full bg-emerald-400/20 blur-[100px]" />
+        <div className="animate-fuchsia-glow absolute top-[25%] right-[12%] w-[460px] h-[460px] rounded-full bg-fuchsia-400/18 blur-[110px]" />
+        <div className="absolute bottom-[10%] left-[30%] w-[380px] h-[380px] rounded-full bg-cyan-400/15 blur-[95px] animate-float" />
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.035)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_45%,black_40%,transparent_100%)]" />
       </div>
 
-      <div className="w-full max-w-[560px] relative mb-5">
-        <div className="flex items-center" style={{
-        position: 'absolute',
-        left: '16px',
-        top: '50%',
-        transform: 'translateY(-50%)'
-      }}>
-          <IconSearch size={20} color="#86868B" />
-        </div>
-        <input type="text" placeholder="Напр. изисквания за директни плащания..." value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          goSearch();
-        }
-      }} className="w-full bg-white border border-[#D2D2D7] rounded-xl text-[#1D1D1F] transition-colors" style={{
-        height: '52px',
-        paddingLeft: '48px',
-        paddingRight: '16px',
-        fontSize: '17px',
-        outline: 'none'
-      }} onFocus={e => {
-        e.currentTarget.style.borderColor = '#0071E3';
-      }} onBlur={e => {
-        e.currentTarget.style.borderColor = '#D2D2D7';
-      }} />
-      </div>
+      <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center text-center">
+        {/* Pill Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-800 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.2)] mb-6 backdrop-blur-md"
+        >
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 font-extrabold">
+            AI АСИСТЕНТ ЗА ФЕРМЕРИ И ЗЕМЕДЕЛСКО ПРАВО
+          </span>
+        </motion.div>
 
-      <div className="flex flex-wrap justify-center gap-2">
-        {SEARCH_CHIPS.map(chip => <Link key={chip} href={`/search?q=${encodeURIComponent(chip)}`} className="bg-[#F5F5F7] text-[#6E6E73] rounded-full hover:bg-[#E8E8ED] transition-colors" style={{
-        fontSize: '14px',
-        padding: '8px 16px',
-        border: 'none',
-        cursor: 'pointer',
-        textDecoration: 'none'
-      }}>
-            {chip}
-          </Link>)}
+        {/* Hero Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
+          className="font-extrabold text-slate-900 tracking-tight leading-[1.08] mb-6 max-w-3xl"
+          style={{ fontSize: 'clamp(38px, 6vw, 68px)' }}
+        >
+          <span className="block">Отговори и решения за</span>
+          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
+            вашето стопанство.
+          </span>
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+          className="text-slate-600 font-normal leading-relaxed max-w-2xl mb-10"
+          style={{ fontSize: 'clamp(16px, 2vw, 19px)' }}
+        >
+          Търсете субсидии, наредби, договори и срокове на едно място. Получавайте мигновени отговори с <span className="font-semibold text-slate-800">точни цитати от ДФЗ и МЗ</span>.
+        </motion.p>
+
+        {/* Elevated Interactive Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
+          className="w-full max-w-2xl relative mb-8"
+        >
+          <div className="glass-panel-pro rounded-[22px] p-2 sm:p-2.5 flex flex-col sm:flex-row items-center gap-2 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.2),0_10px_30px_-10px_rgba(217,70,239,0.15)] border border-slate-200/90 group focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
+            <div className="flex items-center gap-3 px-3 w-full sm:w-auto flex-1">
+              <IconSearch size={22} color="#0f766e" />
+              <input
+                type="text"
+                placeholder="Напр. изисквания за директни плащания 2025, БИСС, екосхеми..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    goSearch();
+                  }
+                }}
+                className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 font-medium text-base sm:text-lg focus:outline-none py-2"
+              />
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button
+                type="button"
+                onClick={() => openChat(query || undefined)}
+                className="agri-btn-primary btn-shimmer w-full sm:w-auto py-3 px-6 text-base whitespace-nowrap shadow-md shadow-emerald-600/25"
+              >
+                <span>AI Анализ</span>
+                <IconSparkles size={18} color="#FFFFFF" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Quick Search Chips */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="flex flex-wrap items-center justify-center gap-2 max-w-2xl"
+        >
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">
+            Чести търсения:
+          </span>
+          {SEARCH_CHIPS.map((chip, idx) => (
+            <Link
+              key={chip}
+              href={`/search?q=${encodeURIComponent(chip)}`}
+              className="group inline-flex items-center gap-1.5 bg-white/80 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-fuchsia-500 text-slate-600 hover:text-white border border-slate-200/80 hover:border-transparent rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
+              style={{ textDecoration: 'none' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 group-hover:bg-white transition-colors" />
+              <span>{chip}</span>
+            </Link>
+          ))}
+        </motion.div>
       </div>
-    </div>
-  </section>;
+    </section>
+  );
 };
 
 const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" style={{
@@ -850,74 +908,64 @@ const LiveTicker = () => <div className="w-full bg-[#000000] overflow-hidden" st
     </div>
   </div>;
 const Features = () => {
-  const featureIcons: React.ReactElement[] = [<IconCalendar key="calendar" size={28} color="#0071E3" />, <IconDocText key="doc" size={28} color="#FFFFFF" />, <IconSparkles key="sparkles" size={28} color="rgba(255,255,255,0.7)" />];
-  return <section className="bg-[#F5F5F7]" style={{
-    padding: '100px 48px'
-  }}>
-      <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+  const featureIcons: React.ReactElement[] = [
+    <IconCalendar key="calendar" size={28} color="#10B981" />,
+    <IconDocText key="doc" size={28} color="#D946EF" />,
+    <IconSparkles key="sparkles" size={28} color="#0EA5E9" />
+  ];
+  return (
+    <section className="relative py-24 px-4 sm:px-8 overflow-hidden bg-slate-50/80">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
         {FEATURES.map((feat, idx) => {
-        const bg = feat.theme === 'light' ? '#FFFFFF' : feat.theme === 'black' ? '#000000' : '#1D1D1F';
-        const textColor = feat.theme === 'light' ? '#1D1D1F' : '#FFFFFF';
-        const labelColor = feat.theme === 'light' ? '#0071E3' : 'rgba(255,255,255,0.5)';
-        const descColor = feat.theme === 'light' ? '#6E6E73' : 'rgba(255,255,255,0.5)';
-        const linkColor = feat.theme === 'light' ? '#0071E3' : '#0071E3';
-        return <div key={feat.label} className="rounded-[18px] flex flex-col items-center text-center" style={{
-          backgroundColor: bg,
-          padding: '80px 40px'
-        }}>
-              <div style={{
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
+          const isHighlight = idx === 1;
+          return (
+            <div
+              key={feat.label}
+              className={`rounded-[28px] flex flex-col items-center text-center p-8 sm:p-10 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden ${
+                isHighlight
+                  ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white shadow-[0_20px_50px_-15px_rgba(217,70,239,0.3)] border border-fuchsia-500/30'
+                  : 'glass-panel-pro card-hover-pro text-slate-900 border border-slate-200/80'
+              }`}
+            >
+              {isHighlight && (
+                <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/20 rounded-full blur-2xl pointer-events-none" />
+              )}
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-md transition-transform duration-300 group-hover:scale-110 ${
+                isHighlight ? 'bg-fuchsia-500/20 border border-fuchsia-400/30' : 'bg-emerald-500/10 border border-emerald-400/20'
+              }`}>
                 {featureIcons[idx]}
               </div>
-              <span style={{
-            fontSize: '12px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontWeight: 600,
-            color: labelColor,
-            marginBottom: '16px',
-            display: 'block'
-          }}>
+              <span className={`text-xs uppercase tracking-widest font-bold mb-3 ${
+                isHighlight ? 'text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400' : 'text-emerald-600'
+              }`}>
                 {feat.label}
               </span>
-              <h3 style={{
-            fontSize: '32px',
-            fontWeight: 700,
-            color: textColor,
-            lineHeight: 1.05,
-            letterSpacing: '-0.025em',
-            marginBottom: '16px'
-          }}>
+              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-4 leading-snug">
                 {feat.title}
               </h3>
-              <p style={{
-            fontSize: '17px',
-            lineHeight: 1.6,
-            color: descColor,
-            marginBottom: '32px'
-          }}>
+              <p className={`text-sm sm:text-base leading-relaxed mb-8 flex-1 ${
+                isHighlight ? 'text-slate-300' : 'text-slate-600'
+              }`}>
                 {feat.description}
               </p>
-              <Link href={feat.href} style={{
-            fontSize: '17px',
-            fontWeight: 500,
-            color: linkColor,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            textDecoration: 'none'
-          }} className="hover:underline">
+              <Link
+                href={feat.href}
+                style={{ textDecoration: 'none' }}
+                className={`inline-flex items-center gap-2 font-bold px-6 py-3 rounded-full transition-all duration-300 ${
+                  isHighlight
+                    ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white hover:opacity-90 shadow-lg shadow-fuchsia-500/25'
+                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white border border-emerald-200/60'
+                }`}
+              >
                 <span>Виж всички</span>
-                <IconChevronRight size={16} color={linkColor} />
+                <IconChevronRight size={16} color="currentColor" />
               </Link>
-            </div>;
-      })}
+            </div>
+          );
+        })}
       </div>
-    </section>;
+    </section>
+  );
 };
 const HowItWorks = () => {
   const stepIcons = [<IconMessage key="msg" size={28} color="#1D1D1F" />, <IconMagnify key="mag" size={28} color="#1D1D1F" />, <IconCheckCircle key="chk" size={28} color="#1D1D1F" />];

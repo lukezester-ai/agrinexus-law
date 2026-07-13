@@ -49,64 +49,77 @@ export default async function DocumentPage({ params }: Params) {
       }
     >
       <div className="space-y-8">
-        <section className="surface-card p-6 sm:p-8">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
+        <section className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-8 sm:p-10 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="mb-4 flex flex-wrap items-center gap-2.5">
             <span
-              className={`rounded-full px-2 py-1 text-xs font-semibold ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider ${
                 status === "active"
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                  : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                  ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                  : "bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300"
               }`}
             >
-              {statusLabel(status)}
+              <span className={`w-1.5 h-1.5 rounded-full ${status === "active" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
+              <span>{statusLabel(status)}</span>
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {doc.category} · {doc.type} · {doc.effectiveDate}
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {doc.category} · {doc.type} · в сила от {doc.effectiveDate}
             </span>
           </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{doc.title}</h1>
-          <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">{summary}</p>
+          
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
+            {doc.title}
+          </h1>
+          
+          <div className="my-6 border-t border-slate-200/80 dark:border-slate-800" />
+          
+          <p className="text-base sm:text-lg font-medium leading-relaxed text-slate-700 dark:text-slate-200">
+            {summary}
+          </p>
+          
           {isPublicDocumentId(id) ? (
-            <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-              {hasStoredFile
-                ? "Индексиран държавен документ с копие в архива — изтеглете PDF или отворете оригинала."
-                : "Индексиран държавен документ от ingest pipeline. Отворете оригинала за пълния текст."}
-            </p>
+            <div className="mt-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-4 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-3">
+              <span>💡 {hasStoredFile
+                ? "Индексиран държавен документ с локално архивирано копие — можете да изтеглите PDF веднага или да прегледате оригинала в сайта на институцията."
+                : "Индексиран държавен документ от нормативния архив. Отворете официалния източник за пълен текст."}</span>
+            </div>
           ) : null}
-          <div className="mt-6 flex flex-wrap gap-3">
+          
+          <div className="mt-8 flex flex-wrap gap-3.5">
             {sourceUrl ? (
               <a
                 href={sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-3 text-sm font-extrabold text-white shadow-md shadow-emerald-500/25 hover:brightness-110 transition-all active:scale-95"
               >
-                <ExternalLink size={16} />
-                Официален източник
+                <ExternalLink size={18} />
+                <span>Официален източник на документа</span>
               </a>
             ) : null}
             {hasStoredFile || !isPublicDocumentId(id) ? (
               <a
                 href={`/api/documents/${doc.id}/download`}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800 dark:border-slate-600 dark:text-slate-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-300/90 bg-slate-50/80 px-5 py-3 text-sm font-extrabold text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm active:scale-95"
               >
-                <Download size={16} />
-                {hasStoredFile ? "Изтегли от архива" : "Изтегли резюме (.txt)"}
+                <Download size={18} />
+                <span>{hasStoredFile ? "Изтегли PDF от архива" : "Изтегли резюме (.txt)"}</span>
               </a>
             ) : null}
           </div>
         </section>
 
         {versions.length > 0 ? (
-          <section>
-            <h2 className="font-display text-lg font-bold text-slate-950 dark:text-white">Версии</h2>
-            <ul className="mt-3 space-y-2">
+          <section className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-8 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl">
+            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">История на версиите</h2>
+            <ul className="mt-4 space-y-3">
               {versions.map((v) => (
-                <li key={v.id} className="rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-700">
-                  <Link href={`/doc/${v.id}`} className="font-medium text-teal-700 dark:text-teal-400">
+                <li key={v.id} className="card-hover-pro rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4 text-sm dark:border-slate-800 dark:bg-slate-900/60 flex items-center justify-between transition-all">
+                  <Link href={`/doc/${v.id}`} className="font-bold text-emerald-700 hover:underline dark:text-emerald-400">
                     {v.title}
                   </Link>
-                  <span className="ml-2 text-slate-500">{v.effectiveDate}</span>
+                  <span className="ml-3 rounded-full bg-slate-200/80 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">{v.effectiveDate}</span>
                 </li>
               ))}
             </ul>
@@ -114,14 +127,14 @@ export default async function DocumentPage({ params }: Params) {
         ) : null}
 
         {related.length > 0 ? (
-          <section>
-            <h2 className="font-display text-lg font-bold text-slate-950 dark:text-white">Свързани документи</h2>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+          <section className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 p-8 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl">
+            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Свързани наредби и процедури</h2>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
               {related.map((r) => (
                 <li key={r.id}>
                   <Link
                     href={`/doc/${r.id}`}
-                    className="block rounded-xl border border-slate-200 p-3 text-sm text-slate-800 hover:border-teal-400 dark:border-slate-700 dark:text-slate-100"
+                    className="card-hover-pro block rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4 text-sm font-bold text-slate-800 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:text-emerald-400 transition-all"
                   >
                     {r.title}
                   </Link>

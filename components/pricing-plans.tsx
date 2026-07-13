@@ -90,12 +90,10 @@ export function PricingPlans() {
 					body: JSON.stringify({ planId, interval }),
 				});
 				const data = (await res.json()) as { url?: string; error?: string };
-				if (!res.ok || !data.url) {
-					throw new Error(data.error ?? "Неуспешно стартиране на плащане.");
-				}
+				if (!res.ok || !data.url) throw new Error(data.error ?? "Грешка при стартиране на плащането.");
 				window.location.href = data.url;
 			} catch (err) {
-				setError(err instanceof Error ? err.message : "Грешка при checkout.");
+				setError(err instanceof Error ? err.message : "Грешка.");
 			} finally {
 				setLoadingPlan(null);
 			}
@@ -105,7 +103,7 @@ export function PricingPlans() {
 
 	const openPortal = useCallback(async () => {
 		setError(null);
-		setLoadingPlan("pro");
+		setLoadingPlan("free");
 		try {
 			const res = await fetch("/api/billing/portal", { method: "POST" });
 			const data = (await res.json()) as { url?: string; error?: string };
@@ -121,56 +119,59 @@ export function PricingPlans() {
 	const planCards: PlanId[] = ["free", ...PAID_PLAN_IDS];
 
 	return (
-		<div>
-			<div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-				Всички цени са в <strong>EUR (€)</strong> — официалната разплащателна единица в България.
+		<div className="space-y-10">
+			<div className="rounded-[24px] border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20 px-6 py-4 text-center text-sm font-medium text-slate-800 dark:text-slate-200 backdrop-blur-md shadow-sm">
+				<span>Всички цени са в <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold">EUR (€)</strong> — официалната разплащателна единица в България.</span>
 				{trialDays > 0 && trialEligible ? (
-					<span className="mt-1 block text-teal-800 dark:text-teal-300">
-						Нови абонати: <strong>{trialDays} дни безплатен пробен период</strong>, после автоматично
-						таксуване (можете да отмените по всяко време).
+					<span className="mt-1 block text-emerald-700 dark:text-emerald-300 font-semibold">
+						Нови абонати получават <strong className="underline">{trialDays} дни безплатен пробен период</strong>, след което следва автоматично
+						таксуване (можете да отмените по всяко време с 1 клик).
 					</span>
 				) : null}
 				{isTrialing && trialEnds ? (
-					<span className="mt-1 block font-medium text-teal-800 dark:text-teal-300">
+					<span className="mt-1 block font-bold text-emerald-700 dark:text-emerald-300">
 						Активен пробен период до {trialEnds}.
 					</span>
 				) : null}
 			</div>
 
-			<div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-				<button
-					type="button"
-					onClick={() => setInterval("month")}
-					className={cn(
-						"rounded-full px-4 py-2 text-sm font-medium transition",
-						interval === "month"
-							? "bg-teal-700 text-white"
-							: "border border-slate-200 text-slate-700 dark:border-slate-600 dark:text-slate-200",
-					)}
-				>
-					Месечно
-				</button>
-				<button
-					type="button"
-					onClick={() => setInterval("year")}
-					className={cn(
-						"rounded-full px-4 py-2 text-sm font-medium transition",
-						interval === "year"
-							? "bg-teal-700 text-white"
-							: "border border-slate-200 text-slate-700 dark:border-slate-600 dark:text-slate-200",
-					)}
-				>
-					Годишно (−17%)
-				</button>
+			<div className="flex justify-center">
+				<div className="inline-flex rounded-full border border-slate-200/90 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 p-1.5 shadow-md backdrop-blur-md gap-1">
+					<button
+						type="button"
+						onClick={() => setInterval("month")}
+						className={cn(
+							"rounded-full px-6 py-2.5 text-sm font-extrabold transition-all duration-300",
+							interval === "month"
+								? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/25 scale-[1.02]"
+								: "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
+						)}
+					>
+						Месечно
+					</button>
+					<button
+						type="button"
+						onClick={() => setInterval("year")}
+						className={cn(
+							"rounded-full px-6 py-2.5 text-sm font-extrabold transition-all duration-300 flex items-center gap-1.5",
+							interval === "year"
+								? "bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 text-white shadow-md shadow-emerald-500/25 scale-[1.02]"
+								: "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
+						)}
+					>
+						<span>Годишно</span>
+						<span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-black text-emerald-700 dark:text-emerald-300 animate-pulse">−17%</span>
+					</button>
+				</div>
 			</div>
 
 			{error ? (
-				<p className="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
+				<p className="rounded-2xl border border-rose-300/80 bg-rose-50/90 px-6 py-4 text-sm font-semibold text-rose-800 dark:border-rose-900/80 dark:bg-rose-950/60 dark:text-rose-200 shadow-sm">
 					{error}
 				</p>
 			) : null}
 
-			<div className="grid gap-6 lg:grid-cols-3">
+			<div className="grid gap-8 lg:grid-cols-3 items-stretch">
 				{planCards.map((planId) => {
 					const plan = PLANS[planId];
 					const price =
@@ -183,59 +184,73 @@ export function PricingPlans() {
 						<div
 							key={planId}
 							className={cn(
-								"flex flex-col rounded-2xl border p-6 sm:p-8",
+								"card-hover-pro glass-panel-pro flex flex-col rounded-[32px] border p-8 transition-all duration-300 justify-between relative overflow-hidden",
 								highlighted
-									? "border-teal-600 bg-teal-50/40 shadow-lg dark:border-teal-500 dark:bg-teal-950/20"
-									: "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/40",
+									? "border-emerald-500/60 bg-gradient-to-b from-emerald-50/90 via-white/95 to-white/95 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.25)] dark:from-emerald-950/40 dark:via-slate-900/95 dark:to-slate-950/95 scale-[1.03] z-10"
+									: "border-slate-200/90 bg-white/95 dark:border-slate-800 dark:bg-slate-900/90 hover:border-emerald-400/50",
 							)}
 						>
-							<div className="mb-3 flex flex-wrap gap-2">
-								{highlighted ? (
-									<span className="inline-flex w-fit rounded-full bg-teal-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-										Препоръчан
+							{highlighted ? (
+								<div className="absolute -top-12 -right-12 w-40 h-40 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+							) : null}
+
+							<div>
+								<div className="mb-4 flex flex-wrap gap-2 items-center">
+									{highlighted ? (
+										<span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-sm">
+											<span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+											<span>Препоръчан</span>
+										</span>
+									) : null}
+									{isPaid && trialEligible && trialDays > 0 ? (
+										<span className="inline-flex rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+											{trialDays} дни безплатно
+										</span>
+									) : null}
+								</div>
+								<h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+									{plan.name}
+								</h2>
+								<p className="mt-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">{plan.tagline}</p>
+								
+								<div className="mt-6 flex items-baseline gap-1.5">
+									<span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
+										{price === 0 ? "0 €" : formatEur(price)}
 									</span>
-								) : null}
-								{isPaid && trialEligible && trialDays > 0 ? (
-									<span className="inline-flex w-fit rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-										{trialDays} дни безплатно
-									</span>
-								) : null}
+									{price > 0 ? (
+										<span className="text-sm font-bold text-slate-500 dark:text-slate-400">
+											/{interval === "year" ? "година" : "месец"}
+										</span>
+									) : null}
+								</div>
+
+								<div className="my-6 border-t border-slate-200/80 dark:border-slate-800" />
+
+								<ul className="space-y-3.5">
+									{plan.features.map((feature) => (
+										<li
+											key={feature}
+											className="flex items-start gap-3 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed"
+										>
+											<div className="mt-0.5 shrink-0 rounded-full bg-emerald-500/10 border border-emerald-500/25 p-1 text-emerald-600 dark:text-emerald-400">
+												<Check size={14} strokeWidth={3} />
+											</div>
+											<span>{feature}</span>
+										</li>
+									))}
+								</ul>
 							</div>
-							<h2 className="font-display text-xl font-bold text-slate-950 dark:text-white">
-								{plan.name}
-							</h2>
-							<p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{plan.tagline}</p>
-							<p className="mt-6 font-display text-4xl font-bold text-slate-950 dark:text-white">
-								{price === 0 ? "0 €" : formatEur(price)}
-								{price > 0 ? (
-									<span className="text-base font-normal text-slate-500">
-										/{interval === "year" ? "год." : "мес."}
-									</span>
-								) : null}
-							</p>
 
-							<ul className="mt-6 flex-1 space-y-3">
-								{plan.features.map((feature) => (
-									<li
-										key={feature}
-										className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
-									>
-										<Check size={16} className="mt-0.5 shrink-0 text-teal-600" />
-										<span>{feature}</span>
-									</li>
-								))}
-							</ul>
-
-							<div className="mt-8">
+							<div className="mt-8 pt-4">
 								{isCurrent && isPaid ? (
 									<button
 										type="button"
 										onClick={() => void openPortal()}
 										disabled={loadingPlan !== null}
-										className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:text-slate-100"
+										className="w-full rounded-2xl border border-slate-300/90 bg-slate-100/80 px-5 py-3.5 text-sm font-extrabold text-slate-800 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 shadow-sm"
 									>
 										{loadingPlan ? (
-											<Loader2 className="mx-auto h-4 w-4 animate-spin" />
+											<Loader2 className="mx-auto h-5 w-5 animate-spin text-emerald-600" />
 										) : (
 											"Управление на абонамента"
 										)}
@@ -246,26 +261,26 @@ export function PricingPlans() {
 										onClick={() => void startCheckout(planId)}
 										disabled={loadingPlan !== null || isCurrent}
 										className={cn(
-											"w-full rounded-xl px-4 py-3 text-sm font-semibold transition",
+											"w-full rounded-2xl px-5 py-4 text-base font-extrabold transition-all duration-200 shadow-md",
 											highlighted
-												? "bg-teal-700 text-white hover:bg-teal-800"
-												: "border border-slate-300 text-slate-800 dark:border-slate-600 dark:text-slate-100",
+												? "bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 text-white shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98]"
+												: "border border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600",
 										)}
 									>
 										{loadingPlan === planId ? (
-											<Loader2 className="mx-auto h-4 w-4 animate-spin" />
+											<Loader2 className="mx-auto h-5 w-5 animate-spin" />
 										) : isCurrent ? (
 											"Текущ план"
 										) : trialEligible && trialDays > 0 ? (
 											`Започни ${trialDays}-дневен trial`
 										) : (
-											"Избери план"
+											"Избери този план"
 										)}
 									</button>
 								) : (
 									<Link
 										href={authenticated ? "/search" : "/vhod"}
-										className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-800 dark:border-slate-600 dark:text-slate-100"
+										className="block w-full rounded-2xl border border-slate-300/90 bg-slate-50/80 px-5 py-3.5 text-center text-sm font-extrabold text-slate-800 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 shadow-sm"
 									>
 										{authenticated ? "Продължи безплатно" : "Регистрация"}
 									</Link>
@@ -276,8 +291,8 @@ export function PricingPlans() {
 				})}
 			</div>
 
-			<p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
-				Плащанията в EUR (€) се обработват от Stripe. Отменете по всяко време от клиентския портал.
+			<p className="mt-10 text-center text-xs font-semibold text-slate-400 dark:text-slate-500 leading-relaxed">
+				Плащанията в EUR (€) се обработват с банково ниво на сигурност от Stripe. Можете да отмените или промените абонамента си по всяко време от клиентския портал.
 				{!billingReady ? " (Stripe ключовете липсват — checkout е в тестов режим.)" : null}
 			</p>
 		</div>

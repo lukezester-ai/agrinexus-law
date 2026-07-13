@@ -265,22 +265,26 @@ export function DocumentReviewPanel() {
 	const dates = result ? extractDateHints(result.analysis) : [];
 
 	return (
-		<div className="flex min-h-screen flex-col bg-[#0A0A0A] font-sans text-white selection:bg-blue-600/30">
+		<div className="flex min-h-screen flex-col bg-[#0A0A0A] font-sans text-white selection:bg-emerald-500/30">
 			<MainNavBar activeScreen="AI Review" />
 
 			<AuroraBackground className="flex-grow pt-32 pb-20">
-				<main className="mx-auto max-w-7xl px-6">
-					<div className="mb-12">
-						<h1 className="mb-4 animate-in font-serif text-6xl italic fade-in slide-in-from-bottom-4 duration-700 md:text-7xl">
+				<main className="mx-auto max-w-7xl px-6 relative z-10">
+					<div className="mb-14 text-center sm:text-left">
+						<div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4 backdrop-blur-md">
+							<span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+							<span>AI Правен & Агро Анализатор</span>
+						</div>
+						<h1 className="mb-4 font-extrabold text-4xl sm:text-6xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-fuchsia-400">
 							AI Преглед на документи
 						</h1>
-						<p className="max-w-2xl animate-in text-xl font-medium text-zinc-500 fade-in slide-in-from-bottom-6 duration-1000 md:text-2xl">
-							Качи договор, ДФЗ документ или писмо — реален анализ с Елена (право / ДФЗ).
+						<p className="max-w-2xl text-lg sm:text-xl font-normal text-slate-300 leading-relaxed">
+							Качи договор, ДФЗ документ, аренда или писмо — мигновен анализ на задължения, рискове и срокове от <span className="text-white font-semibold">Елена (AI Правен експерт)</span>.
 						</p>
 					</div>
 
 					{!result ? (
-						<div className="mx-auto max-w-2xl space-y-6">
+						<div className="mx-auto max-w-3xl space-y-8 glass-panel-pro rounded-[32px] p-6 sm:p-10 border border-white/15 bg-slate-950/75 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.25)] backdrop-blur-2xl">
 							<input
 								ref={fileInputRef}
 								type="file"
@@ -294,52 +298,63 @@ export function DocumentReviewPanel() {
 								tabIndex={0}
 								onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
 								onClick={() => fileInputRef.current?.click()}
-								className="group flex h-[260px] cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-800 bg-[#181818] transition-all duration-300 hover:border-blue-500/50 hover:bg-[#1c1c1c]"
+								className="group flex h-[280px] cursor-pointer flex-col items-center justify-center rounded-[24px] border-2 border-dashed border-emerald-500/30 bg-slate-900/60 transition-all duration-300 hover:border-emerald-400 hover:bg-slate-900/90 hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.3)]"
 							>
-								<div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5 transition-transform group-hover:scale-110">
-									<CloudUpload size={48} className="stroke-[1.5px] text-blue-500" />
+								<div className="mb-6 rounded-2xl border border-emerald-500/40 bg-gradient-to-tr from-emerald-600/20 to-fuchsia-600/20 p-5 transition-transform duration-300 group-hover:scale-110 shadow-lg shadow-emerald-500/15">
+									<CloudUpload size={48} className="text-emerald-400" />
 								</div>
-								<h3 className="mb-2 text-xl font-semibold">
-									{file ? file.name : "Пусни PDF, DOCX или TXT"}
+								<h3 className="mb-2 text-xl font-bold text-white">
+									{file ? file.name : "Пусни PDF, DOCX или TXT файл тук"}
 								</h3>
-								<p className="text-zinc-500">
+								<p className="text-slate-400 font-medium">
 									{file
 										? `${(file.size / 1024 / 1024).toFixed(2)} MB — кликни за смяна`
-										: "или избери файл"}
+										: "или кликни за избор от устройството"}
 								</p>
-								<p className="mt-4 text-xs font-medium uppercase tracking-wider text-zinc-600">
+								<p className="mt-4 text-xs font-bold uppercase tracking-widest text-emerald-400/80 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
 									Макс. {MAX_FILE_BYTES / (1024 * 1024)} MB
 								</p>
 							</div>
 
-							<div className="grid gap-4 sm:grid-cols-2">
-								{MODES.map((m) => (
-									<button
-										key={m.id}
-										type="button"
-										onClick={() => setMode(m.id)}
-										className={cn(
-											"rounded-xl border px-4 py-3 text-left text-sm transition",
-											mode === m.id
-												? "border-blue-500 bg-blue-600/20 text-white"
-												: "border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:border-zinc-600",
-										)}
-									>
-										{m.label}
-									</button>
-								))}
+							<div className="space-y-3">
+								<label className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+									1. Избери тип на документа:
+								</label>
+								<div className="grid gap-3 sm:grid-cols-2">
+									{MODES.map((m) => (
+										<button
+											key={m.id}
+											type="button"
+											onClick={() => setMode(m.id)}
+											className={cn(
+												"rounded-2xl border px-5 py-3.5 text-left font-semibold transition-all duration-300 flex items-center justify-between",
+												mode === m.id
+													? "border-fuchsia-500 bg-gradient-to-r from-fuchsia-600/30 to-pink-600/30 text-white shadow-md shadow-fuchsia-500/20 scale-[1.02]"
+													: "border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:bg-white/10",
+											)}
+										>
+											<span>{m.label}</span>
+											{mode === m.id && <span className="w-2 h-2 rounded-full bg-fuchsia-400 animate-ping" />}
+										</button>
+									))}
+								</div>
 							</div>
 
-							<textarea
-								value={context}
-								onChange={(e) => setContext(e.target.value)}
-								placeholder="Допълнителен контекст (по желание): регион, култура, тип стопанство…"
-								rows={3}
-								className="w-full rounded-xl border border-zinc-800 bg-[#181818] px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:outline-none"
-							/>
+							<div className="space-y-3">
+								<label className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+									2. Допълнителни указания (опционално):
+								</label>
+								<textarea
+									value={context}
+									onChange={(e) => setContext(e.target.value)}
+									placeholder="Напр. интересуват ме конкретни клаузи за неустойки, срокове за плащане по БИСС, или специфични парцели…"
+									rows={3}
+									className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-5 py-3.5 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all"
+								/>
+							</div>
 
 							{error && (
-								<div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+								<div className="rounded-2xl border border-red-500/40 bg-red-500/15 px-5 py-4 text-sm font-medium text-red-200 backdrop-blur-md">
 									{error}
 								</div>
 							)}
@@ -348,21 +363,24 @@ export function DocumentReviewPanel() {
 								type="button"
 								disabled={!file || analyzing}
 								onClick={() => void runAnalysis()}
-								className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+								className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 py-4 font-extrabold text-white text-lg shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
 							>
 								{analyzing ? (
 									<>
-										<Loader2 size={20} className="animate-spin" /> Анализиране…
+										<Loader2 size={22} className="animate-spin" /> Анализиране на документа с AI…
 									</>
 								) : (
-									<>Стартирай AI преглед</>
+									<>
+										<span>Стартирай AI преглед</span>
+										<FileText size={20} />
+									</>
 								)}
 							</button>
 
-							<p className="text-center text-xs text-zinc-500">
-								Не е правен съвет. При спор — адвокат.{" "}
-								<Link href="/documents" className="text-blue-400 hover:underline">
-									Държавен архив
+							<p className="text-center text-xs text-slate-400">
+								Не е правен съвет. При спор — консултирайте се с адвокат.{" "}
+								<Link href="/documents" className="text-emerald-400 hover:underline">
+									Към Държавен архив
 								</Link>
 							</p>
 						</div>

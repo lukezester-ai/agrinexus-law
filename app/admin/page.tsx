@@ -144,24 +144,27 @@ export default function AdminPage() {
 
         <AiLeaderPanel ingestToken={ingestToken} />
 
-        <div className="glass-panel rounded-3xl overflow-hidden mb-8">
-          <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
-            <h2 className="font-display text-2xl font-medium text-slate-950 dark:text-white flex items-center gap-3">
-              <Archive className="text-emerald-600" /> Document Archive Agent
+        <div className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl overflow-hidden mb-8">
+          <div className="p-8 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60">
+            <h2 className="font-display text-2xl font-extrabold text-slate-950 dark:text-white flex items-center gap-3">
+              <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2 text-emerald-600 dark:text-emerald-400">
+                <Archive size={22} />
+              </div>
+              <span>Document Archive Agent</span>
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 mt-3 text-sm font-medium leading-relaxed">
               Автоматично изтегляне от ДФЗ/МЗХ sitemap → архив → RAG reindex → Meili sync.
-              Същият pipeline като cron <code className="text-xs bg-slate-200/80 dark:bg-slate-800 px-1 rounded">/api/ingest/cron</code>.
+              Същият pipeline като cron <code className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md font-mono">/api/ingest/cron</code>.
             </p>
           </div>
           <div className="p-8 space-y-4">
             {archiveStatus === "success" && (
-              <div className="p-4 bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 rounded-2xl flex items-center gap-3 text-sm border border-teal-200 dark:border-teal-800/50">
+              <div className="p-4 bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 rounded-2xl flex items-center gap-3 text-sm border border-teal-200 dark:border-teal-800/50 font-semibold shadow-sm">
                 <CircleCheck size={18} /> {archiveMessage}
               </div>
             )}
             {archiveStatus === "error" && (
-              <div className="p-4 bg-rose-50 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300 rounded-2xl flex items-center gap-3 text-sm border border-rose-200 dark:border-rose-800/50">
+              <div className="p-4 bg-rose-50 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300 rounded-2xl flex items-center gap-3 text-sm border border-rose-200 dark:border-rose-800/50 font-semibold shadow-sm">
                 <AlertCircle size={18} /> {archiveMessage}
               </div>
             )}
@@ -169,25 +172,28 @@ export default function AdminPage() {
               type="button"
               disabled={archiveRunning || !ingestToken.trim()}
               onClick={() => void handleRunArchiveAgent()}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-fuchsia-600 text-white font-extrabold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2.5"
             >
               {archiveRunning ? (
-                <><Loader2 size={18} className="animate-spin" /> Archive Agent работи…</>
+                <><Loader2 size={20} className="animate-spin" /> <span>Archive Agent работи и синхронизира…</span></>
               ) : (
-                <><Archive size={18} /> Пусни Archive Agent (ingest + reindex)</>
+                <><Archive size={20} /> <span>Стартирай Archive Agent (ingest + reindex)</span></>
               )}
             </button>
           </div>
         </div>
 
-        <div className="glass-panel rounded-3xl overflow-hidden">
-          <div className="p-8 border-b border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
-            <h1 className="font-display text-3xl font-medium text-slate-950 dark:text-white flex items-center gap-3">
-              <Upload className="text-teal-600" /> Качване на нов документ
+        <div className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl overflow-hidden">
+          <div className="p-8 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60">
+            <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white flex items-center gap-3">
+              <div className="rounded-xl bg-teal-500/10 border border-teal-500/20 p-2 text-teal-600 dark:text-teal-400">
+                <Upload size={24} />
+              </div>
+              <span>Качване на нов нормативен документ</span>
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm leading-relaxed">
-              Файлът ще бъде автоматично сканиран, разделен на логически части и качен в RAG базата.
-              Нужен е същият админ токен като за <code className="text-xs bg-slate-200/80 dark:bg-slate-800 px-1 rounded">/api/rag/reindex</code> (<code className="text-xs">INGEST_ADMIN_TOKEN</code>).
+            <p className="text-slate-600 dark:text-slate-300 mt-3 text-sm font-medium leading-relaxed">
+              Файлът ще бъде автоматично сканиран, разделен на логически части и качен в RAG базата на AgriNexus.
+              Нужен е същият админ токен като за <code className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md font-mono">/api/rag/reindex</code> (<code className="text-xs font-mono">INGEST_ADMIN_TOKEN</code>).
             </p>
           </div>
 

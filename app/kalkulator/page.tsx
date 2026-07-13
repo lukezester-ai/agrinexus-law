@@ -132,33 +132,33 @@ export default function KalkulatorPage() {
 				</div>
 			}
 		>
-			<div className="text-center mb-8">
+			<div className="text-center mb-10 relative">
 				<motion.div 
 					initial={{ scale: 0 }} 
 					animate={{ scale: 1 }} 
-					className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-3xl border border-teal-200/80 bg-gradient-to-br from-teal-100 to-teal-50 text-teal-700 shadow-xl shadow-teal-900/5 dark:border-teal-800 dark:from-teal-900/60 dark:to-teal-950/80 dark:text-teal-300"
+					className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 text-white shadow-lg shadow-emerald-500/25 animate-float"
 				>
-					<Calculator size={32} />
+					<Calculator size={30} />
 				</motion.div>
-				<h1 className="font-display mb-3 text-3xl font-medium tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+				<h1 className="font-extrabold mb-3 text-3xl sm:text-5xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
 					Оценка на субсидиите
 				</h1>
-				<p className="text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
-					Разберете какъв е потенциалният размер на вашите директни плащания само в 3 лесни стъпки.
+				<p className="text-slate-600 dark:text-slate-300 max-w-lg mx-auto text-base leading-relaxed">
+					Разберете какъв е потенциалният размер на вашите директни плащания само в <span className="font-bold text-slate-900 dark:text-white">3 лесни стъпки</span> с AI алгоритъм.
 				</p>
 			</div>
 
-			<div className="relative overflow-hidden bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 shadow-2xl shadow-slate-200/20 dark:shadow-black/40 rounded-3xl p-6 sm:p-10 min-h-[480px] flex flex-col">
+			<div className="glass-panel-pro relative overflow-hidden rounded-[32px] p-6 sm:p-10 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.2),0_10px_30px_-10px_rgba(217,70,239,0.15)] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 backdrop-blur-2xl min-h-[480px] flex flex-col">
 				
 				{/* Progress Indicator */}
-				<div className="flex gap-2 mb-8">
+				<div className="flex gap-3 mb-8">
 					{[1, 2, 3].map((s) => (
-						<div key={s} className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+						<div key={s} className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden shadow-inner">
 							<motion.div 
-								className="h-full bg-teal-500 dark:bg-teal-400"
+								className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-fuchsia-500 shadow-sm shadow-emerald-500/30"
 								initial={{ width: "0%" }}
 								animate={{ width: step >= s ? "100%" : "0%" }}
-								transition={{ duration: 0.4 }}
+								transition={{ duration: 0.5 }}
 							/>
 						</div>
 					))}

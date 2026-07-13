@@ -6,15 +6,17 @@ import { CookiePreferencesButton } from "@/components/cookie-preferences-button"
 export default function PrivacyPage() {
 	return (
 		<SitePageShell maxWidth="3xl">
-			<header className="mb-8 text-center sm:text-left">
-				<p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Правна информация</p>
-				<h1 className="font-display mt-2 text-3xl font-medium tracking-tight text-slate-950 dark:text-white">
+			<header className="mb-10 text-center sm:text-left">
+				<div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-3">
+					<span>Правна и GDPR Информация</span>
+				</div>
+				<h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-fuchsia-600">
 					Политика за поверителност
 				</h1>
-				<p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Последна актуализация: 1 май 2026</p>
+				<p className="mt-2 text-sm font-semibold text-slate-500 dark:text-slate-400">Последна актуализация: 1 май 2026 · В съответствие с Регламент (ЕС) 2016/679 (GDPR)</p>
 			</header>
 
-			<article className="surface-card space-y-8 p-6 sm:p-8">
+			<article className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.15)] space-y-8 p-6 sm:p-10 backdrop-blur-2xl">
 				<section>
 					<h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Общи положения</h2>
 					<p className="mt-3 leading-relaxed text-slate-600 dark:text-slate-300">
