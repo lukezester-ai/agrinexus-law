@@ -10,10 +10,10 @@ export default function Home() {
             УПРАВЛЕНИЕ НА СТОПАНСТВОТО
           </span>
           <span className="text-slate-200">
-            Опитайте всички 12 модула в <a href="/moya-ferma" className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-fuchsia-400 hover:opacity-80 transition-opacity underline decoration-emerald-500/50 underline-offset-4">Моята ферма</a>:
+            Опитайте всички 18 секторни модула в <a href="/moya-ferma" className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-fuchsia-400 hover:opacity-80 transition-opacity underline decoration-emerald-500/50 underline-offset-4">Моята ферма</a>:
           </span>
           <span className="text-slate-400 text-xs hidden sm:inline">
-            Счетоводство · Склад · Машини · Реколта · Сеитбооборот · Химизация · Календар
+            🌾 Зърнопроизводство · 🐄 Животновъдство (ВетИС) · 🍎 Овощарство & Лозя · 🐝 Пчеларство · 📊 Счетоводство
           </span>
         </div>
       </div>
