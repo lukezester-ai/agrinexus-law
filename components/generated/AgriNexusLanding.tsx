@@ -1052,7 +1052,7 @@ const FARM_MODULES = [
   { label: 'Химизация', href: '/moya-ferma/himizacia', desc: 'БАБХ дневник за РЗ с PDF експорт и препарати' },
   { label: 'Календар', href: '/moya-ferma/kalendar', desc: 'Напомняния за срокове, прегледи и кампании' },
   { label: 'Банки', href: '/moya-ferma/banki', desc: 'Банкови сметки, транзакции и CSV импорт от банка' },
-  { label: 'ЧР', href: '/moya-ferma/choveшки-ресурси', desc: 'Трудови договори, присъствие, отпуски и заплати' },
+  { label: 'ЧР', href: '/moya-ferma/choveshki-resursi', desc: 'Трудови договори, присъствие, отпуски и заплати' },
   { label: 'ДМА', href: '/moya-ferma/dma', desc: 'Дълготрайни активи с амортизация и график' },
   { label: 'Архив', href: '/moya-ferma/dokumenti', desc: 'Хранилище за договори, ДФЗ писма, протоколи и фактури' },
 ];
