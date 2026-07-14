@@ -80,7 +80,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
 			"ТРЗ и заплати (работни ведомости)",
 			"Автоматизиран банков импорт (MT940/CSV) & VIES",
 			"Неограничени потребители и агрономи",
-			"Приоритет и поддръжка по имейл",
 		],
 		chatDailyLimit: null,
 		chatDailyLimitAnonymous: 0,

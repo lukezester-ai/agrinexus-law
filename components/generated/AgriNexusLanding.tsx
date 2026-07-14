@@ -191,31 +191,39 @@ const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [{
   description: 'Получавате ясен отговор с директен линк към нормативния акт.'
 }];
 const COMPARISON_ROWS: ComparisonRow[] = [{
-  feature: 'Намиране на информация',
+  feature: '18 секторни агро-модула (Зърно, Животновъдство, Овощарство, Пчелин)',
   agri: 'check',
   manual: 'x'
 }, {
-  feature: 'Точен източник и цитат',
+  feature: 'Автоматично счетоводство с НАП XML, ДДС и банков импорт',
   agri: 'check',
   manual: 'x'
 }, {
-  feature: 'Следваща стъпка',
+  feature: 'Нормативни дневници за БАБХ и ВетИС регистри',
   agri: 'check',
   manual: 'x'
 }, {
-  feature: 'AI преглед на договор',
+  feature: 'GIS карта на парцелите, сеитбооборот и фири в силози',
   agri: 'check',
   manual: 'x'
 }, {
-  feature: 'Актуални срокове',
+  feature: 'Търсене на закони и субсидии с точен цитат от ДФЗ и МЗ',
   agri: 'check',
   manual: 'x'
 }, {
-  feature: 'Необходимо време',
+  feature: 'AI правен преглед на договори и агрономически анализ (RAG)',
+  agri: 'check',
+  manual: 'x'
+}, {
+  feature: 'Актуални срокове за директни плащания, СЕУ и екосхеми',
+  agri: 'check',
+  manual: 'x'
+}, {
+  feature: 'Необходимо време за пълна администрация и отчетност',
   agri: 'text',
-  agriText: '< 1 минута',
+  agriText: '< 5 минути на ден',
   manual: 'text',
-  manualText: '30–60 минути'
+  manualText: 'Часове ръчен труд'
 }];
 const MOBILE_BULLETS: MobileFeatureBullet[] = [{
   bold: 'PWA приложение',
@@ -1323,7 +1331,7 @@ const ComparisonTable = () => <section className="bg-[#FFFFFF]" style={{
         lineHeight: 1.05,
         letterSpacing: '-0.025em'
       }}>
-          AgriNexus срещу самостоятелно търсене.
+          AgriNexus срещу разпокъсано управление.
         </h2>
       </div>
 
@@ -1355,7 +1363,7 @@ const ComparisonTable = () => <section className="bg-[#FFFFFF]" style={{
               fontSize: '15px',
               fontWeight: 700,
               color: '#1D1D1F'
-            }}>AgriNexus Law</span>
+            }}>AgriNexus 360°</span>
               <span style={{
               backgroundColor: '#0071E3',
               color: '#FFFFFF',
@@ -1365,7 +1373,7 @@ const ComparisonTable = () => <section className="bg-[#FFFFFF]" style={{
               borderRadius: '980px',
               letterSpacing: '0.05em'
             }}>
-                AI
+                AI & ERP
               </span>
             </div>
           </div>
@@ -1382,7 +1390,7 @@ const ComparisonTable = () => <section className="bg-[#FFFFFF]" style={{
             fontSize: '15px',
             fontWeight: 600,
             color: '#6E6E73'
-          }}>Самостоятелно</span>
+          }}>Ръчно / Традиционно</span>
           </div>
         </div>
 
