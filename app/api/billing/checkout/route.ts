@@ -93,7 +93,9 @@ export async function POST(req: Request) {
 			...(withTrial ? { trial_period_days: BILLING_TRIAL_DAYS } : {}),
 		},
 		allow_promotion_codes: true,
-		billing_address_collection: "auto",
+		billing_address_collection: "required",
+		tax_id_collection: { enabled: true },
+		customer_update: { address: "auto", name: "auto" },
 	});
 
 	return Response.json({
