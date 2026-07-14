@@ -66,7 +66,7 @@ const MODULES = [
   // Оперативна техника & Календар
   { href: "/moya-ferma/mashini", label: "Машини & Трактори", desc: "Агротехника, Каско, ГСМ норми и сервизен график", icon: Tractor, color: "text-sky-600", bg: "bg-sky-100 dark:bg-sky-900/50", sector: "ops" },
   { href: "/moya-ferma/kalendar", label: "Календар & Задачи", desc: "График на агротехнически събития, напомняния и срокове", icon: RefreshCw, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50", sector: "ops" },
-  { href: "/moya-ferma/choveшки-ресурси", label: "Човешки ресурси", desc: "Служители, присъствие, отпуски и работни ведомости", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50", sector: "ops" },
+  { href: "/moya-ferma/choveshki-resursi", label: "Човешки ресурси", desc: "Служители, присъствие, отпуски и работни ведомости", icon: Users, color: "text-rose-600", bg: "bg-rose-100 dark:bg-rose-900/50", sector: "ops" },
 
   // Счетоводство & Финанси
   { href: "/moya-ferma/schetovodstvo", label: "Счетоводство & ДДС", desc: "Счетоводен журнал, фактури, баланс, СД по ЗДДС и автоматични проводки", icon: Landmark, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/50", sector: "accounting" },

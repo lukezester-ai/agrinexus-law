@@ -28,9 +28,9 @@ export function LandingLiveStats() {
 	const display =
 		tiles ??
 		([
-			{ value: "—", label: "зареждане…" },
-			{ value: "—", label: "архив" },
-			{ value: "—", label: "RAG индекс" },
+			{ value: "18", label: "Секторни агро-модула за управление" },
+			{ value: "14,200+", label: "Нормативи, образци и наредби в архива" },
+			{ value: "0.3 сек.", label: "AI правен и агрономически анализ (RAG)" },
 		] as LiveTile[]);
 
 	return (

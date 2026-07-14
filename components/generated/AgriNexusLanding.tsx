@@ -1589,32 +1589,16 @@ const FAQ = () => {
                   {openIndex === idx ? <IconMinus size={20} /> : <IconPlus size={20} />}
                 </span>
               </button>
-              <AnimatePresence>
-                {openIndex === idx && <motion.div initial={{
-              height: 0,
-              opacity: 0
-            }} animate={{
-              height: 'auto',
-              opacity: 1
-            }} exit={{
-              height: 0,
-              opacity: 0
-            }} transition={{
-              duration: 0.3,
-              ease: 'easeOut'
-            }} style={{
-              overflow: 'hidden'
-            }}>
-                    <p style={{
-                paddingTop: '16px',
-                fontSize: '17px',
-                color: '#6E6E73',
-                lineHeight: 1.6
-              }}>
-                      {faq.answer}
-                    </p>
-                  </motion.div>}
-              </AnimatePresence>
+              <div className={cn("transition-all duration-300 overflow-hidden", openIndex === idx ? "max-h-96 opacity-100" : "max-h-0 opacity-0")} aria-hidden={openIndex !== idx}>
+                <p style={{
+                  paddingTop: openIndex === idx ? '16px' : '0px',
+                  fontSize: '17px',
+                  color: '#6E6E73',
+                  lineHeight: 1.6
+                }}>
+                  {faq.answer}
+                </p>
+              </div>
             </div>)}
         </div>
       </div>
@@ -1947,9 +1931,9 @@ const Footer = () => <footer className="bg-[#F5F5F7]" style={{
       <div style={{
       fontSize: '13px',
       color: '#6E6E73'
-    }}>© 2025 AgriNexus.Law — собственост на AgriNexus Ltd (info@agrinexus.eu). Всички права запазени.</div>
+    }}>© 2026 AgriNexus — собственост на AgriNexus Ltd (info@agrinexus.eu). Всички права запазени.</div>
       <div className="flex flex-wrap items-center justify-center gap-6">
-        {[{ label: 'Цени', href: '/ceni' }, { label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'AI преглед', href: '/document-review' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
+        {[{ label: 'Цени', href: '/ceni' }, { label: 'Документи', href: '/documents' }, { label: 'Срокове', href: '/srokove' }, { label: 'Калкулатори', href: '/kalkulator' }, { label: 'AI преглед', href: '/document-review' }, { label: 'Общи условия', href: '/terms' }, { label: 'Поверителност', href: '/privacy' }].map(item => <Link key={item.label} href={item.href} style={{
         fontSize: '13px',
         color: '#6E6E73',
         textDecoration: 'none',

@@ -74,12 +74,12 @@ export function PricingPlans() {
 	const startCheckout = useCallback(
 		async (planId: PlanId) => {
 			setError(null);
-			if (!billingReady) {
-				setError("Stripe все още не е конфигуриран. Свържете ключовете в .env.");
-				return;
-			}
 			if (!authenticated) {
 				window.location.href = `/vhod?next=${encodeURIComponent("/ceni")}`;
+				return;
+			}
+			if (!billingReady) {
+				window.location.href = `/moya-ferma`;
 				return;
 			}
 			setLoadingPlan(planId);
@@ -293,7 +293,6 @@ export function PricingPlans() {
 
 			<p className="mt-10 text-center text-xs font-semibold text-slate-400 dark:text-slate-500 leading-relaxed">
 				Плащанията в EUR (€) се обработват с банково ниво на сигурност от Stripe. Можете да отмените или промените абонамента си по всяко време от клиентския портал.
-				{!billingReady ? " (Stripe ключовете липсват — checkout е в тестов режим.)" : null}
 			</p>
 		</div>
 	);
