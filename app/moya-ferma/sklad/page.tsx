@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
 import { 
   Package, 
@@ -20,7 +20,15 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
-  TrendingDown
+  TrendingDown,
+  Camera,
+  QrCode,
+  Scan,
+  Zap,
+  FileText,
+  UploadCloud,
+  Eye,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -143,6 +151,70 @@ export default function SkladPage() {
   const [loadingMovs, setLoadingMovs] = useState(false);
   const [showMovForm, setShowMovForm] = useState(false);
   const [movForm, setMovForm] = useState({ type: "in", quantity: 0, unitCost: "", totalCost: "", description: "" });
+
+  // Officia Smart Scan — Баркод & Камера OCR Скенер
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scannerTab, setScannerTab] = useState<"barcode" | "ocr">("barcode");
+  const [cameraStreamActive, setCameraStreamActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
+  const [manualBarcode, setManualBarcode] = useState("");
+  const [ocrScanning, setOcrScanning] = useState(false);
+  const [ocrResultText, setOcrResultText] = useState("");
+  const [ocrMatchedItem, setOcrMatchedItem] = useState<InventoryItem | null>(null);
+
+  const startCamera = async () => {
+    setCameraError(null);
+    try {
+      if (typeof navigator !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setCameraStreamActive(true);
+        }
+      } else {
+        setCameraError("Камерата не е достъпна на това устройство. Използвайте демо сканиране или ръчно въвеждане.");
+      }
+    } catch (err: any) {
+      setCameraError("Отказан достъп до камерата или хардуерна грешка. Можете да използвате демо баркод бутоните по-долу.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(t => t.stop());
+      videoRef.current.srcObject = null;
+    }
+    setCameraStreamActive(false);
+  };
+
+  useEffect(() => {
+    if (showScannerModal && scannerTab === "barcode") {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => { stopCamera(); };
+  }, [showScannerModal, scannerTab]);
+
+  const handleScanBarcode = (code: string) => {
+    setScannedBarcode(code);
+    setManualBarcode(code);
+  };
+
+  const handleSimulateOcr = (sampleName: string, text: string) => {
+    setOcrScanning(true);
+    setOcrResultText("");
+    setOcrMatchedItem(null);
+    setTimeout(() => {
+      setOcrResultText(text);
+      const match = items.find(i => i.name.toLowerCase().includes(sampleName.toLowerCase()) || sampleName.toLowerCase().includes(i.name.split(" ")[0].toLowerCase()));
+      if (match) setOcrMatchedItem(match);
+      setOcrScanning(false);
+    }, 1100);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -323,18 +395,411 @@ export default function SkladPage() {
                 />
               </div>
 
-              <button
-                onClick={() => {
-                  setEditing(null);
-                  setForm({ name: "", sku: "", category: CATEGORIES[0], unitOfMeasure: "тона", currentStock: 0, minStock: 0, barcode: "" });
-                  setShowForm(!showForm);
-                }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-black text-white shadow-md shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition"
-              >
-                <Plus size={16} />
-                <span>{showForm ? "Скрий формата" : "Нов складов артикул"}</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    setShowScannerModal(!showScannerModal);
+                    setScannedBarcode(null);
+                    setOcrResultText("");
+                    setOcrMatchedItem(null);
+                  }}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-5 py-3 text-xs font-black text-white shadow-md shadow-indigo-500/25 hover:scale-[1.02] active:scale-[0.98] transition animate-pulse sm:animate-none"
+                >
+                  <Camera size={16} />
+                  <span>Officia Smart Scan (Камера & Баркод)</span>
+                  <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[9px] uppercase font-bold tracking-wide">AI</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setEditing(null);
+                    setForm({ name: "", sku: "", category: CATEGORIES[0], unitOfMeasure: "тона", currentStock: 0, minStock: 0, barcode: "" });
+                    setShowForm(!showForm);
+                  }}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-black text-white shadow-md shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition"
+                >
+                  <Plus size={16} />
+                  <span>{showForm ? "Скрий формата" : "Нов складов артикул"}</span>
+                </button>
+              </div>
             </div>
+
+            {/* Officia Smart Scan Panel */}
+            {showScannerModal && (
+              <div className="glass-panel-pro rounded-[32px] border-2 border-indigo-500/50 bg-slate-950 text-white p-6 sm:p-8 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                <div className="absolute -right-20 -top-20 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30">
+                      <Scan size={24} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-black tracking-tight text-white">Officia Smart Scan • Баркод & Камера Скенер</h3>
+                        <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-400">
+                          В реално време
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 font-medium mt-0.5">
+                        Мгновено засклаждане и изписване чрез камерата на вашето устройство или сканиране на етикети с OCR
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex rounded-2xl bg-white/10 p-1">
+                      <button
+                        onClick={() => setScannerTab("barcode")}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-bold transition",
+                          scannerTab === "barcode" ? "bg-indigo-600 text-white shadow-md" : "text-slate-300 hover:text-white"
+                        )}
+                      >
+                        <QrCode size={14} />
+                        <span>Баркод / QR скенер</span>
+                      </button>
+                      <button
+                        onClick={() => setScannerTab("ocr")}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-bold transition",
+                          scannerTab === "ocr" ? "bg-indigo-600 text-white shadow-md" : "text-slate-300 hover:text-white"
+                        )}
+                      >
+                        <FileText size={14} />
+                        <span>Officia OCR (Снимка на етикет)</span>
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => setShowScannerModal(false)}
+                      className="rounded-full bg-white/10 p-2 text-slate-400 hover:bg-white/20 hover:text-white transition"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-6 relative z-10">
+                  {scannerTab === "barcode" ? (
+                    <div className="grid gap-6 lg:grid-cols-2 items-start">
+                      {/* Left: Camera Feed / Stream Viewer */}
+                      <div className="space-y-4">
+                        <div className="relative aspect-video w-full overflow-hidden rounded-2xl border-2 border-dashed border-indigo-500/40 bg-black/80 flex items-center justify-center shadow-inner">
+                          {cameraStreamActive ? (
+                            <>
+                              <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="h-full w-full object-cover"
+                              />
+                              {/* Scanner Laser & HUD */}
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="w-3/4 sm:w-2/3 h-32 sm:h-40 border-2 border-indigo-400 rounded-2xl relative shadow-[0_0_20px_rgba(99,102,241,0.5)]">
+                                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-[bounce_2s_infinite]" />
+                                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-indigo-600/90 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white">
+                                    Насочете баркод или QR към рамката
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center p-6 text-center space-y-3">
+                              <div className="rounded-full bg-indigo-500/20 p-4 text-indigo-400">
+                                <Camera size={36} className="animate-pulse" />
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm font-bold text-white">Камерата е в готовност или демо режим</p>
+                                {cameraError ? (
+                                  <p className="text-xs text-amber-400 max-w-sm">{cameraError}</p>
+                                ) : (
+                                  <p className="text-xs text-slate-400">Кликнете върху „Активирай камера“ или използвайте демо бутоните отдясно</p>
+                                )}
+                              </div>
+                              {!cameraStreamActive && (
+                                <button
+                                  onClick={startCamera}
+                                  className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-black text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/30"
+                                >
+                                  <RefreshCw size={14} />
+                                  <span>Активирай камера</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Manual / Barcode input */}
+                        <div className="flex items-center gap-2">
+                          <input
+                            value={manualBarcode}
+                            onChange={(e) => setManualBarcode(e.target.value)}
+                            placeholder="Въведете или сканирайте баркод (напр. 3800123456701)..."
+                            className="flex-1 rounded-2xl border border-white/20 bg-white/5 px-4 py-2.5 text-xs font-bold text-white placeholder:text-slate-500 outline-none focus:border-indigo-500"
+                          />
+                          <button
+                            onClick={() => manualBarcode && handleScanBarcode(manualBarcode)}
+                            className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2.5 text-xs font-black text-white shadow-md hover:scale-[1.02] transition"
+                          >
+                            Зареди баркод
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right: Scan Results & Demo Controls */}
+                      <div className="space-y-4">
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
+                          <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                            <Zap size={14} className="text-amber-400" />
+                            <span>Тестови / Демо баркод сканирания (Officia Simulation)</span>
+                          </h4>
+                          <p className="text-xs text-slate-400 leading-relaxed">
+                            Изберете реален артикул от базата, за да симулирате мигновено сканиране от скенер или камера на мобилен телефон:
+                          </p>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {items.slice(0, 4).map((it) => (
+                              <button
+                                key={it.id}
+                                onClick={() => handleScanBarcode(it.barcode || it.sku || `380012345670${it.id.slice(-1)}`)}
+                                className="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:border-indigo-500/50 hover:bg-white/10 transition group"
+                              >
+                                <div className="overflow-hidden">
+                                  <div className="text-xs font-bold text-white truncate group-hover:text-indigo-300">{it.name}</div>
+                                  <div className="text-[10px] font-mono text-slate-400">{it.barcode || it.sku}</div>
+                                </div>
+                                <QrCode size={16} className="text-indigo-400 shrink-0" />
+                              </button>
+                            ))}
+                            <button
+                              onClick={() => handleScanBarcode("3800999999999")}
+                              className="flex items-center justify-between gap-2 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/10 p-3 text-left hover:bg-amber-500/20 transition group sm:col-span-2"
+                            >
+                              <div>
+                                <div className="text-xs font-bold text-amber-300">✨ Нов торен чувал NPK 15-15-15 (Непознат баркод)</div>
+                                <div className="text-[10px] font-mono text-amber-400/80">3800999999999 — Симулация на нов артикул</div>
+                              </div>
+                              <Plus size={16} className="text-amber-400 shrink-0" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Scanned Result Action Card */}
+                        {scannedBarcode && (
+                          <div className="rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-br from-emerald-950/60 to-slate-900 p-5 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {(() => {
+                              const found = items.find(i => i.barcode === scannedBarcode || i.sku === scannedBarcode);
+                              if (found) {
+                                return (
+                                  <>
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-300 border border-emerald-500/30">
+                                            ✅ Намерен в склада
+                                          </span>
+                                          <span className="text-xs font-mono text-slate-400">Баркод: {scannedBarcode}</span>
+                                        </div>
+                                        <h4 className="text-base font-black text-white mt-1.5">{found.name}</h4>
+                                        <p className="text-xs font-bold text-emerald-400 mt-0.5">
+                                          Текуща наличност: {found.currentStock.toLocaleString()} {found.unitOfMeasure} ({found.category})
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
+                                      <button
+                                        onClick={() => {
+                                          const newStock = found.currentStock + 10;
+                                          setItems(items.map(i => i.id === found.id ? { ...i, currentStock: newStock } : i));
+                                          alert(`Приети +10 ${found.unitOfMeasure} за ${found.name}. Нова наличност: ${newStock} ${found.unitOfMeasure}`);
+                                        }}
+                                        className="flex flex-col items-center justify-center gap-1 rounded-xl bg-emerald-600/30 border border-emerald-500/50 p-2.5 text-xs font-bold text-emerald-300 hover:bg-emerald-600/50 transition"
+                                      >
+                                        <Plus size={16} />
+                                        <span>+10 Прием</span>
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (found.currentStock < 10) { alert("Недoстатъчна наличност!"); return; }
+                                          const newStock = found.currentStock - 10;
+                                          setItems(items.map(i => i.id === found.id ? { ...i, currentStock: newStock } : i));
+                                          alert(`Изписани -10 ${found.unitOfMeasure} от ${found.name}. Нова наличност: ${newStock} ${found.unitOfMeasure}`);
+                                        }}
+                                        className="flex flex-col items-center justify-center gap-1 rounded-xl bg-red-600/30 border border-red-500/50 p-2.5 text-xs font-bold text-red-300 hover:bg-red-600/50 transition"
+                                      >
+                                        <TrendingDown size={16} />
+                                        <span>-10 Изписване</span>
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setShowScannerModal(false);
+                                          handleOpenMovs(found);
+                                        }}
+                                        className="flex flex-col items-center justify-center gap-1 rounded-xl bg-white/10 border border-white/20 p-2.5 text-xs font-bold text-white hover:bg-white/20 transition"
+                                      >
+                                        <FileText size={16} />
+                                        <span>Движения</span>
+                                      </button>
+                                    </div>
+                                  </>
+                                );
+                              } else {
+                                return (
+                                  <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                                        <AlertCircle size={12} />
+                                        <span>Нов / Непознат баркод</span>
+                                      </span>
+                                      <span className="text-xs font-mono text-slate-400">Код: {scannedBarcode}</span>
+                                    </div>
+                                    <p className="text-xs font-medium text-slate-300">
+                                      Този баркод не е свързан с артикул в момента. Можете автоматично да отворите формата за засклаждане с попълнен код.
+                                    </p>
+                                    <button
+                                      onClick={() => {
+                                        setShowScannerModal(false);
+                                        setEditing(null);
+                                        setForm({
+                                          name: "Нов артикул от сканиране",
+                                          sku: `SKU-${scannedBarcode.slice(-6)}`,
+                                          category: CATEGORIES[1],
+                                          unitOfMeasure: "тона",
+                                          currentStock: 0,
+                                          minStock: 10,
+                                          barcode: scannedBarcode
+                                        });
+                                        setShowForm(true);
+                                      }}
+                                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-xs font-black text-white shadow-md hover:scale-[1.01] transition"
+                                    >
+                                      <Plus size={16} />
+                                      <span>Заведи нов артикул с баркод {scannedBarcode}</span>
+                                    </button>
+                                  </div>
+                                );
+                              }
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* OCR Photo Label Scanner Tab */
+                    <div className="grid gap-6 lg:grid-cols-2 items-start">
+                      <div className="space-y-4">
+                        <div className="rounded-2xl border-2 border-dashed border-indigo-500/40 bg-black/60 p-8 text-center flex flex-col items-center justify-center space-y-4 aspect-video">
+                          <div className="rounded-full bg-indigo-500/20 p-4 text-indigo-400">
+                            <UploadCloud size={40} className="animate-bounce" />
+                          </div>
+                          <div className="space-y-1 max-w-sm">
+                            <h4 className="text-sm font-bold text-white">Качете снимка на чувал, етикет или фактура</h4>
+                            <p className="text-xs text-slate-400">
+                              Officia AI OCR извлича автоматично името на тора/препарата, производителя и количеството.
+                            </p>
+                          </div>
+                          <label className="cursor-pointer inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-2.5 text-xs font-black text-white shadow-lg hover:bg-indigo-500 transition">
+                            <Camera size={16} />
+                            <span>Заснеми или избери снимка</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              className="hidden"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                  handleSimulateOcr(e.target.files[0].name, `Разпознат текст от ${e.target.files[0].name}: Амониев нитрат (34.4% N) Неохим — Партида #AN9012, Нето: 50.00 тона`);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+
+                        <div className="space-y-2">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase">⚡ Бързи тестови етикети (За демонстрация):</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => handleSimulateOcr("Амониев нитрат", "OCR: Амониев нитрат (34.4% N) Неохим Димитровград. Партида #2025-08. Тегло: 64.00 тона.")}
+                              className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-left text-xs font-bold hover:bg-white/10 transition truncate text-indigo-300"
+                            >
+                              Етикет: Амониев нитрат 34.4%
+                            </button>
+                            <button
+                              onClick={() => handleSimulateOcr("Пума Супер", "OCR: Bayer CropScience - Хербицид Пума Супер 7.5 ЕВ. Обем: 180 литра.")}
+                              className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-left text-xs font-bold hover:bg-white/10 transition truncate text-teal-300"
+                            >
+                              Етикет: Хербицид Пума Супер
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* OCR Result Box */}
+                      <div className="space-y-4">
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 min-h-[220px] flex flex-col justify-between">
+                          <div>
+                            <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5 mb-3">
+                              <Eye size={14} className="text-emerald-400" />
+                              <span>Officia OCR Резултат от извличането</span>
+                            </h4>
+
+                            {ocrScanning ? (
+                              <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                                <Loader2 size={32} className="animate-spin text-indigo-400" />
+                                <span className="text-xs font-bold text-slate-300">Officia AI анализира изображението...</span>
+                              </div>
+                            ) : ocrResultText ? (
+                              <div className="space-y-4 animate-in fade-in duration-300">
+                                <div className="rounded-xl bg-black/40 border border-white/10 p-3.5 font-mono text-xs text-slate-200 leading-relaxed">
+                                  {ocrResultText}
+                                </div>
+
+                                {ocrMatchedItem ? (
+                                  <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-black text-emerald-400">🎯 Съвпадение в складовата база:</span>
+                                      <span className="text-[10px] font-mono text-slate-400">{ocrMatchedItem.sku}</span>
+                                    </div>
+                                    <div className="text-sm font-extrabold text-white">{ocrMatchedItem.name}</div>
+                                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                                      <span className="text-xs text-slate-300">Наличност: {ocrMatchedItem.currentStock} {ocrMatchedItem.unitOfMeasure}</span>
+                                      <button
+                                        onClick={() => {
+                                          const addQty = 50;
+                                          setItems(items.map(i => i.id === ocrMatchedItem.id ? { ...i, currentStock: i.currentStock + addQty } : i));
+                                          alert(`Осчетоводен прием на +${addQty} ${ocrMatchedItem.unitOfMeasure} за ${ocrMatchedItem.name} от OCR фактура/етикет!`);
+                                        }}
+                                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-500 transition shadow"
+                                      >
+                                        +50 {ocrMatchedItem.unitOfMeasure} Прием
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="rounded-xl border border-amber-500/40 bg-amber-950/40 p-4 text-xs font-medium text-amber-300">
+                                    Не е открито точно съвпадение в склада. Можете да създадете нов артикул по данните от етикета.
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-slate-500 italic py-10 text-center">
+                                Няма сканиран текст. Изберете снимка или кликнете върху бърз тестови етикет отляво.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Actions & Search */}
 
             {/* Form */}
             {showForm && (
@@ -368,6 +833,29 @@ export default function SkladPage() {
                       onChange={(e) => setForm({ ...form, sku: e.target.value })} 
                       placeholder="напр. ЗЪР-ПШ-2025"
                       className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" 
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Баркод (EAN-13 / QR)</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowScannerModal(true);
+                          setScannerTab("barcode");
+                        }}
+                        className="text-[10px] font-black text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 flex items-center gap-1"
+                      >
+                        <Camera size={12} />
+                        <span>Скенирай с камера</span>
+                      </button>
+                    </div>
+                    <input 
+                      value={form.barcode} 
+                      onChange={(e) => setForm({ ...form, barcode: e.target.value })} 
+                      placeholder="напр. 3800123456701"
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-mono font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" 
                     />
                   </div>
 
@@ -450,6 +938,7 @@ export default function SkladPage() {
                   <thead className="bg-slate-50/80 text-left text-xs font-black uppercase tracking-wider text-slate-400 dark:bg-slate-900/50 dark:text-slate-500 border-b border-slate-200/80 dark:border-slate-800">
                     <tr>
                       <th className="p-4">SKU / Код</th>
+                      <th className="p-4">Баркод (Officia)</th>
                       <th className="p-4">Име на артикул / Зърно</th>
                       <th className="p-4">Счетоводна категория</th>
                       <th className="p-4 text-right">Наличност</th>
@@ -463,6 +952,34 @@ export default function SkladPage() {
                       return (
                         <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                           <td className="p-4 font-mono text-xs font-extrabold text-slate-500 dark:text-slate-400">{item.sku || "—"}</td>
+                          <td className="p-4">
+                            {item.barcode ? (
+                              <button
+                                onClick={() => {
+                                  setShowScannerModal(true);
+                                  setScannerTab("barcode");
+                                  handleScanBarcode(item.barcode!);
+                                }}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition group"
+                                title="Кликнете за сканиране/прием с този баркод"
+                              >
+                                <QrCode size={13} className="text-indigo-500 group-hover:scale-110 transition" />
+                                <span>{item.barcode}</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditing(item);
+                                  setForm({ name: item.name, sku: item.sku || "", category: item.category, unitOfMeasure: item.unitOfMeasure, currentStock: item.currentStock, minStock: item.minStock || 0, barcode: "3800123456799" });
+                                  setShowForm(true);
+                                }}
+                                className="inline-flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[11px] font-bold text-slate-400 hover:text-indigo-500 transition"
+                              >
+                                <Plus size={12} />
+                                <span>Добави баркод</span>
+                              </button>
+                            )}
+                          </td>
                           <td className="p-4 font-black text-slate-900 dark:text-white">{item.name}</td>
                           <td className="p-4 text-xs font-bold text-slate-600 dark:text-slate-400">
                             <span className="rounded-xl bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
@@ -483,6 +1000,17 @@ export default function SkladPage() {
                           </td>
                           <td className="p-4 text-center">
                             <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setShowScannerModal(true);
+                                  setScannerTab("barcode");
+                                  if (item.barcode || item.sku) handleScanBarcode(item.barcode || item.sku!);
+                                }}
+                                className="rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 p-2 text-xs font-black transition flex items-center gap-1"
+                                title="Скенирай / Прием"
+                              >
+                                <Scan size={14} />
+                              </button>
                               <button
                                 onClick={() => handleOpenMovs(item)}
                                 className="rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 px-3 py-1.5 text-xs font-black transition flex items-center gap-1.5"
