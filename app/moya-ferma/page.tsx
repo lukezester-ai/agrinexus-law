@@ -156,7 +156,7 @@ export default function MoyaFermaPage() {
       }
     >
       {/* Universal Agriculture Hero Banner */}
-      <div className="glass-panel-pro mb-10 rounded-[32px] p-6 sm:p-10 border border-emerald-500/40 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 text-white relative overflow-hidden shadow-2xl">
+      <div className="mb-10 rounded-[32px] p-6 sm:p-10 border border-emerald-500/40 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 text-white relative overflow-hidden shadow-2xl">
         <div className="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute right-10 -bottom-20 w-80 h-80 bg-fuchsia-500/15 rounded-full blur-3xl pointer-events-none" />
         

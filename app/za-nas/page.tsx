@@ -128,7 +128,7 @@ export default function AboutPage() {
 			</section>
 
 			{/* Доверие + CTA */}
-			<section className="glass-panel-pro mt-16 rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-gradient-to-r from-slate-900 via-slate-950 to-emerald-950 p-8 text-center sm:p-12 text-white shadow-[0_24px_60px_-15px_rgba(16,185,129,0.3)] relative overflow-hidden">
+			<section className="mt-16 rounded-[32px] border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-950 to-emerald-950 p-8 text-center sm:p-12 text-white shadow-[0_24px_60px_-15px_rgba(16,185,129,0.3)] relative overflow-hidden">
 				<div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
 				<CheckCircle size={40} className="mx-auto text-emerald-400 animate-pulse" />
 				<h2 className="mt-4 text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
