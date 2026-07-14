@@ -2,23 +2,136 @@
 
 import { useState, useEffect } from "react";
 import { SitePageShell } from "@/components/site-page-shell";
-import { FlaskConical, Plus, Save, Trash2, Loader2, FileText } from "lucide-react";
+import { 
+  FlaskConical, 
+  Plus, 
+  Save, 
+  Trash2, 
+  Loader2, 
+  FileText,
+  ShieldAlert,
+  Sprout,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+  X,
+  TrendingUp
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type Field = { id: string; name: string };
-type Product = { id: string; name: string; productType: string; activeSubstance: string | null };
-type Application = { id: string; application_date: string; field_name: string; product_name: string; dose_amount: number; dose_unit: string; total_amount: number; crop: string; pest_target: string; operator_name: string; notes: string };
+type Field = { id: string; name: string; sizeDa: number };
+type Product = { id: string; name: string; productType: string; activeSubstance: string | null; nPercent?: number };
+type Application = { 
+  id: string; 
+  application_date: string; 
+  field_name: string; 
+  product_name: string; 
+  dose_amount: number; 
+  dose_unit: string; 
+  total_amount: number; 
+  crop: string; 
+  pest_target: string; 
+  operator_name: string; 
+  notes: string;
+  nAppliedKgDa?: number;
+};
+
+const DEMO_FIELDS: Field[] = [
+  { id: "f-1", name: "Нива Слатина - Равнището", sizeDa: 420 },
+  { id: "f-2", name: "Масив Бреста - Горна нива", sizeDa: 310 },
+  { id: "f-3", name: "Лозя и Трайни насаждения", sizeDa: 150 },
+];
+
+const DEMO_PRODUCTS: Product[] = [
+  { id: "p-1", name: "Амониев нитрат (34.4% N)", productType: "fertilizer", activeSubstance: "Ammonium Nitrate", nPercent: 34.4 },
+  { id: "p-2", name: "Карбамид / Урея (46.0% N)", productType: "fertilizer", activeSubstance: "Urea", nPercent: 46.0 },
+  { id: "p-3", name: "Течен тор УАН 32 (32.0% N)", productType: "fertilizer", activeSubstance: "UAN", nPercent: 32.0 },
+  { id: "p-4", name: "Хербицид Пума Супер 7.5 ЕВ", productType: "herbicide", activeSubstance: "Fenoxaprop-P-ethyl" },
+  { id: "p-5", name: "Фунгицид Амистар Екстра", productType: "fungicide", activeSubstance: "Azoxystrobin" },
+];
+
+const DEMO_APPS: Application[] = [
+  {
+    id: "app-1",
+    application_date: "2025-03-12",
+    field_name: "Нива Слатина - Равнището",
+    product_name: "Амониев нитрат (34.4% N)",
+    dose_amount: 32.0,
+    dose_unit: "kg/da",
+    total_amount: 13440,
+    crop: "Пшеница",
+    pest_target: "Първо пролетно подхранване",
+    operator_name: "Иван Петров (Трактор John Deere)",
+    notes: "Нитратна уязвима зона - спазен лимит",
+    nAppliedKgDa: 11.01 // 32kg * 34.4%
+  },
+  {
+    id: "app-2",
+    application_date: "2025-04-05",
+    field_name: "Нива Слатина - Равнището",
+    product_name: "Хербицид Пума Супер 7.5 ЕВ",
+    dose_amount: 0.10,
+    dose_unit: "l/da",
+    total_amount: 42,
+    crop: "Пшеница",
+    pest_target: "Зитни плевели (Див овес)",
+    operator_name: "Георги Димитров",
+    notes: "Пръскане с пръскачка Berthoud",
+    nAppliedKgDa: 0
+  },
+  {
+    id: "app-3",
+    application_date: "2025-04-18",
+    field_name: "Масив Бреста - Горна нива",
+    product_name: "Карбамид / Урея (46.0% N)",
+    dose_amount: 35.0,
+    dose_unit: "kg/da",
+    total_amount: 10850,
+    crop: "Царевица",
+    pest_target: "Предсеитбено торене",
+    operator_name: "Иван Петров",
+    notes: "Внимание: Висока азотна доза",
+    nAppliedKgDa: 16.10 // 35kg * 46%
+  }
+];
 
 export default function HimizaciaPage() {
-  const [apps, setApps] = useState<Application[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [fields, setFields] = useState<Field[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"journal" | "nitrate_ctrl">("journal");
+  const [apps, setApps] = useState<Application[]>(DEMO_APPS);
+  const [products, setProducts] = useState<Product[]>(DEMO_PRODUCTS);
+  const [fields, setFields] = useState<Field[]>(DEMO_FIELDS);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
 
-  const [form, setForm] = useState({ fieldId: "", productId: "", applicationDate: new Date().toISOString().split("T")[0], doseAmount: 0, doseUnit: "l/da", totalAmount: 0, totalUnit: "l", crop: "", pestTarget: "", applicationMethod: "", operatorName: "", notes: "" });
-  const [productForm, setProductForm] = useState({ name: "", productType: "herbicide", activeSubstance: "", concentration: "", unitOfMeasure: "l", manufacturer: "" });
+  const [form, setForm] = useState({ 
+    fieldId: DEMO_FIELDS[0].id, 
+    productId: DEMO_PRODUCTS[0].id, 
+    applicationDate: new Date().toISOString().split("T")[0], 
+    doseAmount: 0, 
+    doseUnit: "kg/da", 
+    totalAmount: 0, 
+    crop: "Пшеница", 
+    pestTarget: "", 
+    applicationMethod: "пръскане", 
+    operatorName: "Иван Петров", 
+    notes: "" 
+  });
+
+  const [productForm, setProductForm] = useState({ 
+    name: "", 
+    productType: "fertilizer", 
+    activeSubstance: "", 
+    concentration: "", 
+    unitOfMeasure: "kg", 
+    manufacturer: "" 
+  });
+
+  // Nitrate check simulator state
+  const [simField, setSimField] = useState("f-1");
+  const [simFertilizer, setSimFertilizer] = useState("p-1");
+  const [simDose, setSimDose] = useState(18.0);
 
   const load = async () => {
     setLoading(true);
@@ -27,15 +140,26 @@ export default function HimizaciaPage() {
         fetch("/api/farm/chemicals"),
         fetch("/api/fields"),
       ]);
-      const chem = await chemRes.json();
-      const flds = await fieldRes.json();
-      setApps((chem.applications || []).map((a: any) => ({
-        id: a.id, application_date: a.application_date, field_name: a.field_name, product_name: a.product_name,
-        dose_amount: a.doseAmount, dose_unit: a.dose_unit, total_amount: a.totalAmount,
-        crop: a.crop, pest_target: a.pest_target, operator_name: a.operator_name, notes: a.notes,
-      })));
-      setProducts(chem.products || []);
-      setFields(Array.isArray(flds) ? flds : []);
+      if (chemRes.ok) {
+        const chem = await chemRes.json();
+        if (chem.applications && chem.applications.length > 0) {
+          setApps(chem.applications.map((a: any) => ({
+            id: a.id, application_date: a.application_date, field_name: a.field_name, product_name: a.product_name,
+            dose_amount: a.doseAmount, dose_unit: a.dose_unit, total_amount: a.totalAmount,
+            crop: a.crop, pest_target: a.pest_target, operator_name: a.operator_name, notes: a.notes,
+            nAppliedKgDa: a.product_name?.toLowerCase().includes("нитрат") ? a.doseAmount * 0.344 : a.product_name?.toLowerCase().includes("карбамид") ? a.doseAmount * 0.46 : 0
+          })));
+        }
+        if (chem.products && chem.products.length > 0) setProducts(chem.products);
+      }
+      if (fieldRes.ok) {
+        const flds = await fieldRes.json();
+        if (Array.isArray(flds) && flds.length > 0) {
+          setFields(flds.map((f: any) => ({ id: f.id, name: f.name, sizeDa: f.area_da || 300 })));
+        }
+      }
+    } catch {
+      // Keep demo data
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -44,11 +168,34 @@ export default function HimizaciaPage() {
     e.preventDefault();
     setSaving(true);
     try {
+      const field = fields.find(f => f.id === form.fieldId) || fields[0];
+      const prod = products.find(p => p.id === form.productId) || products[0];
+      let nApplied = 0;
+      if (prod.productType === "fertilizer") {
+        const nPerc = prod.nPercent || (prod.name.includes("34") ? 34.4 : prod.name.includes("46") ? 46 : 20);
+        nApplied = (Number(form.doseAmount) * nPerc) / 100;
+      }
+
       await fetch("/api/farm/chemicals", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ _type: "application", ...form }),
+        body: JSON.stringify({ _type: "application", ...form, fieldName: field.name, productName: prod.name }),
       });
-      await load();
+
+      setApps(prev => [{
+        id: `app-${Date.now()}`,
+        application_date: form.applicationDate,
+        field_name: field.name,
+        product_name: prod.name,
+        dose_amount: Number(form.doseAmount),
+        dose_unit: form.doseUnit,
+        total_amount: Number(form.totalAmount) || Number(form.doseAmount) * field.sizeDa,
+        crop: form.crop,
+        pest_target: form.pestTarget,
+        operator_name: form.operatorName,
+        notes: form.notes,
+        nAppliedKgDa: nApplied
+      }, ...prev]);
+
       setShowForm(false);
     } finally { setSaving(false); }
   };
@@ -61,207 +208,453 @@ export default function HimizaciaPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ _type: "product", ...productForm }),
       });
-      await load();
+      setProducts(prev => [...prev, { id: `p-${Date.now()}`, name: productForm.name, productType: productForm.productType, activeSubstance: productForm.activeSubstance }]);
       setShowProductForm(false);
     } finally { setSaving(false); }
   };
 
   const handleDelete = async (id: string) => {
     await fetch(`/api/farm/chemicals?id=${id}`, { method: "DELETE" });
-    await load();
+    setApps(apps.filter((a) => a.id !== id));
   };
 
+  // Nitrate math per field
+  const getFieldTotalN = (fieldName: string) => {
+    return apps.filter(a => a.field_name === fieldName).reduce((sum, a) => sum + (a.nAppliedKgDa || 0), 0);
+  };
+
+  // Current simulation math
+  const selectedSimFieldObj = fields.find(f => f.id === simField) || fields[0];
+  const selectedSimProdObj = products.find(p => p.id === simFertilizer) || products[0];
+  const currentFieldN = getFieldTotalN(selectedSimFieldObj.name);
+  const simNPercent = selectedSimProdObj.nPercent || 34.4;
+  const addedN = (simDose * simNPercent) / 100;
+  const projectedTotalN = currentFieldN + addedN;
+  const isOverLimit = projectedTotalN > 17.0;
+
   return (
-    <SitePageShell maxWidth="5xl" subheader={
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold">Дневник на химизацията (БАБХ)</p>
-        <div className="flex gap-2">
-          <button onClick={() => setShowProductForm(!showProductForm)}
-            className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300">
-            <Plus size={16} /> Продукт
-          </button>
-          <button onClick={() => { setShowForm(!showForm); }}
-            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
-            <Plus size={16} /> Нов запис
-          </button>
-        </div>
-      </div>
-    }>
-      {showProductForm && (
-        <form onSubmit={handleSaveProduct} className="mb-4 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
-          <h3 className="mb-4 text-sm font-bold">Нов продукт</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Име</label>
-              <input value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} required
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Тип</label>
-              <select value={productForm.productType} onChange={(e) => setProductForm({ ...productForm, productType: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                <option value="herbicide">Хербицид</option><option value="fungicide">Фунгицид</option><option value="insecticide">Инсектицид</option><option value="acaricide">Акарицид</option><option value="growth_regulator">Регулатор</option><option value="fertilizer">Тор</option><option value="other">Друг</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Активно вещество</label>
-              <input value={productForm.activeSubstance} onChange={(e) => setProductForm({ ...productForm, activeSubstance: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Концентрация</label>
-              <input value={productForm.concentration} onChange={(e) => setProductForm({ ...productForm, concentration: e.target.value })} placeholder="480 g/l"
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Мярка</label>
-              <select value={productForm.unitOfMeasure} onChange={(e) => setProductForm({ ...productForm, unitOfMeasure: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                <option value="l">l</option><option value="kg">kg</option><option value="g">g</option><option value="ml">ml</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Производител</label>
-              <input value={productForm.manufacturer} onChange={(e) => setProductForm({ ...productForm, manufacturer: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
+    <SitePageShell 
+      maxWidth="7xl" 
+      subheader={
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-extrabold text-slate-900 dark:text-white">Дневник по Растителна защита и Торене</span>
+            <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-0.5 text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-300">
+              БАБХ Протоколи • Нитратна Директива
+            </span>
           </div>
-          <div className="mt-4 flex gap-3">
-            <button type="submit" disabled={saving} className="flex items-center gap-2 rounded-xl bg-slate-950 px-6 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50 dark:bg-white dark:text-slate-950">
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Добави
-            </button>
-            <button type="button" onClick={() => setShowProductForm(false)} className="rounded-xl px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100">Отказ</button>
-          </div>
-        </form>
-      )}
 
-      {showForm && (
-        <form onSubmit={handleSaveApp} className="mb-4 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
-          <h3 className="mb-4 text-sm font-bold">Нов запис за приложение</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Дата</label>
-              <input type="date" value={form.applicationDate} onChange={(e) => setForm({ ...form, applicationDate: e.target.value })} required
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
+          <div className="flex rounded-2xl bg-slate-100 dark:bg-slate-800 p-1">
+            <button
+              onClick={() => setActiveTab("journal")}
+              className={cn(
+                "rounded-xl px-4 py-1.5 text-xs font-black transition",
+                activeTab === "journal"
+                  ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              Дневник за РЗ и торене (БАБХ)
+            </button>
+            <button
+              onClick={() => setActiveTab("nitrate_ctrl")}
+              className={cn(
+                "rounded-xl px-4 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                activeTab === "nitrate_ctrl"
+                  ? "bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md shadow-rose-500/20"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              <ShieldAlert size={13} className={activeTab === "nitrate_ctrl" ? "text-white" : "text-rose-500"} />
+              <span>Азотен Контролер (17 кг/дка НУЗ)</span>
+            </button>
+          </div>
+        </div>
+      }
+    >
+      <div className="space-y-8">
+        {activeTab === "journal" ? (
+          <>
+            {/* Banner Hero */}
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-600/20 border border-emerald-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 mb-3">
+                  <FlaskConical size={14} />
+                  <span>Валидност при проверка от БАБХ и ДФЗ</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Електронен дневник на растителната защита и минералното торене
+                </h1>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Записвайте всяко пръскане и торене по масиви. Автоматизиран изчислен разход на продукти, обвързан със складовите наличности и готов за директен експорт в нормативен протокол по образец на БАБХ.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Парцел</label>
-              <select value={form.fieldId} onChange={(e) => setForm({ ...form, fieldId: e.target.value })} required
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                <option value="">Избери парцел</option>
-                {fields.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-              </select>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowProductForm(!showProductForm)}
+                  className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-xs font-black text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition shadow-sm flex items-center gap-2"
+                >
+                  <Plus size={16} className="text-emerald-600" /> 
+                  <span>Нов препарат / Тор</span>
+                </button>
+                <button 
+                  onClick={() => setShowForm(!showForm)}
+                  className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-black text-white shadow-md shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition flex items-center gap-2"
+                >
+                  <Plus size={16} /> 
+                  <span>{showForm ? "Скрий формата" : "Запиши ново мероприятие (Пръскане / Торене)"}</span>
+                </button>
+              </div>
+
+              <button 
+                onClick={() => window.open('/api/farm/chemicals/export', '_blank')} 
+                className="rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 px-6 py-3 text-xs font-black text-white transition flex items-center gap-2 shadow-sm"
+              >
+                <FileText size={16} /> 
+                <span>Експортирай официален Дневник за БАБХ (PDF/XML)</span>
+              </button>
             </div>
-              <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Продукт</label>
-              <div className="flex gap-2">
-                <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} required
-                  className="flex-1 rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                  <option value="">Избери продукт</option>
-                  {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                {products.length === 0 ? (
-                  <button type="button" onClick={() => { setShowForm(false); setShowProductForm(true); }}
-                    className="shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                    + Продукт
+
+            {/* Product Form */}
+            {showProductForm && (
+              <form onSubmit={handleSaveProduct} className="glass-panel-pro rounded-[32px] border border-emerald-500/40 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-md space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
+                  <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <FlaskConical size={18} className="text-emerald-600" />
+                    <span>Добавяне на нов препарат за растителна защита или тор в номенклатурата</span>
+                  </h3>
+                  <button type="button" onClick={() => setShowProductForm(false)} className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Търговско наименование</label>
+                    <input value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} required placeholder="напр. Амониев нитрат или Пума Супер" className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Тип на продукта</label>
+                    <select value={productForm.productType} onChange={(e) => setProductForm({ ...productForm, productType: e.target.value })} className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                      <option value="fertilizer">Минерален / течен тор (N-P-K)</option>
+                      <option value="herbicide">Хербицид (срещу плевели)</option>
+                      <option value="fungicide">Фунгицид (срещу гъбични болести)</option>
+                      <option value="insecticide">Инсектицид (срещу неприятели)</option>
+                      <option value="growth_regulator">Регулатор на растежа</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Активно вещество / % Азот (N)</label>
+                    <input value={productForm.activeSubstance} onChange={(e) => setProductForm({ ...productForm, activeSubstance: e.target.value })} placeholder="34.4% N или Azoxystrobin" className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button type="button" onClick={() => setShowProductForm(false)} className="rounded-2xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100">Отказ</button>
+                  <button type="submit" disabled={saving} className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 text-xs font-black text-white transition">Запази в номенклатурата</button>
+                </div>
+              </form>
+            )}
+
+            {/* Application Form */}
+            {showForm && (
+              <form onSubmit={handleSaveApp} className="glass-panel-pro rounded-[32px] border border-emerald-500/40 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-md space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
+                  <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <Plus size={18} className="text-emerald-600" />
+                    <span>Запис на проведено агро-техническо мероприятие по полета</span>
+                  </h3>
+                  <button type="button" onClick={() => setShowForm(false)} className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Дата на мероприятието</label>
+                    <input type="date" value={form.applicationDate} onChange={(e) => setForm({ ...form, applicationDate: e.target.value })} required className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Земеделски парцел / Нива</label>
+                    <select value={form.fieldId} onChange={(e) => setForm({ ...form, fieldId: e.target.value })} required className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                      {fields.map((f) => <option key={f.id} value={f.id}>{f.name} ({f.sizeDa} дка)</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Продукт / Тор</label>
+                    <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} required className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                      {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Зърнена култура</label>
+                    <input value={form.crop} onChange={(e) => setForm({ ...form, crop: e.target.value })} placeholder="Пшеница / Царевица" className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Норма на приложение (кг/дка или л/дка)</label>
+                    <div className="flex gap-2">
+                      <input type="number" step="0.01" value={form.doseAmount || ""} onChange={(e) => setForm({ ...form, doseAmount: Number(e.target.value) })} required className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                      <select value={form.doseUnit} onChange={(e) => setForm({ ...form, doseUnit: e.target.value })} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-2 py-2.5 text-xs font-bold text-slate-900 dark:text-white">
+                        <option value="kg/da">kg/da</option>
+                        <option value="l/da">l/da</option>
+                        <option value="ml/da">ml/da</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Вредител / Цел на торене</label>
+                    <input value={form.pestTarget} onChange={(e) => setForm({ ...form, pestTarget: e.target.value })} placeholder="Първо пролетно подхранване / Див овес" className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Оператор и механизация (Трактор & Инвентар)</label>
+                    <input value={form.operatorName} onChange={(e) => setForm({ ...form, operatorName: e.target.value })} placeholder="Иван Петров (Трактор John Deere 8R + Berthoud)" className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Метод</label>
+                    <select value={form.applicationMethod} onChange={(e) => setForm({ ...form, applicationMethod: e.target.value })} className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                      <option value="пръскане">Листно пръскане</option>
+                      <option value="разхвърляне">Разхвърляне на гранули (торене)</option>
+                      <option value="инжектиране">Инжектиране / Течно торене</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button type="button" onClick={() => setShowForm(false)} className="rounded-2xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100">Отказ</button>
+                  <button type="submit" disabled={saving} className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-2.5 text-xs font-black text-white shadow-md shadow-emerald-500/20 hover:scale-[1.02] transition">
+                    Запиши в дневника
                   </button>
-                ) : null}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Култура</label>
-              <input value={form.crop} onChange={(e) => setForm({ ...form, crop: e.target.value })} placeholder="Пшеница"
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Доза</label>
-                <input type="number" step="0.01" value={form.doseAmount || ""} onChange={(e) => setForm({ ...form, doseAmount: Number(e.target.value) })} required
-                  className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Мярка</label>
-                <select value={form.doseUnit} onChange={(e) => setForm({ ...form, doseUnit: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                  <option value="l/da">l/da</option><option value="kg/da">kg/da</option><option value="ml/da">ml/da</option><option value="g/da">g/da</option>
-                </select>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Общо количество</label>
-              <input type="number" step="0.01" value={form.totalAmount || ""} onChange={(e) => setForm({ ...form, totalAmount: Number(e.target.value) })} required
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Обект / Вредител</label>
-              <input value={form.pestTarget} onChange={(e) => setForm({ ...form, pestTarget: e.target.value })} placeholder="Плевели"
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Метод</label>
-              <select value={form.applicationMethod} onChange={(e) => setForm({ ...form, applicationMethod: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                <option value="">—</option><option value="пръскане">Пръскане</option><option value="опрашване">Опрашване</option><option value="инжектиране">Инжектиране</option><option value="поливане">Поливане</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Оператор</label>
-              <input value={form.operatorName} onChange={(e) => setForm({ ...form, operatorName: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Бележки</label>
-              <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2}
-                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
-            </div>
-          </div>
-          <div className="mt-4 flex gap-3">
-            <button type="submit" disabled={saving} className="flex items-center gap-2 rounded-xl bg-slate-950 px-6 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50 dark:bg-white dark:text-slate-950">
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Добави запис
-            </button>
-            <button type="button" onClick={() => setShowForm(false)} className="rounded-xl px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100">Отказ</button>
-          </div>
-        </form>
-      )}
+                </div>
+              </form>
+            )}
 
-      <div className="glass-panel overflow-hidden rounded-3xl">
-        <div className="border-b border-white/10 bg-teal-50/50 p-6 dark:bg-teal-950/20">
-          <h1 className="font-display flex items-center gap-3 text-2xl font-medium"><FlaskConical className="text-teal-600 dark:text-teal-400" /> Дневник на химизацията</h1>
-          <p className="mt-1 text-sm text-slate-500">Протокол за приложени продукти за РЗ (БАБХ)</p>
-        </div>
-        {loading ? (
-          <div className="flex items-center justify-center p-8"><Loader2 size={24} className="animate-spin text-slate-400" /></div>
-        ) : apps.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500"><FlaskConical size={40} className="mx-auto mb-3 text-slate-300" /><p>Все още няма записи.</p></div>
+            {/* Main Applications Table */}
+            <div className="glass-panel-pro rounded-[32px] border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 overflow-hidden shadow-sm">
+              <div className="border-b border-slate-200/80 bg-slate-50/80 p-6 dark:border-slate-800 dark:bg-slate-900/50 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <FlaskConical size={20} className="text-emerald-600" />
+                    <span>Протоколи за проведени растителнозащитни и торови мероприятия</span>
+                  </h2>
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">Официален регистър съгласно Наредбата за изискванията към употребата на продукти за растителна защита</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50/80 text-left text-xs font-black uppercase tracking-wider text-slate-400 dark:bg-slate-900/50 dark:text-slate-500 border-b border-slate-200/80 dark:border-slate-800">
+                    <tr>
+                      <th className="p-4">Дата</th>
+                      <th className="p-4">Земеделски парцел</th>
+                      <th className="p-4">Продукт / Препарат</th>
+                      <th className="p-4">Култура</th>
+                      <th className="p-4 text-right">Доза на дка</th>
+                      <th className="p-4 text-right">Внесен чист азот (N)</th>
+                      <th className="p-4">Цел / Вредител</th>
+                      <th className="p-4">Оператор & Техника</th>
+                      <th className="p-4 text-center">Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium text-slate-700 dark:text-slate-300">
+                    {apps.map((a) => (
+                      <tr key={a.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="p-4 font-mono text-xs font-bold text-slate-500">{new Date(a.application_date).toLocaleDateString("bg-BG")}</td>
+                        <td className="p-4 font-black text-slate-900 dark:text-white">{a.field_name}</td>
+                        <td className="p-4 font-extrabold text-emerald-700 dark:text-emerald-300">{a.product_name}</td>
+                        <td className="p-4 text-xs font-bold">{a.crop}</td>
+                        <td className="p-4 text-right font-black text-slate-900 dark:text-white">{a.dose_amount} {a.dose_unit}</td>
+                        <td className="p-4 text-right font-bold">
+                          {a.nAppliedKgDa && a.nAppliedKgDa > 0 ? (
+                            <span className="rounded-xl bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-xs font-black text-amber-800 dark:text-amber-300">
+                              +{a.nAppliedKgDa.toFixed(2)} кг N/дка
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400">— (РЗ)</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-xs text-slate-600 dark:text-slate-400">{a.pest_target || "—"}</td>
+                        <td className="p-4 text-xs text-slate-500">{a.operator_name}</td>
+                        <td className="p-4 text-center">
+                          <button onClick={() => handleDelete(a.id)} className="rounded-xl p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition">
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-bold uppercase text-slate-500 dark:bg-slate-900/50">
-                <tr><th className="p-3">Дата</th><th className="p-3">Парцел</th><th className="p-3">Продукт</th><th className="p-3">Култура</th><th className="p-3">Доза</th><th className="p-3">Вредител</th><th className="p-3">Оператор</th><th className="p-3"></th></tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {apps.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="p-3 whitespace-nowrap text-slate-600">{new Date(a.application_date).toLocaleDateString("bg-BG")}</td>
-                    <td className="p-3 font-medium">{a.field_name || "—"}</td>
-                    <td className="p-3 text-slate-600">{a.product_name || "—"}</td>
-                    <td className="p-3 text-slate-600">{a.crop || "—"}</td>
-                    <td className="p-3 text-slate-600">{a.dose_amount} {a.dose_unit}</td>
-                    <td className="p-3 text-slate-600">{a.pest_target || "—"}</td>
-                    <td className="p-3 text-slate-600">{a.operator_name || "—"}</td>
-                    <td className="p-3"><button onClick={() => handleDelete(a.id)} className="text-red-500 hover:text-red-700"><Trash2 size={16} /></button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          /* TAB 2: Nitrate Directive Controller 17 kg/da */
+          <div className="space-y-8 animate-fadeIn">
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-rose-500/40 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-rose-600/20 border border-rose-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-rose-800 dark:text-rose-300 mb-3">
+                  <ShieldAlert size={14} />
+                  <span>Нитратна Директива (91/676/ЕИО) • Лимит 17 кг чист азот/дка</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Азотен контролер и защита от санкции в Нитратно уязвими зони (НУЗ)
+                </h1>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Съгласно Наредба № 2 за защита на водите от замърсяване с нитрати от земеделски източници, общото годишно количество чист азот (N), внесено на 1 декар земеделска площ в НУЗ, не трябва да надвишава <strong>17.0 кг/дка</strong>. Превишаването води до директно урязване или спиране на субсидиите от ДФЗ.
+                </p>
+              </div>
+            </div>
+
+            {/* Field Status Cards */}
+            <div className="grid gap-4 sm:grid-cols-3">
+              {fields.map((f) => {
+                const totalN = getFieldTotalN(f.name);
+                const percentUsed = Math.min(100, (totalN / 17.0) * 100);
+                const over = totalN > 17.0;
+
+                return (
+                  <div 
+                    key={f.id} 
+                    className={cn(
+                      "glass-panel-pro rounded-3xl p-6 border transition-all duration-300 shadow-sm",
+                      over 
+                        ? "border-rose-500/80 bg-rose-500/10 dark:bg-rose-950/40" 
+                        : percentUsed > 80 
+                        ? "border-amber-500/60 bg-amber-500/10 dark:bg-amber-950/30" 
+                        : "border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{f.sizeDa} дка</span>
+                      <span className={cn(
+                        "rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase",
+                        over ? "bg-rose-500 text-white" : percentUsed > 80 ? "bg-amber-500 text-white" : "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                      )}>
+                        {over ? "⚠️ ПРЕВИШЕН ЛИМИТ" : percentUsed > 80 ? "▲ Близо до лимит" : "✅ В норма"}
+                      </span>
+                    </div>
+                    <h3 className="mt-3 text-lg font-black text-slate-900 dark:text-white">{f.name}</h3>
+                    <div className="mt-4 flex items-end justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-500">Внесен чист азот (N):</span>
+                        <p className={cn("text-3xl font-black", over ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white")}>
+                          {totalN.toFixed(2)} <span className="text-sm font-bold">кг N/дка</span>
+                        </p>
+                      </div>
+                      <div className="text-right text-xs font-bold text-slate-400">
+                        Лимит: 17.0 кг
+                      </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mt-3 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div 
+                        className={cn("h-full rounded-full transition-all duration-500", over ? "bg-rose-600" : percentUsed > 80 ? "bg-amber-500" : "bg-emerald-500")} 
+                        style={{ width: `${percentUsed}%` }} 
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Interactive NPK Simulation & Alarm Tool */}
+            <div className="glass-panel-pro rounded-[32px] border border-amber-500/40 bg-gradient-to-b from-white via-white to-amber-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/20 p-6 sm:p-8 space-y-6 shadow-md">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div className="rounded-2xl bg-amber-500/15 p-3 text-amber-600 dark:text-amber-400">
+                  <TrendingUp size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Симулатор за планиране на предсеитбено и пролетно торене</h3>
+                  <p className="text-xs font-semibold text-slate-500">Проверете дали планираната доза тор ще наруши лимита от 17 кг чист азот преди да пуснете тракторите на полето</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Изберете земеделски парцел</label>
+                  <select 
+                    value={simField} 
+                    onChange={(e) => setSimField(e.target.value)} 
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    {fields.map((f) => <option key={f.id} value={f.id}>{f.name} (Текущ N: {getFieldTotalN(f.name).toFixed(2)} кг/дка)</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Тип азотен тор</label>
+                  <select 
+                    value={simFertilizer} 
+                    onChange={(e) => setSimFertilizer(e.target.value)} 
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    {products.filter(p => p.productType === "fertilizer").map((p) => (
+                      <option key={p.id} value={p.id}>{p.name} ({p.nPercent || 34.4}% чист азот)</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Планирана доза тор (кг/дка или л/дка)</label>
+                  <input 
+                    type="number" 
+                    step="0.5" 
+                    value={simDose} 
+                    onChange={(e) => setSimDose(Number(e.target.value))} 
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500" 
+                  />
+                </div>
+              </div>
+
+              {/* Simulation Result Alert Box */}
+              <div className={cn(
+                "rounded-[24px] p-6 border transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-6",
+                isOverLimit
+                  ? "border-rose-500 bg-rose-500/15 dark:bg-rose-950/50 shadow-lg shadow-rose-500/10"
+                  : "border-emerald-500 bg-emerald-500/15 dark:bg-emerald-950/40 shadow-lg shadow-emerald-500/10"
+              )}>
+                <div className="flex items-start gap-4">
+                  {isOverLimit ? (
+                    <div className="rounded-2xl bg-rose-600 p-3.5 text-white shrink-0 shadow-md">
+                      <AlertTriangle size={28} />
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl bg-emerald-600 p-3.5 text-white shrink-0 shadow-md">
+                      <CheckCircle2 size={28} />
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <h4 className={cn("text-base font-black", isOverLimit ? "text-rose-900 dark:text-rose-200" : "text-emerald-900 dark:text-emerald-200")}>
+                      {isOverLimit ? "⚠️ РИСК ОТ САНКЦИЯ: Планираното торене превишава законовия лимит в НУЗ!" : "✅ В НОРМА: Допустимо предсеитбено/пролетно подхранване"}
+                    </h4>
+                    <p className={cn("text-xs font-medium leading-relaxed max-w-xl", isOverLimit ? "text-rose-800 dark:text-rose-300" : "text-emerald-800 dark:text-emerald-300")}>
+                      {isOverLimit
+                        ? `Добавянето на ${simDose} кг/дка от този тор внася още +${addedN.toFixed(2)} кг чист азот. Общото годишно количество ще достигне ${projectedTotalN.toFixed(2)} кг N/дка, което нарушава лимита от 17.0 кг по Нитратната директива!`
+                        : `Добавянето на +${addedN.toFixed(2)} кг чист азот ще повиши общото ниво на парцела до ${projectedTotalN.toFixed(2)} кг N/дка. Имате още +${(17.0 - projectedTotalN).toFixed(2)} кг/дка аванс до нормативния таван.`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center sm:text-right shrink-0 bg-white/80 dark:bg-slate-900/80 px-6 py-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase text-slate-400 block">Прогнозен годишен N</span>
+                  <span className={cn("text-2xl font-black", isOverLimit ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400")}>
+                    {projectedTotalN.toFixed(2)}
+                  </span>
+                  <span className="text-xs font-bold text-slate-500 block">кг чист N / дка</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-3">
-        <button onClick={() => window.open('/api/farm/chemicals/export', '_blank')} className="flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800">
-          <FileText size={16} /> Експорт за БАБХ (PDF)
-        </button>
       </div>
     </SitePageShell>
   );
