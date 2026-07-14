@@ -32,18 +32,18 @@ function emptyLine(): JournalLine {
 }
 
 function AccountPlanTab({ accounts: initial, onRefresh }: { accounts: Account[]; onRefresh: () => void }) {
-  const [items, setItems] = useState<Account[]>(initial)
+  const [items, setItems] = useState<Account[]>(Array.isArray(initial) ? initial : [])
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Account | null>(null)
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState("")
   const [form, setForm] = useState({ accountNumber: "", name: "", type: "expense", isActive: true, isAnalytical: false })
 
-  useEffect(() => { setItems(initial) }, [initial])
+  useEffect(() => { setItems(Array.isArray(initial) ? initial : []) }, [initial])
 
-  const filtered = items.filter((a) => {
+  const filtered = (Array.isArray(items) ? items : []).filter((a) => {
     const q = search.toLowerCase()
-    return !q || a.accountNumber.includes(q) || a.name.toLowerCase().includes(q) || a.type.toLowerCase().includes(q)
+    return !q || a.accountNumber?.includes(q) || a.name?.toLowerCase().includes(q) || a.type?.toLowerCase().includes(q)
   })
 
   const startNew = () => {
@@ -214,20 +214,30 @@ export default function SmetkovodstvoPage() {
   const [formDocType, setFormDocType] = useState("manual")
 
   const loadAll = async () => {
-    const [entriesData, accountsData] = await Promise.all([
-      fetch("/api/accounting/journal").then((r) => r.json()),
-      fetch("/api/accounting/accounts").then((r) => r.json()),
-    ])
-    setEntries(entriesData)
-    setAccounts(accountsData)
-    setLoading(false)
+    try {
+      const [entriesData, accountsData] = await Promise.all([
+        fetch("/api/accounting/journal").then((r) => r.json()).catch(() => []),
+        fetch("/api/accounting/accounts").then((r) => r.json()).catch(() => []),
+      ])
+      setEntries(Array.isArray(entriesData) ? entriesData : [])
+      setAccounts(Array.isArray(accountsData) ? accountsData : [])
+    } catch (e) {
+      setEntries([])
+      setAccounts([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { loadAll() }, [])
 
   const reload = async () => {
-    const res = await fetch("/api/accounting/journal")
-    setEntries(await res.json())
+    try {
+      const res = await fetch("/api/accounting/journal").then((r) => r.json()).catch(() => [])
+      setEntries(Array.isArray(res) ? res : [])
+    } catch (e) {
+      setEntries([])
+    }
   }
 
   const startNew = () => {
@@ -302,7 +312,7 @@ export default function SmetkovodstvoPage() {
         if (l.id !== id) return l
         const updated = { ...l, [field]: value }
         if (field === "accountId") {
-          const acc = accounts.find((a) => a.id === value)
+          const acc = (Array.isArray(accounts) ? accounts : []).find((a) => a.id === value)
           updated.accountNumber = acc?.accountNumber || ""
           updated.accountName = acc?.name || ""
         }
@@ -311,7 +321,7 @@ export default function SmetkovodstvoPage() {
     )
   }
 
-  const filtered = entries.filter(
+  const filtered = (Array.isArray(entries) ? entries : []).filter(
     (e) =>
       e.journalNumber?.toLowerCase().includes(search.toLowerCase()) ||
       e.description?.toLowerCase().includes(search.toLowerCase())
@@ -414,7 +424,7 @@ export default function SmetkovodstvoPage() {
                           <select value={line.accountId} onChange={(e) => updateLine(line.id, "accountId", e.target.value)}
                             className="w-full rounded border border-slate-300 bg-transparent px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-teal-500 dark:border-slate-700 dark:text-white">
                             <option value="">—</option>
-                            {accounts.map((a) => (
+                            {(Array.isArray(accounts) ? accounts : []).map((a) => (
                               <option key={a.id} value={a.id}>{a.accountNumber}</option>
                             ))}
                           </select>
@@ -480,8 +490,9 @@ export default function SmetkovodstvoPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                     {filtered.map((e) => {
-                      const debit = e.lines.filter((l) => l.entryType === "debit").reduce((s, l) => s + l.amount, 0)
-                      const credit = e.lines.filter((l) => l.entryType === "credit").reduce((s, l) => s + l.amount, 0)
+                      const linesArr = Array.isArray(e.lines) ? e.lines : []
+                      const debit = linesArr.filter((l) => l.entryType === "debit").reduce((s, l) => s + l.amount, 0)
+                      const credit = linesArr.filter((l) => l.entryType === "credit").reduce((s, l) => s + l.amount, 0)
                       return (
                         <tr key={e.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                           <td className="p-3 text-slate-600 whitespace-nowrap">{e.entryDate?.slice(0, 10)}</td>

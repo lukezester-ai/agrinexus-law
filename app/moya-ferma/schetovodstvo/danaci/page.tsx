@@ -42,10 +42,9 @@ export default function DanaciPage() {
 
   const fetchInvoices = useCallback(async () => {
     try {
-      const res = await fetch("/api/accounting/invoices");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      const filtered = (data as Invoice[]).filter((inv) => inv.status !== "draft");
+      const res = await fetch("/api/accounting/invoices").then((r) => r.json()).catch(() => []);
+      const data = Array.isArray(res) ? res : [];
+      const filtered = data.filter((inv) => inv.status !== "draft");
       setInvoices(filtered);
 
       const sales = filtered.filter((i) => i.type === "sales");
@@ -53,13 +52,14 @@ export default function DanaciPage() {
       setSummary({
         period: summary.period,
         salesCount: sales.length,
-        salesTotal: sales.reduce((s, i) => s + Number(i.totalAmount), 0),
-        salesVat: sales.reduce((s, i) => s + Number(i.vatAmount), 0),
+        salesTotal: sales.reduce((s, i) => s + Number(i.totalAmount || 0), 0),
+        salesVat: sales.reduce((s, i) => s + Number(i.vatAmount || 0), 0),
         purchaseCount: purchases.length,
-        purchaseTotal: purchases.reduce((s, i) => s + Number(i.totalAmount), 0),
-        purchaseVat: purchases.reduce((s, i) => s + Number(i.vatAmount), 0),
+        purchaseTotal: purchases.reduce((s, i) => s + Number(i.totalAmount || 0), 0),
+        purchaseVat: purchases.reduce((s, i) => s + Number(i.vatAmount || 0), 0),
       });
     } catch {
+      setInvoices([]);
       setMessage({ type: "error", text: "Грешка при зареждане на фактурите" });
     } finally {
       setLoading(false);
@@ -186,7 +186,7 @@ export default function DanaciPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {invoices.map((inv) => (
+                {(Array.isArray(invoices) ? invoices : []).map((inv) => (
                   <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="p-3 font-mono text-xs text-slate-600">{inv.invoiceNumber}</td>
                     <td className="p-3 text-slate-900 dark:text-white">{inv.clientName || "—"}</td>

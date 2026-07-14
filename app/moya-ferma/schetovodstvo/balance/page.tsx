@@ -22,20 +22,22 @@ export default function BalancePage() {
     setLoading(true);
     fetch("/api/accounting/reports?type=trial")
       .then((r) => r.json())
-      .then((data) => { setTrial(data); setLoading(false); });
+      .then((data) => { setTrial(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setTrial([]); setLoading(false); });
   }, []);
 
-  const assets = trial.filter((r) => r.accountType === "asset");
-  const liabilities = trial.filter((r) => r.accountType === "liability");
-  const equity = trial.filter((r) => r.accountType === "equity");
-  const income = trial.filter((r) => r.accountType === "income");
-  const expenses = trial.filter((r) => r.accountType === "expense");
+  const safeTrial = Array.isArray(trial) ? trial : [];
+  const assets = safeTrial.filter((r) => r.accountType === "asset");
+  const liabilities = safeTrial.filter((r) => r.accountType === "liability");
+  const equity = safeTrial.filter((r) => r.accountType === "equity");
+  const income = safeTrial.filter((r) => r.accountType === "income");
+  const expenses = safeTrial.filter((r) => r.accountType === "expense");
 
-  const totalAssets = assets.reduce((s, a) => s + a.balance, 0);
-  const totalLiabilities = liabilities.reduce((s, a) => s + Math.abs(a.balance), 0);
-  const totalEquity = equity.reduce((s, a) => s + Math.abs(a.balance), 0);
-  const totalIncome = income.reduce((s, a) => s + Math.abs(a.balance), 0);
-  const totalExpenses = expenses.reduce((s, a) => s + a.balance, 0);
+  const totalAssets = assets.reduce((s, a) => s + (a.balance || 0), 0);
+  const totalLiabilities = liabilities.reduce((s, a) => s + Math.abs(a.balance || 0), 0);
+  const totalEquity = equity.reduce((s, a) => s + Math.abs(a.balance || 0), 0);
+  const totalIncome = income.reduce((s, a) => s + Math.abs(a.balance || 0), 0);
+  const totalExpenses = expenses.reduce((s, a) => s + (a.balance || 0), 0);
   const netProfit = totalIncome - totalExpenses;
 
   return (
@@ -64,7 +66,7 @@ export default function BalancePage() {
                 <tr><th className="p-3">Сметка</th><th className="p-3">Име</th><th className="p-3">Тип</th><th className="p-3 text-right">Дебит</th><th className="p-3 text-right">Кредит</th><th className="p-3 text-right">Салдо</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {trial.map((r) => (
+                {safeTrial.map((r) => (
                   <tr key={r.accountNumber} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="p-3 font-mono text-xs font-bold text-slate-600">{r.accountNumber}</td>
                     <td className="p-3 text-slate-900 dark:text-white">{r.accountName}</td>

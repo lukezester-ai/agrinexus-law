@@ -54,9 +54,15 @@ export default function KlientiPage() {
   const [filterType, setFilterType] = useState<string>("all")
 
   const load = async () => {
-    const res = await fetch("/api/accounting/counterparties")
-    setItems(await res.json())
-    setLoading(false)
+    try {
+      setLoading(true)
+      const res = await fetch("/api/accounting/counterparties").then((r) => r.json()).catch(() => [])
+      setItems(Array.isArray(res) ? res : [])
+    } catch (e) {
+      setItems([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -115,9 +121,9 @@ export default function KlientiPage() {
     await load()
   }
 
-  const filtered = items.filter((c) => {
+  const filtered = (Array.isArray(items) ? items : []).filter((c) => {
     const q = search.toLowerCase()
-    const matchesSearch = !q || c.name.toLowerCase().includes(q) || (c.eik ?? "").includes(q) || (c.vatNumber ?? "").includes(q) || (c.city ?? "").toLowerCase().includes(q)
+    const matchesSearch = !q || c.name?.toLowerCase().includes(q) || (c.eik ?? "").includes(q) || (c.vatNumber ?? "").includes(q) || (c.city ?? "").toLowerCase().includes(q)
     const matchesType = filterType === "all" || c.type === filterType
     return matchesSearch && matchesType
   })

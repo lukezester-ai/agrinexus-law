@@ -41,21 +41,26 @@ export default function SmetkiPage() {
   });
 
   const loadInvoices = async (type: string) => {
-    setLoading(true);
-    const endpoint = type === "sales" ? "/api/accounting/invoices" : "/api/accounting/purchases";
-    const res = await fetch(endpoint);
-    const data = await res.json();
-    setInvoices(data.map((inv: any) => ({
-      ...inv,
-      subtotal: Number(inv.subtotal || inv.netAmount || 0),
-      vatAmount: Number(inv.vatAmount || 0),
-      totalAmount: Number(inv.totalAmount || 0),
-      vatRate: Number(inv.vatRate || 20),
-      items: inv.items || [],
-      clientName: inv.clientName || inv.supplierName || "",
-      clientEik: inv.clientEik || inv.supplierEik || "",
-    })));
-    setLoading(false);
+    try {
+      setLoading(true);
+      const endpoint = type === "sales" ? "/api/accounting/invoices" : "/api/accounting/purchases";
+      const res = await fetch(endpoint).then((r) => r.json()).catch(() => []);
+      const data = Array.isArray(res) ? res : [];
+      setInvoices(data.map((inv: any) => ({
+        ...inv,
+        subtotal: Number(inv.subtotal || inv.netAmount || 0),
+        vatAmount: Number(inv.vatAmount || 0),
+        totalAmount: Number(inv.totalAmount || 0),
+        vatRate: Number(inv.vatRate || 20),
+        items: Array.isArray(inv.items) ? inv.items : [],
+        clientName: inv.clientName || inv.supplierName || "",
+        clientEik: inv.clientEik || inv.supplierEik || "",
+      })));
+    } catch (e) {
+      setInvoices([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadInvoices(tab); }, [tab]);
@@ -128,7 +133,8 @@ export default function SmetkiPage() {
     await loadInvoices(tab);
   };
 
-  const totalSales = invoices.filter((i) => i.status !== "draft").reduce((s, i) => s + i.totalAmount, 0);
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
+  const totalSales = safeInvoices.filter((i) => i.status !== "draft").reduce((s, i) => s + (i.totalAmount || 0), 0);
 
   return (
     <SitePageShell maxWidth="5xl" subheader={
@@ -151,11 +157,11 @@ export default function SmetkiPage() {
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <p className="text-xs text-slate-500">Общо фактури</p>
-          <p className="text-xl font-bold text-slate-900 dark:text-white">{invoices.length}</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white">{safeInvoices.length}</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <p className="text-xs text-slate-500">Издадени</p>
-          <p className="text-xl font-bold text-emerald-600">{invoices.filter((i) => i.status !== "draft").length}</p>
+          <p className="text-xl font-bold text-emerald-600">{safeInvoices.filter((i) => i.status !== "draft").length}</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <p className="text-xs text-slate-500">Обща сума</p>
@@ -246,12 +252,12 @@ export default function SmetkiPage() {
       <div className="glass-panel overflow-hidden rounded-3xl">
         <div className="border-b border-white/10 bg-teal-50/50 p-5 dark:bg-teal-950/20">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-            <FileText size={18} className="text-teal-600" /> {tab === "sales" ? "Продажби" : "Покупки"} ({invoices.length})
+            <FileText size={18} className="text-teal-600" /> {tab === "sales" ? "Продажби" : "Покупки"} ({safeInvoices.length})
           </h2>
         </div>
         {loading ? (
           <div className="flex items-center justify-center p-8"><Loader2 size={24} className="animate-spin text-slate-400" /></div>
-        ) : invoices.length === 0 ? (
+        ) : safeInvoices.length === 0 ? (
           <div className="p-8 text-center text-sm text-slate-500">
             <FileText size={40} className="mx-auto mb-3 text-slate-300" /><p>Няма фактури.</p>
           </div>
@@ -269,7 +275,7 @@ export default function SmetkiPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {invoices.filter((inv) => (inv.invoiceNumber || "").toLowerCase().includes(search.toLowerCase()) || (inv.clientName || "").toLowerCase().includes(search.toLowerCase()))
+                {safeInvoices.filter((inv) => (inv.invoiceNumber || "").toLowerCase().includes(search.toLowerCase()) || (inv.clientName || "").toLowerCase().includes(search.toLowerCase()))
                   .map((inv) => (
                     <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                       <td className="p-3 font-mono text-xs text-slate-500">{inv.invoiceNumber}</td>
