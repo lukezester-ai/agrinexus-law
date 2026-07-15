@@ -60,20 +60,60 @@ async function readBodyWithLimit(resp: Response, maxBytes: number): Promise<Uint
   return out;
 }
 
+/**
+ * Конвертира HTML таблици в чист Markdown формат (| Col1 | Col2 |\n|---|---|),
+ * премахва боклука (навигации, скриптове, стилове, реклами) и пести токени.
+ */
 function stripHtml(html: string): string {
-  return html
+  let cleaned = html
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
     .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
     .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, "")
+    .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, "")
+    .replace(/<!--[\s\S]*?-->/g, "");
+
+  // Конвертиране на <table> до Markdown таблици за запазване на структурирани данни
+  cleaned = cleaned.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (_match, tableContent) => {
+    const rows: string[][] = [];
+    const rowMatches = tableContent.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
+    for (const tr of rowMatches) {
+      const cells: string[] = [];
+      const cellMatches = tr.match(/<(th|td)[^>]*>([\s\S]*?)<\/\1>/gi) || [];
+      for (const cell of cellMatches) {
+        const text = cell
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/\s+/g, " ")
+          .trim();
+        cells.push(text || "—");
+      }
+      if (cells.length > 0) rows.push(cells);
+    }
+    if (rows.length === 0) return "";
+    const colCount = Math.max(...rows.map((r) => r.length));
+    const mdRows = rows.map((r) => {
+      while (r.length < colCount) r.push("—");
+      return `| ${r.join(" | ")} |`;
+    });
+    const separator = `| ${Array(colCount).fill("---").join(" | ")} |`;
+    if (mdRows.length > 1) {
+      return `\n\n${mdRows[0]}\n${separator}\n${mdRows.slice(1).join("\n")}\n\n`;
+    }
+    return `\n\n${mdRows[0]}\n\n`;
+  });
+
+  return cleaned
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/\s+/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n\s*\n+/g, "\n\n")
     .trim();
 }
 
