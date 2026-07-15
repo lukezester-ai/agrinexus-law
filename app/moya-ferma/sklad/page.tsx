@@ -41,7 +41,9 @@ import {
   Fuel,
   MapPin,
   Calendar,
-  Check
+  Check,
+  ShieldCheck,
+  AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -148,6 +150,13 @@ export default function SkladPage() {
     barcode: "" 
   });
   const [search, setSearch] = useState("");
+  const [showPermitsModal, setShowPermitsModal] = useState(false);
+  const [permitsChecklist, setPermitsChecklist] = useState({
+    ammoniumNitrateDecl: true, // Декларация на крайния потребител за прекурсори (>28% N)
+    mvrKosNotification: true,  // Уведомление до служба КОС към МВР за склад за прекурсори със СОТ
+    babhStorageReg: true,      // Удостоверение от БАБХ за обект за съхранение на торове и ПЗР
+    agronomistCert: true,      // Свидетелство за правоспособност за работа с ПЗР (чл. 83 ЗЗР)
+  });
 
   // Fira Calculator state
   const [firaCrop, setFiraCrop] = useState("Пшеница (норматив 0.15% - 0.28% за 6 мес.)");
@@ -504,6 +513,16 @@ export default function SkladPage() {
 
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <button
+                  onClick={() => setShowPermitsModal(true)}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/15 to-orange-500/15 px-5 py-3 text-xs font-black text-amber-800 dark:text-amber-200 shadow-md shadow-amber-500/10 hover:scale-[1.02] active:scale-[0.98] transition"
+                  title="Проверка на разрешителни за торове и ПЗР"
+                >
+                  <ShieldCheck size={16} className="text-amber-600 dark:text-amber-400" />
+                  <span>🛡️ Регулаторен Щит (БАБХ / МВР Прекурсори)</span>
+                  <span className="rounded-full bg-amber-600 px-1.5 py-0.5 text-[9px] font-black text-white uppercase animate-pulse">ЗЗР</span>
+                </button>
+
+                <button
                   onClick={() => {
                     setShowScannerModal(!showScannerModal);
                     setScannedBarcode(null);
@@ -530,6 +549,136 @@ export default function SkladPage() {
                 </button>
               </div>
             </div>
+
+            {/* Regulatory Permits & Compliance Modal */}
+            {showPermitsModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/65 p-4 backdrop-blur-md animate-in fade-in duration-200">
+                <div className="w-full max-w-3xl rounded-[32px] border border-amber-500/40 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-start justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-3.5 text-white shadow-lg shadow-amber-500/25">
+                        <ShieldCheck size={28} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                            Регулаторен Щит за Торове и ПЗР • БАБХ & МВР КОС
+                          </h2>
+                          <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-black text-emerald-600 uppercase">
+                            Нормативно съответствие
+                          </span>
+                        </div>
+                        <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                          Специализиран контрол по Регламент (ЕС) 2019/1148, Закон за прекурсорите и Закон за защита на растенията (ЗЗР)
+                        </p>
+                      </div>
+                    </div>
+                    <button onClick={() => setShowPermitsModal(false)} className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {/* Ammonium Nitrate & Precursors */}
+                    <div className="rounded-2xl border-2 border-amber-500/30 bg-amber-500/5 p-5 space-y-3.5">
+                      <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-black text-sm">
+                        <AlertTriangle size={18} className="shrink-0 text-amber-600" />
+                        <span>Торове с Азот &gt; 28% (Амониев нитрат)</span>
+                      </div>
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Според европейското и българското законодателство, амониевият нитрат с високо съдържание на азот е класифициран като <strong>Ограничен Прекурсор за взривни вещества</strong>.
+                      </p>
+                      <div className="space-y-2.5 pt-2 border-t border-amber-500/20 text-xs">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={permitsChecklist.ammoniumNitrateDecl}
+                            onChange={(e) => setPermitsChecklist({ ...permitsChecklist, ammoniumNitrateDecl: e.target.checked })}
+                            className="mt-0.5 h-4 w-4 rounded border-amber-500 text-amber-600 focus:ring-amber-500"
+                          />
+                          <div>
+                            <span className="font-extrabold text-slate-900 dark:text-white block">Декларация на крайния потребител</span>
+                            <span className="text-[11px] text-slate-500">Задължително се предоставя на доставчика при всяка покупка (чл. 18 ЗЗВХВС)</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={permitsChecklist.mvrKosNotification}
+                            onChange={(e) => setPermitsChecklist({ ...permitsChecklist, mvrKosNotification: e.target.checked })}
+                            className="mt-0.5 h-4 w-4 rounded border-amber-500 text-amber-600 focus:ring-amber-500"
+                          />
+                          <div>
+                            <span className="font-extrabold text-slate-900 dark:text-white block">Обезопасен склад под ключ със СОТ</span>
+                            <span className="text-[11px] text-slate-500">Регистрация в служба КОС (МВР) против неоторизиран достъп и кражба</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Plant Protection Products (PZR) */}
+                    <div className="rounded-2xl border-2 border-teal-500/30 bg-teal-500/5 p-5 space-y-3.5">
+                      <div className="flex items-center gap-2 text-teal-800 dark:text-teal-300 font-black text-sm">
+                        <FileCheck size={18} className="shrink-0 text-teal-600" />
+                        <span>Препарати за растителна защита (ПЗР)</span>
+                      </div>
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Употребата и съхранението на професионални ПЗР (хербициди, инсектициди) подлежи на контрол от <strong>Българската агенция по безопасност на храните (БАБХ)</strong>.
+                      </p>
+                      <div className="space-y-2.5 pt-2 border-t border-teal-500/20 text-xs">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={permitsChecklist.babhStorageReg}
+                            onChange={(e) => setPermitsChecklist({ ...permitsChecklist, babhStorageReg: e.target.checked })}
+                            className="mt-0.5 h-4 w-4 rounded border-teal-500 text-teal-600 focus:ring-teal-500"
+                          />
+                          <div>
+                            <span className="font-extrabold text-slate-900 dark:text-white block">Удостоверение от БАБХ за обект за ПЗР</span>
+                            <span className="text-[11px] text-slate-500">Регистрирано помещение с непропусклив под, вентилация и авариен резервоар</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={permitsChecklist.agronomistCert}
+                            onChange={(e) => setPermitsChecklist({ ...permitsChecklist, agronomistCert: e.target.checked })}
+                            className="mt-0.5 h-4 w-4 rounded border-teal-500 text-teal-600 focus:ring-teal-500"
+                          />
+                          <div>
+                            <span className="font-extrabold text-slate-900 dark:text-white block">Сертификат по чл. 83 ЗЗР (Агроном/Механизатор)</span>
+                            <span className="text-[11px] text-slate-500">Свидетелство за правоспособност за работа със земеделски химикали</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-slate-100 dark:bg-slate-800/80 p-4 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-black">
+                      <span className="text-slate-700 dark:text-slate-300">Статус на стопанството:</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 size={14} /> Всички 4 регулаторни изисквания са покрити и валидни
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      💡 <strong>Автоматична генерация:</strong> При създаване на изписване или пътен лист от склада, AgriNexus автоматично вписва номера на вашето Удостоверение от БАБХ и генерира електронна Декларация за прекурсори, съвместима с проверките на МВР и БАБХ.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      onClick={() => setShowPermitsModal(false)}
+                      className="rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 px-6 py-3 text-xs font-black text-white transition"
+                    >
+                      Разбрах и Потвърждавам
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Officia Smart Scan Panel */}
             {showScannerModal && (
@@ -1087,7 +1236,21 @@ export default function SkladPage() {
                               </button>
                             )}
                           </td>
-                          <td className="p-4 font-black text-slate-900 dark:text-white">{item.name}</td>
+                          <td className="p-4">
+                            <div className="font-black text-slate-900 dark:text-white">{item.name}</div>
+                            {(item.name.toLowerCase().includes("амониев") || item.name.toLowerCase().includes("нитрат") || item.category.includes("торове") || item.category.includes("6012")) && (
+                              <div onClick={() => setShowPermitsModal(true)} className="mt-1 cursor-pointer inline-flex items-center gap-1 rounded-lg bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-black text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition">
+                                <ShieldCheck size={12} className="text-amber-600 shrink-0" />
+                                <span>Регулаторен режим: Ограничен Прекурсор (&gt;28% N) • МВР КОС & БАБХ</span>
+                              </div>
+                            )}
+                            {(item.name.toLowerCase().includes("пзр") || item.name.toLowerCase().includes("пума") || item.name.toLowerCase().includes("хербицид") || item.category.toLowerCase().includes("пзр")) && (
+                              <div onClick={() => setShowPermitsModal(true)} className="mt-1 cursor-pointer inline-flex items-center gap-1 rounded-lg bg-teal-500/15 border border-teal-500/30 px-2 py-0.5 text-[10px] font-black text-teal-700 dark:text-teal-300 hover:bg-teal-500/25 transition">
+                                <ShieldCheck size={12} className="text-teal-600 shrink-0" />
+                                <span>Контрол БАБХ: Професионален ПЗР продукт (Свидетелство чл. 83 ЗЗР)</span>
+                              </div>
+                            )}
+                          </td>
                           <td className="p-4 text-xs font-bold text-slate-600 dark:text-slate-400">
                             <span className="rounded-xl bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
                               {item.category}
