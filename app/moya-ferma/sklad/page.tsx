@@ -28,7 +28,20 @@ import {
   FileText,
   UploadCloud,
   Eye,
-  RefreshCw
+  RefreshCw,
+  Truck,
+  Printer,
+  ClipboardCheck,
+  TrendingUp,
+  ShoppingCart,
+  ShieldAlert,
+  Layers,
+  Bot,
+  FileCheck,
+  Fuel,
+  MapPin,
+  Calendar,
+  Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -119,7 +132,7 @@ const DEMO_ITEMS: InventoryItem[] = [
 ];
 
 export default function SkladPage() {
-  const [activeTab, setActiveTab] = useState<"inventory" | "fira_calc">("inventory");
+  const [activeTab, setActiveTab] = useState<"inventory" | "fira_calc" | "gsm_machines" | "grain_scales" | "ai_procurement" | "official_docs">("inventory");
   const [items, setItems] = useState<InventoryItem[]>(DEMO_ITEMS);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -144,6 +157,51 @@ export default function SkladPage() {
   const [firaInitialMoisture, setFiraInitialMoisture] = useState(14.8);
   const [firaFinalMoisture, setFiraFinalMoisture] = useState(13.2);
   const [firaSuccess, setFiraSuccess] = useState(false);
+
+  // GSM & Machines state
+  const [gsmItem, setGsmItem] = useState("Дизелово гориво Б6 (за агротехника)");
+  const [gsmMachine, setGsmMachine] = useState("John Deere 8R 370 (Рег. № ТХ 4512 КА)");
+  const [gsmOperator, setGsmOperator] = useState("Иван Петров (Тракторист І категория)");
+  const [gsmLiters, setGsmLiters] = useState(420);
+  const [gsmField, setGsmField] = useState("Блок 102 - Нива Слатина (1,200 дка)");
+  const [gsmLogs, setGsmLogs] = useState([
+    { id: "g-1", date: "2026-07-14", machine: "John Deere 8R 370", operator: "Иван Петров", fuel: "Дизелово гориво Б6", liters: 380, cost: 950, field: "Блок 102 - Нива Слатина" },
+    { id: "g-2", date: "2026-07-13", machine: "CLAAS Lexion 8800", operator: "Георги Димитров", fuel: "Дизелово гориво Б6", liters: 650, cost: 1625, field: "Блок 204 - Голям дол" }
+  ]);
+  const [gsmSuccess, setGsmSuccess] = useState(false);
+
+  // Grain Scales (Кантар) state
+  const [scaleTruck, setScaleTruck] = useState("ТХ 8844 ВА + ТХ 1234 РЕ");
+  const [scaleDriver, setScaleDriver] = useState("Марин Тодоров");
+  const [scaleCrop, setScaleCrop] = useState("Пшеница - Хлябна реколта 2025");
+  const [scaleGross, setScaleGross] = useState(41200);
+  const [scaleTare, setScaleTare] = useState(15400);
+  const [scaleMoisture, setScaleMoisture] = useState(13.6);
+  const [scaleHectoliter, setScaleHectoliter] = useState(78.5);
+  const [scaleImpurities, setScaleImpurities] = useState(1.4);
+  const [scaleSilo, setScaleSilo] = useState("Силоз №1 (Основен - Капацитет 2,500т)");
+  const [scaleLogs, setScaleLogs] = useState([
+    { id: "s-1", date: "2026-07-12 14:20", truck: "ТХ 8844 ВА", driver: "Марин Тодоров", crop: "Пшеница Хлябна", net: 25.8, moisture: 13.4, silo: "Силоз №1" },
+    { id: "s-2", date: "2026-07-12 11:05", truck: "ТХ 3311 КА", driver: "Стойко Колев", crop: "Пшеница Хлябна", net: 26.2, moisture: 13.8, silo: "Силоз №1" }
+  ]);
+  const [scaleSuccess, setScaleSuccess] = useState(false);
+
+  // AI Procurement state
+  const [procurementPlan, setProcurementPlan] = useState([
+    { id: "p-1", name: "Амониев нитрат (34.4% N)", category: "Минерални торове", needed: 220, current: 64, unit: "тона", deficit: 156, estPrice: 720, totalCost: 112320, priority: "ВИСОК (Предстои есенно подхранване)" },
+    { id: "p-2", name: "Хербицид Пума Супер 7.5 ЕВ", category: "ПЗР Хербициди", needed: 350, current: 180, unit: "литра", deficit: 170, estPrice: 48, totalCost: 8160, priority: "СРЕДЕН (Пролетно пръскане)" },
+    { id: "p-3", name: "Семена Слънчоглед Pioneer P64LE25", category: "Посевен материал", needed: 180, current: 0, unit: "торби", deficit: 180, estPrice: 380, totalCost: 68400, priority: "КРИТИЧЕН (Нулева наличност в склада)" }
+  ]);
+  const [procurementAnalyzed, setProcurementAnalyzed] = useState(true);
+
+  // Official Docs (Разписки & Требования) state
+  const [docType, setDocType] = useState<"sklad_razpiska" | "trebovanie" | "inventarizacia">("sklad_razpiska");
+  const [docNumber, setDocNumber] = useState("СР-2026/0142");
+  const [docPartner, setDocPartner] = useState("Агрохим ЕООД / Договор № 44-25");
+  const [docItemSelected, setDocItemSelected] = useState("Амониев нитрат (34.4% N)");
+  const [docQty, setDocQty] = useState(25);
+  const [docPrice, setDocPrice] = useState(720);
+  const [docPrinted, setDocPrinted] = useState(false);
 
   // Movement state
   const [movItem, setMovItem] = useState<InventoryItem | null>(null);
@@ -335,29 +393,78 @@ export default function SkladPage() {
             </span>
           </div>
 
-          <div className="flex rounded-2xl bg-slate-100 dark:bg-slate-800 p-1">
+          <div className="flex rounded-2xl bg-slate-100 dark:bg-slate-800 p-1 flex-wrap gap-1">
             <button
               onClick={() => setActiveTab("inventory")}
               className={cn(
-                "rounded-xl px-4 py-1.5 text-xs font-black transition",
+                "rounded-xl px-3.5 py-1.5 text-xs font-black transition flex items-center gap-1.5",
                 activeTab === "inventory"
                   ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white"
                   : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               )}
             >
-              Складов регистър и наличности
+              <Package size={13} />
+              <span>Складов регистър</span>
             </button>
             <button
               onClick={() => { setActiveTab("fira_calc"); setFiraSuccess(false); }}
               className={cn(
-                "rounded-xl px-4 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                "rounded-xl px-3.5 py-1.5 text-xs font-black transition flex items-center gap-1.5",
                 activeTab === "fira_calc"
                   ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/20"
                   : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               )}
             >
               <Sparkles size={13} className={activeTab === "fira_calc" ? "text-white" : "text-amber-500"} />
-              <span>Калкулатор фира (Наредба)</span>
+              <span>Калкулатор фира</span>
+            </button>
+            <button
+              onClick={() => { setActiveTab("gsm_machines"); setGsmSuccess(false); }}
+              className={cn(
+                "rounded-xl px-3.5 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                activeTab === "gsm_machines"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              <Fuel size={13} className={activeTab === "gsm_machines" ? "text-white" : "text-blue-500"} />
+              <span>ГСМ & Машини</span>
+            </button>
+            <button
+              onClick={() => { setActiveTab("grain_scales"); setScaleSuccess(false); }}
+              className={cn(
+                "rounded-xl px-3.5 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                activeTab === "grain_scales"
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              <Scale size={13} className={activeTab === "grain_scales" ? "text-white" : "text-emerald-500"} />
+              <span>Кантар & Силози</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("ai_procurement")}
+              className={cn(
+                "rounded-xl px-3.5 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                activeTab === "ai_procurement"
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/20"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              <Bot size={13} className={activeTab === "ai_procurement" ? "text-white" : "text-purple-500"} />
+              <span>AI Анализ & Покупки</span>
+            </button>
+            <button
+              onClick={() => { setActiveTab("official_docs"); setDocPrinted(false); }}
+              className={cn(
+                "rounded-xl px-3.5 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                activeTab === "official_docs"
+                  ? "bg-gradient-to-r from-slate-700 to-slate-900 text-white shadow-md shadow-slate-700/20 dark:from-slate-600 dark:to-slate-800"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              <FileCheck size={13} className={activeTab === "official_docs" ? "text-white" : "text-slate-500"} />
+              <span>Официални Разписки</span>
             </button>
           </div>
         </div>
@@ -1196,6 +1303,663 @@ export default function SkladPage() {
                     <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{netShippableTons.toLocaleString("bg-BG", { minimumFractionDigits: 2 })} тона</p>
                     <span className="block text-[11px] font-bold text-emerald-700 dark:text-emerald-300">Чисто търговско тегло в силоза</span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: GSM & MACHINES */}
+        {activeTab === "gsm_machines" && (
+          <div className="space-y-6">
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/20 border border-blue-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-blue-700 dark:text-blue-300 mb-3">
+                  <Fuel size={14} />
+                  <span>Лимит-карти & Пътни Листове</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  ГСМ за Агротехника и Трактористи (Сметка 301/6013)
+                </h2>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Изписвайте дизел и масла директно по машини и оператори. Автоматично изчислява разхода на декар, създава електронен пътен лист и предотвратява злоупотреби.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-3">
+              <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm lg:col-span-1">
+                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <Fuel className="text-blue-600" size={20} />
+                  <span>Ново изписване на ГСМ</span>
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Гориво-смазочен материал</label>
+                    <select
+                      value={gsmItem}
+                      onChange={(e) => setGsmItem(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Дизелово гориво Б6 (за агротехника)">Дизелово гориво Б6 (Наличност: 11,450 л)</option>
+                      <option value="Моторно масло John Deere Plus-50 II (15W-40)">Моторно масло Plus-50 II 15W-40 (Наличност: 180 л)</option>
+                      <option value="Хидравлично масло Hy-Gard">Хидравлично масло Hy-Gard (Наличност: 95 л)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Агромашина / Трактор / Комбайн</label>
+                    <select
+                      value={gsmMachine}
+                      onChange={(e) => setGsmMachine(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="John Deere 8R 370 (Рег. № ТХ 4512 КА)">John Deere 8R 370 (Рег. № ТХ 4512 КА)</option>
+                      <option value="CLAAS Lexion 8800 (Рег. № ТХ 9911 РА)">CLAAS Lexion 8800 (Рег. № ТХ 9911 РА)</option>
+                      <option value="Fendt 1050 Vario (Рег. № ТХ 7722 СА)">Fendt 1050 Vario (Рег. № ТХ 7722 СА)</option>
+                      <option value="JCB 541-70 Agri Plus (Товарач)">JCB 541-70 Agri Plus (Товарач)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Тракторист / Оператор</label>
+                    <select
+                      value={gsmOperator}
+                      onChange={(e) => setGsmOperator(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Иван Петров (Тракторист І категория)">Иван Петров (Тракторист І категория)</option>
+                      <option value="Георги Димитров (Механизатор)">Георги Димитров (Механизатор)</option>
+                      <option value="Николай Стоянов (Оператор Комбайн)">Николай Стоянов (Оператор Комбайн)</option>
+                      <option value="Стойко Тодоров (Шофьор)">Стойко Тодоров (Шофьор)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Количество за зареждане (Литри)</label>
+                    <input
+                      type="number"
+                      value={gsmLiters}
+                      onChange={(e) => setGsmLiters(Number(e.target.value))}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Поле / Блок (За отнасяне по Сметка 6111)</label>
+                    <select
+                      value={gsmField}
+                      onChange={(e) => setGsmField(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Блок 102 - Нива Слатина (1,200 дка / Пшеница)">Блок 102 - Нива Слатина (1,200 дка / Пшеница)</option>
+                      <option value="Блок 204 - Голям дол (850 дка / Слънчоглед)">Блок 204 - Голям дол (850 дка / Слънчоглед)</option>
+                      <option value="Блок 301 - Равнище (1,450 дка / Царевица)">Блок 301 - Равнище (1,450 дка / Царевица)</option>
+                      <option value="Общо стопанство / Вътрешен транспорт">Общо стопанство / Вътрешен транспорт</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const cost = gsmLiters * 2.50;
+                      setGsmLogs([
+                        { id: `g-${Date.now()}`, date: new Date().toISOString().split("T")[0], machine: gsmMachine.split(" ")[0] + " " + gsmMachine.split(" ")[1], operator: gsmOperator.split(" ")[0] + " " + gsmOperator.split(" ")[1], fuel: gsmItem.split(" ")[0] + " " + gsmItem.split(" ")[1], liters: gsmLiters, cost, field: gsmField.split(" ")[0] + " " + gsmField.split(" ")[1] },
+                        ...gsmLogs
+                      ]);
+                      setGsmSuccess(true);
+                    }}
+                    className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-xs font-extrabold text-white shadow-md shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Запиши в Лимит-Карта и Изпиши ГСМ</span>
+                  </button>
+
+                  {gsmSuccess && (
+                    <div className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 p-3.5 flex items-start gap-2.5 text-emerald-800 dark:text-emerald-200 text-xs">
+                      <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-black">Записано успешно!</span> {gsmLiters} л бяха изписани за {gsmMachine.split(" ")[0]} ({gsmOperator.split(" ")[0]}).
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm lg:col-span-2">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">Дневник на пътните листове и лимит-карти</h3>
+                    <p className="text-xs font-semibold text-slate-500">Автоматично изчисление на стойност (2.50 лв/л средна цена)</p>
+                  </div>
+                  <button className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold transition flex items-center gap-1.5">
+                    <Download size={14} /> Експорт PDF/Excel
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-extrabold uppercase">
+                        <th className="pb-3">Дата</th>
+                        <th className="pb-3">Машина</th>
+                        <th className="pb-3">Оператор</th>
+                        <th className="pb-3">Гориво</th>
+                        <th className="pb-3 text-right">Количество</th>
+                        <th className="pb-3 text-right">Стойност</th>
+                        <th className="pb-3">Поле / Обект</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {gsmLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 font-semibold">
+                          <td className="py-3 font-mono text-slate-500">{log.date}</td>
+                          <td className="py-3 font-black text-slate-900 dark:text-white">{log.machine}</td>
+                          <td className="py-3 text-slate-700 dark:text-slate-300">{log.operator}</td>
+                          <td className="py-3 text-blue-600 dark:text-blue-400 font-bold">{log.fuel}</td>
+                          <td className="py-3 text-right font-black text-slate-900 dark:text-white">{log.liters} л</td>
+                          <td className="py-3 text-right font-black text-emerald-600 dark:text-emerald-400">{log.cost.toFixed(2)} лв</td>
+                          <td className="py-3 text-slate-600 dark:text-slate-400">{log.field}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: GRAIN SCALES & SILOS */}
+        {activeTab === "grain_scales" && (
+          <div className="space-y-6">
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-600/20 border border-emerald-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 mb-3">
+                  <Scale size={14} />
+                  <span>Кантарна Бележка & Лабораторен Анализ</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Електронен Кантар за Зърно и Силозно Стопанство (Сметка 303)
+                </h2>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Записвайте бруто, тара и нето тегло на камионите при прием в силозите. Автоматичен контрол на влага, хектолитър и примеси по стандарт.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-3">
+              <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm lg:col-span-1">
+                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <Truck className="text-emerald-600" size={20} />
+                  <span>Нов Кантар (Прием / Експорт)</span>
+                </h3>
+
+                <div className="space-y-3.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Камион + Ремарке (Рег. №)</label>
+                    <input
+                      type="text"
+                      value={scaleTruck}
+                      onChange={(e) => setScaleTruck(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Шофьор / Превозвач</label>
+                    <input
+                      type="text"
+                      value={scaleDriver}
+                      onChange={(e) => setScaleDriver(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Зърнена култура / Партида</label>
+                    <select
+                      value={scaleCrop}
+                      onChange={(e) => setScaleCrop(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <option value="Пшеница - Хлябна реколта 2025">Пшеница - Хлябна реколта 2025</option>
+                      <option value="Царевица Pioneer (ФАО 440)">Царевица Pioneer (ФАО 440)</option>
+                      <option value="Слънчоглед Високомаслодаен">Слънчоглед Високомаслодаен</option>
+                      <option value="Ечемик Пивоварен">Ечемик Пивоварен</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Бруто (кг)</label>
+                      <input
+                        type="number"
+                        value={scaleGross}
+                        onChange={(e) => setScaleGross(Number(e.target.value))}
+                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Тара (кг)</label>
+                      <input
+                        type="number"
+                        value={scaleTare}
+                        onChange={(e) => setScaleTare(Number(e.target.value))}
+                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-center">
+                    <span className="text-[10px] font-extrabold uppercase text-emerald-800 dark:text-emerald-300">Чисто Нето Тегло</span>
+                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                      {Math.max(0, (scaleGross - scaleTare) / 1000).toFixed(2)} тона
+                    </div>
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">({Math.max(0, scaleGross - scaleTare)} кг)</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">Влага (%)</label>
+                      <input
+                        type="number" step="0.1"
+                        value={scaleMoisture}
+                        onChange={(e) => setScaleMoisture(Number(e.target.value))}
+                        className={cn("w-full rounded-xl border px-2.5 py-2 text-xs font-black outline-none", scaleMoisture > 14 ? "border-rose-500 bg-rose-500/10 text-rose-600" : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white")}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">Хект. (кг/хл)</label>
+                      <input
+                        type="number" step="0.1"
+                        value={scaleHectoliter}
+                        onChange={(e) => setScaleHectoliter(Number(e.target.value))}
+                        className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-2.5 py-2 text-xs font-black text-slate-900 dark:text-white outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">Примеси (%)</label>
+                      <input
+                        type="number" step="0.1"
+                        value={scaleImpurities}
+                        onChange={(e) => setScaleImpurities(Number(e.target.value))}
+                        className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-2.5 py-2 text-xs font-black text-slate-900 dark:text-white outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {scaleMoisture > 14 && (
+                    <div className="rounded-xl bg-amber-500/15 border border-amber-500/30 p-2 text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <span>Внимание: Влага над 14%! Изисква се сушене или аерация в силоза.</span>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Прием в Силоз / База</label>
+                    <select
+                      value={scaleSilo}
+                      onChange={(e) => setScaleSilo(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-extrabold text-slate-900 dark:text-white outline-none"
+                    >
+                      <option value="Силоз №1 (Основен - Капацитет 2,500т)">Силоз №1 (Основен - Капацитет 2,500т)</option>
+                      <option value="Силоз №2 (Резервен - Капацитет 1,800т)">Силоз №2 (Резервен - Капацитет 1,800т)</option>
+                      <option value="Плосък склад - Северна База">Плосък склад - Северна База</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const net = (scaleGross - scaleTare) / 1000;
+                      setScaleLogs([
+                        { id: `s-${Date.now()}`, date: new Date().toLocaleDateString("bg-BG") + " " + new Date().toLocaleTimeString("bg-BG", { hour: "2-digit", minute: "2-digit" }), truck: scaleTruck.split(" ")[0] + " " + scaleTruck.split(" ")[1], driver: scaleDriver, crop: scaleCrop.split(" - ")[0], net, moisture: scaleMoisture, silo: scaleSilo.split(" ")[0] + " " + scaleSilo.split(" ")[1] },
+                        ...scaleLogs
+                      ]);
+                      setScaleSuccess(true);
+                    }}
+                    className="w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 text-xs font-extrabold text-white shadow-md shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Запиши Кантарна Бележка & Прием</span>
+                  </button>
+
+                  {scaleSuccess && (
+                    <div className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 p-3 flex items-start gap-2 text-emerald-800 dark:text-emerald-200 text-xs">
+                      <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-black">Кантарният запис е създаден!</span> Тегло от {((scaleGross - scaleTare) / 1000).toFixed(2)}т заскладено в {scaleSilo.split(" ")[0]} {scaleSilo.split(" ")[1]}.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm lg:col-span-2">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">Дневник на кантарните бележки (Вход/Изход Силози)</h3>
+                    <p className="text-xs font-semibold text-slate-500">Пълен лабораторен контрол на всяка партида</p>
+                  </div>
+                  <button className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold transition flex items-center gap-1.5">
+                    <Printer size={14} /> Печат на Дневник
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-extrabold uppercase">
+                        <th className="pb-3">Време</th>
+                        <th className="pb-3">Камион</th>
+                        <th className="pb-3">Шофьор</th>
+                        <th className="pb-3">Култура</th>
+                        <th className="pb-3 text-right">Нето Тегло</th>
+                        <th className="pb-3 text-center">Влага</th>
+                        <th className="pb-3">Силоз</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {scaleLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 font-semibold">
+                          <td className="py-3 font-mono text-slate-500">{log.date}</td>
+                          <td className="py-3 font-black text-slate-900 dark:text-white">{log.truck}</td>
+                          <td className="py-3 text-slate-700 dark:text-slate-300">{log.driver}</td>
+                          <td className="py-3 text-emerald-600 dark:text-emerald-400 font-bold">{log.crop}</td>
+                          <td className="py-3 text-right font-black text-slate-900 dark:text-white">{log.net.toFixed(2)} тона</td>
+                          <td className="py-3 text-center">
+                            <span className={cn("rounded-md px-2 py-0.5 font-black", log.moisture > 14 ? "bg-rose-500/15 text-rose-600" : "bg-emerald-500/15 text-emerald-600")}>
+                              {log.moisture}%
+                            </span>
+                          </td>
+                          <td className="py-3 text-slate-600 dark:text-slate-400 font-bold">{log.silo}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: AI PROCUREMENT */}
+        {activeTab === "ai_procurement" && (
+          <div className="space-y-6">
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/20 border border-purple-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 mb-3">
+                  <Bot size={14} />
+                  <span>AI Планиране & Оптимизация</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  AI Анализатор на Запасите и Списък за Покупки (Procurement Plan)
+                </h2>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Изкуственият интелект сравнява планираните площи в сеитбооборота (10,000 дка общо) с текущите наличности в склада и определя точния дефицит за предстоящия агротехнически сезон.
+                </p>
+              </div>
+            </div>
+
+            <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <ShoppingCart className="text-purple-600" size={20} />
+                    <span>Списък с необходими доставки (Пролет/Есен 2026)</span>
+                  </h3>
+                  <p className="text-xs font-semibold text-slate-500">Автоматично изчислен дефицит по нормативи и сеитбена карта</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setProcurementAnalyzed(true)}
+                    className="rounded-2xl bg-purple-600 hover:bg-purple-700 px-4 py-2 text-xs font-black text-white transition flex items-center gap-2 shadow-md shadow-purple-500/20"
+                  >
+                    <RefreshCw size={14} className="animate-spin-once" />
+                    <span>Преизчисли по Сеитбооборот</span>
+                  </button>
+                  <button className="rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 px-4 py-2 text-xs font-black text-white transition flex items-center gap-2">
+                    <Download size={14} /> Експорт Запитване до Доставчик
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-extrabold uppercase">
+                      <th className="pb-3">Материал / Торове / Семена</th>
+                      <th className="pb-3">Категория</th>
+                      <th className="pb-3 text-right">Нужно за Сезона</th>
+                      <th className="pb-3 text-right">Налично в Склада</th>
+                      <th className="pb-3 text-right">Дефицит за Покупка</th>
+                      <th className="pb-3 text-right">Прогнозна Стойност</th>
+                      <th className="pb-3 text-center">Приоритет</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    {procurementPlan.map((p) => (
+                      <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 font-semibold">
+                        <td className="py-3.5 font-black text-slate-900 dark:text-white">{p.name}</td>
+                        <td className="py-3.5 text-slate-600 dark:text-slate-400 font-bold">{p.category}</td>
+                        <td className="py-3.5 text-right font-black text-slate-900 dark:text-white">{p.needed} {p.unit}</td>
+                        <td className="py-3.5 text-right font-bold text-slate-500">{p.current} {p.unit}</td>
+                        <td className="py-3.5 text-right font-black text-rose-600 dark:text-rose-400 bg-rose-500/5 px-2 rounded-lg">
+                          -{p.deficit} {p.unit}
+                        </td>
+                        <td className="py-3.5 text-right font-black text-slate-900 dark:text-white">{p.totalCost.toLocaleString("bg-BG")} лв</td>
+                        <td className="py-3.5 text-center">
+                          <span className={cn("rounded-md px-2.5 py-1 text-[10px] font-black uppercase", p.priority.includes("КРИТИЧЕН") ? "bg-rose-500/15 text-rose-600 border border-rose-500/30" : p.priority.includes("ВИСОК") ? "bg-amber-500/15 text-amber-600 border border-amber-500/30" : "bg-blue-500/15 text-blue-600 border border-blue-500/30")}>
+                            {p.priority}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-4 flex items-center justify-between text-xs font-bold text-purple-900 dark:text-purple-200">
+                <div className="flex items-center gap-2.5">
+                  <Bot size={20} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                  <span>AI съвет: Доставката на слънчогледови семена и амониев нитрат трябва да се договори преди 15 август за гарантиране на най-добра цена с 12% отстъпка за ранно плащане.</span>
+                </div>
+                <button className="rounded-xl bg-purple-600 hover:bg-purple-700 px-3.5 py-1.5 text-white font-black transition shrink-0">
+                  Генерирай Оферти
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: OFFICIAL DOCS */}
+        {activeTab === "official_docs" && (
+          <div className="space-y-6">
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-slate-700/30 bg-gradient-to-br from-slate-800/10 via-slate-700/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-slate-700/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-700/20 border border-slate-700/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">
+                  <FileCheck size={14} />
+                  <span>Български Счетоводни Стандарти</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Официални Складови Разписки и Требования (PDF Бланки)
+                </h2>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Генерирайте и отпечатайте с един клик законни счетоводни бланки с подписи на материално-отговорното лице (МОЛ), агроном и приемчик.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-3">
+              <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm lg:col-span-1">
+                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <FileText className="text-slate-700 dark:text-slate-300" size={20} />
+                  <span>Параметри на Документа</span>
+                </h3>
+
+                <div className="space-y-3.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Тип счетоводен документ</label>
+                    <select
+                      value={docType}
+                      onChange={(e: any) => setDocType(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-700"
+                    >
+                      <option value="sklad_razpiska">Складова Разписка (Приходен ордер)</option>
+                      <option value="trebovanie">Искане за отпускане (Требование)</option>
+                      <option value="inventarizacia">Инвентаризационен опис (Ревизия)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Номер на документ</label>
+                    <input
+                      type="text"
+                      value={docNumber}
+                      onChange={(e) => setDocNumber(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Контрагент / Основание</label>
+                    <input
+                      type="text"
+                      value={docPartner}
+                      onChange={(e) => setDocPartner(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Материал / Артикул</label>
+                    <input
+                      type="text"
+                      value={docItemSelected}
+                      onChange={(e) => setDocItemSelected(e.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Количество</label>
+                      <input
+                        type="number"
+                        value={docQty}
+                        onChange={(e) => setDocQty(Number(e.target.value))}
+                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs font-black text-slate-900 dark:text-white outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Цена / лв</label>
+                      <input
+                        type="number"
+                        value={docPrice}
+                        onChange={(e) => setDocPrice(Number(e.target.value))}
+                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs font-black text-slate-900 dark:text-white outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setDocPrinted(true)}
+                    className="w-full rounded-2xl bg-gradient-to-r from-slate-800 to-slate-950 dark:from-slate-700 dark:to-slate-850 py-3.5 text-xs font-extrabold text-white shadow-md transition flex items-center justify-center gap-2"
+                  >
+                    <Printer size={16} />
+                    <span>Генерирай и Отпечатай PDF</span>
+                  </button>
+
+                  {docPrinted && (
+                    <div className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 p-3 flex items-start gap-2 text-emerald-800 dark:text-emerald-200 text-xs">
+                      <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-black">Бланката е готова!</span> Изпратена към принтер / готова за изтегляне в PDF формат с реквизити на МОЛ.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="glass-panel-pro rounded-[32px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm lg:col-span-2 flex flex-col justify-between bg-white dark:bg-slate-900">
+                <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 sm:p-8 space-y-6 font-mono text-xs text-slate-800 dark:text-slate-200">
+                  <div className="flex justify-between items-start border-b border-slate-300 dark:border-slate-700 pb-4">
+                    <div>
+                      <h4 className="font-black text-base uppercase text-slate-900 dark:text-white">
+                        {docType === "sklad_razpiska" ? "СКЛАДОВА РАЗПИСКА № " + docNumber : docType === "trebovanie" ? "ИСКАНЕ ЗА ОТПУСКАНЕ (ТРЕБОВАНИЕ) № " + docNumber : "ИНВЕНТАРИЗАЦИОНЕН ОПИС № " + docNumber}
+                      </h4>
+                      <p className="text-[11px] text-slate-500">Предприятие: АГРИ НЕКСУС ЕОП • Склад: Основен Хангар №1</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">Дата: {new Date().toLocaleDateString("bg-BG")}</p>
+                      <p className="text-[11px] text-slate-500">Сметка: 301 / 6111</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-xs font-sans">
+                    <div>
+                      <span className="text-slate-400 font-bold block text-[10px] uppercase">Получател / Доставчик:</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white">{docPartner}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block text-[10px] uppercase">Основание / Обект на влагане:</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white">Блок 102 - Нива Слатина (Сеитбооборот 2026)</p>
+                    </div>
+                  </div>
+
+                  <table className="w-full text-left font-sans border border-slate-300 dark:border-slate-700">
+                    <thead className="bg-slate-100 dark:bg-slate-800 font-black">
+                      <tr>
+                        <th className="p-2 border-b border-slate-300 dark:border-slate-700">№</th>
+                        <th className="p-2 border-b border-slate-300 dark:border-slate-700">Наименование на стоката / материала</th>
+                        <th className="p-2 border-b border-slate-300 dark:border-slate-700 text-right">Мярка</th>
+                        <th className="p-2 border-b border-slate-300 dark:border-slate-700 text-right">К-во</th>
+                        <th className="p-2 border-b border-slate-300 dark:border-slate-700 text-right">Ед. цена</th>
+                        <th className="p-2 border-b border-slate-300 dark:border-slate-700 text-right">Сума (лв)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="font-bold">
+                        <td className="p-2">1</td>
+                        <td className="p-2">{docItemSelected}</td>
+                        <td className="p-2 text-right">тона</td>
+                        <td className="p-2 text-right">{docQty}</td>
+                        <td className="p-2 text-right">{docPrice.toFixed(2)} лв</td>
+                        <td className="p-2 text-right font-black">{(docQty * docPrice).toFixed(2)} лв</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="grid grid-cols-3 gap-6 pt-6 border-t border-slate-300 dark:border-slate-700 text-center font-sans">
+                    <div>
+                      <span className="block text-[11px] text-slate-400 font-bold">МОЛ / Предал:</span>
+                      <div className="mt-4 border-b border-slate-400 w-24 mx-auto" />
+                      <span className="text-[10px] font-semibold">/ Петър Иванов /</span>
+                    </div>
+                    <div>
+                      <span className="block text-[11px] text-slate-400 font-bold">Приел / Агроном:</span>
+                      <div className="mt-4 border-b border-slate-400 w-24 mx-auto" />
+                      <span className="text-[10px] font-semibold">/ инж. Стоян Милев /</span>
+                    </div>
+                    <div>
+                      <span className="block text-[11px] text-slate-400 font-bold">Глав. Счетоводител:</span>
+                      <div className="mt-4 border-b border-slate-400 w-24 mx-auto" />
+                      <span className="text-[10px] font-semibold">/ Виктория Димитрова /</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <button className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs font-black transition">
+                    Изтегли в PDF
+                  </button>
+                  <button onClick={() => window.print()} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-black text-white transition flex items-center gap-1.5">
+                    <Printer size={14} /> Отпечатай Бланката
+                  </button>
                 </div>
               </div>
             </div>
