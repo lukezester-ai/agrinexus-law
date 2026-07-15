@@ -1752,6 +1752,15 @@ const AIChatCTA = () => {
     </section>;
 };
 const MobileAppCTA = () => {
+  const triggerInstallPwa = () => {
+    if (typeof window !== 'undefined') {
+      if ((window as any).__deferredPwaPrompt) {
+        (window as any).__deferredPwaPrompt.prompt();
+      } else {
+        window.dispatchEvent(new Event('agrinexus:install-pwa'));
+      }
+    }
+  };
   const openInstallHelp = () => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('agrinexus:open-help'));
@@ -1789,7 +1798,7 @@ const MobileAppCTA = () => {
         color: '#EBEBF0',
         marginBottom: '48px'
       }}>
-          Инсталирай като PWA от браузъра (Chrome / Edge → „Инсталирай приложението“).
+          Инсталирай като PWA от браузъра (Chrome / Edge → „Инсталирай приложението“). Работи с бърз достъп и офлайн функционалност директно на вашия телефон или компютър.
         </p>
 
         <ul style={{
@@ -1825,13 +1834,24 @@ const MobileAppCTA = () => {
             </li>)}
         </ul>
 
-        <div className="flex flex-wrap gap-4">
-          <button type="button" onClick={openInstallHelp} className="agri-btn-primary" style={{
-          backgroundColor: '#FFFFFF',
-          color: '#000000',
-          fontSize: '15px'
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="button" onClick={triggerInstallPwa} className="agri-btn-primary flex items-center gap-2 shadow-lg shadow-emerald-500/20" style={{
+          backgroundColor: '#10B981',
+          color: '#FFFFFF',
+          fontSize: '15px',
+          fontWeight: 700
         }}>
-            Как да инсталирам
+            <span>📲 Инсталирай приложението (PWA)</span>
+          </button>
+          <button type="button" onClick={openInstallHelp} className="agri-btn-ghost flex items-center gap-1.5" style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          color: '#FFFFFF',
+          fontSize: '14px',
+          padding: '12px 20px',
+          borderRadius: '980px',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
+        }}>
+            <span>❓ Как да инсталирам</span>
           </button>
           <Link href="/document-review" className="agri-btn-ghost inline-flex items-center" style={{
           color: '#FFFFFF',
