@@ -390,6 +390,10 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
 						</svg>
 					</button>
 				</div>
+
+				<div className="mt-2.5 flex items-center justify-center gap-1.5 px-2 text-center text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/25 rounded-md py-1.5">
+					<span>⚠️ <strong>Информационен AI асистент:</strong> Не замества официален правен, счетоводен или агрономен консултант при решения и субсидии.</span>
+				</div>
 			</div>
 		</aside>
 	);

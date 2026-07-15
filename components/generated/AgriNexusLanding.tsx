@@ -226,14 +226,14 @@ const COMPARISON_ROWS: ComparisonRow[] = [{
   manualText: 'Часове ръчен труд'
 }];
 const MOBILE_BULLETS: MobileFeatureBullet[] = [{
-  bold: 'PWA приложение',
-  muted: 'Инсталирай на телефона за бърз достъп'
+  bold: 'PWA стандарт от ново поколение',
+  muted: 'Без такси към App Store и посредници, без тежка инсталация — 100% сигурност от браузъра'
 }, {
-  bold: 'Live данни',
-  muted: 'Срокове и архив от официални източници'
+  bold: 'Мигновени ъпдейти в секундата',
+  muted: 'Законите и наредбите се обновяват автоматично без да чакате актуализация в магазина'
 }, {
-  bold: 'Бърз достъп',
-  muted: 'Документи, срокове и калкулатори'
+  bold: 'Офлайн устойчивост на полето',
+  muted: 'Работи директно на телефона и лаптопа дори при слаб или липсващ обхват'
 }];
 
 // --- Inline SVG Icons ---
@@ -1746,6 +1746,12 @@ const AIChatCTA = () => {
                 Изпрати →
               </button>
             </div>
+            <div className="mt-3.5 flex items-center justify-center gap-1.5 text-center text-xs text-amber-700/90 dark:text-amber-400/90 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-lg px-3 py-2 shadow-sm">
+              <span className="shrink-0 font-bold">⚠️ Внимание:</span>
+              <span>
+                AgriNexus AI има изцяло информационен характер и не замества официална правна, счетоводна или агрономна консултация при решения и субсидии.
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1798,7 +1804,7 @@ const MobileAppCTA = () => {
         color: '#EBEBF0',
         marginBottom: '48px'
       }}>
-          Инсталирай като PWA от браузъра (Chrome / Edge → „Инсталирай приложението“). Работи с бърз достъп и офлайн функционалност директно на вашия телефон или компютър.
+          Избрахме най-модерния стандарт за бизнес софтуер – <strong>PWA (Progressive Web App)</strong>. Вместо бавни инсталации, чакане на одобрение от App Store и излишни такси, получавате <strong>мигновени ъпдейти на нормативната база в секундата на публикуване</strong>, нулева заетост на паметта и надеждна работа дори при слаб мобилен интернет на полето.
         </p>
 
         <ul style={{
