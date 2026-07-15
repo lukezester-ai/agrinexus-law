@@ -29,7 +29,7 @@ export function PwaOnboarding() {
 
     const seen = window.localStorage.getItem(SEEN_KEY) === "1";
     const sessionHidden = window.sessionStorage.getItem(SESSION_HIDE_KEY) === "1";
-    if (!seen && !sessionHidden) {
+    if (!seen && !sessionHidden && pathname !== "/" && pathname !== "") {
       setOpenMode("onboarding");
       setOpen(true);
     }

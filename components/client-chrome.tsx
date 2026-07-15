@@ -13,17 +13,22 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 /** Global UI chrome — client-only to avoid prerender failures on /_not-found. */
 export function ClientChrome() {
-	return (
-		<ConditionalLayout>
-			<CommandPalette />
-			<MobileActionDock />
-			<PwaRegister />
-			<PwaHelpButton />
-			<PwaOnboarding />
-			<ThemeToggle />
-			<CookieConsentBanner />
-			<AnalyticsLoader />
-			<SiteVisitTracker />
-		</ConditionalLayout>
-	);
+  return (
+    <>
+      {/* Тези компоненти трябва да работят НА ВСЯКА страница, включително на началната страница (/) */}
+      <PwaRegister />
+      <PwaOnboarding />
+      <CookieConsentBanner />
+      <AnalyticsLoader />
+      <SiteVisitTracker />
+
+      {/* Тези компоненти се скриват на началната страница (/) за по-чист изглед */}
+      <ConditionalLayout>
+        <CommandPalette />
+        <MobileActionDock />
+        <PwaHelpButton />
+        <ThemeToggle />
+      </ConditionalLayout>
+    </>
+  );
 }

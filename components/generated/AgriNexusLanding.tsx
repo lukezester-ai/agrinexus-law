@@ -1853,7 +1853,7 @@ const MobileAppCTA = () => {
         }}>
             <span>❓ Как да инсталирам</span>
           </button>
-          <Link href="/document-review" className="agri-btn-ghost inline-flex items-center" style={{
+          <a href="/document-review" className="agri-btn-ghost inline-flex items-center" style={{
           color: '#FFFFFF',
           borderColor: 'rgba(255,255,255,0.3)',
           fontSize: '15px',
@@ -1863,7 +1863,7 @@ const MobileAppCTA = () => {
           border: '1px solid rgba(255,255,255,0.3)'
         }}>
             AI преглед на документ →
-          </Link>
+          </a>
         </div>
       </div>
 
