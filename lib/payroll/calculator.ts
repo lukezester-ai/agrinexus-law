@@ -26,14 +26,21 @@ export function calculatePayrollItem(params: {
     const net = Math.round((gross - employeeInsurance) * 100) / 100;
     const employerCost = Math.round((gross + employerInsurance) * 100) / 100;
 
+    const grossEur = Math.round((gross / 1.95583) * 100) / 100;
+    const netEur = Math.round((net / 1.95583) * 100) / 100;
+    const employerCostEur = Math.round((employerCost / 1.95583) * 100) / 100;
+
     return {
       gross,
+      grossEur,
       insuranceBase,
       employeeInsurance,
       employerInsurance,
       incomeTax,
       net,
+      netEur,
       employerCost,
+      employerCostEur,
       breakdown: {
         dooEmployee: dooEmp,
         dzpoEmployee: 0,
@@ -67,18 +74,26 @@ export function calculatePayrollItem(params: {
   const net = Math.round((gross - employeeInsurance - incomeTax) * 100) / 100;
   const employerCost = Math.round((gross + employerInsurance) * 100) / 100;
 
-  const minWage = 1077.00; // Минимална работна заплата 2025/2026
+  const minWage = 1077.00; // Минимална работна заплата 2025/2026 (550.66 €)
   const hasWarning = params.baseSalary < minWage && params.contractType !== 'part_time' && params.contractType !== 'civil';
-  const warning = hasWarning ? `Основната заплата е под минималната за страната (${minWage.toFixed(2)} лв.)` : '';
+  const warning = hasWarning ? `Основната заплата е под минималната за страната (${minWage.toFixed(2)} лв. / 550.66 €)` : '';
+
+  // Преизчисляване в Евро (€) по фиксирания курс на БНБ 1 EUR = 1.95583 BGN
+  const grossEur = Math.round((gross / 1.95583) * 100) / 100;
+  const netEur = Math.round((net / 1.95583) * 100) / 100;
+  const employerCostEur = Math.round((employerCost / 1.95583) * 100) / 100;
 
   return {
     gross,
+    grossEur,
     insuranceBase,
     employeeInsurance,
     employerInsurance,
     incomeTax,
     net,
+    netEur,
     employerCost,
+    employerCostEur,
     breakdown: {
       dooEmployee,
       dzpoEmployee,

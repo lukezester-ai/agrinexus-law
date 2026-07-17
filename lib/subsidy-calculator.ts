@@ -3,7 +3,9 @@
  * Не са официални — ставките са закръглени от публично обобщени параметри.
  */
 
-export const ILLUSTRATIVE_EUR_BGN = 1.956;
+import { EUR_BGN_RATE } from "./utils/euro";
+
+export const ILLUSTRATIVE_EUR_BGN = EUR_BGN_RATE;
 
 export type FarmProductionFocus =
 	| "grain"
