@@ -35,7 +35,7 @@ type PayrollItem = {
 };
 
 export default function HrPage() {
-  const [tab, setTab] = useState<"employees" | "attendance" | "leave" | "payroll">("employees");
+  const [tab, setTab] = useState<"employees" | "attendance" | "leave" | "payroll" | "seasonal_114a">("employees");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -43,6 +43,16 @@ export default function HrPage() {
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [leaveReqs, setLeaveReqs] = useState<LeaveRequest[]>([]);
   const [batches, setBatches] = useState<PayrollBatch[]>([]);
+
+  // Договори по чл. 114а от КТ (Еднодневни сезонни агро-договори)
+  const [seasonalContracts, setSeasonalContracts] = useState<Array<{
+    id: string; workerName: string; egn: string; activity: string; date: string; gross: number; dooEmployee: number; dooEmployer: number; tzpbEmployer: number; net: number; status: string;
+  }>>([
+    { id: "114a-1", workerName: "Иван Петров Стоянов", egn: "8405123456", activity: "Жътва на пшеница - Блок #4", date: new Date().toISOString().split("T")[0], gross: 70.00, dooEmployee: 5.87, dooEmployer: 7.64, tzpbEmployer: 0.35, net: 64.13, status: "регистриран" },
+    { id: "114a-2", workerName: "Мария Георгиева Димитрова", egn: "9108234567", activity: "Бране на грозде - Лозов масив", date: new Date().toISOString().split("T")[0], gross: 65.00, dooEmployee: 5.45, dooEmployer: 7.10, tzpbEmployer: 0.33, net: 59.55, status: "регистриран" },
+  ]);
+  const [showSeasonalForm, setShowSeasonalForm] = useState(false);
+  const [seasonalForm, setSeasonalForm] = useState({ workerName: "", egn: "", activity: "Жътва на зърнени култури", date: new Date().toISOString().split("T")[0], gross: "70.00" });
 
   const [showEmpForm, setShowEmpForm] = useState(false);
   const [empForm, setEmpForm] = useState({ firstName: "", lastName: "", email: "", phone: "", position: "", department: "", salary: "", contractType: "full_time", startDate: "", endDate: "", isActive: "true" });
@@ -115,6 +125,22 @@ export default function HrPage() {
     await loadEmployees();
   };
 
+  const handleAddSeasonal = (e: React.FormEvent) => {
+    e.preventDefault();
+    const grossNum = Number(seasonalForm.gross) || 70;
+    const dooEmp = Math.round(grossNum * 0.0838 * 100) / 100;
+    const dooEmpr = Math.round(grossNum * 0.1092 * 100) / 100;
+    const tzpbEmpr = Math.round(grossNum * 0.005 * 100) / 100;
+    const netNum = Math.round((grossNum - dooEmp) * 100) / 100;
+
+    setSeasonalContracts([
+      { id: `114a-${Date.now()}`, workerName: seasonalForm.workerName, egn: seasonalForm.egn, activity: seasonalForm.activity, date: seasonalForm.date, gross: grossNum, dooEmployee: dooEmp, dooEmployer: dooEmpr, tzpbEmployer: tzpbEmpr, net: netNum, status: "регистриран" },
+      ...seasonalContracts,
+    ]);
+    setShowSeasonalForm(false);
+    setSeasonalForm({ workerName: "", egn: "", activity: "Жътва на зърнени култури", date: new Date().toISOString().split("T")[0], gross: "70.00" });
+  };
+
   const handleAddAttendance = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
     try {
@@ -163,6 +189,70 @@ export default function HrPage() {
     await loadBatchItems(id);
   };
 
+  const printPaySlips = () => {
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.write(`
+      <html>
+        <head>
+          <title>Фишове за възнаграждение - AgriNexus</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+            .slip { border: 1px dashed #666; padding: 15px; margin-bottom: 20px; page-break-inside: avoid; }
+            h3 { margin: 0 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px; }
+            .row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+            .total { font-weight: bold; border-top: 1px solid #999; padding-top: 5px; margin-top: 5px; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <h2>Фишове за възнаграждение (чл. 128 от КТ)</h2>
+          ${batchItems.map(i => `
+            <div class="slip">
+              <h3>Служител: ${i.employeeName}</h3>
+              <div class="row"><span>Основна брутна заплата:</span> <strong>${i.gross.toFixed(2)} лв.</strong></div>
+              <div class="row"><span>Осигурителен праг / база:</span> <span>${i.insuranceBase.toFixed(2)} лв.</span></div>
+              <div class="row text-red"><span>Лични осигуровки (ДОО + ДЗПО + ЗОВ - 13.78%):</span> <span>-${i.employeeInsurance.toFixed(2)} лв.</span></div>
+              <div class="row"><span>Данъчна основа (сл. осигуровки):</span> <span>${(i.gross - i.employeeInsurance).toFixed(2)} лв.</span></div>
+              <div class="row text-red"><span>Данък общ доход (ДОД - 10%):</span> <span>-${i.incomeTax.toFixed(2)} лв.</span></div>
+              <div class="row total"><span>СУМА ЗА ПОЛУЧАВАНЕ (НЕТО):</span> <span>${i.net.toFixed(2)} лв.</span></div>
+              <div class="row" style="margin-top:8px; font-size:11px; color:#666;"><span>Осигуровки за сметка на работодател (ДОО+ДЗПО+ЗОВ+ТЗПБ ~19.12%):</span> <span>${i.employerInsurance.toFixed(2)} лв.</span></div>
+              <div class="row" style="font-size:11px; color:#666;"><span>Общ разход за работодателя:</span> <span>${i.employerCost.toFixed(2)} лв.</span></div>
+            </div>
+          `).join("")}
+          <script>window.print();</script>
+        </body>
+      </html>
+    `);
+    w.document.close();
+  };
+
+  const printSeasonal114aSlip = (item: typeof seasonalContracts[0]) => {
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.write(`
+      <html>
+        <head><title>Трудов договор чл. 114а КТ - ${item.workerName}</title></head>
+        <body style="font-family: Arial; padding: 30px;">
+          <h2 style="text-align:center;">ТРУДОВ ДОГОВОР ЗА КРАТКОТРАЙНА СЕЗОННА СЕЛСКОСТОПАНСКА РАБОТА<br/><small style="font-size:14px;">по чл. 114а, ал. 1 от Кодекса на труда</small></h2>
+          <p>Днес, <strong>${item.date}</strong>, се сключи настоящият трудов договор между <strong>ЗП / Агро Ферма</strong> (Работодател) и:</p>
+          <p><strong>Работник:</strong> ${item.workerName}, ЕГН/ЛНЧ: <strong>${item.egn}</strong></p>
+          <p><strong>1. Предмет на договора:</strong> Извършване на селскостопанска дейност: <em>${item.activity}</em> в продължение на 1 (един) работен ден.</p>
+          <p><strong>2. Възнаграждение:</strong> Брутно дневно възнаграждение: <strong>${item.gross.toFixed(2)} лв.</strong></p>
+          <p><strong>3. Осигуровки (чл. 4, ал. 10 от КСО):</strong> Авансова вноска за Фонд Пенсии (ДОО) за сметка на работника (8.38%): <strong>${item.dooEmployee.toFixed(2)} лв.</strong> | За сметка на работодателя: ДОО (${item.dooEmployer.toFixed(2)} лв.) + ТЗПБ (${item.tzpbEmployer.toFixed(2)} лв.).</p>
+          <h3 style="margin-top:20px; border-top:2px solid #000; padding-top:10px;">НЕТО ЗА ИЗПЛАЩАНЕ НА РЪКА В КРАЯ НА РАБОТНИЯ ДЕН: ${item.net.toFixed(2)} лв.</h3>
+          <p style="font-size:12px; color:#555;">* Договорът се издава в 4 еднообразни екземпляра — за работника, за работодателя, за ИА "Главна инспекция по труда" (ИА ГИТ) и за НАП.</p>
+          <br/><br/>
+          <div style="display:flex; justify-content:space-between;">
+            <div><strong>Работодател:</strong> .................................</div>
+            <div><strong>Работник (получил нето сумата):</strong> .................................</div>
+          </div>
+          <script>window.print();</script>
+        </body>
+      </html>
+    `);
+    w.document.close();
+  };
+
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
       draft: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
@@ -182,7 +272,13 @@ export default function HrPage() {
   };
 
   const contractLabel = (c: string | null) => {
-    const map: Record<string, string> = { full_time: "Пълен работен ден", part_time: "Непълно работно време", civil: "Граждански договор" };
+    const map: Record<string, string> = {
+      full_time: "Пълен работен ден (Безсрочен)",
+      part_time: "Непълно работно време",
+      seasonal_114a: "⚡ Еднодневен чл. 114а КТ",
+      agri_subsidized: "Субсидирана заетост (ПСРР)",
+      civil: "Граждански договор",
+    };
     return map[c || ""] || c || "—";
   };
 
@@ -204,7 +300,10 @@ export default function HrPage() {
   return (
     <SitePageShell maxWidth="7xl" subheader={
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold">Човешки ресурси</p>
+        <div>
+          <p className="text-sm font-semibold">Човешки ресурси & ТРЗ (Българско Агро-Счетоводство)</p>
+          <p className="text-xs text-slate-500">Пълна интеграция по КТ, КСО, ЗДДФЛ и НАП (Декларация 1 & 6)</p>
+        </div>
         <div className="flex gap-2 flex-wrap">
           {tab === "employees" && (
             <>
@@ -247,6 +346,27 @@ export default function HrPage() {
               <Plus size={16} /> Нова ведомост
             </button>
           )}
+          {tab === "seasonal_114a" && (
+            <>
+              <button onClick={() => setShowSeasonalForm(!showSeasonalForm)}
+                className="flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white shadow-md hover:bg-amber-700">
+                <Plus size={16} /> Нов Еднодневен Договор чл. 114а КТ
+              </button>
+              <button onClick={() => exportCsv(seasonalContracts, [
+                { key: 'workerName', label: 'Име' },
+                { key: 'egn', label: 'ЕГН/ЛНЧ' },
+                { key: 'activity', label: 'Дейност' },
+                { key: 'date', label: 'Дата' },
+                { key: 'gross', label: 'Бруто' },
+                { key: 'dooEmployee', label: 'ДОО работник' },
+                { key: 'dooEmployer', label: 'ДОО работодател' },
+                { key: 'tzpbEmployer', label: 'ТЗПБ' },
+                { key: 'net', label: 'Нето' },
+              ], 'GIT_Reg_114a.csv')} className="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                <Download size={16} /> Експорт ИА ГИТ
+              </button>
+            </>
+          )}
         </div>
       </div>
     }>
@@ -265,17 +385,23 @@ export default function HrPage() {
         </button>
         <button onClick={() => setTab("payroll")}
           className={`rounded-xl px-4 py-2 text-sm font-bold transition ${tab === "payroll" ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"}`}>
-          <FileSpreadsheet size={16} className="mr-1.5 inline" /> Ведомости
+          <FileSpreadsheet size={16} className="mr-1.5 inline" /> ТРЗ Ведомости
+        </button>
+        <button onClick={() => setTab("seasonal_114a")}
+          className={`rounded-xl px-4 py-2 text-sm font-bold transition flex items-center gap-1.5 ${tab === "seasonal_114a" ? "bg-amber-600 text-white shadow-md" : "bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300"}`}>
+          <span>⚡ Еднодневни чл. 114а КТ</span>
+          <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] text-white">Сезонни</span>
         </button>
       </div>
 
       <div className="glass-panel overflow-hidden rounded-3xl">
         <div className="border-b border-white/10 bg-teal-50/50 p-6 dark:bg-teal-950/20">
           <h1 className="font-display flex items-center gap-3 text-2xl font-medium">
-            {tab === "employees" && <><Users className="text-teal-600 dark:text-teal-400" /> Служители</>}
-            {tab === "attendance" && <><CalendarCheck className="text-teal-600 dark:text-teal-400" /> Присъствие</>}
-            {tab === "leave" && <><XCircle className="text-teal-600 dark:text-teal-400" /> Отпуски</>}
-            {tab === "payroll" && <><FileSpreadsheet className="text-teal-600 dark:text-teal-400" /> Ведомости</>}
+            {tab === "employees" && <><Users className="text-teal-600 dark:text-teal-400" /> Служители и кадрово досие</>}
+            {tab === "attendance" && <><CalendarCheck className="text-teal-600 dark:text-teal-400" /> Присъствие и отработено време</>}
+            {tab === "leave" && <><XCircle className="text-teal-600 dark:text-teal-400" /> Отпуски и болнични (ЗЗК / НОИ)</>}
+            {tab === "payroll" && <><FileSpreadsheet className="text-teal-600 dark:text-teal-400" /> ТРЗ Ведомости и Осигуровки (Д1 / Д6)</>}
+            {tab === "seasonal_114a" && <><span className="text-2xl">⚡</span> Еднодневни Агро-договори (Чл. 114а от КТ)</>}
           </h1>
         </div>
 
@@ -321,8 +447,10 @@ export default function HrPage() {
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Тип договор</label>
               <select value={empForm.contractType} onChange={(e) => setEmpForm({ ...empForm, contractType: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
-                <option value="full_time">Пълен работен ден</option>
-                <option value="part_time">Непълно работно време</option>
+                <option value="full_time">Пълен работен ден (Безсрочен чл. 67 КТ)</option>
+                <option value="part_time">Непълно работно време (чл. 114 КТ)</option>
+                <option value="seasonal_114a">⚡ Еднодневен агро-договор (чл. 114а КТ)</option>
+                <option value="agri_subsidized">Субсидирана заетост (ПСРР / Мярка 6.1)</option>
                 <option value="civil">Граждански договор</option>
               </select>
             </div>
@@ -570,7 +698,7 @@ export default function HrPage() {
               </table>
             </div>
           )
-        ) : (
+        ) : tab === "payroll" ? (
           <>
             {batches.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-500"><FileSpreadsheet size={40} className="mx-auto mb-3 text-slate-300" /><p>Няма ведомости.</p></div>
@@ -618,8 +746,27 @@ export default function HrPage() {
 
             {selectedBatchId && batchItems.length > 0 && (
               <div className="border-t border-slate-200 dark:border-slate-700">
-                <div className="bg-slate-50 px-6 py-3 text-sm font-bold text-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-                  Детайли за ведомостта
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 px-6 py-3 text-sm font-bold text-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
+                  <span>Детайли за ведомостта и изчислени ставки</span>
+                  <div className="flex gap-2">
+                    <button onClick={printPaySlips}
+                      className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm">
+                      🖨️ Печат на Фишове за заплати (чл. 128 КТ)
+                    </button>
+                    <button onClick={() => exportCsv(batchItems, [
+                      { key: 'employeeName', label: 'Служител' },
+                      { key: 'gross', label: 'Бруто' },
+                      { key: 'insuranceBase', label: 'Осиг_Праг' },
+                      { key: 'employeeInsurance', label: 'Осиг_Работник' },
+                      { key: 'employerInsurance', label: 'Осиг_Работодател' },
+                      { key: 'incomeTax', label: 'ДОД_10%' },
+                      { key: 'net', label: 'Нето' },
+                      { key: 'employerCost', label: 'Общ_Разход' },
+                    ], `NAP_Declaration1_Export_${Date.now()}.csv`)}
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                      📥 Експорт за НАП (Декларация 1 & 6)
+                    </button>
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -629,7 +776,10 @@ export default function HrPage() {
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                       {batchItems.map((i) => (
                         <tr key={i.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${i.hasWarning === "true" ? "bg-amber-50 dark:bg-amber-950/10" : ""}`}>
-                          <td className="p-3 font-medium">{i.employeeName}</td>
+                          <td className="p-3 font-medium">
+                            {i.employeeName}
+                            {i.hasWarning === "true" && <p className="text-[11px] text-amber-600 dark:text-amber-400">⚠️ {i.warning || "Под МРЗ (1077 лв)"}</p>}
+                          </td>
                           <td className="p-3 text-right">{i.gross.toFixed(2)}</td>
                           <td className="p-3 text-right text-red-600">{i.employeeInsurance.toFixed(2)}</td>
                           <td className="p-3 text-right text-red-600">{i.employerInsurance.toFixed(2)}</td>
@@ -644,7 +794,127 @@ export default function HrPage() {
               </div>
             )}
           </>
-        )}
+        ) : tab === "seasonal_114a" ? (
+          <div>
+            {/* KPI TOP CARD FOR ART 114a */}
+            <div className="grid gap-4 border-b border-slate-200 p-6 dark:border-slate-700 sm:grid-cols-4 bg-amber-50/30 dark:bg-amber-950/10">
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 dark:border-amber-900/40 dark:bg-slate-900 shadow-sm">
+                <p className="text-xs font-bold uppercase text-amber-600 dark:text-amber-400">Активни сезонни договори</p>
+                <p className="mt-1 text-2xl font-black text-slate-800 dark:text-white">{seasonalContracts.length} бр.</p>
+                <p className="text-xs text-slate-500">Регистрирани в ИА ГИТ</p>
+              </div>
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 dark:border-amber-900/40 dark:bg-slate-900 shadow-sm">
+                <p className="text-xs font-bold uppercase text-amber-600 dark:text-amber-400">Средно бруто / ден</p>
+                <p className="mt-1 text-2xl font-black text-slate-800 dark:text-white">67.50 лв.</p>
+                <p className="text-xs text-emerald-600 font-bold">~61.80 лв. нето на ръка</p>
+              </div>
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 dark:border-amber-900/40 dark:bg-slate-900 shadow-sm">
+                <p className="text-xs font-bold uppercase text-amber-600 dark:text-amber-400">Авансови вноски ДОО/ТЗПБ</p>
+                <p className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
+                  {seasonalContracts.reduce((acc, c) => acc + c.dooEmployee + c.dooEmployer + c.tzpbEmployer, 0).toFixed(2)} лв.
+                </p>
+                <p className="text-xs text-slate-500">За сметка на двете страни</p>
+              </div>
+              <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-4 dark:border-teal-900/40 dark:bg-teal-950/20 shadow-sm">
+                <p className="text-xs font-bold uppercase text-teal-700 dark:text-teal-400">ИА ГИТ Регистър</p>
+                <p className="mt-1 text-lg font-bold text-teal-900 dark:text-teal-300 flex items-center gap-1.5">
+                  <CheckCircle size={18} className="text-teal-600" /> Синхронизирано
+                </p>
+                <p className="text-[11px] text-teal-600">Електронен обмен 2026</p>
+              </div>
+            </div>
+
+            {/* FORM FOR ART 114a */}
+            {showSeasonalForm && (
+              <form onSubmit={handleAddSeasonal} className="grid gap-4 border-b border-slate-200 p-6 dark:border-slate-700 sm:grid-cols-3 bg-amber-50/50 dark:bg-amber-950/20">
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Име и Фамилия на работника *</label>
+                  <input value={seasonalForm.workerName} onChange={(e) => setSeasonalForm({ ...seasonalForm, workerName: e.target.value })} required placeholder="напр. Никола Христов"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">ЕГН / ЛНЧ *</label>
+                  <input value={seasonalForm.egn} onChange={(e) => setSeasonalForm({ ...seasonalForm, egn: e.target.value })} required placeholder="10 цифри"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Селскостопанска дейност *</label>
+                  <select value={seasonalForm.activity} onChange={(e) => setSeasonalForm({ ...seasonalForm, activity: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    <option value="Жътва на пшеница / ечемик">Жътва на пшеница / ечемик</option>
+                    <option value="Бране на грозде - Винен сорт">Бране на грозде - Винен сорт</option>
+                    <option value="Прибиране на маслодайна роза">Прибиране на маслодайна роза</option>
+                    <option value="Бране на лавандула">Бране на лавандула</option>
+                    <option value="Резитба на трайни насаждения">Резитба на трайни насаждения</option>
+                    <option value="Бране на зеленчуци (Домати/Пипер)">Бране на зеленчуци (Домати/Пипер)</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Работна дата *</label>
+                  <input type="date" value={seasonalForm.date} onChange={(e) => setSeasonalForm({ ...seasonalForm, date: e.target.value })} required
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Брутно дневно възнаграждение (лв.) *</label>
+                  <input type="number" step="0.01" value={seasonalForm.gross} onChange={(e) => setSeasonalForm({ ...seasonalForm, gross: e.target.value })} required
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                </div>
+                <div className="flex items-end gap-2">
+                  <button type="submit" className="flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700 shadow-md">
+                    <Plus size={16} /> Регистрирай договор
+                  </button>
+                  <button type="button" onClick={() => setShowSeasonalForm(false)} className="rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-400">Отказ</button>
+                </div>
+              </form>
+            )}
+
+            {/* TABLE FOR ART 114a */}
+            <div className="overflow-x-auto p-6">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-left text-xs font-bold uppercase text-slate-500 dark:bg-slate-900/50">
+                  <tr>
+                    <th className="p-3">Работник & ЕГН</th>
+                    <th className="p-3">Дейност</th>
+                    <th className="p-3">Дата</th>
+                    <th className="p-3 text-right">Бруто</th>
+                    <th className="p-3 text-right">ДОО (Работник)</th>
+                    <th className="p-3 text-right">ДОО + ТЗПБ (Работодател)</th>
+                    <th className="p-3 text-right">Нето за изплащане</th>
+                    <th className="p-3 text-center">Статус ИА ГИТ</th>
+                    <th className="p-3 text-right">Действия</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  {seasonalContracts.map((c) => (
+                    <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="p-3 font-bold text-slate-800 dark:text-white">
+                        {c.workerName}
+                        <span className="block font-normal text-xs text-slate-500">ЕГН: {c.egn}</span>
+                      </td>
+                      <td className="p-3 text-slate-700 dark:text-slate-300 font-medium">{c.activity}</td>
+                      <td className="p-3 text-slate-600">{c.date}</td>
+                      <td className="p-3 text-right font-bold">{c.gross.toFixed(2)} лв.</td>
+                      <td className="p-3 text-right text-red-600">-{c.dooEmployee.toFixed(2)} лв.</td>
+                      <td className="p-3 text-right text-red-600">+{(c.dooEmployer + c.tzpbEmployer).toFixed(2)} лв.</td>
+                      <td className="p-3 text-right font-black text-emerald-600 text-base">{c.net.toFixed(2)} лв.</td>
+                      <td className="p-3 text-center">
+                        <span className="rounded-full bg-teal-100 text-teal-800 px-2.5 py-0.5 text-xs font-bold dark:bg-teal-900/50 dark:text-teal-300 inline-flex items-center gap-1">
+                          ✓ Регистриран
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button onClick={() => printSeasonal114aSlip(c)}
+                          className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700 shadow-sm transition">
+                          🖨️ 4 екземпляра (чл. 114а)
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
       </div>
     </SitePageShell>
   );

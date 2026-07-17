@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         workingDays,
         workedDays: workingDays,
         bonus: 0,
+        contractType: emp.contractType || 'full_time',
       });
 
       const employeeName = `${emp.firstName} ${emp.lastName}`;
