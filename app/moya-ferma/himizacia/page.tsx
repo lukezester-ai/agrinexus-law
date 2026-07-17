@@ -18,6 +18,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type Field = { id: string; name: string; sizeDa: number };
 type Product = { id: string; name: string; productType: string; activeSubstance: string | null; nPercent?: number };
@@ -368,6 +369,13 @@ export default function HimizaciaPage() {
               <Sparkles size={13} className={activeTab === "ai_recommend" ? "text-white" : "text-purple-500"} />
               <span>🤖 AI Агроном (Препоръка + Склад)</span>
             </button>
+            <Link
+              href="/moya-ferma/himizacia/puhv"
+              className="rounded-xl px-4 py-1.5 text-xs font-black transition flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-600 dark:hover:text-white border border-emerald-500/30"
+            >
+              <Sprout size={13} className="text-emerald-600 dark:text-emerald-400 group-hover:text-white" />
+              <span>🌱 План Еко-ЗВПП (ПУХВ • СЕУ)</span>
+            </Link>
           </div>
         </div>
       }
