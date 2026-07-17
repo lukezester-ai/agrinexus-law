@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { chemicalProducts, chemicalApplications } from '@/lib/db/schema/chemical_diary';
 import { resolveTenantId } from '@/lib/db/tenant-context';
+import { autoDepositPdfToArchive } from '@/lib/documents/auto-archive';
 import { eq, sql } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
@@ -22,6 +23,23 @@ export async function GET(req: NextRequest) {
     const rows = (apps as any).rows || [];
 
     const html = generateHtml(rows);
+
+    // Ticket 3 (P0): Auto-deposit generated report in Documents archive
+    try {
+      await autoDepositPdfToArchive({
+        tenantId,
+        name: `Дневник_Химизация_БАБХ_${new Date().toISOString().split('T')[0]}.html`,
+        docType: 'report',
+        category: 'export',
+        linkedModule: 'chemicals',
+        fileBufferOrString: html,
+        contentType: 'text/html',
+        description: `Официален дневник по растителна защита (БАБХ) с ${rows.length} записа`,
+        tags: '#химизация #дневник #БХАБ #авто-архив',
+      });
+    } catch (archiveErr) {
+      console.error('Failed to auto archive chemical diary:', archiveErr);
+    }
 
     return new Response(html, {
       status: 200,

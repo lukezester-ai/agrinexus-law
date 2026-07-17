@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { chemicalProducts, chemicalApplications } from '@/lib/db/schema/chemical_diary';
+import { inventoryItems, inventoryMovements } from '@/lib/db/schema/inventory';
 import { resolveTenantId } from '@/lib/db/tenant-context';
 import { eq, desc, and, sql } from 'drizzle-orm';
 
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
     if (body._type === 'product') {
       const [result] = await db.insert(chemicalProducts).values({
         tenantId, name: body.name, productType: body.productType || 'other',
+        inventoryItemId: body.inventoryItemId || null,
         activeSubstance: body.activeSubstance || null, concentration: body.concentration || null,
         unitOfMeasure: body.unitOfMeasure || 'l', manufacturer: body.manufacturer || null,
         permitNumber: body.permitNumber || null, hazardClass: body.hazardClass || null,
@@ -48,7 +50,55 @@ export async function POST(req: NextRequest) {
         applicationMethod: body.applicationMethod || null, operatorName: body.operatorName || null,
         notes: body.notes || null, isCompleted: 'true',
       }).returning();
-      return NextResponse.json(result, { status: 201 });
+
+      // Ticket 1 (P0): Auto-deduct inventory & check negative stock warning
+      let hasInventoryWarning = false;
+      let warningMessage: string | null = null;
+      try {
+        const [product] = await db.select().from(chemicalProducts).where(eq(chemicalProducts.id, body.productId));
+        if (product) {
+          let invItem = null;
+          if (product.inventoryItemId) {
+            [invItem] = await db.select().from(inventoryItems).where(and(eq(inventoryItems.id, product.inventoryItemId), eq(inventoryItems.tenantId, tenantId)));
+          }
+          if (!invItem) {
+            [invItem] = await db.select().from(inventoryItems).where(and(eq(inventoryItems.tenantId, tenantId), sql`LOWER(${inventoryItems.name}) = LOWER(${product.name})`));
+          }
+
+          const deductedQty = Number(body.totalAmount) || 0;
+          if (invItem && deductedQty > 0) {
+            const currentStockNum = Number(invItem.currentStock || 0);
+            const newStock = currentStockNum - deductedQty;
+
+            await db.insert(inventoryMovements).values({
+              tenantId,
+              itemId: invItem.id,
+              fieldId: body.fieldId || null,
+              type: 'chemical_application',
+              quantity: String(-deductedQty),
+              unitCost: String(0),
+              totalCost: String(0),
+              movementDate: new Date(),
+              referenceId: result.id,
+              referenceType: 'chemical_application',
+              description: `Изписване за приложение на ${product.name} (Доза: ${body.doseAmount} ${body.doseUnit || 'l/da'})`,
+            });
+
+            await db.update(inventoryItems)
+              .set({ currentStock: String(newStock), updatedAt: new Date() })
+              .where(eq(inventoryItems.id, invItem.id));
+
+            if (newStock < 0) {
+              hasInventoryWarning = true;
+              warningMessage = `⚠️ Внимание: Наличността в Склад за препарат "${product.name}" стана отрицателна (${newStock.toFixed(2)} ${invItem.unitOfMeasure || 'л'}). Моля заведете приходна фактура или начално салдо в модул Склад!`;
+            }
+          }
+        }
+      } catch (invErr) {
+        console.error('Inventory auto-deduction check failed:', invErr);
+      }
+
+      return NextResponse.json({ ...result, hasInventoryWarning, warningMessage }, { status: 201 });
     }
 
     return NextResponse.json({ error: '_type required: product or application' }, { status: 400 });

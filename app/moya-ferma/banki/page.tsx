@@ -31,7 +31,7 @@ export default function BankiPage() {
   const [txForm, setTxForm] = useState({ accountId: "", amount: "", date: "", description: "", counterpartyName: "" });
 
   const [showImportForm, setShowImportForm] = useState(false);
-  const [importForm, setImportForm] = useState({ accountId: "", csvData: "" });
+  const [importForm, setImportForm] = useState({ accountId: "", csvData: "", format: "csv" });
   const [importResult, setImportResult] = useState<string | null>(null);
 
   const loadAccounts = async () => {
@@ -92,20 +92,20 @@ export default function BankiPage() {
   const handleImport = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setImportResult(null);
     try {
-      const lines = importForm.csvData.trim().split("\n").filter(Boolean);
-      const transactions = lines.map((line: string) => {
-        const parts = line.split("\t");
-        return { date: parts[0]?.trim(), amount: parts[1]?.trim(), description: parts[2]?.trim() || null, counterpartyName: parts[3]?.trim() || null };
-      });
       const r = await fetch("/api/farm/bank-transactions/import", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountId: importForm.accountId, transactions }),
+        body: JSON.stringify({ accountId: importForm.accountId, fileContent: importForm.csvData, format: importForm.format }),
       });
       const data = await r.json();
-      setImportResult(`Импортирани ${data.imported} транзакции.`);
-      await loadTransactions(selectedAccountId || undefined);
-      setImportForm({ ...importForm, csvData: "" });
-    } catch { setImportResult("Грешка при импорт."); }
+      if (r.ok && data.summary) {
+        setImportResult(`Успешен импорт! Засечени: ${data.summary.matched} | Частични: ${data.summary.partial} | Незасечени: ${data.summary.unmatched}`);
+        await loadTransactions(selectedAccountId || undefined);
+        await loadAccounts();
+        setImportForm({ ...importForm, csvData: "" });
+      } else {
+        setImportResult(`Грешка: ${data.error || "Неуспешен импорт"}`);
+      }
+    } catch { setImportResult("Грешка при комуникация със сървъра."); }
     finally { setSaving(false); }
   };
 
@@ -235,13 +235,21 @@ export default function BankiPage() {
                   {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </div>
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Формат на извлечението</label>
+                <select value={importForm.format} onChange={(e) => setImportForm({ ...importForm, format: e.target.value })}
+                  className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
+                  <option value="csv">CSV / Excel експорт (Банка ДСК, UniCredit, Fibank и др.)</option>
+                  <option value="mt940">MT940 SWIFT стандарт</option>
+                </select>
+              </div>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                Данни (разделени с табулация: дата, сума, описание, контрагент)
+                Данни от извлечението (поставете съдържанието на файла тук)
               </label>
               <textarea value={importForm.csvData} onChange={(e) => setImportForm({ ...importForm, csvData: e.target.value })}
-                rows={8} placeholder={"2025-01-15\t1500.00\tПлащане от клиент\tИван Иванов\n2025-01-16\t-320.50\tЗакупуване на семена\tАгрофирма ЕООД"}
+                rows={8} placeholder={importForm.format === "mt940" ? ":61:2607170717CD1250,00NTRFNONREF\n:86:/IBAN/BG12UNCR1234567890/NAME/Иван Иванов OOD\nФАКТУРА #10023" : "2026-07-15;1500.00;BGN;Иван Иванов;BG12UNCR1234567890;Плащане фактура #10023"}
                 className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 font-mono text-sm outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
             </div>
             {importResult && (
@@ -318,8 +326,18 @@ export default function BankiPage() {
                           </span>
                         </td>
                         <td className="p-3">
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${t.isReconciled === "true" ? "bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300" : "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"}`}>
-                            {t.isReconciled === "true" ? "Съгласувана" : "Чакаща"}
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                            t.matchStatus === "matched" || t.isReconciled === "true"
+                              ? "bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300"
+                              : t.matchStatus === "partial"
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
+                              : "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"
+                          }`}>
+                            {t.matchStatus === "matched" || t.isReconciled === "true"
+                              ? "✅ Засечена"
+                              : t.matchStatus === "partial"
+                              ? "🔸 Частично"
+                              : "⚠️ Незасечена"}
                           </span>
                         </td>
                         <td className="p-3">

@@ -96,7 +96,7 @@ const DEMO_APPS: Application[] = [
 ];
 
 export default function HimizaciaPage() {
-  const [activeTab, setActiveTab] = useState<"journal" | "nitrate_ctrl">("journal");
+  const [activeTab, setActiveTab] = useState<"journal" | "nitrate_ctrl" | "ai_recommend">("journal");
   const [apps, setApps] = useState<Application[]>(DEMO_APPS);
   const [products, setProducts] = useState<Product[]>(DEMO_PRODUCTS);
   const [fields, setFields] = useState<Field[]>(DEMO_FIELDS);
@@ -104,6 +104,13 @@ export default function HimizaciaPage() {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
+  const [inventoryWarning, setInventoryWarning] = useState<string | null>(null);
+
+  const [aiCrop, setAiCrop] = useState("Пшеница");
+  const [aiPest, setAiPest] = useState("Житна пиявица");
+  const [aiFieldId, setAiFieldId] = useState(DEMO_FIELDS[0].id);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResults, setAiResults] = useState<any | null>(null);
 
   const [form, setForm] = useState({ 
     fieldId: DEMO_FIELDS[0].id, 
@@ -132,6 +139,79 @@ export default function HimizaciaPage() {
   const [simField, setSimField] = useState("f-1");
   const [simFertilizer, setSimFertilizer] = useState("p-1");
   const [simDose, setSimDose] = useState(18.0);
+
+  const handleRequestAiRecommend = async () => {
+    setAiLoading(true);
+    setAiResults(null);
+    try {
+      const field = fields.find(f => f.id === aiFieldId) || fields[0] || DEMO_FIELDS[0];
+      const res = await fetch("/api/farm/chemicals/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          crop: aiCrop,
+          pestOrDisease: aiPest,
+          areaDecares: field?.sizeDa || 100,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiResults(data);
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAcceptAiRecommendation = async (rec: any) => {
+    setSaving(true);
+    try {
+      const field = fields.find(f => f.id === aiFieldId) || fields[0] || DEMO_FIELDS[0];
+      let prod = products.find(p => p.name.toLowerCase() === rec.productName.toLowerCase() || (rec.productId && p.id === rec.productId));
+      if (!prod) {
+        prod = {
+          id: rec.productId || `p-${Date.now()}`,
+          name: rec.productName,
+          productType: rec.productType || "insecticide",
+          activeSubstance: rec.activeSubstance || null
+        };
+      }
+
+      const res = await fetch("/api/farm/chemicals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          _type: "application",
+          fieldId: field.id,
+          productId: prod.id,
+          applicationDate: new Date().toISOString().split("T")[0],
+          doseAmount: rec.dosePerDa,
+          doseUnit: rec.doseUnit,
+          totalAmount: rec.totalNeeded,
+          totalUnit: rec.unitOfMeasure || "л",
+          crop: aiCrop,
+          pestTarget: aiPest,
+          applicationMethod: "AI препоръка - пръскане",
+          operatorName: "Иван Петров (AI Агроном)",
+          notes: `[AI Препоръка Борис]: ${rec.agronomistRationale}`,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.hasInventoryWarning && data.warningMessage) {
+          setInventoryWarning(data.warningMessage);
+        } else {
+          setInventoryWarning("✅ Успешно запазено в Дневника по РЗ и торене + автоматично изписване на необходимото количество от модул Склад!");
+        }
+      }
+
+      await load();
+      setActiveTab("journal");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -176,10 +256,18 @@ export default function HimizaciaPage() {
         nApplied = (Number(form.doseAmount) * nPerc) / 100;
       }
 
-      await fetch("/api/farm/chemicals", {
+      const res = await fetch("/api/farm/chemicals", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ _type: "application", ...form, fieldName: field.name, productName: prod.name }),
       });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.hasInventoryWarning && data.warningMessage) {
+          setInventoryWarning(data.warningMessage);
+        } else {
+          setInventoryWarning(null);
+        }
+      }
 
       setApps(prev => [{
         id: `app-${Date.now()}`,
@@ -268,11 +356,37 @@ export default function HimizaciaPage() {
               <ShieldAlert size={13} className={activeTab === "nitrate_ctrl" ? "text-white" : "text-rose-500"} />
               <span>Азотен Контролер (17 кг/дка НУЗ)</span>
             </button>
+            <button
+              onClick={() => setActiveTab("ai_recommend")}
+              className={cn(
+                "rounded-xl px-4 py-1.5 text-xs font-black transition flex items-center gap-1.5",
+                activeTab === "ai_recommend"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              <Sparkles size={13} className={activeTab === "ai_recommend" ? "text-white" : "text-purple-500"} />
+              <span>🤖 AI Агроном (Препоръка + Склад)</span>
+            </button>
           </div>
         </div>
       }
     >
       <div className="space-y-8">
+        {inventoryWarning && (
+          <div className="flex items-center justify-between rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-sm dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600 dark:text-amber-400" />
+              <div>
+                <p className="font-bold">Предупреждение от Склада (Наличност под нулата)</p>
+                <p className="text-sm">{inventoryWarning}</p>
+              </div>
+            </div>
+            <button onClick={() => setInventoryWarning(null)} className="rounded-lg p-1 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
         {activeTab === "journal" ? (
           <>
             {/* Banner Hero */}
@@ -494,7 +608,7 @@ export default function HimizaciaPage() {
               </div>
             </div>
           </>
-        ) : (
+        ) : activeTab === "nitrate_ctrl" ? (
           /* TAB 2: Nitrate Directive Controller 17 kg/da */
           <div className="space-y-8 animate-fadeIn">
             <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-rose-500/40 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-transparent relative overflow-hidden shadow-sm">
@@ -654,7 +768,147 @@ export default function HimizaciaPage() {
               </div>
             </div>
           </div>
-        )}
+        ) : activeTab === "ai_recommend" ? (
+          /* TAB 3: AI Agronomist Recommendation & Auto-reserve */
+          <div className="space-y-8 animate-fadeIn">
+            <div className="glass-panel-pro rounded-[32px] p-6 sm:p-8 border border-purple-500/40 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent relative overflow-hidden shadow-sm">
+              <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-3xl relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/20 border border-purple-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-purple-800 dark:text-purple-300 mb-3">
+                  <Sparkles size={14} />
+                  <span>AI Агроном Борис • Експертна Диагностика и Авто-Резервация</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Интелигентен избор на препарати (РЗ) със складова синхронизация
+                </h1>
+                <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Посочете културата, вредителя или болестта и изберете земеделски парцел. AI Агроном Борис ще препоръча точния препарат, ще изчисли дозата и ще провери наличностите в Склада за директно изписване.
+                </p>
+              </div>
+            </div>
+
+            <div className="glass-panel-pro rounded-[32px] border border-purple-500/30 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-md space-y-6">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Земеделска култура</label>
+                  <select
+                    value={aiCrop}
+                    onChange={(e) => setAiCrop(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="Пшеница">Пшеница</option>
+                    <option value="Царевица">Царевица</option>
+                    <option value="Слънчоглед">Слънчоглед</option>
+                    <option value="Ечемик">Ечемик</option>
+                    <option value="Рапица">Рапица</option>
+                    <option value="Лозя">Лозя (Трайни насаждения)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Проблем / Вредител / Болест / Плевели</label>
+                  <input
+                    value={aiPest}
+                    onChange={(e) => setAiPest(e.target.value)}
+                    placeholder="напр. Житна пиявица, Септориоза, Див овес..."
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">Земеделски парцел (Площ)</label>
+                  <select
+                    value={aiFieldId}
+                    onChange={(e) => setAiFieldId(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    {fields.map((f) => <option key={f.id} value={f.id}>{f.name} ({f.sizeDa} дка)</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleRequestAiRecommend}
+                  disabled={aiLoading || !aiPest}
+                  className="rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-3 text-xs font-black text-white shadow-md shadow-purple-500/25 hover:scale-[1.02] active:scale-[0.98] transition flex items-center gap-2 disabled:opacity-50"
+                >
+                  {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                  <span>{aiLoading ? "Анализ на патогени и наличности..." : "✨ Поискай AI препоръка от Борис (Агроном)"}</span>
+                </button>
+              </div>
+            </div>
+
+            {aiResults && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="rounded-3xl border border-purple-200 bg-purple-50/70 p-6 dark:border-purple-900 dark:bg-purple-950/40">
+                  <div className="flex items-center gap-3 mb-2 text-purple-900 dark:text-purple-200 font-black text-base">
+                    <Sparkles size={20} className="text-purple-600 dark:text-purple-400" />
+                    <span>Експертно становище на AI Агроном Борис</span>
+                  </div>
+                  <p className="text-sm text-purple-800 dark:text-purple-300 leading-relaxed">
+                    {aiResults.aiAdviceSummary}
+                  </p>
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {aiResults.recommendations?.map((rec: any, idx: number) => (
+                    <div key={idx} className="glass-panel-pro rounded-3xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col justify-between space-y-4 shadow-sm">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                              {rec.productType === 'insecticide' ? '🐛 Инсектицид' : rec.productType === 'fungicide' ? '🍄 Фунгицид' : rec.productType === 'herbicide' ? '🌿 Хербицид' : '🧪 Тор / Стимулатор'}
+                            </span>
+                            <h4 className="mt-2 text-lg font-black text-slate-900 dark:text-white">{rec.productName}</h4>
+                            <p className="text-xs font-bold text-slate-500">Активно вещество: {rec.activeSubstance}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-[10px] font-bold text-slate-400 block">Доза на дка</span>
+                            <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{rec.dosePerDa} {rec.doseUnit}</span>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl bg-slate-50 dark:bg-slate-950 p-4 border border-slate-100 dark:border-slate-800/80 space-y-2">
+                          <div className="flex justify-between text-xs font-bold">
+                            <span className="text-slate-500">Общо за масив ({aiResults.areaDecares} дка):</span>
+                            <span className="text-slate-900 dark:text-white font-black">{rec.totalNeeded} {rec.unitOfMeasure}</span>
+                          </div>
+                          <div className="flex justify-between text-xs font-bold">
+                            <span className="text-slate-500">Наличност в Склад:</span>
+                            <span className={cn("font-black", rec.hasSufficientStock ? "text-emerald-600" : "text-amber-600")}>
+                              {rec.availableStock.toFixed(2)} {rec.stockUnit}
+                            </span>
+                          </div>
+                          {!rec.hasSufficientStock && (
+                            <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                              ⚠️ Внимание: Наличността е недостатъчна. При запис ще се генерира предупреждение или отрицателно салдо.
+                            </p>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-slate-600 dark:text-slate-400 italic bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                          &ldquo;{rec.agronomistRationale}&rdquo;
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAcceptAiRecommendation(rec)}
+                        disabled={saving}
+                        className="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs py-3.5 shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2"
+                      >
+                        {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                        <span>⚡ Приеми препоръката и запази в Дневник + Авто-изписване от Склад</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
     </SitePageShell>
   );

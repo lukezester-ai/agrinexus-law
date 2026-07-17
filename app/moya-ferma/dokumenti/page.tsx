@@ -305,13 +305,24 @@ function DocCard({ doc, onDelete, onTogglePin }: { doc: Document; onDelete: (id:
         <div className="flex flex-wrap items-center gap-2">
           <DocTypeBadge type={doc.docType} />
           {doc.category && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">{doc.category}</span>}
+          {doc.tags?.includes("авто-архив") && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-500/30 px-2 py-0.5 text-xs font-black text-amber-700 dark:text-amber-300">
+              ⚡ Авто-архив
+            </span>
+          )}
         </div>
         {doc.description && <p className="line-clamp-2 text-xs text-slate-500">{doc.description}</p>}
         {doc.tags && (
           <div className="flex flex-wrap gap-1">
-            {doc.tags.split(",").map((tag) => (
-              <span key={tag.trim()} className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{tag.trim()}</span>
-            ))}
+            {doc.tags.split(/[,\s]+/).filter(Boolean).map((tag) => {
+              const clean = tag.replace(/^#/, '');
+              if (clean === "авто-архив") return null;
+              return (
+                <span key={clean} className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  #{clean}
+                </span>
+              );
+            })}
           </div>
         )}
         <div className="flex items-center justify-between pt-1 text-xs text-slate-400">

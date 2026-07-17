@@ -18,7 +18,21 @@ export async function POST(req: NextRequest) {
     const tenantId = await resolveTenantId();
     const body = await req.json();
     const { db } = getDb();
-    const [result] = await db.insert(machines).values({ tenantId, name: body.name, type: body.type, make: body.make || null, model: body.model || null, year: body.year ? String(body.year) : null, plateNumber: body.plateNumber || null, engineHours: String(body.engineHours || 0), fuelType: body.fuelType || null, status: body.status || 'active', notes: body.notes || null }).returning();
+    const [result] = await db.insert(machines).values({
+      tenantId,
+      name: body.name,
+      type: body.type,
+      make: body.make || null,
+      model: body.model || null,
+      year: body.year ? String(body.year) : null,
+      plateNumber: body.plateNumber || null,
+      engineHours: String(body.engineHours || 0),
+      fuelType: body.fuelType || null,
+      status: body.status || 'active',
+      gtpExpiryDate: body.gtpExpiryDate ? new Date(body.gtpExpiryDate) : null,
+      insuranceExpiryDate: body.insuranceExpiryDate ? new Date(body.insuranceExpiryDate) : null,
+      notes: body.notes || null,
+    }).returning();
     return NextResponse.json(result, { status: 201 });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

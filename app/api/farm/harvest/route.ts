@@ -4,6 +4,7 @@ import { harvestRecords } from '@/lib/db/schema/harvest';
 import { resolveTenantId } from '@/lib/db/tenant-context';
 import { fields } from '@/lib/db/schema/fields';
 import { createInventoryFromHarvest } from '@/lib/farm/harvest-to-inventory';
+import { autoLogCropRotationFromHarvest } from '@/lib/farm/harvest-to-rotation';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
@@ -43,6 +44,22 @@ export async function POST(req: NextRequest) {
     });
 
     await db.update(harvestRecords).set({ inventoryItemId: invItemId }).where(eq(harvestRecords.id, result.id));
+
+    // Ticket 4 (P1): Auto-log in Crop Rotation and set predecessor for next year
+    try {
+      if (body.fieldId) {
+        await autoLogCropRotationFromHarvest({
+          tenantId,
+          fieldId: body.fieldId,
+          cropId: body.cropId || null,
+          yieldAmount: Number(body.yieldAmount),
+          yieldUnit: body.yieldUnit || 'kg',
+          date: body.date ? new Date(body.date) : new Date(),
+        });
+      }
+    } catch (rotationErr) {
+      console.error('autoLogCropRotationFromHarvest error:', rotationErr);
+    }
 
     return NextResponse.json({ ...result, inventoryItemId: invItemId }, { status: 201 });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }

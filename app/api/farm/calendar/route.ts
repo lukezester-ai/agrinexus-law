@@ -50,6 +50,16 @@ export async function GET(req: NextRequest) {
           jsonb_build_object('invoice_number', pi.invoice_number, 'supplier_name', pi.supplier_name, 'total', pi.total_amount, 'status', pi.status) as metadata
         FROM purchase_invoices pi
         WHERE pi.tenant_id = ${tenantId} AND pi.due_date IS NOT NULL AND pi.due_date >= ${startStr}::timestamp AND pi.due_date <= ${endStr}::timestamp
+        UNION ALL
+        SELECT m.id, '🚜 ГТП: ' || m.name as title, m.gtp_expiry_date::text as date, 'machine_gtp' as type, 'machine' as entity_type, m.id as entity_id,
+          jsonb_build_object('machine_name', m.name, 'plate_number', m.plate_number) as metadata
+        FROM machines m
+        WHERE m.tenant_id = ${tenantId} AND m.gtp_expiry_date IS NOT NULL AND m.gtp_expiry_date >= ${startStr}::timestamp AND m.gtp_expiry_date <= ${endStr}::timestamp
+        UNION ALL
+        SELECT m.id, '🛡️ Застраховка: ' || m.name as title, m.insurance_expiry_date::text as date, 'machine_insurance' as type, 'machine' as entity_type, m.id as entity_id,
+          jsonb_build_object('machine_name', m.name, 'plate_number', m.plate_number) as metadata
+        FROM machines m
+        WHERE m.tenant_id = ${tenantId} AND m.insurance_expiry_date IS NOT NULL AND m.insurance_expiry_date >= ${startStr}::timestamp AND m.insurance_expiry_date <= ${endStr}::timestamp
       ) events
       ORDER BY date
     `);

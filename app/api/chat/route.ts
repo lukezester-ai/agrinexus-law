@@ -6,6 +6,8 @@ import { farmProfileToPromptText } from "@/lib/farm-profile-server";
 import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
 import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { getSessionUser } from "@/lib/billing/auth";
+import { resolveTenantId } from "@/lib/db/tenant-context";
+import { getFarmContextForPersona } from "@/lib/ai/farm-context";
 import {
 	assertChatAllowed,
 	buildBillingContext,
@@ -157,10 +159,15 @@ export async function POST(req: Request) {
 				? farmProfileToPromptText(resolvedFarmProfile)
 				: undefined;
 
+			// Ticket 7 (P1): Pull dynamic tenant/farm database context for specific persona
+			const tenantId = await resolveTenantId();
+			const dynamicFarmContext = await getFarmContextForPersona(tenantId, characterId as CharacterId);
+			const fullProfileText = [profileText, dynamicFarmContext].filter(Boolean).join("\n\n") || undefined;
+
 			const systemPrompt = buildSystemPrompt(
 				character,
 				combinedKnowledgeContext,
-				profileText,
+				fullProfileText,
 				formatTaxonomyForRag(),
 			);
 			model = process.env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;

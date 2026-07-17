@@ -8,6 +8,7 @@ type Machine = {
   id: string; name: string; type: string; make: string; model: string;
   year: number | null; plateNumber: string; engineHours: number;
   fuelType: string; status: string; notes: string;
+  gtpExpiryDate?: string | null; insuranceExpiryDate?: string | null;
 };
 
 type Service = {
@@ -27,7 +28,7 @@ export default function MashiniPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Machine | null>(null);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState<Machine>({ id: "", name: "", type: "Трактор", make: "", model: "", year: null, plateNumber: "", engineHours: 0, fuelType: "Дизел", status: "active", notes: "" });
+  const [form, setForm] = useState<Machine>({ id: "", name: "", type: "Трактор", make: "", model: "", year: null, plateNumber: "", engineHours: 0, fuelType: "Дизел", status: "active", notes: "", gtpExpiryDate: "", insuranceExpiryDate: "" });
 
   const [serviceMachine, setServiceMachine] = useState<Machine | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -183,6 +184,16 @@ export default function MashiniPage() {
               </select>
             </div>
             <div className="space-y-1">
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Срок за ГТП</label>
+              <input type="date" value={form.gtpExpiryDate ? form.gtpExpiryDate.split("T")[0] : ""} onChange={(e) => setForm({ ...form, gtpExpiryDate: e.target.value })}
+                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Срок за Застраховка (ГО / Каско)</label>
+              <input type="date" value={form.insuranceExpiryDate ? form.insuranceExpiryDate.split("T")[0] : ""} onChange={(e) => setForm({ ...form, insuranceExpiryDate: e.target.value })}
+                className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white" />
+            </div>
+            <div className="space-y-1">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Статус</label>
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:text-white">
@@ -222,7 +233,7 @@ export default function MashiniPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs font-bold uppercase text-slate-500 dark:bg-slate-900/50">
-                <tr><th className="p-3">Име</th><th className="p-3">Тип</th><th className="p-3">Марка/Модел</th><th className="p-3 text-right">Моточасове</th><th className="p-3">Статус</th><th className="p-3"></th></tr>
+                <tr><th className="p-3">Име</th><th className="p-3">Тип</th><th className="p-3">Марка/Модел</th><th className="p-3 text-right">Моточасове</th><th className="p-3">Срокове (ГТП / Застраховка)</th><th className="p-3">Статус</th><th className="p-3"></th></tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                 {filtered.map((m) => (
@@ -231,6 +242,22 @@ export default function MashiniPage() {
                     <td className="p-3 text-slate-600">{m.type}</td>
                     <td className="p-3 text-slate-600">{m.make} {m.model}</td>
                     <td className="p-3 text-right font-mono text-sm">{m.engineHours.toFixed(0)}</td>
+                    <td className="p-3">
+                      <div className="flex flex-col gap-1 text-xs">
+                        {m.gtpExpiryDate ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            🚜 ГТП: {new Date(m.gtpExpiryDate).toLocaleDateString("bg-BG")}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">ГТП: Няма дата</span>
+                        )}
+                        {m.insuranceExpiryDate ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                            🛡️ ГО: {new Date(m.insuranceExpiryDate).toLocaleDateString("bg-BG")}
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
                     <td className="p-3">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${m.status === "active" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300" : m.status === "repair" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300" : "bg-slate-100 text-slate-600 dark:bg-slate-800"}`}>
                         {m.status === "active" ? "Активна" : m.status === "repair" ? "Ремонт" : "Изведена"}

@@ -13,6 +13,8 @@ export const machines = pgTable('machines', {
   engineHours: numeric('engine_hours', { precision: 10, scale: 1 }).default('0'),
   fuelType: text('fuel_type'),
   status: text('status').notNull().default('active'),
+  gtpExpiryDate: timestamp('gtp_expiry_date'),
+  insuranceExpiryDate: timestamp('insurance_expiry_date'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

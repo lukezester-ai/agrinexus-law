@@ -1,10 +1,12 @@
 import { pgTable, text, uuid, timestamp, numeric, jsonb } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants';
 import { fields } from './fields';
+import { inventoryItems } from './inventory';
 
 export const chemicalProducts = pgTable('chemical_products', {
   id: uuid('id').primaryKey().defaultRandom(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  inventoryItemId: uuid('inventory_item_id').references(() => inventoryItems.id, { onDelete: 'set null' }),
   name: text('name').notNull(),
   productType: text('product_type').notNull(),
   activeSubstance: text('active_substance'),

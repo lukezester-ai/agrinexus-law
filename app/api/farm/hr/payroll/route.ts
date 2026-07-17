@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { payrollBatches, payrollItems, employees } from '@/lib/db/schema/hr';
 import { resolveTenantId } from '@/lib/db/tenant-context';
+import { autoDepositPdfToArchive } from '@/lib/documents/auto-archive';
 import { eq, desc, asc } from 'drizzle-orm';
 import { calculatePayrollItem } from '@/lib/payroll/calculator';
+import { autoPostPayrollToJournal } from '@/lib/accounting/auto-post-payroll';
 
 export async function GET() {
   try {
@@ -103,6 +105,52 @@ export async function POST(req: NextRequest) {
     }).where(eq(payrollBatches.id, batch.id));
 
     const [updated] = await db.select().from(payrollBatches).where(eq(payrollBatches.id, batch.id));
+
+    // Ticket 3 (P0): Auto-deposit generated payroll summary into Documents archive
+    try {
+      const summaryHtml = `<!DOCTYPE html><html lang="bg"><head><meta charset="utf-8"><title>Ведомост за заплати ${month}</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:8px;text-align:left}th{background:#f3f4f6}</style></head>body>
+        <h1>Разчетна ведомост за заплати — Период: ${month}</h1>
+        <p>Общо бруто: <b>${totalGross.toFixed(2)} лв.</b> | Общо нето: <b>${totalNet.toFixed(2)} лв.</b> | Разход работодател: <b>${totalEmployerCost.toFixed(2)} лв.</b></p>
+        <table>
+          <thead><tr><th>Служител</th><th>Бруто</th><th>Осигуровки</th><th>ДОД</th><th>Нето за изплащане</th></tr></thead>
+          <tbody>
+            ${items.map(i => `<tr><td>${i.employeeName}</td><td>${Number(i.gross).toFixed(2)} лв.</td><td>${Number(i.employeeInsurance).toFixed(2)} лв.</td><td>${Number(i.incomeTax).toFixed(2)} лв.</td><td><b>${Number(i.net).toFixed(2)} лв.</b></td></tr>`).join('')}
+          </tbody>
+        </table>
+      </body></html>`;
+
+      await autoDepositPdfToArchive({
+        tenantId,
+        name: `Ведомост_Заплати_${month}_${batch.id.slice(0, 8)}.html`,
+        docType: 'payroll',
+        category: 'hr',
+        linkedModule: 'hr',
+        linkedEntityId: batch.id,
+        fileBufferOrString: summaryHtml,
+        contentType: 'text/html',
+        description: `Автоматична разчетна ведомост за заплати за период ${month}`,
+        tags: '#ТРЗ #ведомост #заплати #авто-архив',
+      });
+    } catch (archiveErr) {
+      console.error('Failed to auto archive payroll batch:', archiveErr);
+    }
+
+    // Ticket 6 (P2): Auto-post double-entry journal entries (604 Разходи за заплати / 421 Персонал / 455 Осигуровки)
+    try {
+      await autoPostPayrollToJournal({
+        tenantId,
+        batchId: batch.id,
+        month,
+        totalGross,
+        totalNet,
+        totalTax,
+        totalEmployeeInsurance,
+        totalEmployerInsurance,
+        totalEmployerCost,
+      });
+    } catch (acctErr) {
+      console.error('Failed to auto post payroll journal entries:', acctErr);
+    }
 
     return NextResponse.json(updated, { status: 201 });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }

@@ -12,7 +12,20 @@ export async function PUT(req: NextRequest, { params }: any) {
     const { db } = getDb();
     const existing = await db.select().from(machines).where(and(eq(machines.id, id), eq(machines.tenantId, tenantId))).limit(1);
     if (!existing.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    await db.update(machines).set({ name: body.name, type: body.type, make: body.make, model: body.model, year: body.year ? String(body.year) : null, plateNumber: body.plateNumber, engineHours: body.engineHours !== undefined ? String(body.engineHours) : undefined, fuelType: body.fuelType, status: body.status, notes: body.notes }).where(eq(machines.id, id));
+    await db.update(machines).set({
+      name: body.name,
+      type: body.type,
+      make: body.make,
+      model: body.model,
+      year: body.year ? String(body.year) : null,
+      plateNumber: body.plateNumber,
+      engineHours: body.engineHours !== undefined ? String(body.engineHours) : undefined,
+      fuelType: body.fuelType,
+      status: body.status,
+      gtpExpiryDate: body.gtpExpiryDate !== undefined ? (body.gtpExpiryDate ? new Date(body.gtpExpiryDate) : null) : undefined,
+      insuranceExpiryDate: body.insuranceExpiryDate !== undefined ? (body.insuranceExpiryDate ? new Date(body.insuranceExpiryDate) : null) : undefined,
+      notes: body.notes,
+    }).where(eq(machines.id, id));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

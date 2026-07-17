@@ -747,7 +747,12 @@ export default function HrPage() {
             {selectedBatchId && batchItems.length > 0 && (
               <div className="border-t border-slate-200 dark:border-slate-700">
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 px-6 py-3 text-sm font-bold text-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-                  <span>Детайли за ведомостта и изчислени ставки</span>
+                  <div className="flex items-center gap-2">
+                    <span>Детайли за ведомостта и изчислени ставки</span>
+                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800" title="Автоматично създадени счетоводни статии в Главна книга по сметки 604, 605, 421 и 455">
+                      ⚖️ Авто-осчетоводена (604/421/455)
+                    </span>
+                  </div>
                   <div className="flex gap-2">
                     <button onClick={printPaySlips}
                       className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm">

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { payrollBatches, payrollItems, employees } from '@/lib/db/schema/hr';
-import { eq, asc } from 'drizzle-orm';
+import { journalHeaders } from '@/lib/db/schema/journal_entries';
+import { autoPostPayrollToJournal } from '@/lib/accounting/auto-post-payroll';
+import { eq, asc, and } from 'drizzle-orm';
 
 export async function GET(req: NextRequest, { params }: any) {
   try {
@@ -71,6 +73,32 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (body.status) updates.status = body.status;
 
     await db.update(payrollBatches).set(updates).where(eq(payrollBatches.id, id));
+
+    const [batch] = await db.select().from(payrollBatches).where(eq(payrollBatches.id, id));
+    if (batch && body.status) {
+      try {
+        await db.update(journalHeaders).set({
+          status: body.status === 'draft' ? 'draft' : 'posted',
+          updatedAt: new Date(),
+        }).where(eq(journalHeaders.documentId, id));
+
+        // If journal header didn't exist yet, auto post it right away
+        await autoPostPayrollToJournal({
+          tenantId: batch.tenantId,
+          batchId: batch.id,
+          month: batch.month,
+          totalGross: Number(batch.totalGross || 0),
+          totalNet: Number(batch.totalNet || 0),
+          totalTax: Number(batch.totalTax || 0),
+          totalEmployeeInsurance: Number(batch.totalEmployeeInsurance || 0),
+          totalEmployerInsurance: Number(batch.totalEmployerInsurance || 0),
+          totalEmployerCost: Number(batch.totalEmployerCost || 0),
+        });
+      } catch (e) {
+        console.error('Failed to sync payroll journal status:', e);
+      }
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
@@ -80,6 +108,11 @@ export async function DELETE(req: NextRequest, { params }: any) {
     const { id } = await params;
     const { db } = getDb();
     await db.delete(payrollBatches).where(eq(payrollBatches.id, id));
+    try {
+      await db.delete(journalHeaders).where(eq(journalHeaders.documentId, id));
+    } catch (e) {
+      console.error('Failed to delete linked journal header:', e);
+    }
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

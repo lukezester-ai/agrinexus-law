@@ -181,9 +181,19 @@ export default function SeitbooborotPage() {
                   return (
                     <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                       <td className="p-3 font-medium">{p.year}</td>
-                      <td className="p-3">{p.plannedCrop}</td>
+                      <td className="p-3">
+                        <div className="font-medium">{p.plannedCrop}</div>
+                        {p.notes && (
+                          <div className="mt-0.5 max-w-xs text-[11px] text-slate-500 line-clamp-2">
+                            {p.notes.includes("Автоматично") && <span className="mr-1 inline-block rounded bg-amber-100 px-1 py-0.2 font-bold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">⚡ Auto</span>}
+                            {p.notes}
+                          </div>
+                        )}
+                      </td>
                       <td className="p-3 text-slate-600">{p.cropVariety || "—"}</td>
-                      <td className="p-3 text-slate-600">{p.previousCrop || "—"}</td>
+                      <td className="p-3 text-slate-600">
+                        {p.previousCrop || "—"}
+                      </td>
                       <td className="p-3">
                         {compat === "good" ? <span className="text-emerald-600">✅</span> : compat === "bad" ? <span className="text-red-600">❌</span> : <span className="text-slate-400">—</span>}
                       </td>
