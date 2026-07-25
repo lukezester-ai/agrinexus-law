@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Shield, ShieldCheck, Smartphone, KeyRound, Loader2, QrCode, Check, Trash2 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { createOptionalClient } from "@/lib/supabase/client"
 
 type MfaState =
   | { phase: "idle"; factors: { id: string; factor_type: string; status: string }[] }
@@ -16,11 +16,11 @@ export default function TwoFactorSetup() {
   const [state, setState] = useState<MfaState>({ phase: "loading" })
   const [code, setCode] = useState("")
 
-  const supabase = createClient()
+  const supabase = createOptionalClient()
 
   const refresh = useCallback(async () => {
     setState({ phase: "loading" })
-    const { data, error } = await supabase.auth.mfa.listFactors()
+    const { data, error } = await supabase!.auth.mfa.listFactors()
     if (error) {
       setState({ phase: "error", message: error.message })
       return
@@ -32,7 +32,7 @@ export default function TwoFactorSetup() {
   useEffect(() => { refresh() }, [refresh])
 
   const handleEnroll = async () => {
-    const { data, error } = await supabase.auth.mfa.enroll({
+    const { data, error } = await supabase!.auth.mfa.enroll({
       factorType: "totp",
       issuer: "AgriNexus",
       friendlyName: "Authenticator App",
@@ -54,14 +54,14 @@ export default function TwoFactorSetup() {
     if (state.phase !== "enrolling") return
     const factorId = state.factorId
     setState({ phase: "verifying", factorId })
-    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+    const { data: challenge, error: challengeError } = await supabase!.auth.mfa.challenge({
       factorId,
     })
     if (challengeError || !challenge) {
       setState({ phase: "error", message: challengeError?.message ?? "Грешка при създаване на challenge." })
       return
     }
-    const { error: verifyError } = await supabase.auth.mfa.verify({
+    const { error: verifyError } = await supabase!.auth.mfa.verify({
       factorId,
       challengeId: challenge.id,
       code,
@@ -77,15 +77,13 @@ export default function TwoFactorSetup() {
   const handleDisable = async () => {
     if (state.phase !== "idle" || state.factors.length === 0) return
     for (const factor of state.factors) {
-      await supabase.auth.mfa.unenroll({ factorId: factor.id })
+      await supabase!.auth.mfa.unenroll({ factorId: factor.id })
     }
     setState({ phase: "success", message: "Двуфакторната автентикация е изключена." })
     setTimeout(() => refresh(), 1500)
   }
 
-  const supabaseAvailable = typeof window !== "undefined" && !!supabase
-
-  if (!supabaseAvailable) return null
+  if (typeof window === "undefined") return null
 
   if (state.phase === "loading") {
     return (

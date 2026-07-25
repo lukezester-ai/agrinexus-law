@@ -18,7 +18,7 @@ function createBrowserClientSafe(): SupabaseClient | null {
   }
 }
 
-export function createClient() {
+export function createClient(): SupabaseClient {
   const client = createBrowserClientSafe()
   if (!client) {
     throw new Error('Supabase browser client is not configured.')

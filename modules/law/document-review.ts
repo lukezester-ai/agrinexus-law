@@ -173,7 +173,7 @@ export async function analyzeAgriculturalDocument(params: {
 	});
 
 	const result = await generateText({
-		model: openai(model),
+		model: openai(model) as any,
 		prompt,
 		temperature: 0.2,
 	});

@@ -205,7 +205,7 @@ export async function hybridRetrieve(
     id: item.key,
     title: item.title,
     category: item.category ?? "",
-    type: inferDocTypeFromRetrieved(item.title + ' ' + item.content),
+    type: inferDocTypeFromRetrieved(item.title + ' ' + item.content) as "scheme" | "regulation" | "procedure" | "deadline",
     effectiveDate: item.effective_date ?? "1970-01-01",
     score: item.score,
   }));

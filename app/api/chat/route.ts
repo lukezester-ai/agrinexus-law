@@ -193,8 +193,8 @@ export async function POST(req: Request) {
 
 			const openai = createOpenAI({ apiKey });
 			
-			const result = streamText({
-				model: openai(model),
+			const result = await streamText({
+				model: openai(model) as any,
 				messages: [
 					{ role: "system", content: systemPrompt },
 					...normalized,

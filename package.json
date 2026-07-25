@@ -41,7 +41,7 @@
     "db:seed": "npx tsx lib/db/seed.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.64",
+    "@ai-sdk/openai": "^1.0.0",
     "@aws-sdk/client-s3": "^3.1053.0",
     "@capacitor/android": "^8.3.3",
     "@capacitor/cli": "^8.3.3",
