@@ -226,14 +226,12 @@ export async function POST(req: Request) {
 		}
 		const hint =
 			msg.includes("model") || msg.includes("404")
-				? " Проверете OPENAI_MODEL в `.env.local` (напр. gpt-4o-mini)."
+				? " Проверете дали OPENAI_MODEL е зададен коректно в .env."
 				: msg.includes("401") || msg.toLowerCase().includes("authentication")
-					? " Проверете дали OPENAI_API_KEY е валиден (не примерен) и рестартирайте `npm run dev`."
-				: msg.includes("401")
-					? " Невалиден API ключ."
+				? " Проверете дали OPENAI_API_KEY е валиден и има достатъчно кредити."
 				: msg.includes("429")
-					? " Прекалено много заявки към AI."
-				: "";
+				? " Достигнат е лимитът за заявки (Rate Limit). Опитайте отново по-късно."
+				: " Възникна неочаквана грешка при комуникацията с AI модела.";
 		return Response.json({ error: `Възникна грешка при AI заявката.${hint}` }, { status: 502 });
 	}
 }
