@@ -240,32 +240,11 @@ function inferDocTypeFromRetrieved(text: string): string {
  * Структурата е същата като в досегашния `getKnowledgeContext`,
  * за да остане съвместимост в чата.
  */
-export function formatRetrievedContext(items: RetrievedItem[]): string {
-  if (!items.length) return "";
-  const typeLabel: Record<string, string> = {
-    scheme: "схема/субсидия",
-    regulation: "наредба/закон",
-    procedure: "процедура",
-    deadline: "срок",
-  };
-  return items
-    .map((item, i) => {
-      const docType = inferDocTypeFromRetrieved(item.title + ' ' + item.content);
-      const meta: string[] = [
-        `Тип: ${typeLabel[docType] ?? docType}`,
-        `Произход: ${item.source_type ?? "kb"}`,
-      ];
-      if (item.category) meta.push(`Категория: ${item.category}`);
-      if (item.source_name) meta.push(`Източник: ${item.source_name}`);
-      if (item.effective_date) meta.push(`В сила от: ${item.effective_date}`);
-      if (item.similarity !== undefined) {
-        meta.push(`Сходство: ${item.similarity.toFixed(2)}`);
-      }
-      return `[#${i + 1}] === ${item.title} ===
-${meta.join(" | ")}
-
-${item.content.trim()}`;
-    })
+export function formatRetrievedContext(docs: any[]): string {
+  if (!docs || docs.length === 0) return "Няма намерени релевантни документи.";
+  
+  return docs
+    .map((d, i) => `[Документ ${i + 1}]: ${d.content || d.text}`)
     .join("\n\n---\n\n");
 }
 
