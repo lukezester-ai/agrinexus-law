@@ -87,7 +87,7 @@ export async function getMcpRagContext(query: string): Promise<{
   context: string;
   items: number;
 }> {
-  const text = await callMcpTool("get_rag_context", { query });
+  const text = await callMcpTool("agrinexus_get_rag_context", { query });
   return {
     context: text,
     items: text ? text.split("---").length : 0,
@@ -95,5 +95,5 @@ export async function getMcpRagContext(query: string): Promise<{
 }
 
 export async function searchMcpDocuments(query: string, limit = 10): Promise<string> {
-  return callMcpTool("search_documents", { query, limit });
+  return callMcpTool("agrinexus_search_documents", { query, limit });
 }
