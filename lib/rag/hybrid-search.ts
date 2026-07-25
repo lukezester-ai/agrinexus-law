@@ -205,7 +205,7 @@ export async function hybridRetrieve(
     id: item.key,
     title: item.title,
     category: item.category ?? "",
-    type: inferDocTypeFromRetrieved(item),
+    type: inferDocTypeFromRetrieved(item.title + ' ' + item.content),
     effectiveDate: item.effective_date ?? "1970-01-01",
     score: item.score,
   }));
@@ -227,13 +227,11 @@ export async function hybridRetrieve(
   return resultList;
 }
 
-function inferDocTypeFromRetrieved(
-  item: RetrievedItem,
-): "scheme" | "regulation" | "procedure" | "deadline" {
-  const hay = `${item.title} ${item.content}`.toLowerCase();
-  if (/срок|краен/i.test(hay)) return "deadline";
-  if (/процедур|заявлен|исак/i.test(hay)) return "procedure";
-  if (/схем|субсид|плащан|бисс/i.test(hay)) return "scheme";
+function inferDocTypeFromRetrieved(text: string): string {
+  const hay = text.toLowerCase();
+  if (/срок|краен|дата|година/i.test(hay)) return "deadline";
+  if (/процедур|заявлен|исак|документ/i.test(hay)) return "procedure";
+  if (/схем|субсид|плащан|бисс|финанс/i.test(hay)) return "scheme";
   return "regulation";
 }
 
@@ -252,7 +250,7 @@ export function formatRetrievedContext(items: RetrievedItem[]): string {
   };
   return items
     .map((item, i) => {
-      const docType = inferDocTypeFromRetrieved(item);
+      const docType = inferDocTypeFromRetrieved(item.title + ' ' + item.content);
       const meta: string[] = [
         `Тип: ${typeLabel[docType] ?? docType}`,
         `Произход: ${item.source_type ?? "kb"}`,
