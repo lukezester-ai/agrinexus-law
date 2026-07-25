@@ -39,6 +39,8 @@ if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
+const ALLOW_SESSION_MCP_SERVERS = process.env.ALLOW_SESSION_MCP_SERVERS === "1";
+
 const server = new Server(
   { name: "agrinexus-docs-mcp", version: "1.0.0" },
   { capabilities: { tools: {} } },

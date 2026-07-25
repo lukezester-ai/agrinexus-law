@@ -19,6 +19,12 @@ if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
+const ALLOW_SESSION_MCP_SERVERS = process.env.ALLOW_SESSION_MCP_SERVERS === "1";
+
+if (!ALLOW_SESSION_MCP_SERVERS) {
+  console.warn("[MCP] session-level server injection is DISABLED. Set ALLOW_SESSION_MCP_SERVERS=1 to enable.");
+}
+
 let server: Server | null = null;
 let transport: WebStandardStreamableHTTPServerTransport | null = null;
 let connecting = false;

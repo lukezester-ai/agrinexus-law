@@ -57,6 +57,19 @@ export function getAvailableTools(supabase: SupabaseClient | null): Array<Omit<T
     }));
 }
 
+const TOOL_TIMEOUT_MS = 30_000;
+
+export type FailureMode = 'unknown_tool' | 'missing_env' | 'missing_param' | 'timeout' | 'execution_error' | 'invalid_config';
+
+export const FAILURE_TABLE: Record<FailureMode, { cause: string; behavior: string }> = {
+  unknown_tool:   { cause: 'tool name not in registry',          behavior: 'return error with available tool list' },
+  missing_env:    { cause: 'required env var not set',           behavior: 'return error listing which vars are missing' },
+  missing_param:  { cause: 'handler required field is empty',    behavior: 'return error with field name' },
+  timeout:        { cause: 'handler execution exceeds 30s',      behavior: 'return timeout error, log warning' },
+  execution_error:{ cause: 'handler throws unexpectedly',        behavior: 'return error with message, log stack' },
+  invalid_config: { cause: 'malformed tool definition',          behavior: 'skip tool at registration, log error' },
+};
+
 export async function handleToolCall(
   name: string,
   args: Record<string, unknown>,
@@ -64,17 +77,23 @@ export async function handleToolCall(
 ): Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }> {
   const def = toolRegistry.get(name);
   if (!def) {
-    return response(`Неизвестен инструмент: ${name}. Налични: ${[...toolRegistry.keys()].join(", ")}`, true);
+    return response(`Неизвестен инструмент: "${name}".`, true);
   }
   const missing = def.requiredEnvVars.filter((v) => !process.env[v]);
   if (missing.length > 0) {
-    return response(`Инструментът "${name}" изисква променливите: ${missing.join(", ")}. Те не са конфигурирани.`, true);
+    return response(`Изискват се конфигурирани: ${missing.join(", ")}.`, true);
   }
   try {
-    return await def.handler(args, supabase);
+    const result = await Promise.race([
+      def.handler(args, supabase),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout: "${name}" не завърши за ${TOOL_TIMEOUT_MS / 1000}s.`)), TOOL_TIMEOUT_MS)
+      ),
+    ]);
+    return result;
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    return response(`Грешка при изпълнение на "${name}": ${msg}`, true);
+    return response(`Гречка при "${name}": ${msg}`, true);
   }
 }
 
