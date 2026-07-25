@@ -186,8 +186,9 @@ register({
       .select("institution, category")
       .eq("status", "active");
     if (error) return response(`Грешка: ${error.message}`, true);
+    const rows = (data || []) as Array<{ institution: string | null; category: string | null }>;
     const counts = new Map<string, Map<string, number>>();
-    for (const row of data || []) {
+    for (const row of rows) {
       const inst = row.institution || "Други";
       const cat = row.category || "Други";
       if (!counts.has(inst)) counts.set(inst, new Map());
