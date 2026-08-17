@@ -11,7 +11,7 @@ const compat = new FlatCompat({
 
 /** Legacy „next/core-web-vitals“ през FlatCompat — реална поддръжка на ESLint 9. */
 const eslintConfig = [
-  { ignores: ["scripts/**/*.mjs", ".next/**", "node_modules/**", "dist/**", "android/**", "ios/**"] },
+  { ignores: ["scripts/**/*.mjs", ".next/**", "node_modules/**", "dist/**", "android/**", "ios/**", "**/dist/**", "**/build/**", "**/.next/**", "**/magicpath-project*/**", "**/magicpath-project/**"] },
   ...compat.extends("next/core-web-vitals"),
 ];
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { reminders } from '@/lib/db/schema/reminders';
 import { resolveTenantId } from '@/lib/db/tenant-context';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET() {
   try {
@@ -33,11 +33,12 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const tenantId = await resolveTenantId();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const { db } = getDb();
-    await db.delete(reminders).where(eq(reminders.id, id));
+    await db.delete(reminders).where(and(eq(reminders.id, id), eq(reminders.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

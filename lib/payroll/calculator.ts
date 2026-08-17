@@ -1,3 +1,11 @@
+// Актуални законови стойности (от 01.08.2026):
+// - Максимален месечен осигурителен доход: 2300 EUR (= 4498 лв. по 1.95583)
+// - Минимална работна заплата: 620.20 EUR (= 1213 лв.)
+// Могат да бъдат презаписани чрез env за годишни актуализации.
+const DEFAULT_MAX_INSURANCE_BASE_BGN = Number(process.env.PAYROLL_MAX_INSURANCE_BASE_BGN ?? 4498);
+const DEFAULT_MIN_WAGE_BGN = Number(process.env.PAYROLL_MIN_WAGE_BGN ?? 1213);
+const EUR_RATE = 1.95583;
+
 export function calculatePayrollItem(params: {
   baseSalary: number;
   workingDays: number;
@@ -6,7 +14,7 @@ export function calculatePayrollItem(params: {
   maxInsuranceBase?: number;
   contractType?: string; // 'full_time' | 'part_time' | 'civil' | 'seasonal_114a'
 }) {
-  const maxBase = params.maxInsuranceBase ?? 3750.00; // Максимален осигурителен праг
+  const maxBase = params.maxInsuranceBase ?? DEFAULT_MAX_INSURANCE_BASE_BGN;
   const bonus = params.bonus ?? 0;
   const ratio = params.workingDays > 0 ? Math.min(1, params.workedDays / params.workingDays) : 1;
   const gross = Math.round(((params.baseSalary * ratio) + bonus) * 100) / 100;
@@ -26,9 +34,9 @@ export function calculatePayrollItem(params: {
     const net = Math.round((gross - employeeInsurance) * 100) / 100;
     const employerCost = Math.round((gross + employerInsurance) * 100) / 100;
 
-    const grossEur = Math.round((gross / 1.95583) * 100) / 100;
-    const netEur = Math.round((net / 1.95583) * 100) / 100;
-    const employerCostEur = Math.round((employerCost / 1.95583) * 100) / 100;
+    const grossEur = Math.round((gross / EUR_RATE) * 100) / 100;
+    const netEur = Math.round((net / EUR_RATE) * 100) / 100;
+    const employerCostEur = Math.round((employerCost / EUR_RATE) * 100) / 100;
 
     return {
       gross,
@@ -74,14 +82,14 @@ export function calculatePayrollItem(params: {
   const net = Math.round((gross - employeeInsurance - incomeTax) * 100) / 100;
   const employerCost = Math.round((gross + employerInsurance) * 100) / 100;
 
-  const minWage = 1077.00; // Минимална работна заплата 2025/2026 (550.66 €)
+  const minWage = DEFAULT_MIN_WAGE_BGN;
   const hasWarning = params.baseSalary < minWage && params.contractType !== 'part_time' && params.contractType !== 'civil';
-  const warning = hasWarning ? `Основната заплата е под минималната за страната (${minWage.toFixed(2)} лв. / 550.66 €)` : '';
+  const warning = hasWarning ? `Основната заплата е под минималната за страната (${minWage.toFixed(2)} лв. / ${(minWage / EUR_RATE).toFixed(2)} €)` : '';
 
   // Преизчисляване в Евро (€) по фиксирания курс на БНБ 1 EUR = 1.95583 BGN
-  const grossEur = Math.round((gross / 1.95583) * 100) / 100;
-  const netEur = Math.round((net / 1.95583) * 100) / 100;
-  const employerCostEur = Math.round((employerCost / 1.95583) * 100) / 100;
+  const grossEur = Math.round((gross / EUR_RATE) * 100) / 100;
+  const netEur = Math.round((net / EUR_RATE) * 100) / 100;
+  const employerCostEur = Math.round((employerCost / EUR_RATE) * 100) / 100;
 
   return {
     gross,

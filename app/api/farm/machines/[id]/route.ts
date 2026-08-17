@@ -32,18 +32,20 @@ export async function PUT(req: NextRequest, { params }: any) {
 
 export async function DELETE(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    await db.delete(machines).where(eq(machines.id, id));
+    await db.delete(machines).where(and(eq(machines.id, id), eq(machines.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
 
 export async function GET(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    const [machine] = await db.select().from(machines).where(eq(machines.id, id)).limit(1);
+    const [machine] = await db.select().from(machines).where(and(eq(machines.id, id), eq(machines.tenantId, tenantId))).limit(1);
     if (!machine) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     const services = await db.select().from(machineServices).where(eq(machineServices.machineId, id)).orderBy(desc(machineServices.date));
     return NextResponse.json({ ...machine, engineHours: Number(machine.engineHours), services });

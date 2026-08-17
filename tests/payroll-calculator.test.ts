@@ -18,15 +18,15 @@ describe("calculatePayrollItem", () => {
     expect(result.hasWarning).toBe("false");
   });
 
-  it("прилага максималния осигурителен праг от 10666 BGN", () => {
+  it("прилага максималния осигурителен праг от 4498 BGN (2300 €, от 08.2026)", () => {
     const result = calculatePayrollItem({
       baseSalary: 15000,
       workingDays: 22,
       workedDays: 22,
     });
 
-    expect(result.insuranceBase).toBe(10666);
-    expect(result.employeeInsurance).toBeCloseTo(1469.77, 1);
+    expect(result.insuranceBase).toBe(4498);
+    expect(result.employeeInsurance).toBeCloseTo(619.83, 1);
   });
 
   it("включва бонус в бруто заплатата", () => {
@@ -41,7 +41,7 @@ describe("calculatePayrollItem", () => {
     expect(result.net).toBeGreaterThan(1551);
   });
 
-  it("предупреждава при заплата под минималната (1077 BGN)", () => {
+  it("предупреждава при заплата под минималната (1213 BGN)", () => {
     const result = calculatePayrollItem({
       baseSalary: 800,
       workingDays: 22,
@@ -49,7 +49,7 @@ describe("calculatePayrollItem", () => {
     });
 
     expect(result.hasWarning).toBe("true");
-    expect(result.warning).toContain("1077");
+    expect(result.warning).toContain("1213");
   });
 
   it("смята 0 данък при 0 осигурителна основа", () => {

@@ -3,7 +3,7 @@ import { getDb } from '@/lib/db/db';
 import { machines } from '@/lib/db/schema/machines';
 import { fixedAssets } from '@/lib/db/schema/fixed_assets';
 import { reminders } from '@/lib/db/schema/reminders';
-import { resolveTenantId } from '@/lib/db/tenant-context';
+import { resolveTenantIdForCron } from '@/lib/db/tenant-context';
 import { eq, and } from 'drizzle-orm';
 
 /**
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
 async function runAutoRemindersScan(req: NextRequest) {
   try {
-    const tenantId = await resolveTenantId();
+    const tenantId = await resolveTenantIdForCron();
     const { db } = getDb();
 
     // Threshold in days (configurable via query param ?threshold=14)

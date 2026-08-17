@@ -4,12 +4,14 @@ import { payrollBatches, payrollItems, employees } from '@/lib/db/schema/hr';
 import { journalHeaders } from '@/lib/db/schema/journal_entries';
 import { autoPostPayrollToJournal } from '@/lib/accounting/auto-post-payroll';
 import { eq, asc, and } from 'drizzle-orm';
+import { resolveTenantId } from '@/lib/db/tenant-context';
 
 export async function GET(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    const [batch] = await db.select().from(payrollBatches).where(eq(payrollBatches.id, id));
+    const [batch] = await db.select().from(payrollBatches).where(and(eq(payrollBatches.id, id), eq(payrollBatches.tenantId, tenantId)));
     if (!batch) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const items = await db.select({
@@ -34,7 +36,7 @@ export async function GET(req: NextRequest, { params }: any) {
       createdAt: payrollItems.createdAt,
     })
     .from(payrollItems)
-    .where(eq(payrollItems.batchId, id))
+    .where(and(eq(payrollItems.batchId, id), eq(payrollItems.tenantId, tenantId)))
     .orderBy(asc(payrollItems.employeeName));
 
     return NextResponse.json({
@@ -65,6 +67,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
 export async function PUT(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const body = await req.json();
     const { db } = getDb();
@@ -72,9 +75,9 @@ export async function PUT(req: NextRequest, { params }: any) {
     const updates: any = {};
     if (body.status) updates.status = body.status;
 
-    await db.update(payrollBatches).set(updates).where(eq(payrollBatches.id, id));
+    await db.update(payrollBatches).set(updates).where(and(eq(payrollBatches.id, id), eq(payrollBatches.tenantId, tenantId)));
 
-    const [batch] = await db.select().from(payrollBatches).where(eq(payrollBatches.id, id));
+    const [batch] = await db.select().from(payrollBatches).where(and(eq(payrollBatches.id, id), eq(payrollBatches.tenantId, tenantId)));
     if (batch && body.status) {
       try {
         await db.update(journalHeaders).set({
@@ -105,9 +108,10 @@ export async function PUT(req: NextRequest, { params }: any) {
 
 export async function DELETE(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    await db.delete(payrollBatches).where(eq(payrollBatches.id, id));
+    await db.delete(payrollBatches).where(and(eq(payrollBatches.id, id), eq(payrollBatches.tenantId, tenantId)));
     try {
       await db.delete(journalHeaders).where(eq(journalHeaders.documentId, id));
     } catch (e) {

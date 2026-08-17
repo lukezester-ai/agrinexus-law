@@ -78,7 +78,7 @@ export function PwaOnboarding() {
       window.removeEventListener("agrinexus:pwa-installable", handleInstallable);
       window.removeEventListener("agrinexus:pwa-installed", handleInstalled);
     };
-  }, []);
+  }, [pathname]);
 
   const handleNativeInstallClick = async () => {
     if (!window.__deferredPwaPrompt) return;

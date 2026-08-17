@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { bankTransactions } from '@/lib/db/schema/banking';
-import { eq } from 'drizzle-orm';
+import { resolveTenantId } from '@/lib/db/tenant-context';
+import { eq, and } from 'drizzle-orm';
 
 export async function PUT(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const body = await req.json();
     const { db } = getDb();
@@ -18,16 +20,17 @@ export async function PUT(req: NextRequest, { params }: any) {
       counterpartyIban: body.counterpartyIban,
       isReconciled: body.isReconciled,
       matchStatus: body.matchStatus,
-    }).where(eq(bankTransactions.id, id));
+    }).where(and(eq(bankTransactions.id, id), eq(bankTransactions.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    await db.delete(bankTransactions).where(eq(bankTransactions.id, id));
+    await db.delete(bankTransactions).where(and(eq(bankTransactions.id, id), eq(bankTransactions.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

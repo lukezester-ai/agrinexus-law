@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { employees } from '@/lib/db/schema/hr';
-import { eq } from 'drizzle-orm';
+import { resolveTenantId } from '@/lib/db/tenant-context';
+import { eq, and } from 'drizzle-orm';
 
 export async function PUT(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const body = await req.json();
     const { db } = getDb();
@@ -21,16 +23,17 @@ export async function PUT(req: NextRequest, { params }: any) {
       startDate: body.startDate,
       endDate: body.endDate,
       isActive: body.isActive,
-    }).where(eq(employees.id, id));
+    }).where(and(eq(employees.id, id), eq(employees.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    await db.delete(employees).where(eq(employees.id, id));
+    await db.delete(employees).where(and(eq(employees.id, id), eq(employees.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

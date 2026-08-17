@@ -6,9 +6,10 @@ import { eq, and } from 'drizzle-orm';
 
 export async function GET(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    const [asset] = await db.select().from(fixedAssets).where(eq(fixedAssets.id, id)).limit(1);
+    const [asset] = await db.select().from(fixedAssets).where(and(eq(fixedAssets.id, id), eq(fixedAssets.tenantId, tenantId))).limit(1);
     if (!asset) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({
       ...asset,
@@ -51,9 +52,10 @@ export async function PUT(req: NextRequest, { params }: any) {
 
 export async function DELETE(req: NextRequest, { params }: any) {
   try {
+    const tenantId = await resolveTenantId();
     const { id } = await params;
     const { db } = getDb();
-    await db.delete(fixedAssets).where(eq(fixedAssets.id, id));
+    await db.delete(fixedAssets).where(and(eq(fixedAssets.id, id), eq(fixedAssets.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

@@ -6,7 +6,7 @@ import { farmProfileToPromptText } from "@/lib/farm-profile-server";
 import { resolveFarmProfileForChat } from "@/lib/farm-profile-resolve";
 import { chatRateLimit, checkRateLimit, extractClientIp } from "@/lib/utils/rate-limit";
 import { getSessionUser } from "@/lib/billing/auth";
-import { resolveTenantId } from "@/lib/db/tenant-context";
+import { resolveTenantIdOrNull } from "@/lib/db/tenant-context";
 import { getFarmContextForPersona } from "@/lib/ai/farm-context";
 import {
 	assertChatAllowed,
@@ -160,8 +160,10 @@ export async function POST(req: Request) {
 				: undefined;
 
 			// Ticket 7 (P1): Pull dynamic tenant/farm database context for specific persona
-			const tenantId = await resolveTenantId();
-			const dynamicFarmContext = await getFarmContextForPersona(tenantId, characterId as CharacterId);
+			const tenantId = await resolveTenantIdOrNull();
+			const dynamicFarmContext = tenantId
+				? await getFarmContextForPersona(tenantId, characterId as CharacterId)
+				: "";
 			const fullProfileText = [profileText, dynamicFarmContext].filter(Boolean).join("\n\n") || undefined;
 
 			const systemPrompt = buildSystemPrompt(

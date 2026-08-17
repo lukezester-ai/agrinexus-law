@@ -54,12 +54,13 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    const tenantId = await resolveTenantId();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     const status = searchParams.get('status');
     if (!id || !status) return NextResponse.json({ error: 'id and status are required' }, { status: 400 });
     const { db } = getDb();
-    await db.update(leaveRequests).set({ status }).where(eq(leaveRequests.id, id));
+    await db.update(leaveRequests).set({ status }).where(and(eq(leaveRequests.id, id), eq(leaveRequests.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

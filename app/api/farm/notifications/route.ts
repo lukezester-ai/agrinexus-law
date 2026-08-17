@@ -42,7 +42,7 @@ export async function PUT(req: NextRequest) {
     if (body.all) {
       await db.update(notifications).set({ isRead: 'true' }).where(and(eq(notifications.tenantId, tenantId), eq(notifications.isRead, 'false')));
     } else if (body.id) {
-      await db.update(notifications).set({ isRead: 'true' }).where(eq(notifications.id, body.id));
+      await db.update(notifications).set({ isRead: 'true' }).where(and(eq(notifications.id, body.id), eq(notifications.tenantId, tenantId)));
     }
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }

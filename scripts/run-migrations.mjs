@@ -17,7 +17,7 @@ for (const port of ['6543', '5432']) {
   try {
     await sql`SELECT 1`;
     console.log('Connected on port', port);
-    const migrations = ['0009_documents.sql','0010_subsidies.sql','0011_contracts.sql','0012_insurance.sql'];
+    const migrations = ['0009_documents.sql','0010_subsidies.sql','0011_contracts.sql','0012_insurance.sql','0013_users_email_unique.sql'];
     for (const m of migrations) {
       const fp = resolve(__dirname, '..', 'drizzle', 'migrations', m);
       if (!existsSync(fp)) { console.log('SKIP', m); continue; }

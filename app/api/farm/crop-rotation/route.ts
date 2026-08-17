@@ -51,11 +51,12 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const tenantId = await resolveTenantId();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const { db } = getDb();
-    await db.delete(cropRotationPlans).where(eq(cropRotationPlans.id, id));
+    await db.delete(cropRotationPlans).where(and(eq(cropRotationPlans.id, id), eq(cropRotationPlans.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

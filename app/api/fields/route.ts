@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { fields } from '@/lib/db/schema/fields';
 import { resolveTenantId } from '@/lib/db/tenant-context';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET() {
   try {
@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest) {
       geometry: data.geometry,
       centroid: data.centroid,
       notes: data.notes,
-    }).where(eq(fields.id, id));
+    }).where(and(eq(fields.id, id), eq(fields.tenantId, tenantId)));
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
@@ -89,7 +89,7 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 });
     const { db } = getDb();
-    await db.delete(fields).where(eq(fields.id, id));
+    await db.delete(fields).where(and(eq(fields.id, id), eq(fields.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

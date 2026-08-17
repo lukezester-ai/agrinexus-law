@@ -34,24 +34,26 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    const tenantId = await resolveTenantId();
     const body = await req.json();
     const { db } = getDb();
     await db.update(inventoryItems).set({
       name: body.name, sku: body.sku, unitOfMeasure: body.unitOfMeasure, category: body.category,
       minStock: body.minStock !== undefined ? String(body.minStock) : null,
       currentStock: String(body.currentStock ?? 0),
-    }).where(eq(inventoryItems.id, body.id));
+    }).where(and(eq(inventoryItems.id, body.id), eq(inventoryItems.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
+    const tenantId = await resolveTenantId();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const { db } = getDb();
-    await db.delete(inventoryItems).where(eq(inventoryItems.id, id));
+    await db.delete(inventoryItems).where(and(eq(inventoryItems.id, id), eq(inventoryItems.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }

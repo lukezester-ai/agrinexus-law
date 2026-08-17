@@ -107,11 +107,12 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const tenantId = await resolveTenantId();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const { db } = getDb();
-    await db.delete(chemicalApplications).where(eq(chemicalApplications.id, id));
+    await db.delete(chemicalApplications).where(and(eq(chemicalApplications.id, id), eq(chemicalApplications.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
   } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
 }
