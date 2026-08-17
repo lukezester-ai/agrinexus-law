@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { subsidyApplications, subsidySchemes } from '@/lib/db/schema/subsidies';
@@ -20,7 +21,7 @@ export async function GET() {
       .orderBy(desc(subsidyApplications.season), desc(subsidyApplications.createdAt));
     return NextResponse.json(result);
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }
 
@@ -63,6 +64,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

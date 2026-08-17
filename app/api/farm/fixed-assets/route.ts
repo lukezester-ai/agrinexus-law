@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { fixedAssets } from '@/lib/db/schema/fixed_assets';
@@ -17,7 +18,7 @@ export async function GET() {
       accumulatedAmortization: Number(a.accumulatedAmortization),
       bookValue: a.bookValue ? Number(a.bookValue) : 0,
     })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -43,5 +44,5 @@ export async function POST(req: NextRequest) {
       notes: body.notes || null,
     }).returning();
     return NextResponse.json({ ...result, acquisitionCost: Number(result.acquisitionCost), salvageValue: Number(result.salvageValue), bookValue: Number(result.bookValue) }, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

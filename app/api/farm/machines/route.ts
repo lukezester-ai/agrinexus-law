@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { machines } from '@/lib/db/schema/machines';
@@ -10,7 +11,7 @@ export async function GET() {
     const { db } = getDb();
     const result = await db.select().from(machines).where(eq(machines.tenantId, tenantId)).orderBy(desc(machines.createdAt));
     return NextResponse.json(result.map((m: any) => ({ ...m, engineHours: Number(m.engineHours), year: m.year ? Number(m.year) : null })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -34,5 +35,5 @@ export async function POST(req: NextRequest) {
       notes: body.notes || null,
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

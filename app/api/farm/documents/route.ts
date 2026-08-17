@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { documents } from '@/lib/db/schema/documents';
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(documents.isPinned), desc(documents.createdAt));
     return NextResponse.json(result);
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }
 
@@ -74,6 +75,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(doc, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

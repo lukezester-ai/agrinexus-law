@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { vatJournals, tenants } from '@/lib/db/schema';
-import { resolveTenantId } from '@/lib/db/tenant-context';
+import { resolveTenantId, TenantAuthError } from '@/lib/db/tenant-context';
 import { eq, and, sql } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
@@ -105,6 +105,12 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err: any) {
+    if (err instanceof TenantAuthError) {
+      return new Response('<Error>Unauthorized</Error>', {
+        status: 401,
+        headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+      });
+    }
     const escXml = (s: any) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
     return new Response(`<Error>${escXml(err.message)}</Error>`, {
       status: 500,

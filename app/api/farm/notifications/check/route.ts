@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { resolveTenantId } from '@/lib/db/tenant-context';
@@ -99,5 +100,5 @@ export async function GET() {
     }
 
     return NextResponse.json({ notificationsCreated: created });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

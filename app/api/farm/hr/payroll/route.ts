@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { payrollBatches, payrollItems, employees } from '@/lib/db/schema/hr';
@@ -23,7 +24,7 @@ export async function GET() {
       totalNet: Number(r.totalNet),
       totalEmployerCost: Number(r.totalEmployerCost),
     })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -153,5 +154,5 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(updated, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

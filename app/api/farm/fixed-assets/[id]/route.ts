@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { fixedAssets } from '@/lib/db/schema/fixed_assets';
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest, { params }: any) {
       accumulatedAmortization: Number(asset.accumulatedAmortization),
       bookValue: Number(asset.bookValue),
     });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function PUT(req: NextRequest, { params }: any) {
@@ -47,7 +48,7 @@ export async function PUT(req: NextRequest, { params }: any) {
       bookValue: String(bookValue),
     }).where(eq(fixedAssets.id, id));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -57,5 +58,5 @@ export async function DELETE(req: NextRequest, { params }: any) {
     const { db } = getDb();
     await db.delete(fixedAssets).where(and(eq(fixedAssets.id, id), eq(fixedAssets.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

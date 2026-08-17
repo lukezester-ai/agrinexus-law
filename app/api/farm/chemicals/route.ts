@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { chemicalProducts, chemicalApplications } from '@/lib/db/schema/chemical_diary';
@@ -21,7 +22,7 @@ export async function GET() {
       `),
     ]);
     return NextResponse.json({ products: allProducts, applications: (allApps as any).rows.map((r: any) => ({ ...r, doseAmount: Number(r.dose_amount), totalAmount: Number(r.total_amount) })) });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: '_type required: product or application' }, { status: 400 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -114,5 +115,5 @@ export async function DELETE(req: NextRequest) {
     const { db } = getDb();
     await db.delete(chemicalApplications).where(and(eq(chemicalApplications.id, id), eq(chemicalApplications.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

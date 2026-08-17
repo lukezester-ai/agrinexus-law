@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { cropRotationPlans } from '@/lib/db/schema/crop_rotation';
@@ -19,7 +20,7 @@ export async function GET() {
     const { db } = getDb();
     const result = await db.select().from(cropRotationPlans).where(eq(cropRotationPlans.tenantId, tenantId)).orderBy(desc(cropRotationPlans.year), desc(cropRotationPlans.createdAt));
     return NextResponse.json(result);
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
       status: body.status || 'planned', notes: body.notes || null,
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function PUT(req: NextRequest) {
@@ -46,7 +47,7 @@ export async function PUT(req: NextRequest) {
       status: body.status, notes: body.notes,
     }).where(and(eq(cropRotationPlans.id, body.id), eq(cropRotationPlans.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -58,5 +59,5 @@ export async function DELETE(req: NextRequest) {
     const { db } = getDb();
     await db.delete(cropRotationPlans).where(and(eq(cropRotationPlans.id, id), eq(cropRotationPlans.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

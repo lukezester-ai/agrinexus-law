@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { bankTransactions, bankAccounts } from '@/lib/db/schema/banking';
@@ -65,6 +66,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ summary, transactions: inserted }, { status: 201 });
   } catch (err: any) {
     console.error('Bank import error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

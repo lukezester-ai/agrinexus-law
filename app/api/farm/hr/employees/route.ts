@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { employees } from '@/lib/db/schema/hr';
@@ -12,7 +13,7 @@ export async function GET() {
       .where(eq(employees.tenantId, tenantId))
       .orderBy(asc(employees.lastName), asc(employees.firstName));
     return NextResponse.json(rows.map((r: any) => ({ ...r, salary: r.salary ? Number(r.salary) : null })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -36,5 +37,5 @@ export async function POST(req: NextRequest) {
       isActive: body.isActive ?? 'true',
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

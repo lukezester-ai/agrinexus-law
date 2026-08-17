@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { bankTransactions, bankAccounts } from '@/lib/db/schema/banking';
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
       .where(and(...conditions))
       .orderBy(desc(bankTransactions.date));
     return NextResponse.json(rows.map((r: any) => ({ ...r, amount: Number(r.amount) })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -56,5 +57,5 @@ export async function POST(req: NextRequest) {
       transactionId: body.transactionId || null,
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

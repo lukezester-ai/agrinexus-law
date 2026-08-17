@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { machines } from '@/lib/db/schema/machines';
@@ -119,6 +120,6 @@ async function runAutoRemindersScan(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('Auto reminders scan error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { bankTransactions } from '@/lib/db/schema/banking';
@@ -22,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: any) {
       matchStatus: body.matchStatus,
     }).where(and(eq(bankTransactions.id, id), eq(bankTransactions.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -32,5 +33,5 @@ export async function DELETE(req: NextRequest, { params }: any) {
     const { db } = getDb();
     await db.delete(bankTransactions).where(and(eq(bankTransactions.id, id), eq(bankTransactions.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

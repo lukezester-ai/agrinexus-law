@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db/db';
-import { resolveTenantId } from '@/lib/db/tenant-context';
+import { resolveTenantId, TenantAuthError } from '@/lib/db/tenant-context';
 import { tenants } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -235,6 +235,9 @@ ${fieldsData.map((f) => `
     }
   } catch (error: any) {
     console.error('Error generating PUHV export:', error);
+    if (error instanceof TenantAuthError) {
+      return new Response('Unauthorized', { status: 401 });
+    }
     return new Response('Error generating PUHV export file', { status: 500 });
   }
 }

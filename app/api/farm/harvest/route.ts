@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { harvestRecords } from '@/lib/db/schema/harvest';
@@ -13,7 +14,7 @@ export async function GET() {
     const { db } = getDb();
     const result = await db.select().from(harvestRecords).where(eq(harvestRecords.tenantId, tenantId)).orderBy(desc(harvestRecords.date));
     return NextResponse.json(result.map((r: any) => ({ ...r, areaDecares: Number(r.areaDecares), yieldAmount: Number(r.yieldAmount), moisture: r.moisture ? Number(r.moisture) : null })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -62,5 +63,5 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ...result, inventoryItemId: invItemId }, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

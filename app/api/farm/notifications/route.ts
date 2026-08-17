@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { notifications } from '@/lib/db/schema/notifications';
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
       : eq(notifications.tenantId, tenantId);
     const rows = await db.select().from(notifications).where(where).orderBy(desc(notifications.createdAt)).limit(50);
     return NextResponse.json(rows);
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       link: body.link || null,
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function PUT(req: NextRequest) {
@@ -45,5 +46,5 @@ export async function PUT(req: NextRequest) {
       await db.update(notifications).set({ isRead: 'true' }).where(and(eq(notifications.id, body.id), eq(notifications.tenantId, tenantId)));
     }
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

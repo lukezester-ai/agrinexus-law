@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { productCodes } from '@/lib/db/schema/product_codes';
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(productCodes.createdAt));
 
     return NextResponse.json(result);
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
       isPrimary: body.isPrimary || 'false',
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -61,5 +62,5 @@ export async function DELETE(req: NextRequest) {
     const { db } = getDb();
     await db.delete(productCodes).where(and(eq(productCodes.id, id), eq(productCodes.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

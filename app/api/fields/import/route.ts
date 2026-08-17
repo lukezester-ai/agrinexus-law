@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { fields } from '@/lib/db/schema/fields';
@@ -68,6 +69,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ imported, message: `Импортирани ${imported} парцела` });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

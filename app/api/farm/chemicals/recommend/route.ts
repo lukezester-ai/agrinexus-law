@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { chemicalProducts } from '@/lib/db/schema/chemical_diary';
@@ -144,6 +145,6 @@ export async function POST(req: NextRequest) {
       aiAdviceSummary: `Агроном Борис: За масив от ${areaDecares} дка с култура ${crop} и проблем "${pestOrDisease}", препоръчвам незабавна интервенция при подходящи метеорологични условия (вятър до 3 м/с и липса на валежи в следващите 4 часа). При избор на препарат, системата автоматично проверява наличностите в Склад и изписва точната доза.`,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

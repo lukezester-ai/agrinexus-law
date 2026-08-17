@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { inventoryItems } from '@/lib/db/schema/inventory';
@@ -15,7 +16,7 @@ export async function GET() {
       .where(and(eq(productCodes.tenantId, tenantId), eq(productCodes.isPrimary, 'true')));
     const codeMap = new Map(codes.map((c: any) => [c.itemId, c.code]));
     return NextResponse.json(items.map((i: any) => ({ ...i, barcode: codeMap.get(i.id) || null })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       currentStock: String(body.currentStock ?? 0), isActive: true,
     }).returning();
     return NextResponse.json({ ...result, currentStock: Number(result.currentStock), minStock: result.minStock ? Number(result.minStock) : null }, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function PUT(req: NextRequest) {
@@ -43,7 +44,7 @@ export async function PUT(req: NextRequest) {
       currentStock: String(body.currentStock ?? 0),
     }).where(and(eq(inventoryItems.id, body.id), eq(inventoryItems.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -55,5 +56,5 @@ export async function DELETE(req: NextRequest) {
     const { db } = getDb();
     await db.delete(inventoryItems).where(and(eq(inventoryItems.id, id), eq(inventoryItems.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

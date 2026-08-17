@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveTenantId } from '@/lib/db/tenant-context';
 import { getCostAnalysis, computeSummary } from '@/lib/farm/cost-analysis';
@@ -14,6 +15,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ rows, summary });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

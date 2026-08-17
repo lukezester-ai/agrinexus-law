@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { reminders } from '@/lib/db/schema/reminders';
@@ -10,7 +11,7 @@ export async function GET() {
     const { db } = getDb();
     const rows = await db.select().from(reminders).where(eq(reminders.tenantId, tenantId)).orderBy(desc(reminders.dueDate));
     return NextResponse.json(rows);
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
       entityId: body.entityId || null,
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -40,5 +41,5 @@ export async function DELETE(req: NextRequest) {
     const { db } = getDb();
     await db.delete(reminders).where(and(eq(reminders.id, id), eq(reminders.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

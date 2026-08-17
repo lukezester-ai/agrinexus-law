@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { vatJournals, tenants } from '@/lib/db/schema';
-import { resolveTenantId } from '@/lib/db/tenant-context';
+import { resolveTenantId, TenantAuthError } from '@/lib/db/tenant-context';
 import { eq, and, sql } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
@@ -165,6 +165,9 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error generating NAP TXT export:', error);
+    if (error instanceof TenantAuthError) {
+      return new Response('Unauthorized', { status: 401 });
+    }
     return new Response('Error generating NAP export file', { status: 500 });
   }
 }

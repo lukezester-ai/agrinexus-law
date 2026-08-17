@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { fixedAssets } from '@/lib/db/schema/fixed_assets';
@@ -35,5 +36,5 @@ export async function POST() {
     }
 
     return NextResponse.json({ amortized: results.length, results });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

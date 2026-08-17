@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { machines, machineServices } from '@/lib/db/schema/machines';
@@ -27,7 +28,7 @@ export async function PUT(req: NextRequest, { params }: any) {
       notes: body.notes,
     }).where(eq(machines.id, id));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -37,7 +38,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     const { db } = getDb();
     await db.delete(machines).where(and(eq(machines.id, id), eq(machines.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function GET(req: NextRequest, { params }: any) {
@@ -49,5 +50,5 @@ export async function GET(req: NextRequest, { params }: any) {
     if (!machine) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     const services = await db.select().from(machineServices).where(eq(machineServices.machineId, id)).orderBy(desc(machineServices.date));
     return NextResponse.json({ ...machine, engineHours: Number(machine.engineHours), services });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

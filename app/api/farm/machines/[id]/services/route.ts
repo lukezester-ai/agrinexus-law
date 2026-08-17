@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { machineServices } from '@/lib/db/schema/machines';
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest, { params }: any) {
       hoursAtService: body.hoursAtService !== undefined ? String(body.hoursAtService) : null,
     }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function GET(req: NextRequest, { params }: any) {
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest, { params }: any) {
     const { db } = getDb();
     const services = await db.select().from(machineServices).where(and(eq(machineServices.machineId, machineId), eq(machineServices.tenantId, tenantId))).orderBy(desc(machineServices.date));
     return NextResponse.json(services.map((s: any) => ({ ...s, cost: Number(s.cost), hoursAtService: s.hoursAtService ? Number(s.hoursAtService) : null, date: s.date })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -39,5 +40,5 @@ export async function DELETE(req: NextRequest, { params }: any) {
     const { db } = getDb();
     await db.delete(machineServices).where(and(eq(machineServices.id, id), eq(machineServices.tenantId, tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

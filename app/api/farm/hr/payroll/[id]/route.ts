@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { payrollBatches, payrollItems, employees } from '@/lib/db/schema/hr';
@@ -62,7 +63,7 @@ export async function GET(req: NextRequest, { params }: any) {
         employerCost: Number(i.employerCost),
       })),
     });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function PUT(req: NextRequest, { params }: any) {
@@ -103,7 +104,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -118,5 +119,5 @@ export async function DELETE(req: NextRequest, { params }: any) {
       console.error('Failed to delete linked journal header:', e);
     }
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

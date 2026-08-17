@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { chemicalProducts, chemicalApplications } from '@/lib/db/schema/chemical_diary';
-import { resolveTenantId } from '@/lib/db/tenant-context';
+import { resolveTenantId, TenantAuthError } from '@/lib/db/tenant-context';
 import { autoDepositPdfToArchive } from '@/lib/documents/auto-archive';
 import { eq, sql } from 'drizzle-orm';
 
@@ -46,6 +46,9 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   } catch (err: any) {
+    if (err instanceof TenantAuthError) {
+      return new Response('<h1>Unauthorized</h1>', { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
     return new Response(`<h1>Грешка</h1><p>${err.message}</p>`, {
       status: 500,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },

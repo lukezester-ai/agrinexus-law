@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { journalHeaders, journalLines } from '@/lib/db/schema/journal_entries';
@@ -42,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }
 
@@ -65,6 +66,6 @@ export async function DELETE(req: NextRequest, { params }: any) {
     await db.delete(journalHeaders).where(eq(journalHeaders.id, id));
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

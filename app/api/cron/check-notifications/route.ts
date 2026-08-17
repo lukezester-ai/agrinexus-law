@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { notifications } from '@/lib/db/schema/notifications';
@@ -80,6 +81,6 @@ export async function GET() {
 
     return NextResponse.json({ notificationsCreated: totalCreated, tenantsProcessed: tenantRows.length });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

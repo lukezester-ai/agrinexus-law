@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { vatJournals } from '@/lib/db/schema/vat_journals';
@@ -20,6 +21,6 @@ export async function DELETE(req: NextRequest, { params }: any) {
     await db.delete(vatJournals).where(eq(vatJournals.id, id));
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleApiError(err);
   }
 }

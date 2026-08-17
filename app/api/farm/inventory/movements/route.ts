@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { inventoryItems, inventoryMovements } from '@/lib/db/schema/inventory';
@@ -21,7 +22,7 @@ export async function GET() {
       ...r, quantity: Number(r.quantity), unitCost: r.unitCost ? Number(r.unitCost) : null,
       totalCost: r.totalCost ? Number(r.totalCost) : null,
     })));
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
 
 export async function POST(req: NextRequest) {
@@ -55,5 +56,5 @@ export async function POST(req: NextRequest) {
     await db.update(inventoryItems).set({ currentStock: String(newStock) }).where(eq(inventoryItems.id, itemId));
 
     return NextResponse.json({ movement: mov, newStock }, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }

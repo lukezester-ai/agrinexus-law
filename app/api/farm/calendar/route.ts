@@ -1,3 +1,4 @@
+import { handleApiError } from '@/lib/api/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { resolveTenantId } from '@/lib/db/tenant-context';
@@ -65,5 +66,5 @@ export async function GET(req: NextRequest) {
     `);
 
     return NextResponse.json((result as any).rows);
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { return handleApiError(err); }
 }
