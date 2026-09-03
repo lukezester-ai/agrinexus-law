@@ -32,8 +32,9 @@ CREATE POLICY "Users read own subscription"
 -- API (service role) управлява записите
 CREATE POLICY "Service role full access user_subscriptions"
   ON user_subscriptions FOR ALL
-  USING (auth.role() = 'service_role')
-  WITH CHECK (auth.role() = 'service_role');
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
 
 -- Ако таблицата вече съществува без trial_used:
 ALTER TABLE user_subscriptions

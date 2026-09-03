@@ -18,6 +18,6 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 				.map((e) => e.trim().toLowerCase())
 				.filter(Boolean)
 		: [];
-	const allowlist = new Set([...configured, "lukezester@gmail.com"]);
+	const allowlist = new Set(configured);
 	return allowlist.has(normalized);
 }

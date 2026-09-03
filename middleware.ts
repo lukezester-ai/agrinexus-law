@@ -2,9 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabasePublicEnv } from '@/lib/supabase/env'
 
-const BUILT_IN_ADMIN_EMAILS = ['lukezester@gmail.com']
-
-function adminEmailAllowlist(): Set<string> | null {
+function adminEmailAllowlist(): Set<string> {
   const raw = process.env.ADMIN_EMAILS?.trim().replace(/^"+|"+$/g, '')
   const configuredEmails = raw
     ? raw
@@ -12,8 +10,7 @@ function adminEmailAllowlist(): Set<string> | null {
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean)
     : []
-  const emails = [...new Set([...BUILT_IN_ADMIN_EMAILS, ...configuredEmails])]
-  return emails.length > 0 ? new Set(emails) : null
+  return new Set(configuredEmails)
 }
 
 export async function middleware(request: NextRequest) {
@@ -75,7 +72,7 @@ export async function middleware(request: NextRequest) {
   if (user && isAdminPath) {
     const allowlist = adminEmailAllowlist()
     const email = user.email?.toLowerCase()
-    if (allowlist && (!email || !allowlist.has(email))) {
+    if (!email || !allowlist.has(email)) {
       const url = request.nextUrl.clone()
       url.pathname = '/'
       return NextResponse.redirect(url)

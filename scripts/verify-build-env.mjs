@@ -1,6 +1,10 @@
 /**
  * Logs safe build-time env diagnostics (no secrets) for Vercel CI output.
  */
+import dotenv from "dotenv";
+
+dotenv.config({ path: [".env.local", ".env"], override: false, quiet: true });
+
 function clean(raw) {
 	return raw?.trim().replace(/^"+|"+$/g, "") ?? "";
 }

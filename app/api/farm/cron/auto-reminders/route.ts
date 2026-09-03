@@ -6,6 +6,7 @@ import { fixedAssets } from '@/lib/db/schema/fixed_assets';
 import { reminders } from '@/lib/db/schema/reminders';
 import { resolveTenantIdForCron } from '@/lib/db/tenant-context';
 import { eq, and } from 'drizzle-orm';
+import { isCronAuthorized } from '@/lib/api/cron-auth';
 
 /**
  * TICKET 2 (P0): Cron daily scan to generate reminders from Machines (GTP, Insurance)
@@ -20,6 +21,10 @@ export async function GET(req: NextRequest) {
 }
 
 async function runAutoRemindersScan(req: NextRequest) {
+  if (!isCronAuthorized(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const tenantId = await resolveTenantIdForCron();
     const { db } = getDb();

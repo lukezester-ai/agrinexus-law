@@ -4,6 +4,7 @@ import { invoices } from '@/lib/db/schema/invoices';
 import { resolveTenantId } from '@/lib/db/tenant-context';
 import { updateInventoryFromInvoice } from '@/lib/farm/invoice-to-inventory';
 import { eq, desc } from 'drizzle-orm';
+import { handleApiError } from '@/lib/api/errors';
 
 const FALLBACK_INVOICES = [
   {
@@ -78,16 +79,20 @@ export async function GET(req: NextRequest) {
       .where(eq(invoices.tenantId, tenantId))
       .orderBy(desc(invoices.issueDate))
       .limit(200);
-    return NextResponse.json(result.length > 0 ? result : FALLBACK_INVOICES);
+    return NextResponse.json(result);
   } catch (err: any) {
-    return NextResponse.json(FALLBACK_INVOICES);
+    if (process.env.NODE_ENV !== 'production') {
+      return NextResponse.json(FALLBACK_INVOICES);
+    }
+    return handleApiError(err);
   }
 }
 
 export async function POST(req: NextRequest) {
+  let body: any;
   try {
     const tenantId = await resolveTenantId();
-    const body = await req.json();
+    body = await req.json();
     const { db } = getDb();
 
     const year = new Date().getFullYear();
@@ -122,7 +127,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (err: any) {
-    const body = await req.json().catch(() => ({}));
-    return NextResponse.json({ id: `inv-${Date.now()}`, invoiceNumber: `S-2025-${Math.floor(100 + Math.random() * 900)}`, ...body }, { status: 201 });
+    if (process.env.NODE_ENV !== 'production') {
+      return NextResponse.json({ id: `inv-${Date.now()}`, invoiceNumber: `S-${new Date().getFullYear()}-DEMO`, ...body }, { status: 201 });
+    }
+    return handleApiError(err);
   }
 }

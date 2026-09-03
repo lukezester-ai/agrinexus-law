@@ -3,8 +3,12 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/db';
 import { notifications } from '@/lib/db/schema/notifications';
 import { sql, and, eq } from 'drizzle-orm';
+import { isCronAuthorized } from '@/lib/api/cron-auth';
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!isCronAuthorized(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { db } = getDb();
     const tenants = await db.execute(sql`SELECT id, name FROM tenants WHERE plan != 'free'`);

@@ -122,7 +122,8 @@ ALTER TABLE knowledge_chunks ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Service role full access knowledge_chunks" ON knowledge_chunks;
 CREATE POLICY "Service role full access knowledge_chunks"
   ON knowledge_chunks FOR ALL
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true) WITH CHECK (true);
 
 -- (опционално) public read - ако искаш chunks да се четат без service key:
 -- DROP POLICY IF EXISTS "Public read knowledge_chunks" ON knowledge_chunks;

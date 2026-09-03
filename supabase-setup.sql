@@ -40,11 +40,13 @@ ALTER TABLE search_queries ENABLE ROW LEVEL SECURITY;
 -- Service role може да прави всичко (за API routes)
 CREATE POLICY "Service role full access chat_logs" 
   ON chat_logs FOR ALL 
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true) WITH CHECK (true);
 
 CREATE POLICY "Service role full access search_queries" 
   ON search_queries FOR ALL 
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true) WITH CHECK (true);
 
 -- Полезни заявки за анализ
 -- SELECT character_id, user_message, COUNT(*) as count
@@ -170,12 +172,14 @@ ALTER TABLE ingest_runs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Service role full access public_documents" ON public_documents;
 CREATE POLICY "Service role full access public_documents"
   ON public_documents FOR ALL
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Service role full access ingest_runs" ON ingest_runs;
 CREATE POLICY "Service role full access ingest_runs"
   ON ingest_runs FOR ALL
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read public_documents" ON public_documents;
 CREATE POLICY "Public read public_documents"
@@ -212,4 +216,5 @@ ALTER TABLE knowledge_learned_items ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Service role full access knowledge_learned_items" ON knowledge_learned_items;
 CREATE POLICY "Service role full access knowledge_learned_items"
   ON knowledge_learned_items FOR ALL
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true) WITH CHECK (true);

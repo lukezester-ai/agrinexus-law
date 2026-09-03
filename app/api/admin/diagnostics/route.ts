@@ -1,11 +1,20 @@
 import { getRagIndexStatus } from "@/lib/rag/rag-index-status";
 import { isBillingConfigured } from "@/lib/billing/plans";
+import { getSessionUser, isAdminEmail } from "@/lib/billing/auth";
 
 function hasValue(value: string | undefined) {
 	return Boolean(value?.trim());
 }
 
 export async function GET() {
+	const user = await getSessionUser().catch(() => null);
+	if (!user) {
+		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	}
+	if (!isAdminEmail(user.email)) {
+		return Response.json({ error: "Forbidden" }, { status: 403 });
+	}
+
 	const rag = await getRagIndexStatus();
 	const cronSecret = hasValue(process.env.CRON_SECRET);
 	const stripeWebhook = hasValue(process.env.STRIPE_WEBHOOK_SECRET);

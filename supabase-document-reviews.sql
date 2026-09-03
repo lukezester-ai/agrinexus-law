@@ -47,12 +47,14 @@ drop policy if exists "Service role can manage document reviews" on public.docum
 create policy "Service role can manage document reviews"
   on public.document_reviews
   for all
-  using (auth.role() = 'service_role')
-  with check (auth.role() = 'service_role');
+  to service_role
+  using (true)
+  with check (true);
 
 drop policy if exists "Service role can manage Agrinexus cases" on public.agrinexus_cases;
 create policy "Service role can manage Agrinexus cases"
   on public.agrinexus_cases
   for all
-  using (auth.role() = 'service_role')
-  with check (auth.role() = 'service_role');
+  to service_role
+  using (true)
+  with check (true);
