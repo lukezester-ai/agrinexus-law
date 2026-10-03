@@ -56,13 +56,15 @@ export function RadarMatchCard({
 			className={`rounded-2xl border px-5 py-5 shadow-[0_1px_2px_rgba(10,10,10,0.04)] ${cardTone(item, confidential)}`}
 			data-testid={`radar-item-${item.item_kind}`}
 		>
-			<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink/40">{c.found}</p>
+			<p className="text-[13px] text-ink/55">{c.found}</p>
 			<h3 className="mt-1.5 text-[17px] font-semibold leading-snug tracking-[-0.015em] text-ink">{title}</h3>
-			{item.safe_summary ? <p className="mt-1.5 text-[14px] leading-relaxed text-ink/58">{item.safe_summary}</p> : null}
+			{item.safe_summary && item.safe_summary.trim() !== title.trim() ? (
+				<p className="mt-1.5 text-[14px] leading-relaxed text-ink/58">{item.safe_summary}</p>
+			) : null}
 
 			{percent != null && strengthLabel ? (
 				<div className="mt-5 border-t border-ink/[0.06] pt-4">
-					<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink/40">{c.why}</p>
+					<p className="text-[13px] text-ink/55">{c.why}</p>
 					<p className="mt-2 font-serif text-[1.45rem] leading-none tracking-[-0.02em] text-ink" data-testid="radar-match-strength">
 						{strengthLabel}
 					</p>
@@ -86,7 +88,7 @@ export function RadarMatchCard({
 
 			{confidential ? (
 				<div className="mt-5 rounded-xl border border-harvest-200/80 bg-harvest-50/70 px-3.5 py-3">
-					<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-harvest-700">{c.hidden}</p>
+					<p className="text-[13px] text-harvest-700">{c.hidden}</p>
 					<p className="mt-1.5 text-[14px] leading-relaxed text-ink/70" data-testid="radar-confidential">
 						<span className="font-semibold text-ink">{g.confidential}.</span> {c.confidentialBody}
 					</p>
@@ -94,7 +96,7 @@ export function RadarMatchCard({
 			) : null}
 
 			<div className="mt-5 border-t border-ink/[0.06] pt-4">
-				<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink/40">{c.next}</p>
+				<p className="text-[13px] text-ink/55">{c.next}</p>
 				{isRelationship && item.status ? (
 					<p className="mt-2 text-[13px] font-medium capitalize text-forest-700">{item.status}</p>
 				) : null}

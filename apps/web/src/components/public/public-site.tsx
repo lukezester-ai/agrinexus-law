@@ -109,14 +109,6 @@ export function PublicShell({ locale, children }: { locale: string; children: Re
 	);
 }
 
-const CAPABILITY_HREFS = new Set([
-	"/business-radar",
-	"/finance-intelligence",
-	"/strategy-copilot",
-	"/risk-governance",
-	"/execution-safety",
-]);
-
 const stageButton =
 	"block border border-white/15 px-4 py-5 text-sm text-white/85 no-underline hover:border-white/40";
 
@@ -128,9 +120,14 @@ function FlowArrow() {
 	);
 }
 
-function FlowCard({ href, title }: { href: string; title: string }) {
+function FlowCard({ href, title, current }: { href: string; title: string; current?: boolean }) {
 	return (
-		<Link href={href} data-interactive="true" className={`${stageButton} flex items-center justify-between gap-4`}>
+		<Link
+			href={href}
+			data-interactive="true"
+			aria-current={current ? "page" : undefined}
+			className={`${stageButton} flex items-center justify-between gap-4`}
+		>
 			<span>{title}</span>
 			<span className="text-[10px] tracking-[0.16em] text-white/55">OPEN</span>
 		</Link>
@@ -172,8 +169,22 @@ export function HomeFlow({ locale }: { locale: string }) {
 
 type ChainStep = string | { label: string; href?: string };
 
+const SECTION_LABELS: Record<string, string> = {
+	"/business-radar": "Business Radar",
+	"/finance-intelligence": "Finance Intelligence",
+	"/strategy-copilot": "AI Strategy Copilot",
+	"/risk-governance": "Risk & Governance",
+	"/execution-safety": "Execution Safety",
+};
+
 function chainStep(step: ChainStep): { label: string; href?: string } {
 	return typeof step === "string" ? { label: step } : step;
+}
+
+function parentSection(href: string): { href: string; label: string } | null {
+	const parent = href.replace(/\/[^/]+$/, "");
+	const label = SECTION_LABELS[parent];
+	return label ? { href: parent, label } : null;
 }
 
 export function DirectionPage({
@@ -198,59 +209,93 @@ export function DirectionPage({
 	enter?: { label: string; href: string };
 }) {
 	const c = copy[productLocale(locale)];
+	const steps = chain.map(chainStep);
+	const hereIndex = current ? steps.findIndex((step) => step.href === current) : -1;
+	const onStep = hereIndex >= 0;
+	const nextStep = onStep ? steps[hereIndex + 1] : undefined;
+	const back = current ? parentSection(current) : null;
 	return (
 		<PublicShell locale={locale}>
 			<main className="mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24">
 				<Link href="/" className="text-[11px] tracking-[0.22em] text-[#8fbf9a] no-underline hover:text-white">
 					{kicker}
 				</Link>
+				{back ? (
+					<Link href={back.href} className="mt-6 block text-sm text-white/70 no-underline hover:text-white">
+						{back.label}
+					</Link>
+				) : null}
 				<h1 className="mt-4 text-4xl font-light text-white md:text-5xl">{title}</h1>
 				{lead ? <p className="mt-6 max-w-xl text-sm leading-6 text-white/70">{lead}</p> : null}
-				<ol className="mt-16 flex max-w-xl flex-col border-s border-white/15 ps-8">
-					{chain.map((item) => {
-						const step = chainStep(item);
-						const here = Boolean(current && step.href === current);
-						if (step.href && CAPABILITY_HREFS.has(step.href)) {
+				{onStep ? null : (
+					<ol className="mt-16 flex max-w-xl flex-col border-s border-white/15 ps-8">
+						{steps.map((step) => {
+							const here = Boolean(current && step.href === current);
+							if (step.href) {
+								return (
+									<li key={step.label} className="py-3">
+										<FlowCard href={step.href} title={step.label} current={here} />
+									</li>
+								);
+							}
+							const isStop = step.label === "STOP";
 							return (
 								<li key={step.label} className="py-3">
-									<FlowCard href={step.href} title={step.label} />
+									<p
+										data-interactive="false"
+										aria-current={here ? "step" : undefined}
+										className={
+											isStop
+												? "text-sm tracking-[0.18em] text-[#e2b657]"
+												: here
+													? "text-sm text-white"
+													: "text-sm text-white/85"
+										}
+									>
+										{step.label}
+									</p>
 								</li>
 							);
-						}
-						const isStop = step.label === "STOP";
-						return (
-							<li key={step.label} className="py-3">
-								<p
-									data-interactive="false"
-									aria-current={here ? "step" : undefined}
-									className={
-										isStop
-											? "text-sm tracking-[0.18em] text-[#e2b657]"
-											: here
-												? "text-sm text-white"
-												: "text-sm text-white/85"
-									}
-								>
-									{step.label}
-								</p>
-							</li>
-						);
-					})}
-				</ol>
+						})}
+					</ol>
+				)}
 				{points && points.length > 0 ? (
 					<dl className="mt-12 max-w-xl border-t border-white/10">
-						{points.map((point) => (
-							<div key={point.label} className="grid gap-1 border-b border-white/10 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
-								<dt className="text-[11px] tracking-[0.16em] text-white/45">{point.label}</dt>
-								<dd className="text-sm leading-6 text-white/80">{point.detail}</dd>
-							</div>
-						))}
+						{points.map((point) => {
+							const row = (
+								<>
+									<dt className="text-[11px] tracking-[0.16em] text-white/45">{point.label}</dt>
+									<dd className="text-sm leading-6 text-white/80">{point.detail}</dd>
+								</>
+							);
+							if (point.label === "Next" && nextStep?.href) {
+								return (
+									<Link
+										key={point.label}
+										href={nextStep.href}
+										className="grid gap-1 border-b border-white/10 py-4 no-underline hover:border-white/40 sm:grid-cols-[9rem_1fr] sm:gap-6"
+									>
+										{row}
+									</Link>
+								);
+							}
+							return (
+								<div key={point.label} className="grid gap-1 border-b border-white/10 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
+									{row}
+								</div>
+							);
+						})}
 					</dl>
 				) : null}
 				{enter ? (
 					<Link href={enter.href} className={`${stageButton} mt-10 max-w-xl`}>
 						{enter.label}
 					</Link>
+				) : null}
+				{nextStep?.href ? (
+					<div className="mt-4 max-w-xl">
+						<FlowCard href={nextStep.href} title={nextStep.label} />
+					</div>
 				) : null}
 				<div className="mt-12 max-w-xl space-y-2 text-sm text-[#e2b657]">
 					{boundary.map((line) => (

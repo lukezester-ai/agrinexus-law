@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { supabase } from "@/lib/supabase";
+import { runRadarAction } from "@/lib/radar-action";
 import type { RadarItem, RadarItemKind, RadarSummary } from "../../../../../verticals/b2b/web/business-radar";
 import { RadarMatchCard } from "@/components/Dashboard/RadarMatchCard";
 import { radarBoardCopy, productLocale } from "@/lib/product-ux-copy";
@@ -61,10 +61,12 @@ export function BusinessRadarBoard({
 	const router = useRouter();
 	const [pending, startTransition] = useTransition();
 	const [message, setMessage] = useState<string | null>(null);
+	const [busyId, setBusyId] = useState<string | null>(null);
 
-	function runRpc(fn: string, args: Record<string, unknown>) {
+	function runRpc(itemId: string, fn: string, args: Record<string, string | boolean>) {
 		startTransition(async () => {
 			setMessage(null);
+			setBusyId(itemId);
 			if (e2e) {
 				const res = await fetch("/api/e2e/radar-action", {
 					method: "POST",
@@ -72,18 +74,19 @@ export function BusinessRadarBoard({
 					body: JSON.stringify({ secret: e2e.secret, role: e2e.role, fn, args }),
 				});
 				const body = (await res.json().catch(() => ({}))) as { error?: string };
+				setBusyId(null);
 				if (!res.ok) {
 					setMessage(body.error ?? `HTTP ${res.status}`);
 					return;
 				}
 				window.location.reload();
 				return;
-			} else {
-				const { error } = await supabase.rpc(fn, args);
-				if (error) {
-					setMessage(error.message);
-					return;
-				}
+			}
+			const { error } = await runRadarAction(fn, args);
+			setBusyId(null);
+			if (error) {
+				setMessage(error);
+				return;
 			}
 			router.refresh();
 		});
@@ -96,17 +99,18 @@ export function BusinessRadarBoard({
 
 	function actionsFor(item: RadarItem) {
 		const matchId = matchIdFor(item, introductionMatchIds);
+		const busy = pending && busyId === item.item_id;
 		if (item.item_kind === "candidate_match" && matchId) {
 			return (
 				<div className="mt-3">
 					<button
 						type="button"
 						data-testid="radar-action-qualify"
-						disabled={pending}
-						onClick={() => runRpc("qualify_business_match", { p_match_id: matchId })}
+						disabled={busy}
+						onClick={() => runRpc(item.item_id, "qualify_business_match", { p_match_id: matchId })}
 						className={primaryAction}
 					>
-						{pending ? c.working : c.qualify}
+						{busy ? c.working : c.qualify}
 					</button>
 				</div>
 			);
@@ -124,20 +128,20 @@ export function BusinessRadarBoard({
 					<button
 						type="button"
 						data-testid="radar-action-request"
-						disabled={pending}
+						disabled={busy}
 						onClick={() =>
-							runRpc("request_business_match_introduction", { p_match_id: matchId, p_note: "" })
+							runRpc(item.item_id, "request_business_match_introduction", { p_match_id: matchId, p_note: "" })
 						}
 						className={primaryAction}
 					>
-						{pending ? c.working : c.request}
+						{busy ? c.working : c.request}
 					</button>
 					<button
 						type="button"
 						data-testid="radar-action-accept"
-						disabled={pending}
+						disabled={busy}
 						onClick={() =>
-							runRpc("respond_business_match_introduction", {
+							runRpc(item.item_id, "respond_business_match_introduction", {
 								p_match_id: matchId,
 								p_accept: true,
 								p_note: "",
@@ -150,9 +154,9 @@ export function BusinessRadarBoard({
 					<button
 						type="button"
 						data-testid="radar-action-decline"
-						disabled={pending}
+						disabled={busy}
 						onClick={() =>
-							runRpc("respond_business_match_introduction", {
+							runRpc(item.item_id, "respond_business_match_introduction", {
 								p_match_id: matchId,
 								p_accept: false,
 								p_note: "",
