@@ -68,7 +68,7 @@ const NAV_LINKS: NavLink[] = [{
   href: '/documents'
 }, {
   label: 'AI преглед',
-  href: '/search'
+  href: '/document-review'
 }, {
   label: 'Срокове',
   href: '/srokove'
@@ -247,6 +247,15 @@ const IconSearch = ({
 }) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" strokeLinecap="round" strokeLinejoin="round" stroke={color} strokeWidth="1.5" aria-hidden="true">
     <circle cx="9" cy="9" r="6" />
     <line x1="13.5" y1="13.5" x2="18" y2="18" />
+  </svg>;
+const IconMenu = ({ size = 18 }: { size?: number }) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+    <line x1="3" y1="5" x2="17" y2="5" />
+    <line x1="3" y1="10" x2="17" y2="10" />
+    <line x1="3" y1="15" x2="17" y2="15" />
+  </svg>;
+const IconX = ({ size = 18 }: { size?: number }) => <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+    <line x1="5" y1="5" x2="15" y2="15" />
+    <line x1="15" y1="5" x2="5" y2="15" />
   </svg>;
 const IconChevronRight = ({
   size = 16,
@@ -695,9 +704,13 @@ const GLOBAL_STYLES = `
 
 // --- Sub-components ---
 
-const Navbar = () => (
+const Navbar = () => {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  return (
   <header className="fixed top-3 left-0 right-0 z-50 px-3 sm:px-6 flex justify-center pointer-events-none">
-    <nav className="framer-pill-dock pointer-events-auto w-full max-w-6xl rounded-2xl px-4 py-2.5 flex items-center justify-between transition-all duration-300">
+    <div className="pointer-events-auto w-full max-w-6xl">
+    <nav className="framer-pill-dock rounded-2xl px-4 py-2.5 flex items-center justify-between transition-all duration-300">
       <Link href="/" className="flex items-center gap-2.5 group" style={{ textDecoration: 'none' }}>
         <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-fuchsia-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
           <IconLeaf size={18} color="#FFFFFF" />
@@ -731,10 +744,37 @@ const Navbar = () => (
         <Link href="/search" aria-label="Търсене" className="h-9 w-9 rounded-full bg-slate-100/80 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors" style={{ textDecoration: 'none' }}>
           <IconSearch size={18} color="currentColor" />
         </Link>
+        <button
+          type="button"
+          className="lg:hidden h-9 w-9 rounded-full bg-slate-100/80 text-slate-700 flex items-center justify-center"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? 'Затвори менюто' : 'Отвори менюто'}
+          onClick={() => setMenuOpen(open => !open)}
+        >
+          <span className="sr-only">Меню</span>
+          {menuOpen ? <IconX size={18} /> : <IconMenu size={18} />}
+        </button>
       </div>
     </nav>
+    {menuOpen ? (
+      <div className="lg:hidden mt-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur-xl">
+        {NAV_LINKS.map(link => (
+          <Link
+            key={link.label}
+            href={link.href}
+            className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-emerald-50"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMenuOpen(false)}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    ) : null}
+    </div>
   </header>
-);
+  );
+};
 const Hero = () => {
   const router = useRouter();
   const { openChat } = useLandingChat();
@@ -746,7 +786,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-4 sm:px-8 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/80" style={{ paddingTop: '130px', paddingBottom: '90px' }}>
+    <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-4 sm:px-8 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/80" style={{ paddingTop: '48px', paddingBottom: '90px' }}>
       {/* Ambient Fuchsia & Emerald Glow Blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="animate-emerald-glow absolute top-[15%] left-[10%] w-[420px] h-[420px] rounded-full bg-emerald-400/20 blur-[100px]" />
@@ -1052,16 +1092,22 @@ const HowItWorks = () => {
 };
 const FARM_MODULES = [
   { label: 'Парцели', href: '/moya-ferma/polita', desc: 'Карта и регистър на полетата с площи, култури и геолокация' },
-  { label: 'Склад', href: '/moya-ferma/sklad', desc: 'Наличие на торове, препарати, резервни части и консумативи' },
-  { label: 'Счетоводство', href: '/moya-ferma/schetovodstvo', desc: 'Приходи/разходи, ДДС, банкови сметки и НАП XML експорт' },
-  { label: 'Машини', href: '/moya-ferma/mashini', desc: 'Технически прегледи, застраховки, гориво и сервиз' },
   { label: 'Реколта', href: '/moya-ferma/rekolta', desc: 'Добиви по парцели, култури и години' },
   { label: 'Сеитбооборот', href: '/moya-ferma/seitbooborot', desc: 'План за ротация на културите и предшественици' },
   { label: 'Химизация', href: '/moya-ferma/himizacia', desc: 'БАБХ дневник за РЗ с PDF експорт и препарати' },
+  { label: 'Склад', href: '/moya-ferma/sklad', desc: 'Наличие на торове, препарати, резервни части и консумативи' },
+  { label: 'Животновъдство', href: '/moya-ferma/zhivotnovadstvo', desc: 'Регистър на стадото, ВетИС дневник и фуражен баланс' },
+  { label: 'Овощарство', href: '/moya-ferma/ovoshtarstvo', desc: 'Трайни насаждения, беритба и сезонни договори' },
+  { label: 'Пчеларство', href: '/moya-ferma/pchelarstvo', desc: 'Пчелини, медосбор и контрол срещу вароатоза' },
+  { label: 'Машини', href: '/moya-ferma/mashini', desc: 'Технически прегледи, застраховки, гориво и сервиз' },
   { label: 'Календар', href: '/moya-ferma/kalendar', desc: 'Напомняния за срокове, прегледи и кампании' },
-  { label: 'Банки', href: '/moya-ferma/banki', desc: 'Банкови сметки, транзакции и CSV импорт от банка' },
   { label: 'ЧР', href: '/moya-ferma/choveshki-resursi', desc: 'Трудови договори, присъствие, отпуски и заплати' },
+  { label: 'Счетоводство', href: '/moya-ferma/schetovodstvo', desc: 'Приходи/разходи, ДДС, банкови сметки и НАП XML експорт' },
   { label: 'ДМА', href: '/moya-ferma/dma', desc: 'Дълготрайни активи с амортизация и график' },
+  { label: 'Застраховки', href: '/moya-ferma/zastrahovki', desc: 'Полици и отчитане на щети от градушки и бедствия' },
+  { label: 'Банки', href: '/moya-ferma/banki', desc: 'Банкови сметки, транзакции и CSV импорт от банка' },
+  { label: 'Субсидии', href: '/moya-ferma/subsidii', desc: 'ДФЗ схеми, директни плащания и обвързана подкрепа' },
+  { label: 'Договори', href: '/moya-ferma/dogovori', desc: 'Шаблони и договори с арендодатели и клиенти' },
   { label: 'Архив', href: '/moya-ferma/dokumenti', desc: 'Хранилище за договори, ДФЗ писма, протоколи и фактури' },
 ];
 const FarmDashboard = () => <section className="bg-[#FFFFFF]" style={{
@@ -1099,7 +1145,7 @@ padding: '100px 48px'
       maxWidth: '600px',
       margin: '0 auto 56px'
     }}>
-        От проследяване на парцелите до НАП декларации — 12 модула в едно табло.
+        От проследяване на парцелите до НАП декларации — 18 модула в едно табло.
       </p>
       <div style={{
       display: 'grid',

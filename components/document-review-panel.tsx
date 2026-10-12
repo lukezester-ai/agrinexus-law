@@ -9,9 +9,9 @@ import {
 	Loader2,
 	Send,
 } from "lucide-react";
-import { MainNavBar } from "@/components/generated/MainNavBar";
 import { AuroraBackground } from "@/components/generated/AuroraBackground";
 import { SiteFooter } from "@/components/generated/SiteFooter";
+import { SiteHeader } from "@/components/site-header";
 import { cn } from "@/lib/utils";
 import { loadFarmProfile } from "@/lib/farm-profile";
 
@@ -266,7 +266,7 @@ export function DocumentReviewPanel() {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-[#0A0A0A] font-sans text-white selection:bg-emerald-500/30">
-			<MainNavBar activeScreen="AI Review" />
+			<SiteHeader />
 
 			<AuroraBackground className="flex-grow pt-32 pb-20">
 				<main className="mx-auto max-w-7xl px-6 relative z-10">

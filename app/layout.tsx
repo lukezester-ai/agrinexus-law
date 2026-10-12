@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { ClientChromeLoader } from "@/components/client-chrome-loader";
-import { PwaRegister } from "@/components/pwa-register";
 import { buildAgriNexusLawJsonLd } from "@/lib/seo/structured-data";
 import { resolveSupabasePublicUrl } from "@/lib/supabase/env";
 import { Inter, Space_Grotesk } from "next/font/google";
@@ -160,7 +159,6 @@ export default function RootLayout({
 			>
 				{children}
 				<ClientChromeLoader />
-				<PwaRegister />
 			</body>
 		</html>
 	);

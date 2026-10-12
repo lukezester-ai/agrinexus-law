@@ -6,7 +6,7 @@ import { createOptionalClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Scale, Search, User as UserIcon, LogOut } from "lucide-react";
+import { Scale, Search, User as UserIcon, LogOut, Menu, X } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { navBarReveal } from "@/lib/motion-variants";
@@ -37,6 +37,7 @@ export function SiteHeader() {
 	const router = useRouter();
 	const reducedMotion = useReducedMotion();
 	const [user, setUser] = useState<User | null>(null);
+	const [menuOpen, setMenuOpen] = useState(false);
 	const supabase = useMemo(() => createOptionalClient(), []);
 
 	useEffect(() => {
@@ -60,7 +61,7 @@ export function SiteHeader() {
 	return (
 		<header className="pointer-events-none fixed inset-x-0 top-2.5 z-50 flex justify-center px-3 sm:px-6">
 			<motion.div
-				className="pointer-events-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-2 rounded-2xl border border-emerald-500/30 bg-white/85 px-4 py-2.5 shadow-[0_12px_36px_-12px_rgba(16,185,129,0.25),0_4px_16px_-6px_rgba(217,70,239,0.15)] backdrop-blur-xl transition-all duration-500 ease-out hover:border-emerald-500/50 hover:shadow-[0_18px_48px_-12px_rgba(16,185,129,0.35),0_8px_24px_-6px_rgba(217,70,239,0.22)] dark:border-emerald-500/25 dark:bg-slate-950/75 dark:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.3)] dark:hover:border-fuchsia-500/30 dark:hover:shadow-[0_20px_56px_-12px_rgba(217,70,239,0.25)] sm:gap-3 sm:rounded-2xl"
+				className="pointer-events-auto relative flex w-full max-w-7xl min-w-0 items-center justify-between gap-2 rounded-2xl border border-emerald-500/30 bg-white/85 px-4 py-2.5 shadow-[0_12px_36px_-12px_rgba(16,185,129,0.25),0_4px_16px_-6px_rgba(217,70,239,0.15)] backdrop-blur-xl transition-all duration-500 ease-out hover:border-emerald-500/50 hover:shadow-[0_18px_48px_-12px_rgba(16,185,129,0.35),0_8px_24px_-6px_rgba(217,70,239,0.22)] dark:border-emerald-500/25 dark:bg-slate-950/75 dark:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.3)] dark:hover:border-fuchsia-500/30 dark:hover:shadow-[0_20px_56px_-12px_rgba(217,70,239,0.25)] sm:gap-3 sm:rounded-2xl"
 				variants={navBarReveal(reducedMotion)}
 				initial="hidden"
 				animate="visible"
@@ -117,6 +118,15 @@ export function SiteHeader() {
 						<span className="sr-only sm:not-sr-only">Търси</span>
 					</Button>
 					<NotificationBell />
+					<button
+						type="button"
+						className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-700 xl:hidden dark:border-slate-700 dark:text-slate-200"
+						aria-expanded={menuOpen}
+						aria-label={menuOpen ? "Затвори менюто" : "Отвори менюто"}
+						onClick={() => setMenuOpen((open) => !open)}
+					>
+						{menuOpen ? <X size={16} /> : <Menu size={16} />}
+					</button>
 					{user ? (
 						<Button
 							type="button"
@@ -143,6 +153,36 @@ export function SiteHeader() {
 						</Button>
 					)}
 				</div>
+				{menuOpen ? (
+					<nav
+						className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[70vh] overflow-y-auto rounded-2xl border border-emerald-500/20 bg-white/95 p-2 shadow-xl backdrop-blur-xl xl:hidden dark:border-emerald-500/20 dark:bg-slate-950/95"
+						aria-label="Мобилна навигация"
+					>
+						{NAV_LINKS.map((item) =>
+							item.external ? (
+								<a
+									key={item.href}
+									href={item.href}
+									target="_blank"
+									rel="noreferrer"
+									className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-emerald-50 dark:text-slate-100 dark:hover:bg-emerald-950/40"
+									onClick={() => setMenuOpen(false)}
+								>
+									{item.label}
+								</a>
+							) : (
+								<Link
+									key={item.href}
+									href={item.href}
+									className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-emerald-50 dark:text-slate-100 dark:hover:bg-emerald-950/40"
+									onClick={() => setMenuOpen(false)}
+								>
+									{item.label}
+								</Link>
+							),
+						)}
+					</nav>
+				) : null}
 			</motion.div>
 		</header>
 	);

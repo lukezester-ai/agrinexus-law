@@ -6,12 +6,13 @@ export const SiteFooter: React.FC = () => {
       <div className="flex flex-col items-center gap-6">
         <span className="text-white font-bold text-[18px] font-body tracking-tight">AgriNexus</span>
         <div className="flex flex-col items-center gap-4">
+          <Link href="/moya-ferma" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Моята ферма</Link>
           <Link href="/documents" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Документи</Link>
           <Link href="/privacy" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Поверителност</Link>
           <Link href="/srokove" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">Срокове</Link>
           <Link href="/document-review" className="text-[13px] text-[#555555] font-medium hover:text-white transition-colors">AI Преглед</Link>
         </div>
       </div>
-      <p className="text-[13px] text-[#333333] font-body">© 2025 AgriNexus.Law — собственост на AgriNexus Ltd (info@agrinexus.eu)</p>
+      <p className="text-[13px] text-[#333333] font-body">© 2026 AgriNexus.Law — собственост на AgriNexus Ltd (info@agrinexus.eu)</p>
     </footer>;
 };
